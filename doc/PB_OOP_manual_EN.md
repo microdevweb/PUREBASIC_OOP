@@ -1,99 +1,120 @@
 # PureBasic OOP Reference Manual (English)
 
-Welcome to the official documentation for the PureBasic Object-Oriented Programming transpiler and framework.
+Welcome to the official documentation of the Object-Oriented Programming (OOP) transpiler for PureBasic.
 
 ---
 
 ## 1. Introduction
 
-PureBasic OOP brings high-level Object-Oriented syntax while retaining the native speed, lightness, and power of the PureBasic compiler.
+PureBasic OOP brings modern Object-Oriented syntax while retaining the high execution speed, small footprint, and native compilation power of PureBasic.
 
 ### Key Features:
-- **Classes & Methods**: Clean declarations using `Class` and `Method`.
+- **Classes & Methods**: Clean object declaration with `Class` and `Method`.
+- **Single Inheritance**: Class inheritance using the `Extends` keyword.
+- **Dynamic VTable Polymorphism**: Automatic resolution of virtual method tables and method overriding.
+- **Parent Invocation `Super::`**: Reuse parent class method implementations with `Super::Method(...)`.
 - **Encapsulation**: Access control for fields and methods (`Public`, `Protected`, `Private`).
-- **Constructors & Destructors**: Automatic instantiation (`New_*`) and explicit memory deallocation (`Free()`).
-- **VTable Polymorphism**: Transparent mapping to PureBasic `Interface` and virtual function tables (`DataSection`).
+- **Constructors & Destructors**: Instantiation via `New ClassName(...)` and memory release via `*obj\Free()`.
 
 ---
 
-## 2. Syntax & Object Grammar
+## 2. Syntax & Grammar
 
-### Class Declaration
+### 2.1 Class Declaration and Inheritance
 ```oop
-Class Chien
-  Private nom.s
-  Private age.i
+; Base class
+Class Animal
+  Protected nom.s
+  Protected age.i
   
   Public Method Init(nom_p.s, age_p.i)
-  Public Method Aboyer()
+  Public Method Crier()
   Public Method Free()
+EndClass
+
+; Derived class
+Class Chien Extends Animal
+  Protected race.s
+  
+  Public Method Init(nom_p.s, age_p.i, race_p.s)
+  Public Method Crier()              ; Overrides parent method
+  Public Method Rapporter(objet.s)   ; Specific new method
+  Public Method Free()               ; Destructor
 EndClass
 ```
 
-### Method Implementation
-Each method accesses instance data using the `This` reference pointer.
+### 2.2 Method Implementation and `Super::`
+Methods access their internal fields using the `This` instance pointer.
+To invoke a parent implementation, use `Super::`.
 
 ```oop
-Method Chien::Init(nom_p.s, age_p.i)
+Method Animal::Init(nom_p.s, age_p.i)
   This\nom = nom_p
   This\age = age_p
 EndMethod
 
-Method Chien::Aboyer()
-  PrintN(This\nom + " dit : Wouaf ! Wouaf ! (Age : " + Str(This\age) + " ans)")
+Method Animal::Crier()
+  PrintN("[Animal] " + This\nom + " makes a generic sound.")
+EndMethod
+
+Method Animal::Free()
+  FreeStructure(This)
+EndMethod
+
+Method Chien::Init(nom_p.s, age_p.i, race_p.s)
+  Super::Init(nom_p, age_p) ; Initialize parent fields
+  This\race = race_p
+EndMethod
+
+Method Chien::Crier()
+  Super::Crier() ; Call parent behavior
+  PrintN("   ==> DOG (" + This\race + ") : Woof ! Woof !")
+EndMethod
+
+Method Chien::Rapporter(objet.s)
+  PrintN(This\nom + " fetches: " + objet)
+EndMethod
+
+Method Chien::Free()
+  Super::Free()
 EndMethod
 ```
 
----
+### 2.3 Polymorphic Usage
+```oop
+Define *monChien.Chien = New Chien("Buddy", 4, "Retriever")
+*monChien\Crier()
 
-## 3. Generated PureBasic Code Plumbing
+; Dynamic Polymorphism via parent-type list / pointer
+NewList *refuge.Animal()
+AddElement(*refuge()) : *refuge() = *monChien
 
-The transpiler converts OOP constructs into native, compilable PureBasic code:
-
-```purebasic
-Interface Chien_vt
-  Aboyer()
-  Free()
-EndInterface
-
-Structure Chien_Inst
-  *VTable.Chien_vt
-  nom.s
-  age.i
-EndStructure
-
-Procedure Chien_Aboyer(*This.Chien_Inst)
-  OpenConsole()
-  PrintN(*This\nom + " dit : Wouaf ! Wouaf ! (Age : " + Str(*This\age) + " ans)")
-EndProcedure
-
-Procedure Chien_Free(*This.Chien_Inst)
-  FreeStructure(*This)
-EndProcedure
-
-DataSection
-  Chien_VTable_Data:
-    Data.i @Chien_Aboyer()
-    Data.i @Chien_Free()
-EndDataSection
-
-Procedure.i New_Chien(nom.s, age.i)
-  Protected *obj.Chien_Inst = AllocateStructure(Chien_Inst)
-  If *obj
-    *obj\VTable = ?Chien_VTable_Data
-    *obj\nom = nom
-    *obj\age = age
-  EndIf
-  ProcedureReturn *obj
-EndProcedure
+ForEach *refuge()
+  *refuge()\Crier() ; Dynamically dispatches to Chien::Crier()
+  *refuge()\Free()  ; Clean polymorphic destructor dispatch
+Next
 ```
 
 ---
 
-## 4. Compilation Guide
+## 3. Generated PureBasic Plumbing
 
-To compile a generated PureBasic source file into a console executable:
+The transpiler maps OOP abstractions to native PureBasic constructs:
+1. `Interface Chien_vt Extends Animal_vt` (declaring only added methods).
+2. `Structure Chien_Inst Extends Animal_Inst` (with `*VTable` pointer header).
+3. `DataSection` containing the function pointers with overridden methods in proper slots.
+4. Factory constructors `New_Chien(...)` initializing structure instances and VTable references.
 
+---
+
+## 4. Build & Execution Guide
+
+### Transpile `.pbo` to `.pb`:
 ```cmd
-"C:\Program Files\PureBasic\Compilers\pbcompiler.exe" "src/test_chien_generated.pb" /CONSOLE /EXE "src/test_chien.exe"
+"compiler/transpiler.exe" "src/my_file.pbo" "src/my_file_generated.pb"
+```
+
+### Compile the generated PureBasic code:
+```cmd
+"C:\Program Files\PureBasic\Compilers\pbcompiler.exe" "src/my_file_generated.pb" /CONSOLE /EXE "src/my_file.exe"
 ```

@@ -10,90 +10,113 @@ PureBasic OOP apporte une syntaxe Orientée Objet de haut niveau tout en conserv
 
 ### Caractéristiques Principales :
 - **Classes & Méthodes** : Déclaration propre via `Class` et `Method`.
+- **Héritage Simple** : Support de l'héritage de classes via le mot-clé `Extends`.
+- **Polymorphisme VTable Dynamique** : Résolution automatique des tables virtuelles et des surcharges de méthodes (*method overriding*).
+- **Appel Parent `Super::`** : Possibilité d'appeler l'implémentation de la méthode parente via `Super::Methode(...)`.
 - **Encapsulation** : Gestion de la visibilité des attributs et méthodes (`Public`, `Protected`, `Private`).
-- **Constructeurs et Destructeurs** : Instanciation automatique (`New_*`) et libération explicite mémoire (`Free()`).
-- **Polymorphisme VTable** : Mappage transparent sous forme d'`Interface` et de table de fonctions virtuelles PureBasic (`DataSection`).
+- **Constructeurs et Destructeurs** : Instanciation automatique (`New Classe(...)`) et libération mémoire propre (`*obj\Free()`).
 
 ---
 
 ## 2. Syntaxe & Grammaire Objet
 
-### Déclaration d'une Classe
+### 2.1 Déclaration de Classes et Héritage
 ```oop
-Class Chien
-  Private nom.s
-  Private age.i
+; Classe de base
+Class Animal
+  Protected nom.s
+  Protected age.i
   
   Public Method Init(nom_p.s, age_p.i)
-  Public Method Aboyer()
+  Public Method Crier()
   Public Method Free()
+EndClass
+
+; Classe dérivée
+Class Chien Extends Animal
+  Protected race.s
+  
+  Public Method Init(nom_p.s, age_p.i, race_p.s)
+  Public Method Crier()              ; Surcharge (Override)
+  Public Method Rapporter(objet.s)   ; Nouvelle méthode
+  Public Method Free()               ; Destructeur
 EndClass
 ```
 
-### Implémentation des Méthodes
+### 2.2 Implémentation des Méthodes et `Super::`
 Chaque méthode accède à ses attributs internes via la référence d'instance `This`.
+Pour appeler la méthode parente, utilisez le préfixe `Super::`.
 
 ```oop
-Method Chien::Init(nom_p.s, age_p.i)
+Method Animal::Init(nom_p.s, age_p.i)
   This\nom = nom_p
   This\age = age_p
 EndMethod
 
-Method Chien::Aboyer()
-  PrintN(This\nom + " dit : Wouaf ! Wouaf ! (Age : " + Str(This\age) + " ans)")
+Method Animal::Crier()
+  PrintN("[Animal] " + This\nom + " émet un son générique.")
 EndMethod
+
+Method Animal::Free()
+  FreeStructure(This)
+EndMethod
+
+Method Chien::Init(nom_p.s, age_p.i, race_p.s)
+  Super::Init(nom_p, age_p) ; Initialisation du parent
+  This\race = race_p
+EndMethod
+
+Method Chien::Crier()
+  Super::Crier() ; Appel du comportement parent
+  PrintN("   ==> CHIEN (" + This\race + ") : Wouaf ! Wouaf !")
+EndMethod
+
+Method Chien::Rapporter(objet.s)
+  PrintN(This\nom + " rapporte : " + objet)
+EndMethod
+
+Method Chien::Free()
+  Super::Free()
+EndMethod
+```
+
+### 2.3 Utilisation et Polymorphisme
+```oop
+; 1. Instanciation concrète
+Define *monChien.Chien = New Chien("Médor", 4, "Labrador")
+*monChien\Crier()
+*monChien\Rapporter("la balle")
+
+; 2. Polymorphisme dynamique via liste ou pointeur de type parent
+NewList *refuge.Animal()
+AddElement(*refuge()) : *refuge() = *monChien
+
+ForEach *refuge()
+  *refuge()\Crier() ; Dispatch dynamique vers Chien::Crier() !
+  *refuge()\Free()  ; Libération polymorphe
+Next
 ```
 
 ---
 
 ## 3. Plomberie PureBasic Générée
 
-Le compilateur/transpileur transforme la classe OOP en code PureBasic compilable :
-
-```purebasic
-Interface Chien_vt
-  Aboyer()
-  Free()
-EndInterface
-
-Structure Chien_Inst
-  *VTable.Chien_vt
-  nom.s
-  age.i
-EndStructure
-
-Procedure Chien_Aboyer(*This.Chien_Inst)
-  OpenConsole()
-  PrintN(*This\nom + " dit : Wouaf ! Wouaf ! (Age : " + Str(*This\age) + " ans)")
-EndProcedure
-
-Procedure Chien_Free(*This.Chien_Inst)
-  FreeStructure(*This)
-EndProcedure
-
-DataSection
-  Chien_VTable_Data:
-    Data.i @Chien_Aboyer()
-    Data.i @Chien_Free()
-EndDataSection
-
-Procedure.i New_Chien(nom.s, age.i)
-  Protected *obj.Chien_Inst = AllocateStructure(Chien_Inst)
-  If *obj
-    *obj\VTable = ?Chien_VTable_Data
-    *obj\nom = nom
-    *obj\age = age
-  EndIf
-  ProcedureReturn *obj
-EndProcedure
-```
+Le transpileur convertit automatiquement les classes en constructions natives PureBasic :
+1. `Interface Chien_vt Extends Animal_vt` contenant uniquement les nouvelles méthodes ajoutées.
+2. `Structure Chien_Inst Extends Animal_Inst` avec le pointeur `*VTable` en tête de structure.
+3. `DataSection` contenant les adresses des procédures avec les méthodes surchargées correctement positionnées.
+4. Fonctions constructeurs `New_Chien(...)` allouant la structure et initialisant la `VTable`.
 
 ---
 
 ## 4. Guide d'Exécution & Compilation
 
-Pour compiler un fichier PureBasic généré sous forme d'exécutable console :
-
+### Transpiler un fichier `.pbo` vers `.pb` :
 ```cmd
-"C:\Program Files\PureBasic\Compilers\pbcompiler.exe" "src/test_chien_generated.pb" /CONSOLE /EXE "src/test_chien.exe"
+"compiler/transpiler.exe" "src/mon_fichier.pbo" "src/mon_fichier_generated.pb"
+```
+
+### Compiler le code PureBasic généré :
+```cmd
+"C:\Program Files\PureBasic\Compilers\pbcompiler.exe" "src/mon_fichier_generated.pb" /CONSOLE /EXE "src/mon_fichier.exe"
 ```

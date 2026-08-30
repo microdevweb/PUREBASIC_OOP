@@ -15,3 +15,22 @@ EndMethod
 Method Chien::Aboyer()
   PrintN(This\nom + " dit : Wouaf ! Wouaf ! (Age : " + Str(This\age) + " ans)")
 EndMethod
+
+; ============================================================================
+; EXEMPLE D'UTILISATION DE LA SYNTAXE POO (.pbo)
+; ============================================================================
+
+; Instanciation simple de deux objets Chien
+Define *chien1.Chien = New Chien("Médor", 3)
+Define *chien2.Chien = New Chien("Rox", 5)
+
+; Utilisation des méthodes
+If *chien1
+  *chien1\Aboyer()
+  *chien1\Free()
+EndIf
+
+If *chien2
+  *chien2\Aboyer()
+  *chien2\Free()
+EndIf

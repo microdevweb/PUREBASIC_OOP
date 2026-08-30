@@ -10,6 +10,12 @@ A modern Object-Oriented Programming (OOP) extension and transpiler for PureBasi
 ## Project Structure
 - `src/` : Source files and `.pbo` examples.
 - `compiler/` : Transpiler implementation in PureBasic.
+- `doc/` : Reference manuals (FR / EN) and [ROADMAP_IDE_AND_GUI.md](doc/ROADMAP_IDE_AND_GUI.md).
+
+## Future Roadmap & Vision
+See [doc/ROADMAP_IDE_AND_GUI.md](doc/ROADMAP_IDE_AND_GUI.md) for the roadmap covering:
+1. **Native PureBasic OOP GUI Framework** (`UIWindow`, `UIButton`, `UITextBox`, etc.)
+2. **Dedicated Native Scintilla IDE** (`pbo_ide.pb`) with syntax highlighting, live transpilation, and autocompletion.
 
 ## Getting Started
 To compile `.pb` generated output using the PureBasic compiler:
