@@ -1331,7 +1331,7 @@ Procedure AutoComplete_CheckAutoPopup()
         ; Skip any whitespace
         *Buffer = @Line$
         *Cursor.Character = *Buffer + Column * #CharSize
-        While *Cursor > *Buffer And (*Cursor\c = ' ' Or *Cursor\c = 9)
+        While *Cursor >= *Buffer And (*Cursor\c = ' ' Or *Cursor\c = 9)
           *Cursor - #CharSize
         Wend
         
