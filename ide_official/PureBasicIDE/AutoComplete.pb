@@ -613,9 +613,13 @@ Procedure AutoComplete_FillStructured(WordStart$, StructName$, *BaseItem.SourceI
     EndIf
     IsOffsetOf = 0
     
-  ElseIf StructName$ <> "" ; OffsetOf mode
+  ElseIf StructName$ <> "" ; OffsetOf or Class mode
     Type$ = StructName$
-    IsOffsetOf = 1
+    If FindString(Type$, "OffsetOf")
+      IsOffsetOf = 1
+    Else
+      IsOffsetOf = 0
+    EndIf
     
   Else
     ProcedureReturn
@@ -846,6 +850,38 @@ Procedure.s AutoComplete_IsOffsetOf(Line$, Column)
   ProcedureReturn ""
 EndProcedure
 
+Procedure.s AutoComplete_FindEnclosingClass(Line)
+  If *ActiveSource = 0 Or Line < 0
+    ProcedureReturn ""
+  EndIf
+  
+  Depth = 0
+  For l = Line To 0 Step -1
+    LineText$ = Trim(GetLine(l, *ActiveSource))
+    Upper$ = UCase(LineText$)
+    
+    If Left(Upper$, 8) = "ENDCLASS"
+      Depth + 1
+    ElseIf Left(Upper$, 6) = "CLASS " Or Left(Upper$, 6) = "CLASS	"
+      If Depth = 0
+        ClassName$ = Trim(Mid(LineText$, 7))
+        ExtendsPos = FindString(UCase(ClassName$), "EXTENDS ")
+        If ExtendsPos = 0
+          ExtendsPos = FindString(UCase(ClassName$), "EXTENDS	")
+        EndIf
+        If ExtendsPos > 0
+          ClassName$ = Trim(Left(ClassName$, ExtendsPos - 1))
+        EndIf
+        ProcedureReturn ClassName$
+      Else
+        Depth - 1
+      EndIf
+    EndIf
+  Next l
+  
+  ProcedureReturn ""
+EndProcedure
+
 Procedure OpenAutoCompleteWindow()
   ;
   ; Note: We have a problem here:
@@ -924,6 +960,38 @@ Procedure OpenAutoCompleteWindow()
         StructName$ = ""
         BaseItemLine = *ActiveSource\CurrentLine-1
         AutoComplete_IsStructure = LocateStructureBaseItem(Line$, Column, @*BaseItem.SourceItem, @BaseItemLine, AutoCompleteStack())
+      EndIf
+      
+      ; OOP: Check for "This\" or "*This\" inside a class method
+      If AutoComplete_IsStructure = 0
+        *Buffer = @Line$
+        *Cursor.Character = *Buffer + Column * #CharSize
+        While *Cursor >= *Buffer And (*Cursor\c = ' ' Or *Cursor\c = 9)
+          *Cursor - #CharSize
+        Wend
+        If *Cursor >= *Buffer And *Cursor\c = '\'
+          *Cursor - #CharSize
+          While *Cursor >= *Buffer And (*Cursor\c = ' ' Or *Cursor\c = 9)
+            *Cursor - #CharSize
+          Wend
+          *WordEnd = *Cursor
+          While *Cursor >= *Buffer And (*Cursor\c = '*' Or ValidCharacters(*Cursor\c))
+            *Cursor - #CharSize
+          Wend
+          *WordStart = *Cursor + #CharSize
+          If *WordEnd >= *WordStart
+            WordBeforeSlash$ = PeekS(*WordStart, (*WordEnd - *WordStart)/#CharSize + 1)
+            If LCase(WordBeforeSlash$) = "this" Or LCase(WordBeforeSlash$) = "*this"
+              EnclosingClass$ = AutoComplete_FindEnclosingClass(*ActiveSource\CurrentLine - 1)
+              If EnclosingClass$ <> ""
+                StructName$ = EnclosingClass$
+                *BaseItem = 0
+                AutoComplete_IsStructure = 1
+                ClearList(AutoCompleteStack())
+              EndIf
+            EndIf
+          EndIf
+        EndIf
       EndIf
       
       

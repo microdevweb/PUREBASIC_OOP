@@ -1,4 +1,4 @@
-﻿; --------------------------------------------------------------------------------------------
+; --------------------------------------------------------------------------------------------
 ;  Copyright (c) Fantaisie Software. All rights reserved.
 ;  Dual licensed under the GPL and Fantaisie Software licenses.
 ;  See LICENSE and LICENSE-FANTAISIE in the project root for license information.
@@ -31,6 +31,7 @@ DataSection
 
   Data$ "CallDebugger"     , "", ""
   Data$ "Case"             , "", " "
+  Data$ "Class"            , "EndClass", " "
   Data$ "CompilerCase"     , "", " "
   Data$ "CompilerDefault"  , "", ""
   Data$ "CompilerElse"     , "", ""
@@ -78,6 +79,7 @@ DataSection
       Data$ "EnableJS"        , "", ""
   CompilerEndIf
   Data$ "End"               , "", ""
+  Data$ "EndClass"          , "", ""
   Data$ "EndDataSection"    , "", ""
   Data$ "EndDeclareModule"  , "", ""
   Data$ "EndEnumeration"    , "", ""
@@ -86,6 +88,7 @@ DataSection
   Data$ "EndImport"         , "", ""
   Data$ "EndInterface"      , "", ""
   Data$ "EndMacro"          , "", ""
+  Data$ "EndMethod"         , "", ""
   Data$ "EndModule"         , "", ""
   Data$ "EndProcedure"      , "", ""
   Data$ "EndSelect"         , "", ""
@@ -130,6 +133,7 @@ DataSection
   Data$ "Macro", "EndMacro", " "
   Data$ "MacroExpandedCount", "", ""
   Data$ "Map", "", " "
+  Data$ "Method", "EndMethod", " "
   Data$ "Module"  , "EndModule", " "
 
   Data$ "NewList", "", " "

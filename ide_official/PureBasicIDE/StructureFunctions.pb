@@ -1,4 +1,4 @@
-﻿; --------------------------------------------------------------------------------------------
+; --------------------------------------------------------------------------------------------
 ;  Copyright (c) Fantaisie Software. All rights reserved.
 ;  Dual licensed under the GPL and Fantaisie Software licenses.
 ;  See LICENSE and LICENSE-FANTAISIE in the project root for license information.
@@ -802,12 +802,171 @@ Procedure FindStructureInterface(Name$, Type, List Output.s(), Recursion)
   ProcedureReturn #False
 EndProcedure
 
+Procedure FindClassInterfaceFromSource(*Source.SourceFile, Name$, List Output.s(), IncludePrivate, Recursion = 0)
+  If Recursion > 50 Or *Source = 0 Or Name$ = ""
+    ProcedureReturn #False
+  EndIf
+  
+  Success = #False
+  LineCount = ScintillaSendMessage(*Source\EditorGadget, #SCI_GETLINECOUNT, 0, 0)
+  InsideTargetClass = #False
+  ExtendsClass$ = ""
+  
+  For line = 0 To LineCount - 1
+    LineText$ = Trim(GetLine(line, *Source))
+    
+    ; Skip empty lines or comments
+    If LineText$ = "" Or Left(LineText$, 1) = ";"
+      Continue
+    EndIf
+    
+    ; Check start of Class
+    If Left(UCase(LineText$), 6) = "CLASS " Or Left(UCase(LineText$), 6) = "CLASS	"
+      CurrentClassName$ = Trim(Mid(LineText$, 7))
+      ExtendsPos = FindString(UCase(CurrentClassName$), "EXTENDS ")
+      If ExtendsPos = 0
+        ExtendsPos = FindString(UCase(CurrentClassName$), "EXTENDS	")
+      EndIf
+      
+      If ExtendsPos > 0
+        ExtendsClass$ = Trim(Mid(CurrentClassName$, ExtendsPos + 8))
+        CurrentClassName$ = Trim(Left(CurrentClassName$, ExtendsPos - 1))
+      Else
+        ExtendsClass$ = ""
+      EndIf
+      
+      If LCase(CurrentClassName$) = LCase(Name$)
+        InsideTargetClass = #True
+        Success = #True
+        ; If it extends another class, parse the base class first
+        If ExtendsClass$ <> ""
+          FindClassInterface(ExtendsClass$, Output(), IncludePrivate, Recursion + 1)
+        EndIf
+        Continue
+      EndIf
+    EndIf
+    
+    If InsideTargetClass
+      If Left(UCase(LineText$), 8) = "ENDCLASS"
+        Break
+      EndIf
+      
+      ; Parse members
+      SemiColon = FindString(LineText$, ";")
+      If SemiColon > 0
+        LineText$ = Trim(Left(LineText$, SemiColon - 1))
+      EndIf
+      Upper$ = UCase(LineText$)
+      
+      ; 1) Methods: [Public|Private] Method Name(...)
+      IsMethod = #False
+      IsPublic = #True
+      MethodRest$ = ""
+      
+      If Left(Upper$, 14) = "PUBLIC METHOD " Or Left(Upper$, 14) = "PUBLIC METHOD	"
+        IsMethod = #True
+        IsPublic = #True
+        MethodRest$ = Trim(Mid(LineText$, 15))
+      ElseIf Left(Upper$, 15) = "PRIVATE METHOD " Or Left(Upper$, 15) = "PRIVATE METHOD	"
+        IsMethod = #True
+        IsPublic = #False
+        MethodRest$ = Trim(Mid(LineText$, 16))
+      ElseIf Left(Upper$, 7) = "METHOD " Or Left(Upper$, 7) = "METHOD	"
+        IsMethod = #True
+        IsPublic = #True
+        MethodRest$ = Trim(Mid(LineText$, 8))
+      EndIf
+      
+      If IsMethod
+        If IncludePrivate Or IsPublic
+          MethodName$ = Trim(StringField(MethodRest$, 1, "("))
+          If MethodName$ <> ""
+            If FindString(MethodRest$, "(")
+              Args$ = Mid(MethodRest$, FindString(MethodRest$, "("))
+              AddElement(Output())
+              Output() = MethodName$ + Args$
+            Else
+              AddElement(Output())
+              Output() = MethodName$ + "()"
+            EndIf
+          EndIf
+        EndIf
+        Continue
+      EndIf
+      
+      ; 2) Fields: Protected / Public / Private
+      IsField = #False
+      FieldRest$ = ""
+      If Left(Upper$, 10) = "PROTECTED " Or Left(Upper$, 10) = "PROTECTED	"
+        IsField = #True
+        If IncludePrivate : FieldRest$ = Trim(Mid(LineText$, 11)) : EndIf
+      ElseIf Left(Upper$, 7) = "PUBLIC " Or Left(Upper$, 7) = "PUBLIC	"
+        IsField = #True
+        FieldRest$ = Trim(Mid(LineText$, 8))
+      ElseIf Left(Upper$, 8) = "PRIVATE " Or Left(Upper$, 8) = "PRIVATE	"
+        IsField = #True
+        If IncludePrivate : FieldRest$ = Trim(Mid(LineText$, 9)) : EndIf
+      EndIf
+      
+      If IsField And FieldRest$ <> ""
+        Count = CountString(FieldRest$, ",") + 1
+        For f = 1 To Count
+          SingleField$ = Trim(StringField(FieldRest$, f, ","))
+          If SingleField$ <> ""
+            AddElement(Output())
+            Output() = SingleField$
+          EndIf
+        Next f
+      EndIf
+    EndIf
+  Next line
+  
+  ProcedureReturn Success
+EndProcedure
+
+Procedure FindClassInterface(Name$, List Output.s(), IncludePrivate = #True, Recursion = 0)
+  If Recursion > 50 Or Name$ = ""
+    ProcedureReturn #False
+  EndIf
+  
+  ; Check active source first
+  If *ActiveSource
+    If FindClassInterfaceFromSource(*ActiveSource, Name$, Output(), IncludePrivate, Recursion)
+      ProcedureReturn #True
+    EndIf
+  EndIf
+  
+  ; Check other open files
+  Current = ListIndex(FileList())
+  ForEach FileList()
+    If @FileList() <> *ProjectInfo And @FileList() <> *ActiveSource
+      If FindClassInterfaceFromSource(@FileList(), Name$, Output(), IncludePrivate, Recursion)
+        SelectElement(FileList(), Current)
+        ProcedureReturn #True
+      EndIf
+    EndIf
+  Next FileList()
+  SelectElement(FileList(), Current)
+  
+  ProcedureReturn #False
+EndProcedure
+
 Procedure FindStructure(Name$, List Output.s())
-  ProcedureReturn FindStructureInterface(Name$, #ITEM_Structure, Output(), 0)
+  If FindStructureInterface(Name$, #ITEM_Structure, Output(), 0)
+    ProcedureReturn #True
+  ElseIf FindClassInterface(Name$, Output(), #True)
+    ProcedureReturn #True
+  EndIf
+  ProcedureReturn #False
 EndProcedure
 
 Procedure FindInterface(Name$, List Output.s())
-  ProcedureReturn FindStructureInterface(Name$, #ITEM_Interface, Output(), 0)
+  If FindStructureInterface(Name$, #ITEM_Interface, Output(), 0)
+    ProcedureReturn #True
+  ElseIf FindClassInterface(Name$, Output(), #False)
+    ProcedureReturn #True
+  EndIf
+  ProcedureReturn #False
 EndProcedure
 
 ; return "Array", "List", "Map" or "" (in this case)

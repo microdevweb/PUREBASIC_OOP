@@ -1,4 +1,4 @@
-﻿; --------------------------------------------------------------------------------------------
+; --------------------------------------------------------------------------------------------
 ;  Copyright (c) Fantaisie Software. All rights reserved.
 ;  Dual licensed under the GPL and Fantaisie Software licenses.
 ;  See LICENSE and LICENSE-FANTAISIE in the project root for license information.
@@ -667,6 +667,7 @@ Declare Template_DropEvent()          ; #PB_Event_GadgetDrop happened...
 Declare ParseStructure(*Buffer, Length, List Output.s())           ; parse structure content
 Declare ParseInterface(*Buffer, Length, List Output.s())           ; parse interface content
 Declare FindStructureInterface(Name$, Type, List Output.s(), Recursion)
+Declare FindClassInterface(Name$, List Output.s(), IncludePrivate = #True, Recursion = 0)
 Declare FindStructure(Name$, List Output.s())                      ; find Structure
 Declare FindInterface(Name$, List Output.s())                      ; find interface
 Declare FindPrototype(Name$)                                       ; Returns the SourceItem of the prototype declaration (or 0)

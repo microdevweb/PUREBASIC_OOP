@@ -385,6 +385,48 @@ Procedure LoadPreferences()
     IndentKeywords(NbIndentKeywords)\After  = 0
     NbIndentKeywords+1
   EndIf
+  
+  ; OOP IDE: Class/Method/EndClass/EndMethod added (version 700)
+  ; Inject them if missing (handles existing prefs from standard PB IDE)
+  ;
+  HasClass = #False : HasEndClass = #False
+  HasMethod = #False : HasEndMethod = #False
+  For i = 0 To NbIndentKeywords-1
+    Select LCase(IndentKeywords(i)\Keyword$)
+      Case "class"     : HasClass     = #True
+      Case "endclass"  : HasEndClass  = #True
+      Case "method"    : HasMethod    = #True
+      Case "endmethod" : HasEndMethod = #True
+    EndSelect
+  Next i
+  ToAdd = (1-HasClass) + (1-HasEndClass) + (1-HasMethod) + (1-HasEndMethod)
+  If ToAdd > 0
+    ReDim IndentKeywords.IndentEntry(NbIndentKeywords + ToAdd)
+    If Not HasClass
+      IndentKeywords(NbIndentKeywords)\Keyword$ = "Class"
+      IndentKeywords(NbIndentKeywords)\Before = 0
+      IndentKeywords(NbIndentKeywords)\After   = 1
+      NbIndentKeywords+1
+    EndIf
+    If Not HasEndClass
+      IndentKeywords(NbIndentKeywords)\Keyword$ = "EndClass"
+      IndentKeywords(NbIndentKeywords)\Before = -1
+      IndentKeywords(NbIndentKeywords)\After   = 0
+      NbIndentKeywords+1
+    EndIf
+    If Not HasMethod
+      IndentKeywords(NbIndentKeywords)\Keyword$ = "Method"
+      IndentKeywords(NbIndentKeywords)\Before = 0
+      IndentKeywords(NbIndentKeywords)\After   = 1
+      NbIndentKeywords+1
+    EndIf
+    If Not HasEndMethod
+      IndentKeywords(NbIndentKeywords)\Keyword$ = "EndMethod"
+      IndentKeywords(NbIndentKeywords)\Before = -1
+      IndentKeywords(NbIndentKeywords)\After   = 0
+      NbIndentKeywords+1
+    EndIf
+  EndIf
     
   ; Sort and index the values
   BuildIndentVT()

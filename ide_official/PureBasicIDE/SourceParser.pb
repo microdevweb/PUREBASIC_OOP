@@ -1,4 +1,4 @@
-﻿; --------------------------------------------------------------------------------------------
+; --------------------------------------------------------------------------------------------
 ;  Copyright (c) Fantaisie Software. All rights reserved.
 ;  Dual licensed under the GPL and Fantaisie Software licenses.
 ;  See LICENSE and LICENSE-FANTAISIE in the project root for license information.
@@ -3790,11 +3790,11 @@ DataSection
   ;
   ; Note: Compiler Keywords are treated specially, as they can be used
   ;   outside of the normal nesting rules.
-  ;
   KeywordMatches:
   Data.l #KEYWORD_Case,            #KEYWORD_Case
   Data.l #KEYWORD_Case,            #KEYWORD_Default
   Data.l #KEYWORD_Case,            #KEYWORD_EndSelect
+  Data.l #KEYWORD_Class,           #KEYWORD_EndClass
   Data.l #KEYWORD_CompilerCase,    #KEYWORD_CompilerCase
   Data.l #KEYWORD_CompilerCase,    #KEYWORD_CompilerDefault
   Data.l #KEYWORD_CompilerCase,    #KEYWORD_CompilerEndSelect
@@ -3829,6 +3829,7 @@ DataSection
   Data.l #KEYWORD_ImportC,         #KEYWORD_EndImport
   Data.l #KEYWORD_Interface,       #KEYWORD_EndInterface
   Data.l #KEYWORD_Macro,           #KEYWORD_EndMacro
+  Data.l #KEYWORD_Method,          #KEYWORD_EndMethod
   Data.l #KEYWORD_Module,          #KEYWORD_EndModule
   Data.l #KEYWORD_Procedure,       #KEYWORD_EndProcedure
   Data.l #KEYWORD_ProcedureC,      #KEYWORD_EndProcedure
