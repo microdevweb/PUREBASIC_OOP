@@ -1,4 +1,4 @@
-﻿; --------------------------------------------------------------------------------------------
+; --------------------------------------------------------------------------------------------
 ;  Copyright (c) Fantaisie Software. All rights reserved.
 ;  Dual licensed under the GPL and Fantaisie Software licenses.
 ;  See LICENSE and LICENSE-FANTAISIE in the project root for license information.
@@ -2194,6 +2194,58 @@ Procedure.s Compiler_TemporaryFilename(*Target.CompileTarget)
   ProcedureReturn TargetFileName$
 EndProcedure
 
+Procedure.s TranspileOOPFile(SourceFileName$)
+  ; Check if file is .pbo or contains OOP keywords like "Class "
+  Protected isOOP.b = #False
+  If LCase(GetExtensionPart(SourceFileName$)) = "pbo"
+    isOOP = #True
+  Else
+    ; Scan first lines of source file to detect OOP Class
+    Protected f = ReadFile(#PB_Any, SourceFileName$)
+    If f
+      While Not Eof(f)
+        Protected l.s = Trim(UCase(ReadString(f)))
+        If Left(l, 6) = "CLASS " Or Left(l, 7) = "METHOD "
+          isOOP = #True
+          Break
+        EndIf
+      Wend
+      CloseFile(f)
+    EndIf
+  EndIf
+
+  If Not isOOP
+    ProcedureReturn SourceFileName$
+  EndIf
+
+  ; Locate transpiler executable
+  Protected transpilerExe$ = AppDirectory$ + "compiler\transpiler.exe"
+  If FileSize(transpilerExe$) <= 0
+    transpilerExe$ = "c:\PB\PUREBASIC_OOP_WORKSPACE\compiler\transpiler.exe"
+  EndIf
+  If FileSize(transpilerExe$) <= 0
+    transpilerExe$ = GetPathPart(ProgramFilename()) + "compiler\transpiler.exe"
+  EndIf
+
+  If FileSize(transpilerExe$) <= 0
+    ; Transpiler not found, fallback to original file
+    ProcedureReturn SourceFileName$
+  EndIf
+
+  Protected transpiledFile$ = TempPath$ + "PB_OOP_Transpiled_" + Str(Random(999999)) + ".pb"
+  Protected prg = RunProgram(transpilerExe$, #DQUOTE$ + SourceFileName$ + #DQUOTE$ + " " + #DQUOTE$ + transpiledFile$ + #DQUOTE$, "", #PB_Program_Open | #PB_Program_Wait | #PB_Program_Hide)
+  If prg
+    Protected exitCode = ProgramExitCode(prg)
+    CloseProgram(prg)
+    If exitCode = 0 And FileSize(transpiledFile$) > 0
+      RegisterDeleteFile(transpiledFile$)
+      ProcedureReturn transpiledFile$
+    EndIf
+  EndIf
+
+  ProcedureReturn SourceFileName$
+EndProcedure
+
 Procedure Compiler_CompileRun(SourceFileName$, *Source.SourceFile, CheckSyntax)
   
   ; Load the correct compiler + unicode mode and subsystem
@@ -2242,13 +2294,16 @@ Procedure Compiler_CompileRun(SourceFileName$, *Source.SourceFile, CheckSyntax)
   ;
   RegisterDeleteFile(TargetFileName$)
   
-  CompilerWrite("SOURCE"+Chr(9)+SourceFileName$, #COMPILER_FileFormat)
+  ; Transpile OOP source (.pbo / Class keywords) before passing to pbcompiler
+  Protected ActualSourceFile$ = TranspileOOPFile(SourceFileName$)
+  
+  CompilerWrite("SOURCE"+Chr(9)+ActualSourceFile$, #COMPILER_FileFormat)
   CompilerWrite("TARGET"+Chr(9)+TargetFileName$, #COMPILER_FileFormat)
   
   If *Source\FileName$ <> ""
     CompilerWrite("INCLUDEPATH"+Chr(9)+GetPathPart(*Source\FileName$), #COMPILER_FileFormat)
     
-    If *Source\FileName$ <> SourceFileName$
+    If *Source\FileName$ <> ActualSourceFile$
       CompilerWrite("SOURCEALIAS"+Chr(9)+*Source\FileName$, #COMPILER_FileFormat)
     EndIf
   EndIf
@@ -2455,14 +2510,17 @@ Procedure Compiler_BuildTarget(SourceFileName$, TargetFileName$, *Target.Compile
     
   CompilerEndIf
   
-  CompilerWrite("SOURCE"+Chr(9)+SourceFileName$, #COMPILER_FileFormat)
+  ; Transpile OOP source (.pbo / Class keywords) before passing to pbcompiler
+  Protected ActualSourceFile$ = TranspileOOPFile(SourceFileName$)
+  
+  CompilerWrite("SOURCE"+Chr(9)+ActualSourceFile$, #COMPILER_FileFormat)
   CompilerWrite("TARGET"+Chr(9)+TargetFileName$, #COMPILER_FileFormat)
   
   If *Target\FileName$ <> ""
     ; do not use the BasePath$ here. Includes are always relative to the main file, not the project
     CompilerWrite("INCLUDEPATH"+Chr(9)+GetPathPart(*Target\FileName$), #COMPILER_FileFormat)
     
-    If *Target\FileName$ <> SourceFileName$
+    If *Target\FileName$ <> ActualSourceFile$
       CompilerWrite("SOURCEALIAS"+Chr(9)+*Target\FileName$, #COMPILER_FileFormat)
     EndIf
   EndIf

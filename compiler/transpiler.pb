@@ -2,8 +2,9 @@
 ; Title:       PureBasic OOP Transpiler / Code Generator (Full OOP Engine)
 ; Description: Transpiles OOP syntax (.pbo) to native PureBasic code (.pb)
 ;              Supports Single Inheritance, Dynamic VTable Polymorphism,
-;              Method Overriding, 'Super::' calls, and Encapsulation.
-; Author:      Expert PureBasic OOP Architect
+;              Method Overriding, 'Super::' / 'Super\' calls, 'New' instantiation,
+;              and inline / out-of-class method bodies.
+; Author:      MicrodevWeb
 ; ============================================================================
 
 EnableExplicit
@@ -60,20 +61,11 @@ Global NewList Classes.OOP_Class()
 Global NewMap ClassMap.i() ; Map ClassName to ListIndex
 Global NewList MethodBodies.OOP_MethodBody()
 Global NewList MainLines.s()
+Global NewList FileLines.s()
 
 ; ----------------------------------------------------------------------------
-; Helper String Functions
+; Helper Functions
 ; ----------------------------------------------------------------------------
-
-Procedure.s ExtractParamTypes(params.s)
-  ; Strips default values or trims spaces
-  ProcedureReturn Trim(params)
-EndProcedure
-
-Procedure.s CleanLine(line.s)
-  Protected clean.s = Trim(line)
-  ProcedureReturn clean
-EndProcedure
 
 Procedure.b IsIdentifierChar(c.s)
   Protected a.i = Asc(c)
@@ -81,6 +73,49 @@ Procedure.b IsIdentifierChar(c.s)
     ProcedureReturn #True
   EndIf
   ProcedureReturn #False
+EndProcedure
+
+Procedure.s ReplaceWord(text.s, findWord.s, replaceWith.s)
+  Protected res.s = ""
+  Protected lenT.i = Len(text)
+  Protected lenW.i = Len(findWord)
+  Protected i.i = 1
+  
+  While i <= lenT
+    If Mid(text, i, lenW) = findWord
+      Protected isStart.b = #False
+      Protected isEnd.b = #False
+      
+      If i = 1
+        isStart = #True
+      Else
+        Protected prevChar.s = Mid(text, i - 1, 1)
+        If Not IsIdentifierChar(prevChar) And prevChar <> "*"
+          isStart = #True
+        EndIf
+      EndIf
+      
+      If (i + lenW > lenT)
+        isEnd = #True
+      Else
+        Protected nextChar.s = Mid(text, i + lenW, 1)
+        If Not IsIdentifierChar(nextChar)
+          isEnd = #True
+        EndIf
+      EndIf
+      
+      If isStart And isEnd
+        res + replaceWith
+        i + lenW
+        Continue
+      EndIf
+    EndIf
+    
+    res + Mid(text, i, 1)
+    i + 1
+  Wend
+  
+  ProcedureReturn res
 EndProcedure
 
 ; ----------------------------------------------------------------------------
@@ -93,6 +128,13 @@ Procedure.b ParsePBO(inputFile.s)
     ProcedureReturn #False
   EndIf
 
+  ClearList(FileLines())
+  While Not Eof(file)
+    AddElement(FileLines())
+    FileLines() = ReadString(file)
+  Wend
+  CloseFile(file)
+
   ClearList(Classes())
   ClearMap(ClassMap())
   ClearList(MethodBodies())
@@ -100,24 +142,41 @@ Procedure.b ParsePBO(inputFile.s)
 
   Protected inClass.b = #False
   Protected inMethod.b = #False
+  Protected inClassMethod.b = #False
   Protected *currentClass.OOP_Class = #Null
   Protected *currentMethod.OOP_MethodBody = #Null
   Protected rawLine.s, line.s, upper.s
-  Protected p1.i, p2.i, p3.i, word1.s, word2.s, word3.s, word4.s
+  Protected p1.i, p2.i, p3.i
 
-  While Not Eof(file)
-    rawLine = ReadString(file)
+  Protected lineIdx.i = 0, totalLines.i = ListSize(FileLines())
+
+  ForEach FileLines()
+    rawLine = FileLines()
     line = Trim(rawLine)
     upper = UCase(line)
 
-    ; 1. Parsing inside Class definition
-    If inClass
+    ; 1. Parsing inside Class Method body (Inline method inside Class)
+    If inClassMethod
+      If Left(upper, 9) = "ENDMETHOD"
+        inClassMethod = #False
+        *currentMethod = #Null
+        Continue
+      Else
+        AddElement(*currentMethod\BodyLines())
+        *currentMethod\BodyLines() = rawLine
+        Continue
+      EndIf
+
+    ; 2. Parsing inside Class definition
+    ElseIf inClass
       If Left(upper, 8) = "ENDCLASS"
         inClass = #False
         *currentClass = #Null
         Continue
-      ElseIf Left(upper, 6) = "PUBLIC" Or Left(upper, 9) = "PROTECTED" Or Left(upper, 7) = "PRIVATE"
-        ; Field or Method declaration
+
+      ; Handle method declarations or inline method bodies:
+      ; e.g. Public Method Init(...) or Method Init(...)
+      ElseIf Left(upper, 6) = "PUBLIC" Or Left(upper, 9) = "PROTECTED" Or Left(upper, 7) = "PRIVATE" Or Left(upper, 6) = "METHOD"
         Protected vis.s = "Public"
         Protected rest.s = ""
         If Left(upper, 6) = "PUBLIC"
@@ -129,13 +188,25 @@ Procedure.b ParsePBO(inputFile.s)
         ElseIf Left(upper, 7) = "PRIVATE"
           vis = "Private"
           rest = Trim(Mid(line, 8))
+        Else
+          vis = "Public"
+          rest = line
         EndIf
 
         Protected restUpper.s = UCase(rest)
         If Left(restUpper, 6) = "METHOD"
-          ; Method declaration in class
+          ; Method declaration / inline definition inside class
           Protected methDecl.s = Trim(Mid(rest, 7))
           Protected mName.s, mParams.s = "", mRet.s = ""
+          
+          ; Check return type in header if format Method.i Name(params)
+          If Left(methDecl, 1) = "."
+            p1 = FindString(methDecl, " ")
+            If p1 > 0
+              mRet = Left(methDecl, p1 - 1)
+              methDecl = Trim(Mid(methDecl, p1 + 1))
+            EndIf
+          EndIf
           
           p1 = FindString(methDecl, "(")
           If p1 > 0
@@ -149,10 +220,12 @@ Procedure.b ParsePBO(inputFile.s)
           EndIf
           
           ; Check return type in mName (e.g. GetAge.i)
-          p3 = FindString(mName, ".")
-          If p3 > 0
-            mRet = Mid(mName, p3)
-            mName = Left(mName, p3 - 1)
+          If mRet = ""
+            p3 = FindString(mName, ".")
+            If p3 > 0
+              mRet = Mid(mName, p3)
+              mName = Left(mName, p3 - 1)
+            EndIf
           EndIf
 
           AddElement(*currentClass\Methods())
@@ -169,16 +242,55 @@ Procedure.b ParsePBO(inputFile.s)
             *currentClass\hasFree = #True
           EndIf
 
+          ; Check if this is an inline method or a single-line declaration
+          ; Look ahead for an EndMethod before next declaration or EndClass
+          Protected isInline.b = #False
+          PushListPosition(FileLines())
+          While NextElement(FileLines())
+            Protected nextLine.s = Trim(UCase(FileLines()))
+            If nextLine = "" Or Left(nextLine, 1) = ";"
+              Continue
+            ElseIf Left(nextLine, 9) = "ENDMETHOD"
+              isInline = #True
+              Break
+            ElseIf Left(nextLine, 8) = "ENDCLASS" Or Left(nextLine, 6) = "PUBLIC" Or Left(nextLine, 9) = "PROTECTED" Or Left(nextLine, 7) = "PRIVATE" Or Left(nextLine, 6) = "METHOD"
+              isInline = #False
+              Break
+            EndIf
+          Wend
+          PopListPosition(FileLines())
+
+          If isInline
+            AddElement(MethodBodies())
+            *currentMethod = @MethodBodies()
+            *currentMethod\className = *currentClass\name
+            *currentMethod\methodName = mName
+            *currentMethod\params = mParams
+            *currentMethod\returnType = mRet
+            inClassMethod = #True
+          EndIf
+          Continue
+
         Else
           ; Field declaration: e.g. "nom.s", "age.i", "List items.s()"
           AddElement(*currentClass\Fields())
           *currentClass\Fields()\name = rest
           *currentClass\Fields()\visibility = vis
+          Continue
         EndIf
+
+      ElseIf line = "" Or Left(line, 1) = ";"
+        ; Empty line or comment in class
+        Continue
+      Else
+        ; Implicit field declaration (without Public/Protected keyword)
+        AddElement(*currentClass\Fields())
+        *currentClass\Fields()\name = line
+        *currentClass\Fields()\visibility = "Public"
         Continue
       EndIf
 
-    ; 2. Parsing inside Method Implementation
+    ; 3. Parsing inside Out-of-Class Method Implementation (Method Class::Name())
     ElseIf inMethod
       If Left(upper, 9) = "ENDMETHOD"
         inMethod = #False
@@ -190,7 +302,7 @@ Procedure.b ParsePBO(inputFile.s)
         Continue
       EndIf
 
-    ; 3. Outside Class/Method (Root Level)
+    ; 4. Outside Class/Method (Root Level)
     Else
       If Left(upper, 5) = "CLASS" And (Len(line) = 5 Or Mid(line, 6, 1) = " ")
         ; Class definition start
@@ -241,7 +353,6 @@ Procedure.b ParsePBO(inputFile.s)
             targetMeth = targetMethAndParams
           EndIf
           
-          ; Check return type on method name if not already extracted
           If implRet = ""
             p3 = FindString(targetMeth, ".")
             If p3 > 0
@@ -265,9 +376,8 @@ Procedure.b ParsePBO(inputFile.s)
         MainLines() = rawLine
       EndIf
     EndIf
-  Wend
+  Next
 
-  CloseFile(file)
   ProcedureReturn #True
 EndProcedure
 
@@ -299,40 +409,37 @@ Procedure BuildVTables()
       PopListPosition(Classes())
     EndIf
 
-    ; Now process this class's methods
+    ; Process methods defined in current class
     ForEach *c\Methods()
       Protected *m.OOP_Method = @*c\Methods()
       
-      ; Exclude Private methods from VTable (they are direct calls)
-      If *m\visibility = "Private"
-        Continue
-      EndIf
-      ; Exclude Init from VTable (Init is constructor helper)
-      If UCase(*m\name) = "INIT"
+      ; Constructors (Init) and Private methods do not go into VTable
+      If *m\visibility = "Private" Or UCase(*m\name) = "INIT"
         Continue
       EndIf
 
-      ; Check if this method overrides a slot in the inherited VTable
-      Protected foundSlot.b = #False
+      ; Check if overriding an existing VTable slot
+      Protected isOverridden.b = #False
       ForEach *c\VTableSlots()
         If UCase(*c\VTableSlots()\methodName) = UCase(*m\name)
-          ; Override implementation
+          ; Override slot with current class implementation
           *c\VTableSlots()\implementingClass = *c\name
           *c\VTableSlots()\params = *m\params
           *c\VTableSlots()\returnType = *m\returnType
           *m\isOverride = #True
-          foundSlot = #True
+          isOverridden = #True
           Break
         EndIf
       Next
 
-      ; If not found in parent VTable, append as a new method
-      If Not foundSlot
+      If Not isOverridden
+        ; New virtual method
         AddElement(*c\VTableSlots())
         *c\VTableSlots()\methodName = *m\name
         *c\VTableSlots()\implementingClass = *c\name
         *c\VTableSlots()\params = *m\params
         *c\VTableSlots()\returnType = *m\returnType
+        *m\isOverride = #False
       EndIf
     Next
   Next
@@ -342,58 +449,24 @@ EndProcedure
 ; Code Generation Phase: Emit PureBasic Code
 ; ----------------------------------------------------------------------------
 
-Procedure.s ReplaceWord(text.s, findWord.s, replaceWith.s)
-  Protected res.s = ""
-  Protected lenT.i = Len(text)
-  Protected lenW.i = Len(findWord)
-  Protected i.i = 1
-  
-  While i <= lenT
-    If Mid(text, i, lenW) = findWord
-      Protected isStart.b = #False
-      Protected isEnd.b = #False
-      
-      If i = 1
-        isStart = #True
-      Else
-        Protected prevChar.s = Mid(text, i - 1, 1)
-        If Not IsIdentifierChar(prevChar) And prevChar <> "*"
-          isStart = #True
-        EndIf
-      EndIf
-      
-      If (i + lenW > lenT)
-        isEnd = #True
-      Else
-        Protected nextChar.s = Mid(text, i + lenW, 1)
-        If Not IsIdentifierChar(nextChar)
-          isEnd = #True
-        EndIf
-      EndIf
-      
-      If isStart And isEnd
-        res + replaceWith
-        i + lenW
-        Continue
-      EndIf
-    EndIf
-    
-    res + Mid(text, i, 1)
-    i + 1
-  Wend
-  
-  ProcedureReturn res
-EndProcedure
-
 Procedure.s TranspileMethodBodyLine(line.s, className.s, parentClassName.s)
   Protected res.s = line
   
-  ; 1. Handle 'Super::Method(' calls
+  ; 1. Handle 'Super::Method(' or 'Super\Method(' calls
   Protected pSuper.i = FindString(res, "Super::")
+  If pSuper = 0
+    pSuper = FindString(res, "Super\")
+  EndIf
+  
   While pSuper > 0
+    Protected sepLen.i = 7
+    If Mid(res, pSuper, 6) = "Super\"
+      sepLen = 6
+    EndIf
+    
     Protected pOpen.i = FindString(res, "(", pSuper)
     If pOpen > 0
-      Protected methName.s = Trim(Mid(res, pSuper + 7, pOpen - (pSuper + 7)))
+      Protected methName.s = Trim(Mid(res, pSuper + sepLen, pOpen - (pSuper + sepLen)))
       Protected before.s = Left(res, pSuper - 1)
       Protected after.s = Mid(res, pOpen + 1)
       
@@ -404,7 +477,11 @@ Procedure.s TranspileMethodBodyLine(line.s, className.s, parentClassName.s)
         res = before + parentClassName + "_" + methName + "(*This, " + after
       EndIf
     EndIf
+    
     pSuper = FindString(res, "Super::", pSuper + 1)
+    If pSuper = 0
+      pSuper = FindString(res, "Super\", pSuper + 1)
+    EndIf
   Wend
   
   ; 2. Replace 'This' with '*This' cleanly (both This\field and FreeStructure(This))
@@ -416,9 +493,18 @@ EndProcedure
 Procedure.s TranspileMainLine(line.s)
   Protected res.s = line
   
-  ; 1. Replace 'New ClassName(' with 'New_ClassName('
+  ; 1. Replace 'New(ClassName, ...)' or 'New ClassName(...)' with 'New_ClassName(...)'
   ForEach Classes()
     Protected cName.s = Classes()\name
+    
+    ; Replace New(ClassName, ...) -> New_ClassName(...)
+    ; Replace New(ClassName) -> New_ClassName()
+    res = ReplaceString(res, "New(" + cName + ",", "New_" + cName + "(")
+    res = ReplaceString(res, "New(" + cName + ")", "New_" + cName + "()")
+    res = ReplaceString(res, "New( " + cName + ",", "New_" + cName + "(")
+    res = ReplaceString(res, "New( " + cName + " )", "New_" + cName + "()")
+    
+    ; Replace New ClassName(...) -> New_ClassName(...)
     res = ReplaceString(res, "New " + cName + "(", "New_" + cName + "(")
     res = ReplaceString(res, "New  " + cName + "(", "New_" + cName + "(")
     
@@ -643,6 +729,18 @@ Procedure.b GenerateTargetPB(outputFile.s)
 EndProcedure
 
 ; ----------------------------------------------------------------------------
+; Public Transpiler Function for IDE / CLI
+; ----------------------------------------------------------------------------
+
+Procedure.b TranspileSourceFile(inputPBO.s, outputPB.s)
+  If Not ParsePBO(inputPBO)
+    ProcedureReturn #False
+  EndIf
+  BuildVTables()
+  ProcedureReturn GenerateTargetPB(outputPB)
+EndProcedure
+
+; ----------------------------------------------------------------------------
 ; Main CLI Entry Point
 ; ----------------------------------------------------------------------------
 
@@ -668,23 +766,13 @@ Procedure.i Main()
   PrintN("Output PB  : " + outputPB)
   PrintN("")
 
-  If Not ParsePBO(inputPBO)
-    PrintN("[ERROR] Failed to open and parse input file: " + inputPBO)
+  If Not TranspileSourceFile(inputPBO, outputPB)
+    PrintN("[ERROR] Failed to transpile file: " + inputPBO)
     CloseConsole()
     ProcedureReturn 1
   EndIf
 
   PrintN("[INFO] Parsed " + Str(ListSize(Classes())) + " classes, " + Str(ListSize(MethodBodies())) + " method implementations.")
-  
-  BuildVTables()
-  PrintN("[INFO] Built VTables and resolved method overrides.")
-
-  If Not GenerateTargetPB(outputPB)
-    PrintN("[ERROR] Failed to write generated PureBasic code: " + outputPB)
-    CloseConsole()
-    ProcedureReturn 2
-  EndIf
-
   PrintN("[SUCCESS] Successfully transpiled to: " + outputPB)
   PrintN("=================================================================")
   CloseConsole()
