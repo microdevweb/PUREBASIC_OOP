@@ -1,7 +1,7 @@
 ; ============================================================================
 ; Title:       ide_builder.pb
-; Description: Pipeline de Transpilation et Compilation F5 avec affichage console
-; Author:      Expert PureBasic OOP
+; Description: Transpilation and native F5 compilation pipeline with live console output
+; Author:      MicrodevWeb
 ; ============================================================================
 
 EnableExplicit
@@ -10,13 +10,19 @@ XIncludeFile "../config/ide_settings.pb"
 
 Prototype IDE_LogCallback(message.s, isError.b)
 
+; ----------------------------------------------------------------------------
+; Procedure:   IDE_FindPBCompiler
+; Purpose:     Finds valid pbcompiler.exe path from config, standard paths, or PATH
+; Parameters:  None
+; Return:      Path to pbcompiler.exe or empty string
+; ----------------------------------------------------------------------------
 Procedure.s IDE_FindPBCompiler()
-  ; 1. Vérifier si le chemin configuré est valide
+  ; 1. Check user configured path
   If FileSize(Settings\CompilerPath) > 0
     ProcedureReturn Settings\CompilerPath
   EndIf
   
-  ; 2. Vérifier les emplacements standards PureBasic sous Windows
+  ; 2. Check standard Windows PureBasic installations
   Protected standardPath1.s = "C:\Program Files\PureBasic\Compilers\pbcompiler.exe"
   Protected standardPath2.s = "C:\Program Files (x86)\PureBasic\Compilers\pbcompiler.exe"
   Protected standardPath3.s = GetPathPart(ProgramFilename()) + "..\..\..\Compilers\pbcompiler.exe"
@@ -25,7 +31,7 @@ Procedure.s IDE_FindPBCompiler()
   If FileSize(standardPath2) > 0 : ProcedureReturn standardPath2 : EndIf
   If FileSize(standardPath3) > 0 : ProcedureReturn standardPath3 : EndIf
   
-  ; 3. Recherche dans le PATH système
+  ; 3. Search system PATH environment variable
   Protected envPath.s = GetEnvironmentVariable("PATH")
   Protected i.i, dirCount = CountString(envPath, ";") + 1, dir.s
   For i = 1 To dirCount
@@ -38,39 +44,46 @@ Procedure.s IDE_FindPBCompiler()
   ProcedureReturn ""
 EndProcedure
 
+; ----------------------------------------------------------------------------
+; Procedure:   IDE_BuildAndRun
+; Purpose:     Transpiles .pbo to .pb, compiles with pbcompiler, and executes binary
+; Parameters:  sourceCode.s       - Editor source text buffer
+;              currentFilePath.s  - Path of active document
+;              *logCb             - Callback procedure for console logging
+; Return:      #True on success, #False on error
+; ----------------------------------------------------------------------------
 Procedure.b IDE_BuildAndRun(sourceCode.s, currentFilePath.s, *logCb.IDE_LogCallback)
   Protected workspaceDir.s = GetCurrentDirectory()
   Protected transpilerPath.s = workspaceDir + "compiler\transpiler.pb"
   Protected compilerExe.s = IDE_FindPBCompiler()
   
   If *logCb
-    *logCb("[BUILD] Démarrage du pipeline de compilation PureBasic OOP...", #False)
+    *logCb("[BUILD] Starting PureBasic OOP build pipeline...", #False)
   EndIf
   
-  ; 1. Fichiers temporaires pour le build
+  ; 1. Setup temporary build file paths
   Protected tempDir.s = GetTemporaryDirectory()
   Protected tempPBO.s = tempDir + "pbo_build_temp.pbo"
   Protected tempPB.s  = tempDir + "pbo_build_temp.pb"
   Protected tempEXE.s = tempDir + "pbo_build_temp.exe"
   
-  ; Sauvegarde du code source actuel dans le fichier temporaire
+  ; Save active editor source into temporary file
   Protected file = CreateFile(#PB_Any, tempPBO)
   If Not file
-    If *logCb : *logCb("[ERREUR] Impossible de créer le fichier temporaire : " + tempPBO, #True) : EndIf
+    If *logCb : *logCb("[ERROR] Cannot create temporary file: " + tempPBO, #True) : EndIf
     ProcedureReturn #False
   EndIf
   WriteString(file, sourceCode, #PB_UTF8)
   CloseFile(file)
   
   If *logCb
-    *logCb("[TRANSPILER] Conversion du code POO (.pbo) vers PureBasic natif (.pb)...", #False)
+    *logCb("[TRANSPILER] Converting OOP code (.pbo) to native PureBasic (.pb)...", #False)
   EndIf
   
-  ; 2. Exécution du Transpileur
-  ; Si on dispose de pbcompiler, on exécute transpiler.pb
+  ; 2. Run OOP Transpiler
   If compilerExe = ""
     If *logCb
-      *logCb("[AVERTISSEMENT] 'pbcompiler.exe' n'a pas été trouvé. Veuillez configurer son chemin dans les Paramètres (Fichier -> Paramètres).", #True)
+      *logCb("[WARNING] 'pbcompiler.exe' was not found. Please set compiler path in File -> Settings.", #True)
     EndIf
     ProcedureReturn #False
   EndIf
@@ -89,17 +102,17 @@ Procedure.b IDE_BuildAndRun(sourceCode.s, currentFilePath.s, *logCb.IDE_LogCallb
     CloseProgram(transProg)
   EndIf
   
-  ; Vérifier si le fichier .pb transpilé existe
+  ; Verify generated .pb file
   If FileSize(tempPB) <= 0
-    If *logCb : *logCb("[ERREUR] Échec de la transpilation. Le fichier cible .pb n'a pas été généré.", #True) : EndIf
+    If *logCb : *logCb("[ERROR] Transpilation failed. Target .pb file was not produced.", #True) : EndIf
     ProcedureReturn #False
   EndIf
   
   If *logCb
-    *logCb("[COMPILER] Compilation native avec pbcompiler.exe...", #False)
+    *logCb("[COMPILER] Compiling binary with pbcompiler.exe...", #False)
   EndIf
   
-  ; 3. Compilation avec PureBasic Compiler
+  ; 3. Compile with native PureBasic compiler
   Protected compileParams.s = #DQUOTE$ + tempPB + #DQUOTE$ + " /EXE " + #DQUOTE$ + tempEXE + #DQUOTE$ + " /CONSOLE"
   Protected compProg = RunProgram(compilerExe, compileParams, workspaceDir, #PB_Program_Open | #PB_Program_Read | #PB_Program_Error | #PB_Program_Hide)
   Protected compError.b = #False
@@ -113,7 +126,7 @@ Procedure.b IDE_BuildAndRun(sourceCode.s, currentFilePath.s, *logCb.IDE_LogCallb
       Protected errLog.s = ReadProgramError(compProg)
       If errLog <> ""
         compError = #True
-        If *logCb : *logCb("[PBCOMPILER ERREUR] " + errLog, #True) : EndIf
+        If *logCb : *logCb("[PBCOMPILER ERROR] " + errLog, #True) : EndIf
       EndIf
       Delay(10)
     Wend
@@ -121,13 +134,13 @@ Procedure.b IDE_BuildAndRun(sourceCode.s, currentFilePath.s, *logCb.IDE_LogCallb
   EndIf
   
   If FileSize(tempEXE) <= 0
-    If *logCb : *logCb("[ERREUR] Échec de la compilation binaire. Voir les détails ci-dessus.", #True) : EndIf
+    If *logCb : *logCb("[ERROR] Binary compilation failed. See output logs above.", #True) : EndIf
     ProcedureReturn #False
   EndIf
   
-  ; 4. Exécution de l'application compilée
+  ; 4. Execute compiled binary
   If *logCb
-    *logCb("[RUN] Lancement de l'exécutable généré : " + tempEXE, #False)
+    *logCb("[RUN] Launching executable: " + tempEXE, #False)
   EndIf
   
   RunProgram(tempEXE, "", GetPathPart(currentFilePath))

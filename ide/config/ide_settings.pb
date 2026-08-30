@@ -1,40 +1,50 @@
 ; ============================================================================
 ; Title:       ide_settings.pb
-; Description: Gestion des paramètres utilisateurs (Autocomplétion, Auto-close, Thème)
-; Author:      Expert PureBasic OOP
+; Description: User preferences manager (Autocomplete, Auto-close, Theme, Compiler)
+; Author:      MicrodevWeb
 ; ============================================================================
 
 EnableExplicit
 
 XIncludeFile "ide_theme.pb"
 
+; ----------------------------------------------------------------------------
+; Structure:   IDE_Settings
+; Purpose:     Holds all configuration options for editor, syntax, and build tool
+; ----------------------------------------------------------------------------
 Structure IDE_Settings
-  ; Autocomplétion
-  AutocompleteMinChars.i    ; Nombre de caractères avant déclenchement (défaut : 2)
-  AutocompleteEnabled.b     ; #True / #False
+  ; Autocomplete options
+  AutocompleteMinChars.i    ; Minimum typed characters before triggering popup (default: 2)
+  AutocompleteEnabled.b     ; Enable/Disable autocomplete flag
   
-  ; Auto-fermeture
-  AutoCloseBlocks.b         ; Fermeture automatique de If/EndIf, Class/EndClass, etc.
-  AutoCloseBrackets.b       ; Fermeture des paires (), [], {}, ""
+  ; Auto-closing options
+  AutoCloseBlocks.b         ; Auto-close block keywords (If/EndIf, Class/EndClass, etc.)
+  AutoCloseBrackets.b       ; Auto-close delimiter pairs (), [], {}, ""
   
-  ; Police & Affichage
-  FontName.s                ; Ex: "Consolas" ou "Courier New"
-  FontSize.i                ; Ex: 11
-  TabWidth.i                ; Ex: 2 ou 4 espaces
-  ShowLineNumbers.b         ; #True / #False
-  HighlightCurrentLine.b    ; #True / #False
+  ; Font and visual options
+  FontName.s                ; Font family name (e.g. "Consolas")
+  FontSize.i                ; Font size in points (e.g. 11)
+  TabWidth.i                ; Indentation size in spaces (e.g. 2)
+  ShowLineNumbers.b         ; Show/Hide line numbers margin
+  HighlightCurrentLine.b    ; Highlight active line flag
   
-  ; Compilateur & Chemins
-  CompilerPath.s            ; Chemin vers pbcompiler.exe
-  LastOpenedFile.s          ; Dernier fichier ouvert
+  ; Compiler path and files
+  CompilerPath.s            ; Full file path to pbcompiler.exe
+  LastOpenedFile.s          ; Path to the last opened project or file
   
-  ; Thème actif
-  ThemeName.s               ; "Dark Modern", "Classic PureBasic", "Custom"
-  Colors.IDE_ThemeColors    ; Couleurs personnalisées
+  ; Active theme
+  ThemeName.s               ; Theme preset name ("Dark Modern", "Classic PureBasic")
+  Colors.IDE_ThemeColors    ; Theme color definition
 EndStructure
 
 Global Settings.IDE_Settings
 
+; ----------------------------------------------------------------------------
+; Procedure:   IDE_Settings_GetConfigFile
+; Purpose:     Returns the full path to the preferences file
+; Parameters:  None
+; Return:      Path to ide_settings.prefs file
+; ----------------------------------------------------------------------------
 Procedure.s IDE_Settings_GetConfigFile()
   Protected appDir.s = GetPathPart(ProgramFilename())
   If appDir = "" Or Not FileSize(appDir) = -2
@@ -43,6 +53,12 @@ Procedure.s IDE_Settings_GetConfigFile()
   ProcedureReturn appDir + "ide_settings.prefs"
 EndProcedure
 
+; ----------------------------------------------------------------------------
+; Procedure:   IDE_Settings_SetDefaults
+; Purpose:     Sets default values for all preferences and loads Dark Modern theme
+; Parameters:  None
+; Return:      None
+; ----------------------------------------------------------------------------
 Procedure IDE_Settings_SetDefaults()
   With Settings
     \AutocompleteMinChars  = 2
@@ -61,6 +77,12 @@ Procedure IDE_Settings_SetDefaults()
   EndWith
 EndProcedure
 
+; ----------------------------------------------------------------------------
+; Procedure:   IDE_Settings_Save
+; Purpose:     Writes all settings into the preferences INI file
+; Parameters:  None
+; Return:      None
+; ----------------------------------------------------------------------------
 Procedure IDE_Settings_Save()
   Protected file.s = IDE_Settings_GetConfigFile()
   If CreatePreferences(file, #PB_Preference_GroupSeparator)
@@ -104,6 +126,12 @@ Procedure IDE_Settings_Save()
   EndIf
 EndProcedure
 
+; ----------------------------------------------------------------------------
+; Procedure:   IDE_Settings_Load
+; Purpose:     Reads settings from preferences file or initializes default values
+; Parameters:  None
+; Return:      None
+; ----------------------------------------------------------------------------
 Procedure IDE_Settings_Load()
   Protected file.s = IDE_Settings_GetConfigFile()
   IDE_Settings_SetDefaults()
@@ -148,6 +176,6 @@ Procedure IDE_Settings_Load()
     ClosePreferences()
   EndIf
   
-  ; Synchroniser le CurrentTheme global
+  ; Sync global active theme
   CurrentTheme = Settings\Colors
 EndProcedure

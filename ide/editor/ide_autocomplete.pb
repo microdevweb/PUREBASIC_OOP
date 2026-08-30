@@ -1,7 +1,7 @@
 ; ============================================================================
 ; Title:       ide_autocomplete.pb
-; Description: Moteur d'autocomplétion contextuelle (seuil N lettres, mots-clés, symboles)
-; Author:      Expert PureBasic OOP
+; Description: Autocomplete trigger engine and word extraction
+; Author:      MicrodevWeb
 ; ============================================================================
 
 EnableExplicit
@@ -13,6 +13,13 @@ XIncludeFile "../data/ide_keywords.pb"
 #SCI_WORDSTARTPOSITION = 2266
 #SCI_WORDENDPOSITION = 2267
 
+; ----------------------------------------------------------------------------
+; Procedure:   IDE_GetCurrentWord
+; Purpose:     Extracts current word fragment at cursor position
+; Parameters:  gadgetId.i         - Scintilla gadget ID
+;              *wordLen.Integer   - Pointer to integer receiving word length
+; Return:      Extracted word string
+; ----------------------------------------------------------------------------
 Procedure.s IDE_GetCurrentWord(gadgetId.i, *wordLen.Integer)
   Protected currentPos = IDE_SendSci(gadgetId, #SCI_GETCURRENTPOS)
   Protected startPos = IDE_SendSci(gadgetId, #SCI_WORDSTARTPOSITION, currentPos, 1)
@@ -45,7 +52,15 @@ Procedure.s IDE_GetCurrentWord(gadgetId.i, *wordLen.Integer)
   ProcedureReturn ""
 EndProcedure
 
+; ----------------------------------------------------------------------------
+; Procedure:   IDE_TriggerAutocomplete
+; Purpose:     Displays Scintilla autocomplete popup if length matches threshold
+; Parameters:  gadgetId.i    - Scintilla gadget ID
+;              forceManual.b - Flag to ignore minimum char count (e.g. Ctrl+Space)
+; Return:      None
+; ----------------------------------------------------------------------------
 Procedure IDE_TriggerAutocomplete(gadgetId.i, forceManual.b = #False)
+  ; Check if autocomplete is enabled
   If Not Settings\AutocompleteEnabled And Not forceManual
     ProcedureReturn
   EndIf
@@ -53,10 +68,10 @@ Procedure IDE_TriggerAutocomplete(gadgetId.i, forceManual.b = #False)
   Protected wordLen.i = 0
   Protected currentWord.s = IDE_GetCurrentWord(gadgetId, @wordLen)
   
-  ; Vérifier le seuil de déclenchement défini par l'utilisateur (défaut : 2 lettres)
+  ; Check minimum characters threshold (default: 2 letters)
   If Not forceManual
     If wordLen < Settings\AutocompleteMinChars
-      ; Si la liste était affichée et que la longueur descend sous le seuil, fermer
+      ; Cancel existing autocomplete popup if below threshold
       If IDE_SendSci(gadgetId, #SCI_AUTOCACTIVE)
         IDE_SendSci(gadgetId, #SCI_AUTOCCANCEL)
       EndIf
@@ -64,11 +79,10 @@ Procedure IDE_TriggerAutocomplete(gadgetId.i, forceManual.b = #False)
     EndIf
   EndIf
   
-  ; Récupérer la liste des mots-clés triés
+  ; Fetch sorted keyword list and show popup
   Protected fullList.s = IDE_GetFullAutocompleteWordList()
   Protected *utf8 = UTF8(fullList)
   If *utf8
-    ; Déclencher la popup Scintilla
     IDE_SendSci(gadgetId, #SCI_AUTOCSHOW, wordLen, *utf8)
     FreeMemory(*utf8)
   EndIf

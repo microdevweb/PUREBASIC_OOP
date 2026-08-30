@@ -1,7 +1,7 @@
 ; ============================================================================
 ; Title:       ide_lexer.pb
-; Description: Configuration du lexer Scintilla et coloration PureBasic + OOP
-; Author:      Expert PureBasic OOP
+; Description: Scintilla syntax lexer configuration for PureBasic and OOP keywords
+; Author:      MicrodevWeb
 ; ============================================================================
 
 EnableExplicit
@@ -10,13 +10,19 @@ XIncludeFile "ide_scintilla.pb"
 XIncludeFile "../config/ide_settings.pb"
 XIncludeFile "../data/ide_keywords.pb"
 
+; ----------------------------------------------------------------------------
+; Procedure:   IDE_ApplyThemeAndLexer
+; Purpose:     Applies lexer styles, fonts, margins, and keywords to Scintilla gadget
+; Parameters:  gadgetId.i - Target Scintilla gadget ID
+; Return:      None
+; ----------------------------------------------------------------------------
 Procedure IDE_ApplyThemeAndLexer(gadgetId.i)
   Protected *utf8
   
-  ; 1. Définition du Lexer PureBasic natif Scintilla
+  ; 1. Set native PureBasic Scintilla lexer
   IDE_SendSci(gadgetId, #SCI_SETLEXER, #SCLEX_PUREBASIC, 0)
   
-  ; 2. Style par défaut
+  ; 2. Default font and base colors
   *utf8 = UTF8(Settings\FontName)
   If *utf8
     IDE_SendSci(gadgetId, #SCI_STYLESETFONT, #STYLE_DEFAULT, *utf8)
@@ -25,9 +31,9 @@ Procedure IDE_ApplyThemeAndLexer(gadgetId.i)
   IDE_SendSci(gadgetId, #SCI_STYLESETSIZE, #STYLE_DEFAULT, Settings\FontSize)
   IDE_SendSci(gadgetId, #SCI_STYLESETFORE, #STYLE_DEFAULT, Settings\Colors\FgColor)
   IDE_SendSci(gadgetId, #SCI_STYLESETBACK, #STYLE_DEFAULT, Settings\Colors\BgColor)
-  IDE_SendSci(gadgetId, #SCI_STYLECLEARALL, 0, 0) ; Propage aux autres styles
+  IDE_SendSci(gadgetId, #SCI_STYLECLEARALL, 0, 0) ; Clear and propagate base styles
   
-  ; 3. Marge des numéros de ligne
+  ; 3. Line numbers margin configuration
   If Settings\ShowLineNumbers
     IDE_SendSci(gadgetId, #SCI_SETMARGINTYPEN, 0, #SC_MARGIN_NUMBER)
     IDE_SendSci(gadgetId, #SCI_SETMARGINWIDTHN, 0, 48)
@@ -38,12 +44,12 @@ Procedure IDE_ApplyThemeAndLexer(gadgetId.i)
     IDE_SendSci(gadgetId, #SCI_SETMARGINWIDTHN, 0, 0)
   EndIf
   
-  ; 4. Curseur et sélection
+  ; 4. Caret and selection styling
   IDE_SendSci(gadgetId, #SCI_SETCARETFORE, Settings\Colors\CaretColor, 0)
   IDE_SendSci(gadgetId, #SCI_SETSELFORE, 1, Settings\Colors\SelectionFg)
   IDE_SendSci(gadgetId, #SCI_SETSELBACK, 1, Settings\Colors\SelectionBg)
   
-  ; Ligne courante
+  ; Active line highlight
   If Settings\HighlightCurrentLine
     IDE_SendSci(gadgetId, #SCI_SETCARETLINEVISIBLE, 1, 0)
     IDE_SendSci(gadgetId, #SCI_SETCARETLINEBACK, Settings\Colors\CurrentLineBg, 0)
@@ -51,70 +57,70 @@ Procedure IDE_ApplyThemeAndLexer(gadgetId.i)
     IDE_SendSci(gadgetId, #SCI_SETCARETLINEVISIBLE, 0, 0)
   EndIf
   
-  ; Tabulation et indentation
+  ; Tabulation and indentation settings
   IDE_SendSci(gadgetId, #SCI_SETTABWIDTH, Settings\TabWidth, 0)
   IDE_SendSci(gadgetId, #SCI_SETINDENT, Settings\TabWidth, 0)
-  IDE_SendSci(gadgetId, #SCI_SETUSETABS, 0, 0) ; Convertit tab en espaces
+  IDE_SendSci(gadgetId, #SCI_SETUSETABS, 0, 0) ; Converts tab key to spaces
   
-  ; 5. Coloration syntaxique par catégorie
-  ; Identifiants standards
+  ; 5. Syntax token colors
+  ; Default identifiers
   IDE_SendSci(gadgetId, #SCI_STYLESETFORE, #SCE_B_IDENTIFIER, Settings\Colors\FgColor)
   IDE_SendSci(gadgetId, #SCI_STYLESETBACK, #SCE_B_IDENTIFIER, Settings\Colors\BgColor)
   
-  ; Commentaires
+  ; Comments
   IDE_SendSci(gadgetId, #SCI_STYLESETFORE, #SCE_B_COMMENT, Settings\Colors\CommentColor)
   
-  ; Chaînes
+  ; String literals
   IDE_SendSci(gadgetId, #SCI_STYLESETFORE, #SCE_B_STRING, Settings\Colors\StringColor)
   IDE_SendSci(gadgetId, #SCI_STYLESETFORE, #SCE_B_STRINGEOL, Settings\Colors\StringColor)
   
-  ; Nombres
+  ; Number literals
   IDE_SendSci(gadgetId, #SCI_STYLESETFORE, #SCE_B_NUMBER, Settings\Colors\NumberColor)
   IDE_SendSci(gadgetId, #SCI_STYLESETFORE, #SCE_B_HEXNUMBER, Settings\Colors\NumberColor)
   IDE_SendSci(gadgetId, #SCI_STYLESETFORE, #SCE_B_BINNUMBER, Settings\Colors\NumberColor)
   
-  ; Mots-clés PureBasic Standard (KeyWord set 0 -> #SCE_B_KEYWORD)
+  ; Standard PureBasic keywords (KeyWord set 0 -> #SCE_B_KEYWORD)
   IDE_SendSci(gadgetId, #SCI_STYLESETFORE, #SCE_B_KEYWORD, Settings\Colors\KeywordPBColor)
   IDE_SendSci(gadgetId, #SCI_STYLESETBOLD, #SCE_B_KEYWORD, 1)
   
-  ; Mots-clés PureBasic OOP (KeyWord set 1 -> #SCE_B_KEYWORD2)
+  ; OOP extension keywords (KeyWord set 1 -> #SCE_B_KEYWORD2)
   IDE_SendSci(gadgetId, #SCI_STYLESETFORE, #SCE_B_KEYWORD2, Settings\Colors\KeywordOOPColor)
   IDE_SendSci(gadgetId, #SCI_STYLESETBOLD, #SCE_B_KEYWORD2, 1)
   
-  ; Fonctions intégrées (KeyWord set 2 -> #SCE_B_KEYWORD3 ou #SCE_B_KEYWORD4)
+  ; Built-in functions (KeyWord set 2 -> #SCE_B_KEYWORD3 / #SCE_B_KEYWORD4)
   IDE_SendSci(gadgetId, #SCI_STYLESETFORE, #SCE_B_KEYWORD3, Settings\Colors\FunctionColor)
   IDE_SendSci(gadgetId, #SCI_STYLESETFORE, #SCE_B_KEYWORD4, Settings\Colors\FunctionColor)
   
-  ; Opérateurs
+  ; Operators
   IDE_SendSci(gadgetId, #SCI_STYLESETFORE, #SCE_B_OPERATOR, Settings\Colors\OperatorColor)
   
-  ; Constantes
+  ; Constants
   IDE_SendSci(gadgetId, #SCI_STYLESETFORE, #SCE_B_CONSTANT, Settings\Colors\ConstantColor)
   
-  ; 6. Envoi des listes de mots-clés au Lexer Scintilla
-  ; Set 0 : Mots clés PB
+  ; 6. Send keyword wordlists to Scintilla lexer
+  ; Set 0: Native PB keywords
   *utf8 = UTF8(IDE_GetPBKeywords())
   If *utf8
     IDE_SendSci(gadgetId, #SCI_SETKEYWORDS, 0, *utf8)
     FreeMemory(*utf8)
   EndIf
   
-  ; Set 1 : Mots clés OOP
+  ; Set 1: OOP extension keywords
   *utf8 = UTF8(IDE_GetOOPKeywords())
   If *utf8
     IDE_SendSci(gadgetId, #SCI_SETKEYWORDS, 1, *utf8)
     FreeMemory(*utf8)
   EndIf
   
-  ; Set 2 : Fonctions
+  ; Set 2: Built-in functions
   *utf8 = UTF8(IDE_GetPBFallbackFunctions())
   If *utf8
     IDE_SendSci(gadgetId, #SCI_SETKEYWORDS, 2, *utf8)
     FreeMemory(*utf8)
   EndIf
   
-  ; Configuration de la complétion Scintilla
+  ; Autocomplete options in Scintilla
   IDE_SendSci(gadgetId, #SCI_AUTOCSETSEPARATOR, Asc(" "), 0)
   IDE_SendSci(gadgetId, #SCI_AUTOCSETIGNORECASE, 1, 0)
-  IDE_SendSci(gadgetId, #SCI_AUTOCSETORDER, 1, 0) ; Trié
+  IDE_SendSci(gadgetId, #SCI_AUTOCSETORDER, 1, 0) ; Strictly sorted order
 EndProcedure

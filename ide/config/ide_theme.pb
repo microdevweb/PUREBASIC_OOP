@@ -1,77 +1,93 @@
 ; ============================================================================
 ; Title:       ide_theme.pb
-; Description: Gestion des thèmes et des couleurs de l'IDE PureBasic OOP
-; Author:      Expert PureBasic OOP
+; Description: Color theme definitions and presets for PureBasic OOP IDE
+; Author:      MicrodevWeb
 ; ============================================================================
 
 EnableExplicit
 
+; ----------------------------------------------------------------------------
+; Structure:   IDE_ThemeColors
+; Purpose:     Stores RGB/BGR color values for editor background and syntax items
+; ----------------------------------------------------------------------------
 Structure IDE_ThemeColors
-  BgColor.i            ; Fond de l'éditeur
-  FgColor.i            ; Texte standard
-  LineNumberBg.i       ; Fond de la marge des numéros de ligne
-  LineNumberFg.i       ; Texte des numéros de ligne
-  SelectionBg.i        ; Fond de la sélection
-  SelectionFg.i        ; Texte de la sélection
-  CaretColor.i         ; Couleur du curseur clignotant
-  CurrentLineBg.i      ; Surlignage de la ligne courante
+  BgColor.i            ; Editor background color
+  FgColor.i            ; Default plain text color
+  LineNumberBg.i       ; Line numbers margin background
+  LineNumberFg.i       ; Line numbers text color
+  SelectionBg.i        ; Selection background color
+  SelectionFg.i        ; Selection text color
+  CaretColor.i         ; Blinking cursor color
+  CurrentLineBg.i      ; Active line highlight color
   
-  ; Coloration syntaxique
-  CommentColor.i       ; Commentaires (;)
-  StringColor.i        ; Chaînes ("...")
-  NumberColor.i        ; Nombres entiers et flottants
-  KeywordPBColor.i     ; Mots-clés PureBasic standard (If, For, Select, etc.)
-  KeywordOOPColor.i    ; Mots-clés OOP (Class, Method, Super, This, New, etc.)
-  FunctionColor.i      ; Fonctions et appels
-  OperatorColor.i      ; Opérateurs (+, -, *, =, \, ::)
-  ConstantColor.i      ; Constantes (#PB_Any, etc.)
+  ; Syntax token colors
+  CommentColor.i       ; Comments (;)
+  StringColor.i        ; String literals ("...")
+  NumberColor.i        ; Integers and float literals
+  KeywordPBColor.i     ; Standard PureBasic keywords (If, For, Select, etc.)
+  KeywordOOPColor.i    ; OOP extension keywords (Class, Method, Super, This, New, etc.)
+  FunctionColor.i      ; Built-in functions and procedure calls
+  OperatorColor.i      ; Operators (+, -, *, =, \, ::)
+  ConstantColor.i      ; Constants (#PB_Any, etc.)
 EndStructure
 
 Global CurrentTheme.IDE_ThemeColors
 
+; ----------------------------------------------------------------------------
+; Procedure:   IDE_Theme_SetDarkModern
+; Purpose:     Applies VS Code Dark Modern style color values
+; Parameters:  *theme - Pointer to IDE_ThemeColors structure
+; Return:      None
+; ----------------------------------------------------------------------------
 Procedure IDE_Theme_SetDarkModern(*theme.IDE_ThemeColors)
   With *theme
-    \BgColor         = $1E1E1E  ; Gris très foncé (#1E1E1E en BGR)
-    \FgColor         = $D4D4D4  ; Blanc cassé
-    \LineNumberBg    = $252526  ; Fond marge
-    \LineNumberFg    = $858585  ; Gris moyen
-    \SelectionBg     = $264F78  ; Bleu foncé sélection
-    \SelectionFg     = $FFFFFF  ; Blanc sélection
-    \CaretColor      = $AEAFAD  ; Curseur
-    \CurrentLineBg   = $2A2D2E  ; Ligne active
+    \BgColor         = $1E1E1E  ; Dark grey background (#1E1E1E)
+    \FgColor         = $D4D4D4  ; Off-white plain text
+    \LineNumberBg    = $252526  ; Margin background
+    \LineNumberFg    = $858585  ; Neutral grey line numbers
+    \SelectionBg     = $264F78  ; Blue selection highlight
+    \SelectionFg     = $FFFFFF  ; White text inside selection
+    \CaretColor      = $AEAFAD  ; Light grey caret
+    \CurrentLineBg   = $2A2D2E  ; Active line highlight
     
-    \CommentColor    = $6A9955  ; Vert doux VS Code
-    \StringColor     = $CE9178  ; Orange/corail doux
-    \NumberColor     = $B5CEA8  ; Vert menthe clair
-    \KeywordPBColor  = $569CD6  ; Bleu VS Code
-    \KeywordOOPColor = $C586C0  ; Magenta / Violet moderne pour la POO
-    \FunctionColor   = $DCDCAA  ; Jaune pâle
-    \OperatorColor   = $D4D4D4  ; Blanc cassé
-    \ConstantColor   = $4FC1FF  ; Cyan clair
+    \CommentColor    = $6A9955  ; Soft green comments
+    \StringColor     = $CE9178  ; Coral / orange string literals
+    \NumberColor     = $B5CEA8  ; Light mint green numbers
+    \KeywordPBColor  = $569CD6  ; VS Code blue for native PB keywords
+    \KeywordOOPColor = $C586C0  ; Magenta / Purple for OOP keywords
+    \FunctionColor   = $DCDCAA  ; Soft yellow for functions
+    \OperatorColor   = $D4D4D4  ; Off-white operators
+    \ConstantColor   = $4FC1FF  ; Light cyan constants
   EndWith
 EndProcedure
 
+; ----------------------------------------------------------------------------
+; Procedure:   IDE_Theme_SetClassicPB
+; Purpose:     Applies classic PureBasic IDE color values (light theme)
+; Parameters:  *theme - Pointer to IDE_ThemeColors structure
+; Return:      None
+; ----------------------------------------------------------------------------
 Procedure IDE_Theme_SetClassicPB(*theme.IDE_ThemeColors)
   With *theme
-    \BgColor         = $FFFFFF  ; Fond blanc
-    \FgColor         = $000000  ; Texte noir
-    \LineNumberBg    = $F0F0F0  ; Fond gris très clair
-    \LineNumberFg    = $808080  ; Gris
-    \SelectionBg     = $C0C0C0  ; Gris sélection
-    \SelectionFg     = $000000  ; Texte noir
-    \CaretColor      = $000000  ; Curseur noir
-    \CurrentLineBg   = $EFEFEF  ; Ligne active
+    \BgColor         = $FFFFFF  ; White background
+    \FgColor         = $000000  ; Black text
+    \LineNumberBg    = $F0F0F0  ; Light grey margin
+    \LineNumberFg    = $808080  ; Grey line numbers
+    \SelectionBg     = $C0C0C0  ; Silver selection
+    \SelectionFg     = $000000  ; Black text
+    \CaretColor      = $000000  ; Black caret
+    \CurrentLineBg   = $EFEFEF  ; Active line highlight
     
-    \CommentColor    = $008000  ; Vert standard
-    \StringColor     = $808080  ; Gris chaîne standard PB
-    \NumberColor     = $0000FF  ; Bleu
-    \KeywordPBColor  = $006699  ; Bleu foncé PB
-    \KeywordOOPColor = $990066  ; Pourpre/Magenta foncé pour la POO
-    \FunctionColor   = $006666  ; Cyan foncé
-    \OperatorColor   = $000000  ; Noir
-    \ConstantColor   = $996600  ; Brun/Orange
+    \CommentColor    = $008000  ; Green comments
+    \StringColor     = $808080  ; Grey string literals
+    \NumberColor     = $0000FF  ; Blue numbers
+    \KeywordPBColor  = $006699  ; Dark blue native PB keywords
+    \KeywordOOPColor = $990066  ; Dark purple for OOP keywords
+    \FunctionColor   = $006666  ; Dark cyan functions
+    \OperatorColor   = $000000  ; Black operators
+    \ConstantColor   = $996600  ; Brown constants
   EndWith
 EndProcedure
 
-; Initialisation par défaut
+; Initialize default theme
 IDE_Theme_SetDarkModern(@CurrentTheme)

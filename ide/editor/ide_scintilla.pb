@@ -1,12 +1,12 @@
 ; ============================================================================
 ; Title:       ide_scintilla.pb
-; Description: Initialisation, configuration et wrappers Scintilla
-; Author:      Expert PureBasic OOP
+; Description: Scintilla component initialisation, message dispatch, and text helpers
+; Author:      MicrodevWeb
 ; ============================================================================
 
 EnableExplicit
 
-; Constantes Scintilla non prédéfinies
+; Scintilla message and token constants
 #SCI_SETLEXER = 4001
 #SCLEX_CONTAINER = 0
 #SCLEX_NULL = 1
@@ -32,17 +32,36 @@ EnableExplicit
 #SCE_B_HEXNUMBER = 17
 #SCE_B_BINNUMBER = 18
 
-; Initialisation Scintilla
+; ----------------------------------------------------------------------------
+; Procedure:   IDE_InitScintilla
+; Purpose:     Initializes Scintilla runtime support
+; Parameters:  None
+; Return:      #True if ready
+; ----------------------------------------------------------------------------
 Procedure.b IDE_InitScintilla()
   ProcedureReturn #True
 EndProcedure
 
-; Wrapper d'envoi de messages Scintilla
+; ----------------------------------------------------------------------------
+; Procedure:   IDE_SendSci
+; Purpose:     Sends a message directly to Scintilla component
+; Parameters:  gadgetId.i - Target Scintilla gadget ID
+;              msg.i      - Scintilla message constant
+;              wParam.i   - First message parameter
+;              lParam.i   - Second message parameter
+; Return:      Result value from Scintilla
+; ----------------------------------------------------------------------------
 Procedure.i IDE_SendSci(gadgetId.i, msg.i, wParam.i = 0, lParam.i = 0)
   ProcedureReturn ScintillaSendMessage(gadgetId, msg, wParam, lParam)
 EndProcedure
 
-; Définition du texte de l'éditeur
+; ----------------------------------------------------------------------------
+; Procedure:   IDE_SetEditorText
+; Purpose:     Sets the entire document text in UTF-8 encoding
+; Parameters:  gadgetId.i - Scintilla gadget ID
+;              text.s     - String to put into editor
+; Return:      None
+; ----------------------------------------------------------------------------
 Procedure IDE_SetEditorText(gadgetId.i, text.s)
   Protected *utf8 = UTF8(text)
   If *utf8
@@ -51,7 +70,12 @@ Procedure IDE_SetEditorText(gadgetId.i, text.s)
   EndIf
 EndProcedure
 
-; Récupération du texte complet
+; ----------------------------------------------------------------------------
+; Procedure:   IDE_GetEditorText
+; Purpose:     Retrieves the entire document text from Scintilla buffer
+; Parameters:  gadgetId.i - Scintilla gadget ID
+; Return:      Document content as string
+; ----------------------------------------------------------------------------
 Procedure.s IDE_GetEditorText(gadgetId.i)
   Protected length = IDE_SendSci(gadgetId, #SCI_GETLENGTH)
   If length <= 0
@@ -68,13 +92,24 @@ Procedure.s IDE_GetEditorText(gadgetId.i)
   ProcedureReturn ""
 EndProcedure
 
-; Récupération du numéro de ligne courante (0-indexé)
+; ----------------------------------------------------------------------------
+; Procedure:   IDE_GetCurrentLine
+; Purpose:     Gets the zero-based line index of current caret position
+; Parameters:  gadgetId.i - Scintilla gadget ID
+; Return:      Line index (0-based)
+; ----------------------------------------------------------------------------
 Procedure.i IDE_GetCurrentLine(gadgetId.i)
   Protected pos = IDE_SendSci(gadgetId, #SCI_GETCURRENTPOS)
   ProcedureReturn IDE_SendSci(gadgetId, #SCI_LINEFROMPOSITION, pos)
 EndProcedure
 
-; Récupération du texte d'une ligne spécifique
+; ----------------------------------------------------------------------------
+; Procedure:   IDE_GetLineText
+; Purpose:     Extracts text for a specific line number
+; Parameters:  gadgetId.i  - Scintilla gadget ID
+;              lineIndex.i - Zero-based line index
+; Return:      Line text content
+; ----------------------------------------------------------------------------
 Procedure.s IDE_GetLineText(gadgetId.i, lineIndex.i)
   Protected startPos = IDE_SendSci(gadgetId, #SCI_POSITIONFROMLINE, lineIndex)
   Protected endPos = IDE_SendSci(gadgetId, #SCI_GETLINEENDPOSITION, lineIndex)

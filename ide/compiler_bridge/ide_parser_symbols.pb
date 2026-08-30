@@ -1,20 +1,30 @@
 ; ============================================================================
 ; Title:       ide_parser_symbols.pb
-; Description: Analyseur rapide de symboles (Classes, Méthodes) pour l'arbre et l'autocomplétion
-; Author:      Expert PureBasic OOP
+; Description: Fast symbol parser (Classes, Methods, Procedures) for tree explorer
+; Author:      MicrodevWeb
 ; ============================================================================
 
 EnableExplicit
 
+; ----------------------------------------------------------------------------
+; Structure:   IDE_Symbol
+; Purpose:     Stores parsed symbol metadata for code outline navigation
+; ----------------------------------------------------------------------------
 Structure IDE_Symbol
-  name.s
-  type.s        ; "Class", "Method", "Procedure"
-  className.s   ; Classe parente pour les méthodes
-  line.i        ; Numéro de ligne (1-indexé)
+  name.s        ; Symbol name (e.g. "Chien", "Aboyer")
+  type.s        ; "Class", "Method", or "Procedure"
+  className.s   ; Parent class name for methods
+  line.i        ; 1-based source line number
 EndStructure
 
 Global NewList IDE_FoundSymbols.IDE_Symbol()
 
+; ----------------------------------------------------------------------------
+; Procedure:   IDE_ExtractSymbolsFromText
+; Purpose:     Parses source text line by line to discover classes and methods
+; Parameters:  sourceCode.s - Entire source code string
+; Return:      None
+; ----------------------------------------------------------------------------
 Procedure IDE_ExtractSymbolsFromText(sourceCode.s)
   ClearList(IDE_FoundSymbols())
   
@@ -27,7 +37,7 @@ Procedure IDE_ExtractSymbolsFromText(sourceCode.s)
     line = Trim(RemoveString(rawLine, #CR$))
     upper = UCase(line)
     
-    ; 1. Détection de Class
+    ; 1. Match Class declaration
     If Left(upper, 6) = "CLASS "
       Protected className.s = Trim(Mid(line, 7))
       If FindString(className, " ")
@@ -44,7 +54,7 @@ Procedure IDE_ExtractSymbolsFromText(sourceCode.s)
     ElseIf Left(upper, 8) = "ENDCLASS"
       currentClass = ""
       
-    ; 2. Détection de Method
+    ; 2. Match Method declaration
     ElseIf FindString(upper, "METHOD ")
       Protected pMethod = FindString(upper, "METHOD ")
       Protected methodDecl.s = Trim(Mid(line, pMethod + 7))
@@ -59,12 +69,12 @@ Procedure IDE_ExtractSymbolsFromText(sourceCode.s)
       IDE_FoundSymbols()\className = currentClass
       IDE_FoundSymbols()\line = i
       
-    ; 3. Détection de Procedure standard
+    ; 3. Match native Procedure declaration
     ElseIf Left(upper, 10) = "PROCEDURE " Or Left(upper, 11) = "PROCEDUREC " Or Left(upper, 13) = "PROCEDUREDLL "
       Protected pProc = FindString(upper, "PROCEDURE")
       Protected procDecl.s = Trim(Mid(line, pProc + 9))
       If Left(procDecl, 1) = "." Or Left(procDecl, 1) = "$"
-        ; Retirer le type de retour ex: Procedure.s Nom()
+        ; Strip return type signature, e.g. Procedure.s Name()
         Protected spacePos = FindString(procDecl, " ")
         If spacePos
           procDecl = Trim(Mid(procDecl, spacePos + 1))

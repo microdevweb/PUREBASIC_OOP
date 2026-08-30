@@ -1,0 +1,36 @@
+﻿
+[General]
+FontName = Consolas
+FontSize = 11
+TabWidth = 0
+ShowLineNumbers = 0
+HighlightCurrentLine = 0
+CompilerPath = 
+LastOpenedFile = 
+ThemeName = Dark Modern
+
+[Autocomplete]
+AutocompleteMinChars = 1
+AutocompleteEnabled = 0
+
+[AutoClose]
+AutoCloseBlocks = 0
+AutoCloseBrackets = 0
+
+[Colors]
+BgColor = 0
+FgColor = 0
+LineNumberBg = 0
+LineNumberFg = 0
+SelectionBg = 0
+SelectionFg = 0
+CaretColor = 0
+CurrentLineBg = 0
+CommentColor = 0
+StringColor = 0
+NumberColor = 0
+KeywordPBColor = 0
+KeywordOOPColor = 0
+FunctionColor = 0
+OperatorColor = 0
+ConstantColor = 0

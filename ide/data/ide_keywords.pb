@@ -1,13 +1,16 @@
 ; ============================================================================
 ; Title:       ide_keywords.pb
-; Description: Mots-clés PureBasic natifs et extensions OOP pour Scintilla
-; Author:      Expert PureBasic OOP
+; Description: Native PureBasic keywords and OOP extension keywords for Scintilla
+; Author:      MicrodevWeb
 ; ============================================================================
 
 EnableExplicit
 
 ; ----------------------------------------------------------------------------
-; Mots-clés PureBasic Standard (Minuscules pour Scintilla Lexer)
+; Procedure:   IDE_GetPBKeywords
+; Purpose:     Returns standard PureBasic keywords in lowercase for Lexer
+; Parameters:  None
+; Return:      Space-separated keyword string
 ; ----------------------------------------------------------------------------
 Procedure.s IDE_GetPBKeywords()
   Protected kw.s = ""
@@ -28,7 +31,10 @@ Procedure.s IDE_GetPBKeywords()
 EndProcedure
 
 ; ----------------------------------------------------------------------------
-; Mots-clés PureBasic OOP Étendus (Class, Method, Super, This, etc.)
+; Procedure:   IDE_GetOOPKeywords
+; Purpose:     Returns extended OOP keywords in lowercase for Lexer
+; Parameters:  None
+; Return:      Space-separated keyword string
 ; ----------------------------------------------------------------------------
 Procedure.s IDE_GetOOPKeywords()
   Protected kw.s = ""
@@ -38,7 +44,10 @@ Procedure.s IDE_GetOOPKeywords()
 EndProcedure
 
 ; ----------------------------------------------------------------------------
-; Fonctions Standard PureBasic Populaires (Lexer Group 2)
+; Procedure:   IDE_GetPBFallbackFunctions
+; Purpose:     Returns standard PureBasic built-in functions
+; Parameters:  None
+; Return:      Space-separated function names string
 ; ----------------------------------------------------------------------------
 Procedure.s IDE_GetPBFallbackFunctions()
   Protected fn.s = ""
@@ -55,10 +64,13 @@ Procedure.s IDE_GetPBFallbackFunctions()
 EndProcedure
 
 ; ----------------------------------------------------------------------------
-; Liste Alphabétique Fusionnée pour la popup d'Autocomplétion (séparateur espace)
+; Procedure:   IDE_GetFullAutocompleteWordList
+; Purpose:     Returns alphabetically sorted list of all keywords for autocomplete
+; Parameters:  None
+; Return:      Sorted space-separated words string
 ; ----------------------------------------------------------------------------
 Procedure.s IDE_GetFullAutocompleteWordList()
-  ; Liste triée alphabétiquement (exigence stricte de Scintilla SCI_AUTOCSHOW)
+  ; Must be strictly sorted alphabetically for Scintilla SCI_AUTOCSHOW
   Protected list.s = ""
   list + "AddElement "
   list + "And "
