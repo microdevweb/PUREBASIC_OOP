@@ -139,6 +139,7 @@ Repeat
       
     Case #PB_Event_CloseWindow
       If EventWin = #Win_Main
+        CloseWindow(#Win_Main)
         Quit = #True
       EndIf
   EndSelect

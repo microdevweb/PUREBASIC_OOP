@@ -210,6 +210,8 @@ EndProcedure
 ; ----------------------------------------------------------------------------
 Procedure IDE_MainWindow_NewFile()
   IDE_SetEditorText(#Gadget_Scintilla_Editor, "; New PureBasic OOP file (.pbo)" + #CRLF$ + "Class MyObject" + #CRLF$ + "  Public Method SayHello()" + #CRLF$ + "    PrintN(" + Chr(34) + "Hello PureBasic OOP!" + Chr(34) + ")" + #CRLF$ + "  EndMethod" + #CRLF$ + "EndClass" + #CRLF$)
+  IDE_SendSci(#Gadget_Scintilla_Editor, #SCI_SETCURRENTPOS, 0)
+  IDE_SendSci(#Gadget_Scintilla_Editor, #SCI_SETSEL, 0, 0)
   CurrentDocumentPath = ""
   IsModified = #False
   IDE_MainWindow_UpdateTitle()

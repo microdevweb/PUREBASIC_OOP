@@ -11,22 +11,42 @@ XIncludeFile "../config/ide_settings.pbi"
 XIncludeFile "../data/ide_keywords.pbi"
 
 ; ----------------------------------------------------------------------------
+; Procedure:   IDE_ToAscii
+; Purpose:     Returns ASCII pointer for Scintilla commands
+; Parameters:  strVal.s - Unicode string
+; Return:      Pointer to ASCII memory buffer
+; ----------------------------------------------------------------------------
+Procedure.i IDE_ToAscii(strVal.s)
+  Static *asciiBuffer = 0
+  Static bufferLength.i = 0
+  
+  Protected needLen.i = Len(strVal) + 1
+  If bufferLength < needLen
+    If *asciiBuffer : FreeMemory(*asciiBuffer) : EndIf
+    *asciiBuffer = AllocateMemory(needLen + 16, #PB_Memory_NoClear)
+    bufferLength = needLen + 16
+  EndIf
+  
+  PokeS(*asciiBuffer, strVal, -1, #PB_Ascii)
+  ProcedureReturn *asciiBuffer
+EndProcedure
+
+; ----------------------------------------------------------------------------
 ; Procedure:   IDE_ApplyThemeAndLexer
 ; Purpose:     Applies lexer styles, fonts, margins, and keywords to Scintilla gadget
 ; Parameters:  gadgetId.i - Target Scintilla gadget ID
 ; Return:      None
 ; ----------------------------------------------------------------------------
 Procedure IDE_ApplyThemeAndLexer(gadgetId.i)
-  Protected *utf8
+  Protected *asciiPtr
   
   ; 1. Set native PureBasic Scintilla lexer
   IDE_SendSci(gadgetId, #SCI_SETLEXER, #SCLEX_PUREBASIC, 0)
   
   ; 2. Default font and base colors
-  *utf8 = UTF8(Settings\FontName)
-  If *utf8
-    IDE_SendSci(gadgetId, #SCI_STYLESETFONT, #STYLE_DEFAULT, *utf8)
-    FreeMemory(*utf8)
+  *asciiPtr = IDE_ToAscii(Settings\FontName)
+  If *asciiPtr
+    IDE_SendSci(gadgetId, #SCI_STYLESETFONT, #STYLE_DEFAULT, *asciiPtr)
   EndIf
   IDE_SendSci(gadgetId, #SCI_STYLESETSIZE, #STYLE_DEFAULT, Settings\FontSize)
   IDE_SendSci(gadgetId, #SCI_STYLESETFORE, #STYLE_DEFAULT, Settings\Colors\FgColor)
@@ -65,61 +85,64 @@ Procedure IDE_ApplyThemeAndLexer(gadgetId.i)
   IDE_SendSci(gadgetId, #SCI_SETINDENT, Settings\TabWidth, 0)
   IDE_SendSci(gadgetId, #SCI_SETUSETABS, 0, 0) ; Converts tab key to spaces
   
-  ; 5. Syntax token colors
-  ; Default identifiers
+  ; 5. Syntax token colors for SCLEX_PUREBASIC
+  ; Default identifiers (0 and 7)
+  IDE_SendSci(gadgetId, #SCI_STYLESETFORE, #SCE_B_DEFAULT, Settings\Colors\FgColor)
+  IDE_SendSci(gadgetId, #SCI_STYLESETBACK, #SCE_B_DEFAULT, Settings\Colors\BgColor)
   IDE_SendSci(gadgetId, #SCI_STYLESETFORE, #SCE_B_IDENTIFIER, Settings\Colors\FgColor)
   IDE_SendSci(gadgetId, #SCI_STYLESETBACK, #SCE_B_IDENTIFIER, Settings\Colors\BgColor)
   
-  ; Comments
+  ; Comments (1)
   IDE_SendSci(gadgetId, #SCI_STYLESETFORE, #SCE_B_COMMENT, Settings\Colors\CommentColor)
   
-  ; String literals
-  IDE_SendSci(gadgetId, #SCI_STYLESETFORE, #SCE_B_STRING, Settings\Colors\StringColor)
-  IDE_SendSci(gadgetId, #SCI_STYLESETFORE, #SCE_B_STRINGEOL, Settings\Colors\StringColor)
-  
-  ; Number literals
+  ; Number literals (2, 17, 18)
   IDE_SendSci(gadgetId, #SCI_STYLESETFORE, #SCE_B_NUMBER, Settings\Colors\NumberColor)
   IDE_SendSci(gadgetId, #SCI_STYLESETFORE, #SCE_B_HEXNUMBER, Settings\Colors\NumberColor)
   IDE_SendSci(gadgetId, #SCI_STYLESETFORE, #SCE_B_BINNUMBER, Settings\Colors\NumberColor)
   
-  ; Standard PureBasic keywords (KeyWord set 0 -> #SCE_B_KEYWORD)
+  ; Standard PureBasic keywords (3 -> #SCE_B_KEYWORD)
   IDE_SendSci(gadgetId, #SCI_STYLESETFORE, #SCE_B_KEYWORD, Settings\Colors\KeywordPBColor)
   IDE_SendSci(gadgetId, #SCI_STYLESETBOLD, #SCE_B_KEYWORD, 1)
   
-  ; OOP extension keywords (KeyWord set 1 -> #SCE_B_KEYWORD2)
+  ; String literals (4, 9)
+  IDE_SendSci(gadgetId, #SCI_STYLESETFORE, #SCE_B_STRING, Settings\Colors\StringColor)
+  IDE_SendSci(gadgetId, #SCI_STYLESETFORE, #SCE_B_STRINGEOL, Settings\Colors\StringColor)
+  
+  ; Preprocessor & Operators (5, 6)
+  IDE_SendSci(gadgetId, #SCI_STYLESETFORE, #SCE_B_PREPROCESSOR, Settings\Colors\OperatorColor)
+  IDE_SendSci(gadgetId, #SCI_STYLESETFORE, #SCE_B_OPERATOR, Settings\Colors\OperatorColor)
+  
+  ; OOP extension keywords (10 -> #SCE_B_KEYWORD2)
   IDE_SendSci(gadgetId, #SCI_STYLESETFORE, #SCE_B_KEYWORD2, Settings\Colors\KeywordOOPColor)
   IDE_SendSci(gadgetId, #SCI_STYLESETBOLD, #SCE_B_KEYWORD2, 1)
   
-  ; Built-in functions (KeyWord set 2 -> #SCE_B_KEYWORD3 / #SCE_B_KEYWORD4)
+  ; Built-in functions (11, 12 -> #SCE_B_KEYWORD3 / #SCE_B_KEYWORD4)
   IDE_SendSci(gadgetId, #SCI_STYLESETFORE, #SCE_B_KEYWORD3, Settings\Colors\FunctionColor)
   IDE_SendSci(gadgetId, #SCI_STYLESETFORE, #SCE_B_KEYWORD4, Settings\Colors\FunctionColor)
   
-  ; Operators
-  IDE_SendSci(gadgetId, #SCI_STYLESETFORE, #SCE_B_OPERATOR, Settings\Colors\OperatorColor)
-  
-  ; Constants
+  ; Constants (13 -> #SCE_B_CONSTANT)
   IDE_SendSci(gadgetId, #SCI_STYLESETFORE, #SCE_B_CONSTANT, Settings\Colors\ConstantColor)
   
-  ; 6. Send keyword wordlists to Scintilla lexer
+  ; ASM (14 -> #SCE_B_ASM)
+  IDE_SendSci(gadgetId, #SCI_STYLESETFORE, #SCE_B_ASM, Settings\Colors\OperatorColor)
+  
+  ; 6. Send keyword wordlists to Scintilla lexer (ASCII encoded as expected by Scintilla)
   ; Set 0: Native PB keywords
-  *utf8 = UTF8(IDE_GetPBKeywords())
-  If *utf8
-    IDE_SendSci(gadgetId, #SCI_SETKEYWORDS, 0, *utf8)
-    FreeMemory(*utf8)
+  *asciiPtr = IDE_ToAscii(IDE_GetPBKeywords())
+  If *asciiPtr
+    IDE_SendSci(gadgetId, #SCI_SETKEYWORDS, 0, *asciiPtr)
   EndIf
   
   ; Set 1: OOP extension keywords
-  *utf8 = UTF8(IDE_GetOOPKeywords())
-  If *utf8
-    IDE_SendSci(gadgetId, #SCI_SETKEYWORDS, 1, *utf8)
-    FreeMemory(*utf8)
+  *asciiPtr = IDE_ToAscii(IDE_GetOOPKeywords())
+  If *asciiPtr
+    IDE_SendSci(gadgetId, #SCI_SETKEYWORDS, 1, *asciiPtr)
   EndIf
   
   ; Set 2: Built-in functions
-  *utf8 = UTF8(IDE_GetPBFallbackFunctions())
-  If *utf8
-    IDE_SendSci(gadgetId, #SCI_SETKEYWORDS, 2, *utf8)
-    FreeMemory(*utf8)
+  *asciiPtr = IDE_ToAscii(IDE_GetPBFallbackFunctions())
+  If *asciiPtr
+    IDE_SendSci(gadgetId, #SCI_SETKEYWORDS, 2, *asciiPtr)
   EndIf
   
   ; Autocomplete options in Scintilla
