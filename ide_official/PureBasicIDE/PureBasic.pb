@@ -300,7 +300,7 @@ If CommandlineBuild = 0 And NoSplashScreen = 0
           FrontColor($777777) ; SpiderBasic splash screen background is white, so change the font color to a dark one
           OffsetX = DesktopScaledX(130) ; Spider has a logo at the left of the window, so shift the text display
         CompilerElse
-          FrontColor($555555) ; Clean dark gray text on white background
+          FrontColor($D4AF37) ; Elegant light gold text matching MicrodevWeb 3D branding on dark background
           OffsetX = 0
         CompilerEndIf  
         
