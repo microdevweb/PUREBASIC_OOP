@@ -1,4 +1,4 @@
-﻿; --------------------------------------------------------------------------------------------
+; --------------------------------------------------------------------------------------------
 ;  Copyright (c) Fantaisie Software. All rights reserved.
 ;  Dual licensed under the GPL and Fantaisie Software licenses.
 ;  See LICENSE and LICENSE-FANTAISIE in the project root for license information.
@@ -1902,6 +1902,15 @@ Procedure MainMenuEvent(MenuItemID)
       ;
     Case #MENU_ProjectPanel_Open To #MENU_ProjectPanel_Remove
       ProjectPanelMenuEvent(MenuItemID)
+      
+    Case #MENU_ProcedureBrowser_GenerateGetter
+      ProcedureBrowser_GenerateGetterSetter(1)
+      
+    Case #MENU_ProcedureBrowser_GenerateSetter
+      ProcedureBrowser_GenerateGetterSetter(2)
+      
+    Case #MENU_ProcedureBrowser_GenerateGetterSetter
+      ProcedureBrowser_GenerateGetterSetter(3)
       
       
       CompilerIf #CompileMacCocoa

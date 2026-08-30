@@ -506,6 +506,7 @@ Declare UpdateImageColorGadget(Gadget, Image, Color)
 Declare UpdateProcedureList(ScrollPosition.l = -1) ; scan active source and update the procedure list and the autocomplete lists
                               ;Declare ProcedureList_LineUpdate()    ; check if the current line is in the procedure list and update if necessary.
 Declare JumpToProcedure()     ; jump to procedure under cursor (for double-click)
+Declare ProcedureBrowser_GenerateGetterSetter(Mode.i)
 
 ;- WebView.pb
 ;

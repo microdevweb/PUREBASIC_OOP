@@ -63,6 +63,106 @@ Procedure ProcedureBrowser_DisableColorButtons(Type.i)
   
 EndProcedure
 
+Procedure ProcedureBrowser_GenerateGetterSetter(Mode.i)
+  If *ActiveSource = 0 Or *ActiveSource = *ProjectInfo Or *ActiveSource\IsCode = 0
+    ProcedureReturn
+  EndIf
+  
+  index = GetGadgetState(#GADGET_ProcedureBrowser)
+  If index = -1 Or index >= ListSize(ProcedureList())
+    ProcedureReturn
+  EndIf
+  
+  SelectElement(ProcedureList(), index)
+  If ProcedureList()\Type <> #PB_BROWSER_Field
+    ProcedureReturn
+  EndIf
+  
+  RawField$ = ProcedureList()\Name$
+  FieldLine = ProcedureList()\Line ; 1-based line of the field declaration
+  
+  ; 1. Clean and parse field name and type
+  RawField$ = Trim(StringField(RawField$, 1, "=")) ; strip initializers
+  IsPointer = #False
+  If Left(RawField$, 1) = "*"
+    IsPointer = #True
+    RawField$ = Mid(RawField$, 2)
+  EndIf
+  
+  DotPos = FindString(RawField$, ".")
+  If DotPos
+    BaseName$ = Left(RawField$, DotPos - 1)
+    FieldType$ = Mid(RawField$, DotPos) ; e.g. ".s"
+  Else
+    BaseName$ = RawField$
+    FieldType$ = ".i" ; default type
+  EndIf
+  
+  If BaseName$ = ""
+    ProcedureReturn
+  EndIf
+  
+  ; Build Method names and code
+  If IsPointer
+    MemberRef$ = "*" + BaseName$
+    ValParam$  = "*val" + FieldType$
+    ParamRef$  = "*val"
+  Else
+    MemberRef$ = BaseName$
+    ValParam$  = "val" + FieldType$
+    ParamRef$  = "val"
+  EndIf
+  
+  ClassIndent$ = "  "
+  BodyIndent$  = "    "
+  
+  GetterCode$ = ClassIndent$ + "Public Method" + FieldType$ + " Get_" + BaseName$ + "()" + #NewLine
+  GetterCode$ + BodyIndent$  + "ProcedureReturn This\" + MemberRef$ + #NewLine
+  GetterCode$ + ClassIndent$ + "EndMethod" + #NewLine
+  
+  SetterCode$ = ClassIndent$ + "Public Method Set_" + BaseName$ + "(" + ValParam$ + ")" + #NewLine
+  SetterCode$ + BodyIndent$  + "This\" + MemberRef$ + " = " + ParamRef$ + #NewLine
+  SetterCode$ + ClassIndent$ + "EndMethod" + #NewLine
+  
+  CodeToInsert$ = ""
+  Select Mode
+    Case 1 ; Getter
+      CodeToInsert$ = #NewLine + ClassIndent$ + "; Getter for " + MemberRef$ + #NewLine + GetterCode$
+    Case 2 ; Setter
+      CodeToInsert$ = #NewLine + ClassIndent$ + "; Setter for " + MemberRef$ + #NewLine + SetterCode$
+    Case 3 ; Getter & Setter
+      CodeToInsert$ = #NewLine + ClassIndent$ + "; Getter & Setter for " + MemberRef$ + #NewLine + GetterCode$ + #NewLine + SetterCode$
+  EndSelect
+  
+  ; 2. Find EndClass line for this class
+  TotalLines = ScintillaSendMessage(*ActiveSource\EditorGadget, #SCI_GETLINECOUNT, 0, 0)
+  TargetLine = TotalLines ; fallback
+  InsideNested = 0
+  
+  For l = FieldLine To TotalLines
+    Line$ = Trim(GetLine(l - 1, *ActiveSource))
+    Upper$ = UCase(Line$)
+    If Left(Upper$, 6) = "CLASS " Or Left(Upper$, 6) = "CLASS	"
+      InsideNested + 1
+    ElseIf Upper$ = "ENDCLASS" Or Left(Upper$, 9) = "ENDCLASS " Or Left(Upper$, 9) = "ENDCLASS	"
+      If InsideNested = 0
+        TargetLine = l ; line with EndClass (1-based)
+        Break
+      Else
+        InsideNested - 1
+      EndIf
+    EndIf
+  Next l
+  
+  ; 3. Move cursor to start of EndClass line and insert code
+  ChangeActiveLine(TargetLine, 0)
+  InsertCodeString(CodeToInsert$, #False)
+  
+  ; 4. Update procedure browser immediately
+  UpdateProcedureList()
+  
+EndProcedure
+
 
 Procedure.i ProcedureBrowser_IsLineInside(Line.i, Type.i)
   ; Determines whether the line number is within a procedure or macro.
@@ -1275,12 +1375,53 @@ Procedure ProcedureBrowser_EventHandler(*Entry.ToolsPanelEntry, EventGadgetID)
       EndIf
     CompilerEndIf
     
+    If EventValid And EventType() = #PB_EventType_RightClick
+      CompilerIf #CompileWindows
+        Protected hitInfo.LVHITTESTINFO
+        GetCursorPos_(@hitInfo\pt)
+        MapWindowPoints_(0, GadgetID(#GADGET_ProcedureBrowser), @hitInfo\pt, 1)
+        SendMessage_(GadgetID(#GADGET_ProcedureBrowser), #LVM_HITTEST, 0, @hitInfo)
+        If hitInfo\iItem <> -1
+          SetGadgetState(#GADGET_ProcedureBrowser, hitInfo\iItem)
+        EndIf
+      CompilerEndIf
+      
+      index = GetGadgetState(#GADGET_ProcedureBrowser)
+      If index <> -1 And ListSize(ProcedureList()) > index
+        SelectElement(ProcedureList(), index)
+        If ProcedureList()\Type = #PB_BROWSER_Field
+          RawField$ = ProcedureList()\Name$
+          RawField$ = Trim(StringField(RawField$, 1, "="))
+          If Left(RawField$, 1) = "*" : RawField$ = Mid(RawField$, 2) : EndIf
+          DotPos = FindString(RawField$, ".")
+          If DotPos : BaseName$ = Left(RawField$, DotPos - 1) : Else : BaseName$ = RawField$ : EndIf
+          
+          If IsMenu(#POPUPMENU_ProcedureBrowser)
+            FreeMenu(#POPUPMENU_ProcedureBrowser)
+          EndIf
+          CreatePopupMenu(#POPUPMENU_ProcedureBrowser)
+          MenuItem(#MENU_ProcedureBrowser_GenerateGetter, "G" + Chr(233) + "n" + Chr(233) + "rer Getter (Get_" + BaseName$ + ")")
+          MenuItem(#MENU_ProcedureBrowser_GenerateSetter, "G" + Chr(233) + "n" + Chr(233) + "rer Setter (Set_" + BaseName$ + ")")
+          MenuBar()
+          MenuItem(#MENU_ProcedureBrowser_GenerateGetterSetter, "G" + Chr(233) + "n" + Chr(233) + "rer Getter & Setter")
+          
+          If *Entry\IsSeparateWindow
+            DisplayPopupMenu(#POPUPMENU_ProcedureBrowser, WindowID(*Entry\ToolWindowID))
+          Else
+            DisplayPopupMenu(#POPUPMENU_ProcedureBrowser, WindowID(#WINDOW_Main))
+          EndIf
+        EndIf
+      EndIf
+    EndIf
+    
     ; Ignore the events for left/right and double clicks, it should be enough for change.
     If ProcedureMulticolor
       EventGadgetType = EventType()
       If EventValid And Not (EventGadgetType = #PB_EventType_Change)
         EventValid = #False
-        SetGadgetState(#GADGET_ProcedureBrowser, -1)
+        If EventGadgetType <> #PB_EventType_RightClick
+          SetGadgetState(#GADGET_ProcedureBrowser, -1)
+        EndIf
       EndIf
     EndIf
     

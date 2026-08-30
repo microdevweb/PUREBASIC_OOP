@@ -1219,10 +1219,9 @@ Enumeration 0
   #MENU_ProjectInfo_DefaultTarget
   #MENU_ProjectInfo_EnableTarget
   
-  ;   #MENU_TemplateEdit_Cut
-  ;   #MENU_TemplateEdit_Copy
-  ;   #MENU_TemplateEdit_Paste
-  ;   #MENU_TemplateEdit_SelectAll
+  #MENU_ProcedureBrowser_GenerateGetter
+  #MENU_ProcedureBrowser_GenerateSetter
+  #MENU_ProcedureBrowser_GenerateGetterSetter
   
   #MENU_MacroError_Close
   #MENU_Warnings_Close
@@ -2040,6 +2039,7 @@ EndEnumeration
 #POPUPMENU_FilesPanel = 11
 #POPUPMENU_ErrorLog = 12
 #POPUPMENU_TabBar = 13
+#POPUPMENU_ProcedureBrowser = 14
 
 #PB_MessageRequester_Yes    = 6
 #PB_MessageRequester_No     = 7

@@ -492,7 +492,21 @@ Procedure.s TranspileMethodBodyLine(line.s, className.s, parentClassName.s)
     EndIf
   Wend
   
-  ; 2. Replace 'This' with '*This' cleanly (both This\field and FreeStructure(This))
+  ; 2. Handle internal method calls 'This\Method(' -> '*This\VTable\Method('
+  If FindMapElement(ClassMap(), className)
+    PushListPosition(Classes())
+    SelectElement(Classes(), ClassMap(className))
+    ForEach Classes()\VTableSlots()
+      Protected mName.s = Classes()\VTableSlots()\methodName
+      If mName <> ""
+        res = ReplaceString(res, "This\" + mName + "(", "*This\VTable\" + mName + "(")
+        res = ReplaceString(res, "*This\" + mName + "(", "*This\VTable\" + mName + "(")
+      EndIf
+    Next
+    PopListPosition(Classes())
+  EndIf
+
+  ; 3. Replace remaining 'This' with '*This' cleanly (e.g. This\field and FreeStructure(This))
   res = ReplaceWord(res, "This", "*This")
   
   ProcedureReturn res
