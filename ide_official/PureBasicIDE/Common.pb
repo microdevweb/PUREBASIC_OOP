@@ -2375,10 +2375,20 @@ Structure ColorSetting
   DisplayValue.l ; Actual value currently in use (when color is disabled, this is the fallback actually used)
 EndStructure
 
+Enumeration 
+  #PB_BROWSER_Procedure = 0
+  #PB_BROWSER_Macro     = 1
+  #PB_BROWSER_Marker    = 2
+  #PB_BROWSER_Issue     = 3
+  #PB_BROWSER_Class     = 4
+  #PB_BROWSER_Method    = 5
+  #PB_BROWSER_Field     = 6
+EndEnumeration
+
 Structure ProcedureInfo
   Name$
   Line.l ; 1 based!
-  Type.l ; 0= Procedure, 1=Macro, 2=marker, 3=issue
+  Type.l ; 0= Procedure, 1=Macro, 2=marker, 3=issue, 4=Class, 5=Method, 6=Field
   Prototype$
   ; For the 'Multicolored Procedure List' and automatic selection of the procedure or macro according to the cursor position in the editor.
   LineEnd.l

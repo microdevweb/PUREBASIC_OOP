@@ -1,4 +1,4 @@
-﻿; --------------------------------------------------------------------------------------------
+; --------------------------------------------------------------------------------------------
 ;  Copyright (c) Fantaisie Software. All rights reserved.
 ;  Dual licensed under the GPL and Fantaisie Software licenses.
 ;  See LICENSE and LICENSE-FANTAISIE in the project root for license information.
@@ -54,9 +54,9 @@ Global Backup_ProcedureBrowserSort, Backup_DisplayProtoType
 ;- Functions for coloring, automatic selection and scrolling of entries in the Procezdur browser.
 
 Procedure ProcedureBrowser_DisableColorButtons(Type.i)
-  ; Only activate the buttons for coloring for procedures, macros and markers.
+  ; Only activate the buttons for coloring for procedures, macros, markers, classes, methods and fields.
   
-  State = Bool(Not (Type = 0 Or Type = 1 Or Type = 2))
+  State = Bool(Not (Type = #PB_BROWSER_Procedure Or Type = #PB_BROWSER_Macro Or Type = #PB_BROWSER_Marker Or Type = #PB_BROWSER_Class Or Type = #PB_BROWSER_Method Or Type = #PB_BROWSER_Field))
   DisableGadget(#GADGET_ProcedureBrowser_FrontColor, State)
   DisableGadget(#GADGET_ProcedureBrowser_BackColor, State)
   DisableGadget(#GADGET_ProcedureBrowser_RestoreColor, State)	
@@ -643,6 +643,106 @@ Procedure UpdateProcedureList(ScrollPosition.l = -1) ; scroll position -1 means 
       Next i
     EndIf
     
+    ; Scan for OOP Classes, Methods, and Members in *ActiveSource
+    LineCount = ScintillaSendMessage(*ActiveSource\EditorGadget, #SCI_GETLINECOUNT, 0, 0)
+    InsideClass = #False
+    CurrentClass$ = ""
+    
+    For l = 0 To LineCount - 1
+      LineText$ = Trim(GetLine(l, *ActiveSource))
+      If LineText$ = "" Or Left(LineText$, 1) = ";"
+        Continue
+      EndIf
+      
+      Upper$ = UCase(LineText$)
+      
+      ; Remove trailing comments
+      SemiColon = FindString(LineText$, ";")
+      If SemiColon > 0
+        LineText$ = Trim(Left(LineText$, SemiColon - 1))
+        Upper$ = UCase(LineText$)
+      EndIf
+      
+      ; 1) Class start
+      If Left(Upper$, 6) = "CLASS " Or Left(Upper$, 6) = "CLASS	"
+        InsideClass = #True
+        CurrentClass$ = Trim(Mid(LineText$, 7))
+        AddElement(ProcedureList())
+        ProcedureList()\Name$ = CurrentClass$
+        ProcedureList()\Line  = l + 1
+        ProcedureList()\Type  = #PB_BROWSER_Class
+        Continue
+      EndIf
+      
+      ; 2) Class end
+      If Left(Upper$, 8) = "ENDCLASS"
+        InsideClass = #False
+        CurrentClass$ = ""
+        Continue
+      EndIf
+      
+      ; Inside Class: parse methods and fields
+      If InsideClass
+        ; Method
+        IsMethod = #False
+        MethodRest$ = ""
+        If Left(Upper$, 14) = "PUBLIC METHOD " Or Left(Upper$, 14) = "PUBLIC METHOD	"
+          IsMethod = #True
+          MethodRest$ = Trim(Mid(LineText$, 15))
+        ElseIf Left(Upper$, 15) = "PRIVATE METHOD " Or Left(Upper$, 15) = "PRIVATE METHOD	"
+          IsMethod = #True
+          MethodRest$ = Trim(Mid(LineText$, 16))
+        ElseIf Left(Upper$, 7) = "METHOD " Or Left(Upper$, 7) = "METHOD	"
+          IsMethod = #True
+          MethodRest$ = Trim(Mid(LineText$, 8))
+        EndIf
+        
+        If IsMethod
+          MethodName$ = Trim(StringField(MethodRest$, 1, "("))
+          Proto$ = ""
+          If FindString(MethodRest$, "(")
+            Proto$ = Mid(MethodRest$, FindString(MethodRest$, "("))
+          Else
+            Proto$ = "()"
+          EndIf
+          AddElement(ProcedureList())
+          ProcedureList()\Name$ = MethodName$
+          ProcedureList()\Prototype$ = Proto$
+          ProcedureList()\Line  = l + 1
+          ProcedureList()\Type  = #PB_BROWSER_Method
+          Continue
+        EndIf
+        
+        ; Fields (Protected / Public / Private)
+        IsField = #False
+        FieldRest$ = ""
+        If Left(Upper$, 10) = "PROTECTED " Or Left(Upper$, 10) = "PROTECTED	"
+          IsField = #True
+          FieldRest$ = Trim(Mid(LineText$, 11))
+        ElseIf Left(Upper$, 7) = "PUBLIC " Or Left(Upper$, 7) = "PUBLIC	"
+          IsField = #True
+          FieldRest$ = Trim(Mid(LineText$, 8))
+        ElseIf Left(Upper$, 8) = "PRIVATE " Or Left(Upper$, 8) = "PRIVATE	"
+          IsField = #True
+          FieldRest$ = Trim(Mid(LineText$, 9))
+        EndIf
+        
+        If IsField And FieldRest$ <> ""
+          Count = CountString(FieldRest$, ",") + 1
+          For f = 1 To Count
+            SingleField$ = Trim(StringField(FieldRest$, f, ","))
+            If SingleField$ <> ""
+              AddElement(ProcedureList())
+              ProcedureList()\Name$ = SingleField$
+              ProcedureList()\Line  = l + 1
+              ProcedureList()\Type  = #PB_BROWSER_Field
+            EndIf
+          Next f
+          Continue
+        EndIf
+      EndIf
+    Next l
+    
     ; first sort the list
     ;
     If ListSize(ProcedureList()) > 1
@@ -720,21 +820,33 @@ Procedure UpdateProcedureList(ScrollPosition.l = -1) ; scroll position -1 means 
     
     ClearGadgetItems(#GADGET_ProcedureBrowser)
     ForEach ProcedureList()
-      If ProcedureList()\Type = 0
-        Text$ = ProcedureList()\Name$
-        If DisplayPrototype
-          Text$ + ProcedureList()\Prototype$
-        EndIf
-      ElseIf ProcedureList()\Type = 1
-        Text$ = "+ " + ProcedureList()\Name$
-        If DisplayPrototype
-          Text$ + ProcedureList()\Prototype$
-        EndIf
-      ElseIf ProcedureList()\Type = 2
-        Text$ = "> " + ProcedureList()\Name$
-      Else
-        Text$ = ProcedureList()\Name$
-      EndIf
+      Select ProcedureList()\Type
+        Case #PB_BROWSER_Procedure ; 0
+          Text$ = ProcedureList()\Name$
+          If DisplayPrototype
+            Text$ + ProcedureList()\Prototype$
+          EndIf
+        Case #PB_BROWSER_Macro ; 1
+          Text$ = "+ " + ProcedureList()\Name$
+          If DisplayPrototype
+            Text$ + ProcedureList()\Prototype$
+          EndIf
+        Case #PB_BROWSER_Marker ; 2
+          Text$ = "> " + ProcedureList()\Name$
+        Case #PB_BROWSER_Class ; 4
+          Text$ = "[Class] " + ProcedureList()\Name$
+        Case #PB_BROWSER_Method ; 5
+          Text$ = "    [M] " + ProcedureList()\Name$
+          If DisplayPrototype
+            Text$ + ProcedureList()\Prototype$
+          Else
+            Text$ + "()"
+          EndIf
+        Case #PB_BROWSER_Field ; 6
+          Text$ = "    [F] " + ProcedureList()\Name$
+        Default
+          Text$ = ProcedureList()\Name$
+      EndSelect
       
       AddGadgetItem(#GADGET_ProcedureBrowser, -1, Text$)
       
