@@ -1,4 +1,4 @@
-﻿; --------------------------------------------------------------------------------------------
+; --------------------------------------------------------------------------------------------
 ;  Copyright (c) Fantaisie Software. All rights reserved.
 ;  Dual licensed under the GPL and Fantaisie Software licenses.
 ;  See LICENSE and LICENSE-FANTAISIE in the project root for license information.
@@ -880,26 +880,30 @@ Procedure CompileRun(CheckSyntax)
           Success = #False
           
           ; for the addtools, we need a temporary file, so they can modify it...
-          If CopyFile(CompileSource\FileName$, TempPath$ + "PB_EditorOutput.pb")
+          ; Use .pbo extension if source is .pbo so TranspileOOPFile can detect it
+          Protected ProjTempExt$ = LCase(GetExtensionPart(CompileSource\FileName$))
+          If ProjTempExt$ = "" : ProjTempExt$ = "pb" : EndIf
+          Protected ProjTempFile$ = TempPath$ + "PB_EditorOutput." + ProjTempExt$
+          If CopyFile(CompileSource\FileName$, ProjTempFile$)
             CompilerIf #CompileWindows
               ; If the source file was readonly, so will be the temp file, so remove that!
-              SetFileAttributes(TempPath$ + "PB_EditorOutput.pb", GetFileAttributes(TempPath$ + "PB_EditorOutput.pb") & ~#PB_FileSystem_ReadOnly)
+              SetFileAttributes(ProjTempFile$, GetFileAttributes(ProjTempFile$) & ~#PB_FileSystem_ReadOnly)
             CompilerEndIf
             
             ; append the procects settings for the tools if needed
-            If SaveProjectSettings <> #SAVESETTINGS_EndOfFile And OpenFile(#FILE_SaveSource, TempPath$+"PB_EditorOutput.pb")
+            If SaveProjectSettings <> #SAVESETTINGS_EndOfFile And OpenFile(#FILE_SaveSource, ProjTempFile$)
               FileSeek(#FILE_SaveSource, Lof(#FILE_SaveSource)) ; to to the end of the file
               SaveProjectSettings(@CompileSource, #True, 1, 0)
               CloseFile(#FILE_SaveSource)
             EndIf
             
             ; call the compiler function with this new structure and main source name
-            AddTools_CompiledFile$ = TempPath$ + "PB_EditorOutput.pb"; save for AddTools
+            AddTools_CompiledFile$ = ProjTempFile$ ; save for AddTools
             AddTools_Execute(#TRIGGER_BeforeCompile, *ActiveSource)
             
             DisplayCompilerWindow() ; hiding this window is done by the compiler functions if there is no error
             
-            Success = Compiler_CompileRun(TempPath$ + "PB_EditorOutput.pb", @CompileSource, CheckSyntax)
+            Success = Compiler_CompileRun(ProjTempFile$, @CompileSource, CheckSyntax)
             
           Else
             
@@ -1089,17 +1093,23 @@ Procedure CompileRun(CheckSyntax)
     Else ; No MainFile option... way simpler :)
       
       ; the source must be saved to the temp path
-      ;
-      If SaveTempFile(TempPath$ + "PB_EditorOutput.pb")
+      ; Use .pbo extension if the active source is a .pbo file so TranspileOOPFile can detect it
+      Protected TempExt$ = "pb"
+      If LCase(GetExtensionPart(*ActiveSource\FileName$)) = "pbo"
+        TempExt$ = "pbo"
+      EndIf
+      Protected TempOutputFile$ = TempPath$ + "PB_EditorOutput." + TempExt$
+      
+      If SaveTempFile(TempOutputFile$)
         
         
-        AddTools_CompiledFile$ = TempPath$ + "PB_EditorOutput.pb" ; save for AddTools
+        AddTools_CompiledFile$ = TempOutputFile$ ; save for AddTools
         AddTools_Execute(#TRIGGER_BeforeCompile, *ActiveSource)
         
         DisplayCompilerWindow() ; hiding this window is done by the compiler functions if there is no error
         
         ; call the os compiler function, with the current source settings
-        If Compiler_CompileRun(TempPath$ + "PB_EditorOutput.pb", *ActiveSource, CheckSyntax)
+        If Compiler_CompileRun(TempOutputFile$, *ActiveSource, CheckSyntax)
           
           ; update the compile count
           If *ActiveSource\UseCompileCount And CheckSyntax = #False

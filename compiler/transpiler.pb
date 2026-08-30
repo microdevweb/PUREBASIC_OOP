@@ -129,9 +129,17 @@ Procedure.b ParsePBO(inputFile.s)
   EndIf
 
   ClearList(FileLines())
+  Protected isFirstLine.b = #True
   While Not Eof(file)
     AddElement(FileLines())
     FileLines() = ReadString(file)
+    ; Strip UTF-8 BOM (EF BB BF) from the first line if present
+    If isFirstLine
+      If Left(FileLines(), 1) = Chr(239) Or Asc(Left(FileLines(), 1)) = 65279
+        FileLines() = Mid(FileLines(), 2)  ; Remove the BOM character
+      EndIf
+      isFirstLine = #False
+    EndIf
   Wend
   CloseFile(file)
 
