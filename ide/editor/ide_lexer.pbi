@@ -6,9 +6,9 @@
 
 EnableExplicit
 
-XIncludeFile "ide_scintilla.pb"
-XIncludeFile "../config/ide_settings.pb"
-XIncludeFile "../data/ide_keywords.pb"
+XIncludeFile "ide_scintilla.pbi"
+XIncludeFile "../config/ide_settings.pbi"
+XIncludeFile "../data/ide_keywords.pbi"
 
 ; ----------------------------------------------------------------------------
 ; Procedure:   IDE_ApplyThemeAndLexer
@@ -56,6 +56,9 @@ Procedure IDE_ApplyThemeAndLexer(gadgetId.i)
   Else
     IDE_SendSci(gadgetId, #SCI_SETCARETLINEVISIBLE, 0, 0)
   EndIf
+  
+  ; Ensure editor is writable and not read-only
+  IDE_SendSci(gadgetId, #SCI_SETREADONLY, 0, 0)
   
   ; Tabulation and indentation settings
   IDE_SendSci(gadgetId, #SCI_SETTABWIDTH, Settings\TabWidth, 0)

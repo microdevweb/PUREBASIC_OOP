@@ -6,8 +6,8 @@
 
 EnableExplicit
 
-XIncludeFile "ide_scintilla.pb"
-XIncludeFile "../config/ide_settings.pb"
+XIncludeFile "ide_scintilla.pbi"
+XIncludeFile "../config/ide_settings.pbi"
 
 ; ----------------------------------------------------------------------------
 ; Procedure:   IDE_GetClosingKeyword

@@ -6,17 +6,17 @@
 
 EnableExplicit
 
-; Include modular components
-XIncludeFile "config/ide_settings.pb"
-XIncludeFile "editor/ide_scintilla.pb"
-XIncludeFile "editor/ide_lexer.pb"
-XIncludeFile "editor/ide_autocomplete.pb"
-XIncludeFile "editor/ide_autoclose.pb"
-XIncludeFile "compiler_bridge/ide_builder.pb"
-XIncludeFile "compiler_bridge/ide_parser_symbols.pb"
-XIncludeFile "gui/ide_dlg_settings.pb"
-XIncludeFile "gui/ide_dlg_about.pb"
-XIncludeFile "gui/ide_main_window.pb"
+; Include modular components (.pbi)
+XIncludeFile "config/ide_settings.pbi"
+XIncludeFile "editor/ide_scintilla.pbi"
+XIncludeFile "editor/ide_lexer.pbi"
+XIncludeFile "editor/ide_autocomplete.pbi"
+XIncludeFile "editor/ide_autoclose.pbi"
+XIncludeFile "compiler_bridge/ide_builder.pbi"
+XIncludeFile "compiler_bridge/ide_parser_symbols.pbi"
+XIncludeFile "gui/ide_dlg_settings.pbi"
+XIncludeFile "gui/ide_dlg_about.pbi"
+XIncludeFile "gui/ide_main_window.pbi"
 
 ; ----------------------------------------------------------------------------
 ; Global Initialization

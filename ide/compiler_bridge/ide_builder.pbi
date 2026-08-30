@@ -6,7 +6,7 @@
 
 EnableExplicit
 
-XIncludeFile "../config/ide_settings.pb"
+XIncludeFile "../config/ide_settings.pbi"
 
 Prototype IDE_LogCallback(message.s, isError.b)
 

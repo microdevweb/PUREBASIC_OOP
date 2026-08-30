@@ -6,7 +6,7 @@
 
 EnableExplicit
 
-XIncludeFile "ide_theme.pb"
+XIncludeFile "ide_theme.pbi"
 
 ; ----------------------------------------------------------------------------
 ; Structure:   IDE_Settings

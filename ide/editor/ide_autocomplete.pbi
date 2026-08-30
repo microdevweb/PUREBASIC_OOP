@@ -6,9 +6,9 @@
 
 EnableExplicit
 
-XIncludeFile "ide_scintilla.pb"
-XIncludeFile "../config/ide_settings.pb"
-XIncludeFile "../data/ide_keywords.pb"
+XIncludeFile "ide_scintilla.pbi"
+XIncludeFile "../config/ide_settings.pbi"
+XIncludeFile "../data/ide_keywords.pbi"
 
 #SCI_WORDSTARTPOSITION = 2266
 #SCI_WORDENDPOSITION = 2267

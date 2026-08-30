@@ -6,14 +6,14 @@
 
 EnableExplicit
 
-XIncludeFile "../config/ide_settings.pb"
-XIncludeFile "../editor/ide_scintilla.pb"
-XIncludeFile "../editor/ide_lexer.pb"
-XIncludeFile "../editor/ide_autocomplete.pb"
-XIncludeFile "../editor/ide_autoclose.pb"
-XIncludeFile "../compiler_bridge/ide_builder.pb"
-XIncludeFile "../compiler_bridge/ide_parser_symbols.pb"
-XIncludeFile "ide_dlg_settings.pb"
+XIncludeFile "../config/ide_settings.pbi"
+XIncludeFile "../editor/ide_scintilla.pbi"
+XIncludeFile "../editor/ide_lexer.pbi"
+XIncludeFile "../editor/ide_autocomplete.pbi"
+XIncludeFile "../editor/ide_autoclose.pbi"
+XIncludeFile "../compiler_bridge/ide_builder.pbi"
+XIncludeFile "../compiler_bridge/ide_parser_symbols.pbi"
+XIncludeFile "ide_dlg_settings.pbi"
 
 Enumeration Windows
   #Win_Main
@@ -215,6 +215,7 @@ Procedure IDE_MainWindow_NewFile()
   IDE_MainWindow_UpdateTitle()
   IDE_MainWindow_UpdateSymbols()
   IDE_MainWindow_Log("New file created.", #False)
+  SetActiveGadget(#Gadget_Scintilla_Editor)
 EndProcedure
 
 ; ----------------------------------------------------------------------------
@@ -246,6 +247,7 @@ Procedure IDE_MainWindow_OpenFile(filePath.s = "")
       IDE_MainWindow_UpdateTitle()
       IDE_MainWindow_UpdateSymbols()
       IDE_MainWindow_Log("Opened file: " + filePath, #False)
+      SetActiveGadget(#Gadget_Scintilla_Editor)
     Else
       MessageRequester("Error", "Cannot open selected file.", #PB_MessageRequester_Error)
     EndIf
@@ -434,4 +436,7 @@ Procedure IDE_MainWindow_Open()
   Else
     IDE_MainWindow_NewFile()
   EndIf
+  
+  ; Focus editor on launch
+  SetActiveGadget(#Gadget_Scintilla_Editor)
 EndProcedure

@@ -6,7 +6,7 @@
 
 EnableExplicit
 
-XIncludeFile "../config/ide_settings.pb"
+XIncludeFile "../config/ide_settings.pbi"
 
 Enumeration SettingsWidgets 1000
   #Dlg_Settings_Window

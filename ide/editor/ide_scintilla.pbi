@@ -8,6 +8,7 @@ EnableExplicit
 
 ; Scintilla message and token constants
 #SCI_SETLEXER = 4001
+#SCI_SETREADONLY = 2171
 #SCLEX_CONTAINER = 0
 #SCLEX_NULL = 1
 #SCLEX_PUREBASIC = 67
