@@ -1,4 +1,4 @@
-﻿; --------------------------------------------------------------------------------------------
+; --------------------------------------------------------------------------------------------
 ;  Copyright (c) Fantaisie Software. All rights reserved.
 ;  Dual licensed under the GPL and Fantaisie Software licenses.
 ;  See LICENSE and LICENSE-FANTAISIE in the project root for license information.
@@ -156,6 +156,7 @@ Global NbBasicFunctions, NbApiFunctions
 CompilerIf Defined(PUREBASIC_IDE, #PB_Constant)
   
   Global BasicKeywordsTree.RadixTree   ; Stores index in array (not "index+1" since index 0 is invalid anyway)
+  Global CustomKeywordsTree.RadixTree  ; Stores index in CustomKeywords array
   Global ASMKeywordsTree.RadixTree     ; Stores index in array (not "index+1"!)
   Global BasicFunctionsTree.RadixTree  ; Stores index+1
   Global APIFunctionsTree.RadixTree    ; Stores index+1
@@ -844,9 +845,11 @@ CompilerIf Defined(PUREBASIC_DEBUGGER, #PB_Constant) ; only in IDE and debugger
     Next i
 
     CurrentChar = 0
+    RadixFree(CustomKeywordsTree)
     ForEach TempList()
       index = ListIndex(TempList())+1 ; index 0 is ignored
       CustomKeywords(index) = TempList()
+      RadixInsert(CustomKeywordsTree, TempList(), index)
 
       Char = Asc(UCase(Left(TempList(), 1)))
       If Char <> CurrentChar

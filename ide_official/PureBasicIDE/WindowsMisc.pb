@@ -1,4 +1,4 @@
-﻿; --------------------------------------------------------------------------------------------
+; --------------------------------------------------------------------------------------------
 ;  Copyright (c) Fantaisie Software. All rights reserved.
 ;  Dual licensed under the GPL and Fantaisie Software licenses.
 ;  See LICENSE and LICENSE-FANTAISIE in the project root for license information.
@@ -116,6 +116,17 @@ CompilerIf #CompileWindows
       GetModuleFileName_(GetModuleHandle_(#Null$), @PureBasicPath$, #MAX_PATH)
       PureBasicPath$ = PeekS(@PureBasicPath$)
       PureBasicPath$ = GetPathPart(PureBasicPath$)
+      
+      ; If pbcompiler.exe is not in local Compilers\ subdir, fallback to standard install or PB home
+      If FileSize(PureBasicPath$ + "Compilers\pbcompiler.exe") <= 0
+        If FileSize(#PB_Compiler_Home + "Compilers\pbcompiler.exe") > 0
+          PureBasicPath$ = #PB_Compiler_Home
+        ElseIf FileSize("C:\Program Files\PureBasic\Compilers\pbcompiler.exe") > 0
+          PureBasicPath$ = "C:\Program Files\PureBasic\"
+        ElseIf FileSize("C:\PureBasic\Compilers\pbcompiler.exe") > 0
+          PureBasicPath$ = "C:\PureBasic\"
+        EndIf
+      EndIf
     EndIf
     
     TempPath$        = GetTemporaryDirectory()

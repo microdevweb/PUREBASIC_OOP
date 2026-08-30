@@ -225,8 +225,8 @@ Procedure LoadPreferences()
   
   ; default
   
-  NbFoldStartWords = 11
-  NbFoldEndWords = 8
+  NbFoldStartWords = 13
+  NbFoldEndWords = 10
   FoldStart$(1) = ";{"
   FoldStart$(2) = "Macro"
   FoldStart$(3) = "Procedure"
@@ -242,6 +242,8 @@ Procedure LoadPreferences()
     FoldStart$(10) = "EnableASM" 
   CompilerEndIf
   FoldStart$(11) = "HeaderSection" 
+  FoldStart$(12) = "Class"
+  FoldStart$(13) = "Method"
   
   FoldEnd$(1) = ";}"
   FoldEnd$(2) = "EndMacro"
@@ -255,6 +257,8 @@ Procedure LoadPreferences()
     FoldEnd$(7) = "DisableASM"
   CompilerEndIf
   FoldEnd$(8) = "EndHeaderSection"
+  FoldEnd$(9) = "EndClass"
+  FoldEnd$(10) = "EndMethod"
   
   NbFoldStartWords = ReadPreferenceLong("StartWords", NbFoldStartWords)
   NbFoldEndWords = ReadPreferenceLong("EndWords", NbFoldEndWords)
@@ -830,24 +834,30 @@ Procedure LoadPreferences()
       AddElement(CustomKeywordList())
       CustomKeywordList() = ReadPreferenceString("W"+Str(i), "")
     Next i
-  ElseIf Count = -1
-    ; PureBasic OOP Default Keywords
-    AddElement(CustomKeywordList()) : CustomKeywordList() = "Class"
-    AddElement(CustomKeywordList()) : CustomKeywordList() = "EndClass"
-    AddElement(CustomKeywordList()) : CustomKeywordList() = "Method"
-    AddElement(CustomKeywordList()) : CustomKeywordList() = "EndMethod"
-    AddElement(CustomKeywordList()) : CustomKeywordList() = "Super"
-    AddElement(CustomKeywordList()) : CustomKeywordList() = "This"
-    AddElement(CustomKeywordList()) : CustomKeywordList() = "New"
-    AddElement(CustomKeywordList()) : CustomKeywordList() = "Init"
-    AddElement(CustomKeywordList()) : CustomKeywordList() = "Free"
-    AddElement(CustomKeywordList()) : CustomKeywordList() = "Public"
-    AddElement(CustomKeywordList()) : CustomKeywordList() = "Protected"
-    AddElement(CustomKeywordList()) : CustomKeywordList() = "Private"
-    AddElement(CustomKeywordList()) : CustomKeywordList() = "Override"
-    AddElement(CustomKeywordList()) : CustomKeywordList() = "Constructor"
-    AddElement(CustomKeywordList()) : CustomKeywordList() = "Destructor"
   EndIf
+  
+  ; Always ensure PureBasic OOP default keywords are included
+  ProcedureReturnOOPKeyword:
+  DataSection
+    OOPKeywordsData:
+    Data$ "Class", "EndClass", "Method", "EndMethod", "Super", "This", "New", "Init", "Free", "Public", "Protected", "Private", "Override", "Constructor", "Destructor", ""
+  EndDataSection
+  Restore OOPKeywordsData
+  Repeat
+    Read.s OOPWord$
+    If OOPWord$ = "" : Break : EndIf
+    FoundOOP = #False
+    ForEach CustomKeywordList()
+      If UCase(CustomKeywordList()) = UCase(OOPWord$)
+        FoundOOP = #True
+        Break
+      EndIf
+    Next CustomKeywordList()
+    If Not FoundOOP
+      AddElement(CustomKeywordList())
+      CustomKeywordList() = OOPWord$
+    EndIf
+  ForEver
   
   SortList(CustomKeywordList(), 2)
   BuildCustomKeywordTable()
@@ -5644,7 +5654,7 @@ AccessibilityColorScheme:
   ; Order and case do not matter
   ;
   DefaultIndentList:
-  Data.l 45   ; Number of default keywords
+  Data.l 49   ; Number of default keywords
   
   Data$ "If":                Data.l  0, 1
   Data$ "Else":              Data.l -1, 1
@@ -5706,6 +5716,11 @@ AccessibilityColorScheme:
   
   Data$ "With":              Data.l  0, 1
   Data$ "EndWith":           Data.l -1, 0
+  
+  Data$ "Class":             Data.l  0, 1
+  Data$ "EndClass":          Data.l -1, 0
+  Data$ "Method":            Data.l  0, 1
+  Data$ "EndMethod":         Data.l -1, 0
   
   
 EndDataSection

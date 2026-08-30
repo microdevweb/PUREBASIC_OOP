@@ -1,4 +1,4 @@
-﻿; --------------------------------------------------------------------------------------------
+; --------------------------------------------------------------------------------------------
 ;  Copyright (c) Fantaisie Software. All rights reserved.
 ;  Dual licensed under the GPL and Fantaisie Software licenses.
 ;  See LICENSE and LICENSE-FANTAISIE in the project root for license information.
@@ -406,6 +406,17 @@ Procedure AutoComplete_FillNormal(WordStart$, ModulePrefix$, EnclosingFunction$,
             AutoComplete_AddEntry(BasicKeywordsReal(i) + BasicKeywordsSpaces(i))
           Else
             AutoComplete_AddEntry(BasicKeywordsReal(i))
+          EndIf
+        Next i
+      EndIf
+      
+      ; add OOP / Custom keywords
+      If RadixFindRange(CustomKeywordsTree, WordStart$, @FirstMatch, @LastMatch)
+        For i = FirstMatch To LastMatch
+          If AutoCompleteAddSpaces
+            AutoComplete_AddEntry(CustomKeywords(i) + " ")
+          Else
+            AutoComplete_AddEntry(CustomKeywords(i))
           EndIf
         Next i
       EndIf
