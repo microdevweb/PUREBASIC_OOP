@@ -617,10 +617,14 @@ EndProcedure
 Procedure TokenizeCompilerVersion(Version$, *Version.INTEGER, *Beta.INTEGER, *OS.INTEGER, *Processor.INTEGER, *cBackend.INTEGER = 0)
   Version$ = Trim(UCase(Version$))
   
-  If StringField(Version$, 1, " ") = UCase(#ProductName$)
+  ; Accept "PUREBASIC" and "PUREBASIC OOP" or SpiderBasic
+  If StringField(Version$, 1, " ") = "PUREBASIC" Or StringField(Version$, 1, " ") = "SPIDERBASIC" Or StringField(Version$, 1, " ") = UCase(#ProductName$)
     
-    ; remove the LTS indicator
+    ; remove the LTS indicator and "OOP" word if present
     Version$ = ReplaceString(Version$, " LTS ", " ")
+    If FindString(Version$, "PUREBASIC OOP ", 1)
+      Version$ = ReplaceString(Version$, "PUREBASIC OOP ", "PUREBASIC ")
+    EndIf
     
     *Version\i = Val(LSet(RemoveString(StringField(Version$, 2, " "), "."), 3, "0"))
     
@@ -796,7 +800,7 @@ Procedure GetCompilerVersion(Executable$, *Compiler.Compiler)
     If AvailableProgramOutput(Compiler) > 0
       Version$ = ReadProgramString(Compiler)
       
-      If Left(Version$, 10) = #ProductName$ + " "
+      If Left(Version$, 10) = "PureBasic " Or Left(Version$, 12) = "SpiderBasic " Or Left(Version$, Len(#ProductName$) + 1) = #ProductName$ + " "
         copy = FindString(Version$, "- (c)", 1) ; cut the copyright statement
         If copy > 0
           Version$ = RTrim(Left(Version$, copy-1))
@@ -805,7 +809,7 @@ Procedure GetCompilerVersion(Executable$, *Compiler.Compiler)
         *Compiler\Executable$    = Executable$
         *Compiler\MD5$           = FileFingerprint(Executable$, #PB_Cipher_MD5)
         *Compiler\VersionString$ = Version$
-        *Compiler\VersionNumber  = Val(LSet(RemoveString(StringField(Version$, 2, " "), "."), 3, "0"))
+        *Compiler\VersionNumber  = Val(LSet(RemoveString(StringField(ReplaceString(ReplaceString(Version$, " LTS ", " "), "PureBasic OOP ", "PureBasic "), 2, " "), "."), 3, "0"))
         
         ; 3.94 and 4.00 both know the /VERSION switch, but they do not have the
         ; communication interface, so we cannot accept them

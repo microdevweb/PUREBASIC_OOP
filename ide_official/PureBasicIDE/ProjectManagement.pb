@@ -1,4 +1,4 @@
-﻿; --------------------------------------------------------------------------------------------
+; --------------------------------------------------------------------------------------------
 ;  Copyright (c) Fantaisie Software. All rights reserved.
 ;  Dual licensed under the GPL and Fantaisie Software licenses.
 ;  See LICENSE and LICENSE-FANTAISIE in the project root for license information.
@@ -222,7 +222,7 @@ Procedure IsCodeFile(FileName$)
   EndIf
   
   ; PB and SB extensions always work
-  If Ext$ = "PB" Or Ext$ = "PBI" Or Ext$ = "PBF" Or Ext$ = "SB" Or Ext$ = "SBI" Or Ext$ = "SBF"
+  If Ext$ = "PB" Or Ext$ = "PBI" Or Ext$ = "PBF" Or Ext$ = "PBO" Or Ext$ = "SB" Or Ext$ = "SBI" Or Ext$ = "SBF"
     ProcedureReturn #True
   EndIf
   
@@ -248,7 +248,7 @@ Procedure IsPureBasicFile(FileName$)
       ProcedureReturn #True
     EndIf
   CompilerElse
-    If Ext$ = "PB" Or Ext$ = "PBI" Or Ext$ = "PBF" Or Ext$ = "PBP"
+    If Ext$ = "PB" Or Ext$ = "PBI" Or Ext$ = "PBF" Or Ext$ = "PBP" Or Ext$ = "PBO"
       ProcedureReturn #True
     EndIf
   CompilerEndIf

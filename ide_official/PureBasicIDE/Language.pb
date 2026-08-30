@@ -622,7 +622,7 @@ DataSection
   CompilerIf #SpiderBasic
     Data$ "Pattern",          "SpiderBasic Files (*.sb, *.sbi, *.sbp, *.sbf)|*.sb;*.sbi;*.sbp;*.sbf|SpiderBasic Sourcecodes (*.sb)|*.sb|SpiderBasic Includefiles (*.sbi)|*.sbi|SpiderBasic Projects (*.sbp)|*.sbp|Spiderbasic Forms (*.sbf)|*.sbf|All Files (*.*)|*.*"
   CompilerElse
-    Data$ "Pattern",          "PureBasic Files (*.pb, *.pbi, *.pbp, *.pbf)|*.pb;*.pbi;*.pbp;*.pbf|PureBasic Sourcecodes (*.pb)|*.pb|PureBasic Includefiles (*.pbi)|*.pbi|PureBasic Projects (*.pbp)|*.pbp|Purebasic Forms (*.pbf)|*.pbf|All Files (*.*)|*.*"
+    Data$ "Pattern",          "PureBasic OOP Files (*.pbo, *.pb, *.pbi, *.pbp, *.pbf)|*.pbo;*.pb;*.pbi;*.pbp;*.pbf|PureBasic OOP Sources (*.pbo)|*.pbo|PureBasic Sourcecodes (*.pb)|*.pb|PureBasic Includefiles (*.pbi)|*.pbi|PureBasic Projects (*.pbp)|*.pbp|PureBasic Forms (*.pbf)|*.pbf|All Files (*.*)|*.*"
   CompilerEndIf
   
   Data$ "StatusLoading",    "Loading source code..."
