@@ -3604,6 +3604,13 @@ Procedure LocateStructureBaseItem(Line$, Position, *pItem.INTEGER, *pLine.INTEGE
           
         Else
           ; It must be the base item, so try to identify it (the loop then terminates)
+          ItemName$ = PeekS(*StartPosition, ((*EndPosition-*StartPosition)/SizeOf(Character))+1)
+          If LCase(ItemName$) = "this" Or LCase(ItemName$) = "*this"
+            *BaseItem = 0
+            IsStructure = #True
+            Break
+          EndIf
+          
           *BaseItem = LocateSourceItem(@*ActiveSource\Parser, BaseItemLine, CharsToBytes(Line$, 0, *ActiveSource\Parser\Encoding, (*StartPosition-*Buffer)/SizeOf(Character)))
           If *BaseItem
             If *BaseItem\Type = #ITEM_Variable Or *BaseItem\Type = #ITEM_Array Or *BaseItem\Type = #ITEM_LinkedList Or *BaseItem\Type = #ITEM_Map Or *BaseItem\Type = #ITEM_UnknownBraced

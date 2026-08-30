@@ -686,9 +686,16 @@ Procedure AutoComplete_FillStructured(WordStart$, StructName$, *BaseItem.SourceI
           Break
         Else
           ; store the processed entry
-          If AutoCompleteAddBrackets And IsOffsetOf = 0 ; any brackes in OffsetOf are a syntax error (with structures)
+          If AutoCompleteAddBrackets And IsOffsetOf = 0 ; any brackets in OffsetOf are a syntax error (with structures)
             If Bracket$
               AutoComplete_AddEntry(Entry$ + Bracket$)
+            ElseIf FindString(AutoCompleteStructure(), "(", 1) ; Method with prototype
+              ProtoInItem$ = Mid(AutoCompleteStructure(), FindString(AutoCompleteStructure(), "(", 1))
+              If RemoveString(RemoveString(ProtoInItem$, " "), Chr(9)) = "()"
+                AutoComplete_AddEntry(Entry$ + "()")
+              Else
+                AutoComplete_AddEntry(Entry$ + "(")
+              EndIf
             Else
               *ProtoItem.SourceItem = FindPrototype(EntryType$)
               If *ProtoItem And *ProtoItem\Prototype$
@@ -960,36 +967,12 @@ Procedure OpenAutoCompleteWindow()
         StructName$ = ""
         BaseItemLine = *ActiveSource\CurrentLine-1
         AutoComplete_IsStructure = LocateStructureBaseItem(Line$, Column, @*BaseItem.SourceItem, @BaseItemLine, AutoCompleteStack())
-      EndIf
-      
-      ; OOP: Check for "This\" or "*This\" inside a class method
-      If AutoComplete_IsStructure = 0
-        *Buffer = @Line$
-        *Cursor.Character = *Buffer + Column * #CharSize
-        While *Cursor >= *Buffer And (*Cursor\c = ' ' Or *Cursor\c = 9)
-          *Cursor - #CharSize
-        Wend
-        If *Cursor >= *Buffer And *Cursor\c = '\'
-          *Cursor - #CharSize
-          While *Cursor >= *Buffer And (*Cursor\c = ' ' Or *Cursor\c = 9)
-            *Cursor - #CharSize
-          Wend
-          *WordEnd = *Cursor
-          While *Cursor >= *Buffer And (*Cursor\c = '*' Or ValidCharacters(*Cursor\c))
-            *Cursor - #CharSize
-          Wend
-          *WordStart = *Cursor + #CharSize
-          If *WordEnd >= *WordStart
-            WordBeforeSlash$ = PeekS(*WordStart, (*WordEnd - *WordStart)/#CharSize + 1)
-            If LCase(WordBeforeSlash$) = "this" Or LCase(WordBeforeSlash$) = "*this"
-              EnclosingClass$ = AutoComplete_FindEnclosingClass(*ActiveSource\CurrentLine - 1)
-              If EnclosingClass$ <> ""
-                StructName$ = EnclosingClass$
-                *BaseItem = 0
-                AutoComplete_IsStructure = 1
-                ClearList(AutoCompleteStack())
-              EndIf
-            EndIf
+        If AutoComplete_IsStructure And *BaseItem = 0 And StructName$ = ""
+          EnclosingClass$ = AutoComplete_FindEnclosingClass(*ActiveSource\CurrentLine - 1)
+          If EnclosingClass$ <> ""
+            StructName$ = EnclosingClass$
+          Else
+            AutoComplete_IsStructure = 0
           EndIf
         EndIf
       EndIf
@@ -1376,7 +1359,7 @@ Procedure AutoComplete_WordUpdate(IsInitial=#False)
       ; we need to find out if the last char is still a '\', as anything else should force a close
       *Buffer = @Line$
       *Cursor.Character = *Buffer + Column * #CharSize
-      While *Cursor > *Buffer And (*Cursor\c = ' ' Or *Cursor\c = 9)
+      While *Cursor >= *Buffer And (*Cursor\c = ' ' Or *Cursor\c = 9)
         *Cursor - #CharSize
       Wend
       
