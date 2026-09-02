@@ -59,6 +59,11 @@ EndProcedure
 Global Compiler_SubSystem$ = ""
 Global CompilerStartup
 
+Global NewMap OOP_SourceLineMap.i()
+Global OOP_TranspilerError$ = ""
+Global OOP_TranspilerErrorLine.i = 0
+Global OOP_TranspilerErrorFile$ = ""
+
 CompilerIf #SpiderBasic
   Global NewList OpenedWebServers()
 CompilerEndIf
@@ -1192,6 +1197,9 @@ Procedure Compiler_HandleCompilerResponse(*Target.CompileTarget)
     ElseIf Left(Response$, 8) = "WARNING"+Chr(9)  ; warning message
       File$ = *Target\FileName$
       Line  = Val(StringField(Response$, 2, Chr(9)))
+      If FindMapElement(OOP_SourceLineMap(), Str(Line))
+        Line = OOP_SourceLineMap(Str(Line))
+      EndIf
       Message$ = ""
       
       ; Read all warning related information
@@ -1347,6 +1355,10 @@ Procedure Compiler_HandleCompilerResponse(*Target.CompileTarget)
     ; Process the information
     ;
     If IncludeName$ = "" ; main file
+      If FindMapElement(OOP_SourceLineMap(), Str(ErrorLine))
+        ErrorLine = OOP_SourceLineMap(Str(ErrorLine))
+      EndIf
+      
       If ErrorLine = -1
         Line$ = Message$
       Else
@@ -2198,7 +2210,40 @@ Procedure.s Compiler_TemporaryFilename(*Target.CompileTarget)
   ProcedureReturn TargetFileName$
 EndProcedure
 
+Procedure.b LoadOOPSourceMap(mapFilePath$)
+  ClearMap(OOP_SourceLineMap())
+  Protected f = ReadFile(#PB_Any, mapFilePath$)
+  If f
+    Protected isMapSection.b = #False
+    While Not Eof(f)
+      Protected line$ = Trim(ReadString(f))
+      If line$ = "MAP:"
+        isMapSection = #True
+        Continue
+      EndIf
+      If isMapSection And line$ <> ""
+        Protected p1 = FindString(line$, ":")
+        If p1 > 0
+          Protected pbLine$ = Trim(Left(line$, p1 - 1))
+          Protected pboLine = Val(Trim(Mid(line$, p1 + 1)))
+          If pbLine$ <> "" And pboLine > 0
+            OOP_SourceLineMap(pbLine$) = pboLine
+          EndIf
+        EndIf
+      EndIf
+    Wend
+    CloseFile(f)
+    ProcedureReturn #True
+  EndIf
+  ProcedureReturn #False
+EndProcedure
+
 Procedure.s TranspileOOPFile(SourceFileName$)
+  ClearMap(OOP_SourceLineMap())
+  OOP_TranspilerError$ = ""
+  OOP_TranspilerErrorLine = 0
+  OOP_TranspilerErrorFile$ = ""
+
   ; Check if file is .pbo or contains OOP keywords like "Class "
   Protected isOOP.b = #False
   If LCase(GetExtensionPart(SourceFileName$)) = "pbo"
@@ -2209,7 +2254,7 @@ Procedure.s TranspileOOPFile(SourceFileName$)
     If f
       While Not Eof(f)
         Protected l.s = Trim(UCase(ReadString(f)))
-        If Left(l, 6) = "CLASS " Or Left(l, 7) = "METHOD "
+        If Left(l, 6) = "CLASS " Or Left(l, 7) = "METHOD " Or Left(l, 15) = "ABSTRACT CLASS "
           isOOP = #True
           Break
         EndIf
@@ -2237,13 +2282,56 @@ Procedure.s TranspileOOPFile(SourceFileName$)
   EndIf
 
   Protected transpiledFile$ = TempPath$ + "PB_OOP_Transpiled_" + Str(Random(999999)) + ".pb"
-  Protected prg = RunProgram(transpilerExe$, #DQUOTE$ + SourceFileName$ + #DQUOTE$ + " " + #DQUOTE$ + transpiledFile$ + #DQUOTE$, "", #PB_Program_Open | #PB_Program_Wait | #PB_Program_Hide)
+  Protected prg = RunProgram(transpilerExe$, #DQUOTE$ + SourceFileName$ + #DQUOTE$ + " " + #DQUOTE$ + transpiledFile$ + #DQUOTE$, "", #PB_Program_Open | #PB_Program_Read | #PB_Program_Hide)
+  Protected outputLog$ = ""
+  
   If prg
+    While ProgramRunning(prg)
+      While AvailableProgramOutput(prg)
+        outputLog$ + ReadProgramString(prg) + #NewLine
+      Wend
+      Delay(5)
+    Wend
+    While AvailableProgramOutput(prg)
+      outputLog$ + ReadProgramString(prg) + #NewLine
+    Wend
     Protected exitCode = ProgramExitCode(prg)
     CloseProgram(prg)
+    
     If exitCode = 0 And FileSize(transpiledFile$) > 0
       RegisterDeleteFile(transpiledFile$)
+      ; Load source line mapping
+      If FileSize(transpiledFile$ + ".map") > 0
+        LoadOOPSourceMap(transpiledFile$ + ".map")
+        RegisterDeleteFile(transpiledFile$ + ".map")
+      EndIf
       ProcedureReturn transpiledFile$
+    Else
+      ; Parse OOP Error output
+      OOP_TranspilerErrorFile$ = SourceFileName$
+      OOP_TranspilerErrorLine = 1
+      OOP_TranspilerError$ = "PureBasic OOP Transpilation Failed"
+      
+      Protected i.i, numLines.i = CountString(outputLog$, #NewLine)
+      For i = 1 To numLines
+        Protected curLogLine$ = Trim(StringField(outputLog$, i, #NewLine))
+        If Left(curLogLine$, 7) = "[ERROR]"
+          Protected pLine = FindString(curLogLine$, "Line ")
+          If pLine > 0
+            Protected pColon = FindString(curLogLine$, ":", pLine)
+            If pColon > 0
+              OOP_TranspilerErrorLine = Val(Trim(Mid(curLogLine$, pLine + 5, pColon - (pLine + 5))))
+              OOP_TranspilerError$ = Trim(Mid(curLogLine$, pColon + 1))
+            Else
+              OOP_TranspilerError$ = Trim(Mid(curLogLine$, 8))
+            EndIf
+          Else
+            OOP_TranspilerError$ = Trim(Mid(curLogLine$, 8))
+          EndIf
+          Break
+        EndIf
+      Next
+      ProcedureReturn ""
     EndIf
   EndIf
 
@@ -2300,6 +2388,24 @@ Procedure Compiler_CompileRun(SourceFileName$, *Source.SourceFile, CheckSyntax)
   
   ; Transpile OOP source (.pbo / Class keywords) before passing to pbcompiler
   Protected ActualSourceFile$ = TranspileOOPFile(SourceFileName$)
+  
+  If ActualSourceFile$ = ""
+    ; Transpilation failed due to OOP error!
+    HideCompilerWindow()
+    If OOP_TranspilerErrorFile$ <> ""
+      LoadSourceFile(OOP_TranspilerErrorFile$)
+      If OOP_TranspilerErrorLine > 0
+        ChangeActiveLine(OOP_TranspilerErrorLine, -5)
+        SetSelection(OOP_TranspilerErrorLine, 1, OOP_TranspilerErrorLine, -1)
+      EndIf
+      Debugger_AddLog_BySource(*ActiveSource, "[OOP ERROR] Line " + Str(OOP_TranspilerErrorLine) + ": " + OOP_TranspilerError$, Date())
+    EndIf
+    If DisplayErrorWindow
+      MessageRequester(#ProductName$, "Line " + Str(OOP_TranspilerErrorLine) + ": " + OOP_TranspilerError$, #FLAG_Error)
+    EndIf
+    ActivateMainWindow()
+    ProcedureReturn #False
+  EndIf
   
   CompilerWrite("SOURCE"+Chr(9)+ActualSourceFile$, #COMPILER_FileFormat)
   CompilerWrite("TARGET"+Chr(9)+TargetFileName$, #COMPILER_FileFormat)
@@ -2516,6 +2622,24 @@ Procedure Compiler_BuildTarget(SourceFileName$, TargetFileName$, *Target.Compile
   
   ; Transpile OOP source (.pbo / Class keywords) before passing to pbcompiler
   Protected ActualSourceFile$ = TranspileOOPFile(SourceFileName$)
+  
+  If ActualSourceFile$ = ""
+    ; Transpilation failed due to OOP error!
+    HideCompilerWindow()
+    If OOP_TranspilerErrorFile$ <> ""
+      LoadSourceFile(OOP_TranspilerErrorFile$)
+      If OOP_TranspilerErrorLine > 0
+        ChangeActiveLine(OOP_TranspilerErrorLine, -5)
+        SetSelection(OOP_TranspilerErrorLine, 1, OOP_TranspilerErrorLine, -1)
+      EndIf
+      Debugger_AddLog_BySource(*ActiveSource, "[OOP ERROR] Line " + Str(OOP_TranspilerErrorLine) + ": " + OOP_TranspilerError$, Date())
+    EndIf
+    If DisplayErrorWindow
+      MessageRequester(#ProductName$, "Line " + Str(OOP_TranspilerErrorLine) + ": " + OOP_TranspilerError$, #FLAG_Error)
+    EndIf
+    ActivateMainWindow()
+    ProcedureReturn #False
+  EndIf
   
   CompilerWrite("SOURCE"+Chr(9)+ActualSourceFile$, #COMPILER_FileFormat)
   CompilerWrite("TARGET"+Chr(9)+TargetFileName$, #COMPILER_FileFormat)

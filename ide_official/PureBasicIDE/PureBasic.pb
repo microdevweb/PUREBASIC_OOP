@@ -561,7 +561,7 @@ AddGadgetItem(#GADGET_ErrorLog, -1, Language("Misc", "Welcome"))
 
 QuitIDE = 0
 Repeat
-  DispatchEvent(WaitWindowEvent())
+  DispatchEvent(WaitWindowEvent(50))
   EventLoopCallback()
   
   ; On Linux x64 and Cocoa, opening the files from the RunOnce message filter causes the IDE to lock up

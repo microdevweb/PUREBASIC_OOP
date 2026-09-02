@@ -2521,11 +2521,19 @@ Procedure EventLoopCallback()
             SendMessage_(GadgetID(*ActiveSource\EditorGadget), #WM_LBUTTONUP, 0, 0) ; simulate a mouseup to fix the ugly selection problem (https://www.purebasic.fr/english/viewtopic.php?f=4&t=50135)
           CompilerEndIf
           
-          JumpToProcedure()
+            JumpToProcedure()
+          EndIf
         EndIf
       EndIf
+    CompilerEndIf
+
+  ; OOP Real-time linter debounced check (600ms inactivity)
+  If *ActiveSource And *ActiveSource\OOP_Linter_LastCheckTime <> 0
+    If ElapsedMilliseconds() - *ActiveSource\OOP_Linter_LastCheckTime >= 600
+      *ActiveSource\OOP_Linter_LastCheckTime = 0
+      OOP_Linter_CheckSource(*ActiveSource)
     EndIf
-  CompilerEndIf
+  EndIf
   
 EndProcedure
 

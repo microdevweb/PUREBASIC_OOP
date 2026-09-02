@@ -14,7 +14,7 @@ Abstract Class Animal
   Public Method Crier()
   Public Method Manger(nourriture.s)
   Public Method Free()
-EndClass
+EndClas
 
 Method Animal::Init(nom_p.s, age_p.i)
   This\nom = nom_p
@@ -166,7 +166,7 @@ Input()
 CloseConsole()
 
 ; IDE Options = PureBasic 6.40 (Windows - x64)
-; CursorPosition = 10
+; CursorPosition = 15
 ; Folding = -
 ; EnableXP
 ; DPIAware

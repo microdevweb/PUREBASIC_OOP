@@ -1,4 +1,4 @@
-﻿; --------------------------------------------------------------------------------------------
+; --------------------------------------------------------------------------------------------
 ;  Copyright (c) Fantaisie Software. All rights reserved.
 ;  Dual licensed under the GPL and Fantaisie Software licenses.
 ;  See LICENSE and LICENSE-FANTAISIE in the project root for license information.
@@ -315,6 +315,7 @@ CompilerIf #CompileWindows | #CompileLinux | #CompileMac
         SendEditorMessage(#SCI_INDICSETFORE, #INDICATOR_KeywordMatch,    Colors(#COLOR_GoodBrace)\DisplayValue)
         SendEditorMessage(#SCI_INDICSETFORE, #INDICATOR_KeywordMismatch, Colors(#COLOR_BadBrace)\DisplayValue)
         SendEditorMessage(#SCI_INDICSETFORE, #INDICATOR_SelectionRepeat, Colors(#COLOR_SelectionRepeat)\DisplayValue)
+        SendEditorMessage(#SCI_INDICSETFORE, #INDICATOR_OOP_Error,       $0000FF)
         
         ; Set the line margin and symbol margin style
         ;
@@ -2834,6 +2835,10 @@ CompilerIf #CompileWindows | #CompileLinux | #CompileMac
             QuickHelpFromLine(*ActiveSource\CurrentLine-1, *ActiveSource\CurrentColumnChars-1)
           EndIf
           
+          If *ActiveSource\OOP_Linter_ErrorLine > 0 And *ActiveSource\CurrentLine = *ActiveSource\OOP_Linter_ErrorLine
+            ChangeStatus("[OOP Erreur Ligne " + Str(*ActiveSource\OOP_Linter_ErrorLine) + "] " + *ActiveSource\OOP_Linter_ErrorMessage$, 2500)
+          EndIf
+          
           ; add the old line to the lines history, if the jump since the last #SCN_UPDATEUI
           ; was more than 20 lines. (ie, not moved by keyboard, but by mouse or something else)
           ;
@@ -2930,6 +2935,7 @@ CompilerIf #CompileWindows | #CompileLinux | #CompileMac
       Case #SCN_MODIFIED
         If *ActiveSource\IsCode
           *ActiveSource\ModifiedSinceUpdate = 1 ; the source has been modified
+          *ActiveSource\OOP_Linter_LastCheckTime = ElapsedMilliseconds()
           If EnableLineNumbers And *scinotify\modificationType & (#SC_MOD_INSERTTEXT | #SC_MOD_DELETETEXT)
             UpdateLineNumbers(*ActiveSource)
           EndIf
@@ -3018,6 +3024,7 @@ CompilerIf #CompileWindows | #CompileLinux | #CompileMac
       Case #SCN_CHARADDED
         If *ActiveSource And EditorGadget = *ActiveSource\EditorGadget
           *ActiveSource\ModifiedSinceUpdate = 1 ; the source has been modified
+          *ActiveSource\OOP_Linter_LastCheckTime = ElapsedMilliseconds()
           
           ; With structure autocomplete, while typing a \, we can have one autocomplete to close
           ; and then directly re-open in structure mode for the structure, so handle this case
@@ -3450,6 +3457,10 @@ CompilerIf #CompileWindows | #CompileLinux | #CompileMac
     SendEditorMessage(#SCI_INDICSETALPHA, #INDICATOR_SelectionRepeat, 255)
     SendEditorMessage(#SCI_INDICSETOUTLINEALPHA, #INDICATOR_SelectionRepeat, 255)
     SendEditorMessage(#SCI_INDICSETUNDER, #INDICATOR_SelectionRepeat, #True)
+    
+    SendEditorMessage(#SCI_INDICSETSTYLE, #INDICATOR_OOP_Error, #INDIC_SQUIGGLE)
+    SendEditorMessage(#SCI_INDICSETFORE, #INDICATOR_OOP_Error, $0000FF)
+    SendEditorMessage(#SCI_INDICSETUNDER, #INDICATOR_OOP_Error, #True)
     
     
     ApplyWordChars(*ActiveSource\EditorGadget)
@@ -4154,6 +4165,144 @@ CompilerIf #CompileWindows | #CompileLinux | #CompileMac
     ScintillaSendMessage(*Source\EditorGadget, #SCI_MARKERDELETEALL, #MARKER_BreakpointSymbol, 0)
     If *Source = *ActiveSource ; removing background markers sometimes is only done when redrawing.. really annoying!
       RedrawGadget(*Source\EditorGadget)
+    EndIf
+  EndProcedure
+  
+  ; ----------------------------------------------------------------------------
+  ; OOP Real-Time Dynamic Linter
+  ; ----------------------------------------------------------------------------
+  Procedure OOP_Linter_ClearErrors(*Source.SourceFile)
+    If *Source And *Source\EditorGadget And IsGadget(*Source\EditorGadget)
+      ScintillaSendMessage(*Source\EditorGadget, #SCI_SETINDICATORCURRENT, #INDICATOR_OOP_Error, 0)
+      ScintillaSendMessage(*Source\EditorGadget, #SCI_INDICATORCLEARRANGE, 0, ScintillaSendMessage(*Source\EditorGadget, #SCI_GETLENGTH, 0, 0))
+      *Source\OOP_Linter_ErrorLine = 0
+      *Source\OOP_Linter_ErrorMessage$ = ""
+      If *Source = *ActiveSource And IsGadget(#STATUSBAR)
+        StatusBarText(#STATUSBAR, 1, "", #PB_StatusBar_BorderLess)
+      EndIf
+      CompilerIf #CompileWindows
+        InvalidateRect_(GadgetID(*Source\EditorGadget), 0, #True)
+      CompilerEndIf
+    EndIf
+  EndProcedure
+
+  Procedure OOP_Linter_SetError(*Source.SourceFile, lineNum.i, message.s)
+    If *Source And *Source\EditorGadget And IsGadget(*Source\EditorGadget)
+      ScintillaSendMessage(*Source\EditorGadget, #SCI_INDICSETSTYLE, #INDICATOR_OOP_Error, #INDIC_SQUIGGLE)
+      ScintillaSendMessage(*Source\EditorGadget, #SCI_INDICSETFORE, #INDICATOR_OOP_Error, $0000FF)
+      ScintillaSendMessage(*Source\EditorGadget, #SCI_INDICSETUNDER, #INDICATOR_OOP_Error, #True)
+      ScintillaSendMessage(*Source\EditorGadget, #SCI_INDICSETALPHA, #INDICATOR_OOP_Error, 255)
+      ScintillaSendMessage(*Source\EditorGadget, #SCI_INDICSETOUTLINEALPHA, #INDICATOR_OOP_Error, 255)
+      ScintillaSendMessage(*Source\EditorGadget, #SCI_SETINDICATORCURRENT, #INDICATOR_OOP_Error, 0)
+      ScintillaSendMessage(*Source\EditorGadget, #SCI_INDICATORCLEARRANGE, 0, ScintillaSendMessage(*Source\EditorGadget, #SCI_GETLENGTH, 0, 0))
+      
+      *Source\OOP_Linter_ErrorLine = lineNum
+      *Source\OOP_Linter_ErrorMessage$ = message
+      
+      If lineNum > 0
+        Protected totalLines = ScintillaSendMessage(*Source\EditorGadget, #SCI_GETLINECOUNT, 0, 0)
+        If lineNum <= totalLines
+          Protected startPos = ScintillaSendMessage(*Source\EditorGadget, #SCI_POSITIONFROMLINE, lineNum - 1, 0)
+          Protected endPos = ScintillaSendMessage(*Source\EditorGadget, #SCI_GETLINEENDPOSITION, lineNum - 1, 0)
+          If endPos <= startPos
+            endPos = startPos + 1
+          EndIf
+          ScintillaSendMessage(*Source\EditorGadget, #SCI_SETINDICATORCURRENT, #INDICATOR_OOP_Error, 0)
+          ScintillaSendMessage(*Source\EditorGadget, #SCI_INDICATORFILLRANGE, startPos, endPos - startPos)
+        EndIf
+      EndIf
+
+      If *Source = *ActiveSource And IsGadget(#STATUSBAR)
+        StatusBarText(#STATUSBAR, 1, "[OOP Error L" + Str(lineNum) + "] " + message, #PB_StatusBar_BorderLess)
+      EndIf
+      CompilerIf #CompileWindows
+        InvalidateRect_(GadgetID(*Source\EditorGadget), 0, #True)
+      CompilerEndIf
+    EndIf
+  EndProcedure
+
+  Procedure OOP_Linter_CheckSource(*Source.SourceFile)
+    If *Source = #Null Or *Source\EditorGadget = 0 Or Not IsGadget(*Source\EditorGadget)
+      ProcedureReturn
+    EndIf
+
+    ; Locate transpiler executable
+    Protected transpilerExe$ = "c:\PB\PUREBASIC_OOP_WORKSPACE\compiler\transpiler.exe"
+    If FileSize(transpilerExe$) <= 0
+      transpilerExe$ = GetPathPart(ProgramFilename()) + "compiler\transpiler.exe"
+    EndIf
+    If FileSize(transpilerExe$) <= 0
+      transpilerExe$ = GetCurrentDirectory() + "compiler\transpiler.exe"
+    EndIf
+    If FileSize(transpilerExe$) <= 0
+      ProcedureReturn
+    EndIf
+
+    ; Save buffer text to a temp file
+    Protected totalLen = ScintillaSendMessage(*Source\EditorGadget, #SCI_GETLENGTH, 0, 0)
+    If totalLen <= 0
+      OOP_Linter_ClearErrors(*Source)
+      ProcedureReturn
+    EndIf
+
+    Protected *fullBuf = AllocateMemory(totalLen + 1)
+    If Not *fullBuf
+      ProcedureReturn
+    EndIf
+    ScintillaSendMessage(*Source\EditorGadget, #SCI_GETTEXT, totalLen + 1, *fullBuf)
+
+    Protected tempPBO$ = TempPath$ + "pbo_linter_temp_" + Str(Random(999999)) + ".pbo"
+    Protected f = CreateFile(#PB_Any, tempPBO$)
+    If f
+      WriteData(f, *fullBuf, totalLen)
+      CloseFile(f)
+    EndIf
+    FreeMemory(*fullBuf)
+
+    Protected prg = RunProgram(transpilerExe$, "--check " + #DQUOTE$ + tempPBO$ + #DQUOTE$, "", #PB_Program_Open | #PB_Program_Read | #PB_Program_Hide)
+    Protected logOut$ = ""
+    If prg
+      While ProgramRunning(prg)
+        While AvailableProgramOutput(prg)
+          logOut$ + ReadProgramString(prg) + #NewLine
+        Wend
+        Delay(5)
+      Wend
+      While AvailableProgramOutput(prg)
+        logOut$ + ReadProgramString(prg) + #NewLine
+      Wend
+      CloseProgram(prg)
+      DeleteFile(tempPBO$)
+
+      If FindString(logOut$, "[ERROR]") > 0
+        ; Parse error
+        Protected errLine.i = 0, errDesc.s = ""
+        Protected pErr = FindString(logOut$, "[ERROR]")
+        If pErr > 0
+          Protected errSub$ = Mid(logOut$, pErr)
+          Protected pL = FindString(errSub$, "Line ")
+          If pL > 0
+            Protected pC = FindString(errSub$, ":", pL)
+            If pC > 0
+              errLine = Val(Trim(Mid(errSub$, pL + 5, pC - (pL + 5))))
+              errDesc = Trim(Mid(errSub$, pC + 1))
+              Protected pEnd = FindString(errDesc, #NewLine)
+              If pEnd > 0
+                errDesc = Left(errDesc, pEnd - 1)
+              EndIf
+            EndIf
+          EndIf
+        EndIf
+        If errLine > 0
+          OOP_Linter_SetError(*Source, errLine, errDesc)
+        Else
+          OOP_Linter_ClearErrors(*Source)
+        EndIf
+      Else
+        OOP_Linter_ClearErrors(*Source)
+      EndIf
+    Else
+      DeleteFile(tempPBO$)
     EndIf
   EndProcedure
   

@@ -30,6 +30,9 @@ Declare.s Compiler_TemporaryFilename(*Target.CompileTarget)
 Declare Compiler_CompileRun(SourceFileName$, *Source.SourceFile, CheckSyntax)           ; compilerun with the given source (no Project targsts used here!)
 Declare Compiler_Run(*Target.CompileTarget, IsFirstRun)                                 ; run the target
 Declare Compiler_BuildTarget(SourceFileName$, TargetFileName$, *Target.CompileTarget, CreateExe, CheckSyntax)  ; create executable with the given source
+Declare OOP_Linter_CheckSource(*Source.SourceFile)
+Declare OOP_Linter_ClearErrors(*Source.SourceFile)
+Declare OOP_Linter_SetError(*Source.SourceFile, lineNum.i, message.s)
 
 ;- HelpViewer.pb
 ;- WindowsHelp.pb

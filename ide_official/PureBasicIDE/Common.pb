@@ -1998,6 +1998,7 @@ EndStructure
 #INDICATOR_KeywordMatch    = 0
 #INDICATOR_KeywordMismatch = 1
 #INDICATOR_SelectionRepeat = 2
+#INDICATOR_OOP_Error       = 8
 
 ;- UpdateCheck
 
@@ -2311,6 +2312,12 @@ Structure SourceFile Extends CompileTarget
   ProjectFile.i   ; pointer to a ProjectFile Structure (0 if not part of the open project)
   FormFile.i
   
+  ; OOP Linter fields
+  OOP_Linter_LastCheckTime.q
+  OOP_Linter_ErrorLine.l
+  OOP_Linter_ErrorMessage$
+  OOP_IsOOPFile.b
+
   ; history information
   HistoryName.s       ; either the filename or a unique id string for unsaved files
   ExcludeFromHistory.l; exclude from history (too large size)
