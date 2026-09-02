@@ -14,7 +14,7 @@ Abstract Class Animal
   Public Method Crier()
   Public Method Manger(nourriture.s)
   Public Method Free()
-EndClas
+EndClass
 
 Method Animal::Init(nom_p.s, age_p.i)
   This\nom = nom_p
