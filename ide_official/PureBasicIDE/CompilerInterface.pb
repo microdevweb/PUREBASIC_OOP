@@ -2495,6 +2495,14 @@ Procedure Compiler_CompileRun(SourceFileName$, *Source.SourceFile, CheckSyntax)
     
     ProcedureReturn #True
   Else
+    ; Ensure all sources are unlocked from read-only if compilation failed
+    PushListPosition(FileList())
+    ForEach FileList()
+      If @FileList() <> *ProjectInfo And FileList()\EditorGadget And IsGadget(FileList()\EditorGadget)
+        SetReadOnly(FileList()\EditorGadget, 0)
+      EndIf
+    Next
+    PopListPosition(FileList())
     ProcedureReturn #False
   EndIf
   
