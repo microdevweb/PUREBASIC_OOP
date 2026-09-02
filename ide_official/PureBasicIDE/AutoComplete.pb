@@ -23,6 +23,8 @@ Global AutoComplete_IsModule
 Global AutoComplete_ModuleStart
 Global AutoComplete_IsUsingNamespace
 Global AutoComplete_UsingStart
+Global AutoComplete_IsExtends
+Global AutoComplete_ExtendsStart
 Global AutoComplete_StartColumn
 
 Global AutoCompleteTree.RadixTree       ; indexes AutoCompleteList() for fast prefix access and ordering
@@ -863,7 +865,12 @@ EndProcedure
 ; PureBasic OOP - Namespace & Include AutoComplete Support
 ; ----------------------------------------------------------------------------
 
-Procedure AutoComplete_ExtractNamespacesFromFile(filePath.s, Map visitedFiles.i(), List Namespaces.s())
+Structure OOP_ClassSymbol
+  ClassName.s
+  Namespace.s
+EndStructure
+
+Procedure AutoComplete_ExtractOOPFromFile(filePath.s, Map visitedFiles.i(), List Namespaces.s(), List Classes.OOP_ClassSymbol())
   filePath = ResolveRelativePath(SourcePath$, filePath)
   Protected normPath.s = UCase(filePath)
   If FindMapElement(visitedFiles(), normPath)
@@ -884,10 +891,26 @@ Procedure AutoComplete_ExtractNamespacesFromFile(filePath.s, Map visitedFiles.i(
   If fmt = #PB_Ascii : fmt = #PB_UTF8 : EndIf
   
   Protected fileDir.s = GetPathPart(filePath)
+  Protected currentNS.s = ""
+  Protected nsBraceDepth.i = 0
   
   While Not Eof(file)
     Protected rawLine.s = Trim(ReadString(file, fmt))
     Protected upper.s = UCase(rawLine)
+    
+    ; Track Namespace depth
+    If currentNS <> ""
+      If CountString(rawLine, "{") > 0
+        nsBraceDepth + CountString(rawLine, "{")
+      EndIf
+      If CountString(rawLine, "}") > 0
+        nsBraceDepth - CountString(rawLine, "}")
+        If nsBraceDepth <= 0
+          currentNS = ""
+          nsBraceDepth = 0
+        EndIf
+      EndIf
+    EndIf
     
     ; 1. Check Namespace declaration
     If Left(upper, 10) = "NAMESPACE " Or Left(upper, 10) = "NAMESPACE	"
@@ -897,6 +920,8 @@ Procedure AutoComplete_ExtractNamespacesFromFile(filePath.s, Map visitedFiles.i(
         nsName = Trim(Left(nsName, pBrace - 1))
       EndIf
       If nsName <> ""
+        currentNS = nsName
+        nsBraceDepth = 1
         Protected isDuplicate.b = #False
         ForEach Namespaces()
           If CompareMemoryString(@Namespaces(), @nsName, #PB_String_NoCaseAscii) = #PB_String_Equal
@@ -910,7 +935,40 @@ Procedure AutoComplete_ExtractNamespacesFromFile(filePath.s, Map visitedFiles.i(
         EndIf
       EndIf
       
-    ; 2. Check IncludeFile / XIncludeFile
+    ; 2. Check Class declaration
+    ElseIf (Left(upper, 6) = "CLASS " Or Left(upper, 6) = "CLASS	" Or FindString(upper, " CLASS ") > 0) And Left(upper, 8) <> "ENDCLASS"
+      Protected pCls = FindString(upper, "CLASS ")
+      If pCls = 0 : pCls = FindString(upper, "CLASS	") : EndIf
+      If pCls > 0
+        Protected clsRest.s = Trim(Mid(rawLine, pCls + 6))
+        If Right(clsRest, 1) = "{"
+          clsRest = Trim(Left(clsRest, Len(clsRest) - 1))
+        EndIf
+        Protected pExt = FindString(UCase(clsRest), "EXTENDS ")
+        If pExt = 0 : pExt = FindString(UCase(clsRest), "EXTENDS	") : EndIf
+        Protected clsName.s = ""
+        If pExt > 0
+          clsName = Trim(Left(clsRest, pExt - 1))
+        Else
+          clsName = clsRest
+        EndIf
+        If clsName <> ""
+          Protected isClsDup.b = #False
+          ForEach Classes()
+            If CompareMemoryString(@Classes()\ClassName, @clsName, #PB_String_NoCaseAscii) = #PB_String_Equal And CompareMemoryString(@Classes()\Namespace, @currentNS, #PB_String_NoCaseAscii) = #PB_String_Equal
+              isClsDup = #True
+              Break
+            EndIf
+          Next
+          If Not isClsDup
+            AddElement(Classes())
+            Classes()\ClassName = clsName
+            Classes()\Namespace = currentNS
+          EndIf
+        EndIf
+      EndIf
+      
+    ; 3. Check IncludeFile / XIncludeFile
     ElseIf Left(upper, 12) = "INCLUDEFILE " Or Left(upper, 13) = "XINCLUDEFILE " Or Left(upper, 12) = "INCLUDEFILE	" Or Left(upper, 13) = "XINCLUDEFILE	"
       Protected pQ1 = FindString(rawLine, Chr(34))
       Protected pQ2 = 0
@@ -929,7 +987,7 @@ Procedure AutoComplete_ExtractNamespacesFromFile(filePath.s, Map visitedFiles.i(
             EndIf
           EndIf
         EndIf
-        AutoComplete_ExtractNamespacesFromFile(finalInc, visitedFiles(), Namespaces())
+        AutoComplete_ExtractOOPFromFile(finalInc, visitedFiles(), Namespaces(), Classes())
       EndIf
     EndIf
   Wend
@@ -937,8 +995,9 @@ Procedure AutoComplete_ExtractNamespacesFromFile(filePath.s, Map visitedFiles.i(
   CloseFile(file)
 EndProcedure
 
-Procedure AutoComplete_CollectAllNamespaces(List Namespaces.s())
+Procedure AutoComplete_CollectAllOOP(List Namespaces.s(), List Classes.OOP_ClassSymbol())
   ClearList(Namespaces())
+  ClearList(Classes())
   NewMap visitedFiles.i()
   
   ; 1. Scan active source buffer
@@ -951,11 +1010,27 @@ Procedure AutoComplete_CollectAllNamespaces(List Namespaces.s())
       activeDir = SourcePath$
     EndIf
     
+    Protected currentNS.s = ""
+    Protected nsBraceDepth.i = 0
     Protected lineCount = ScintillaSendMessage(*ActiveSource\EditorGadget, #SCI_GETLINECOUNT, 0, 0)
     Protected l.i
     For l = 0 To lineCount - 1
       Protected lineText.s = Trim(GetLine(l, *ActiveSource))
       Protected upper.s = UCase(lineText)
+      
+      ; Track Namespace depth
+      If currentNS <> ""
+        If CountString(lineText, "{") > 0
+          nsBraceDepth + CountString(lineText, "{")
+        EndIf
+        If CountString(lineText, "}") > 0
+          nsBraceDepth - CountString(lineText, "}")
+          If nsBraceDepth <= 0
+            currentNS = ""
+            nsBraceDepth = 0
+          EndIf
+        EndIf
+      EndIf
       
       ; Namespace in current editor
       If Left(upper, 10) = "NAMESPACE " Or Left(upper, 10) = "NAMESPACE	"
@@ -965,6 +1040,8 @@ Procedure AutoComplete_CollectAllNamespaces(List Namespaces.s())
           nsName = Trim(Left(nsName, pBrace - 1))
         EndIf
         If nsName <> ""
+          currentNS = nsName
+          nsBraceDepth = 1
           Protected isDup.b = #False
           ForEach Namespaces()
             If CompareMemoryString(@Namespaces(), @nsName, #PB_String_NoCaseAscii) = #PB_String_Equal
@@ -975,6 +1052,39 @@ Procedure AutoComplete_CollectAllNamespaces(List Namespaces.s())
           If Not isDup
             AddElement(Namespaces())
             Namespaces() = nsName
+          EndIf
+        EndIf
+        
+      ; Class in current editor
+      ElseIf (Left(upper, 6) = "CLASS " Or Left(upper, 6) = "CLASS	" Or FindString(upper, " CLASS ") > 0) And Left(upper, 8) <> "ENDCLASS"
+        Protected pCls = FindString(upper, "CLASS ")
+        If pCls = 0 : pCls = FindString(upper, "CLASS	") : EndIf
+        If pCls > 0
+          Protected clsRest.s = Trim(Mid(lineText, pCls + 6))
+          If Right(clsRest, 1) = "{"
+            clsRest = Trim(Left(clsRest, Len(clsRest) - 1))
+          EndIf
+          Protected pExt = FindString(UCase(clsRest), "EXTENDS ")
+          If pExt = 0 : pExt = FindString(UCase(clsRest), "EXTENDS	") : EndIf
+          Protected clsName.s = ""
+          If pExt > 0
+            clsName = Trim(Left(clsRest, pExt - 1))
+          Else
+            clsName = clsRest
+          EndIf
+          If clsName <> ""
+            Protected isClsDup.b = #False
+            ForEach Classes()
+              If CompareMemoryString(@Classes()\ClassName, @clsName, #PB_String_NoCaseAscii) = #PB_String_Equal And CompareMemoryString(@Classes()\Namespace, @currentNS, #PB_String_NoCaseAscii) = #PB_String_Equal
+                isClsDup = #True
+                Break
+              EndIf
+            Next
+            If Not isClsDup
+              AddElement(Classes())
+              Classes()\ClassName = clsName
+              Classes()\Namespace = currentNS
+            EndIf
           EndIf
         EndIf
         
@@ -997,7 +1107,7 @@ Procedure AutoComplete_CollectAllNamespaces(List Namespaces.s())
               EndIf
             EndIf
           EndIf
-          AutoComplete_ExtractNamespacesFromFile(finalInc, visitedFiles(), Namespaces())
+          AutoComplete_ExtractOOPFromFile(finalInc, visitedFiles(), Namespaces(), Classes())
         EndIf
       EndIf
     Next l
@@ -1006,20 +1116,56 @@ Procedure AutoComplete_CollectAllNamespaces(List Namespaces.s())
   ; 2. Scan other open files in IDE
   ForEach FileList()
     If @FileList() <> *ActiveSource And FileList()\FileName$ <> ""
-      AutoComplete_ExtractNamespacesFromFile(FileList()\FileName$, visitedFiles(), Namespaces())
+      AutoComplete_ExtractOOPFromFile(FileList()\FileName$, visitedFiles(), Namespaces(), Classes())
     EndIf
   Next
 EndProcedure
 
 Procedure AutoComplete_FillUsingNamespaces(WordStart$)
   NewList Namespaces.s()
-  AutoComplete_CollectAllNamespaces(Namespaces())
+  NewList Classes.OOP_ClassSymbol()
+  AutoComplete_CollectAllOOP(Namespaces(), Classes())
   
   ForEach Namespaces()
     If WordStart$ = "" Or CompareMemoryString(@WordStart$, @Namespaces(), #PB_String_NoCaseAscii, Len(WordStart$)) = #PB_String_Equal
       AutoComplete_AddEntry(Namespaces())
     EndIf
   Next
+EndProcedure
+
+Procedure AutoComplete_FillOOP(WordStart$, TargetNamespace$, IsExtends.b = #False)
+  NewList Namespaces.s()
+  NewList Classes.OOP_ClassSymbol()
+  AutoComplete_CollectAllOOP(Namespaces(), Classes())
+  
+  If TargetNamespace$ <> ""
+    ; Target namespace specified (e.g. UI::) -> offer classes inside this namespace
+    ForEach Classes()
+      If CompareMemoryString(@Classes()\Namespace, @TargetNamespace$, #PB_String_NoCaseAscii) = #PB_String_Equal
+        If WordStart$ = "" Or CompareMemoryString(@WordStart$, @Classes()\ClassName, #PB_String_NoCaseAscii, Len(WordStart$)) = #PB_String_Equal
+          AutoComplete_AddEntry(Classes()\ClassName)
+        EndIf
+      EndIf
+    Next
+  Else
+    ; No target namespace (e.g. after 'Extends ') -> offer namespaces and classes
+    ForEach Namespaces()
+      If WordStart$ = "" Or CompareMemoryString(@WordStart$, @Namespaces(), #PB_String_NoCaseAscii, Len(WordStart$)) = #PB_String_Equal
+        AutoComplete_AddEntry(Namespaces() + "::")
+      EndIf
+    Next
+    ForEach Classes()
+      Protected entry$ = ""
+      If Classes()\Namespace <> ""
+        entry$ = Classes()\Namespace + "::" + Classes()\ClassName
+      Else
+        entry$ = Classes()\ClassName
+      EndIf
+      If WordStart$ = "" Or CompareMemoryString(@WordStart$, @entry$, #PB_String_NoCaseAscii, Len(WordStart$)) = #PB_String_Equal Or (Classes()\Namespace = "" And (WordStart$ = "" Or CompareMemoryString(@WordStart$, @Classes()\ClassName, #PB_String_NoCaseAscii, Len(WordStart$)) = #PB_String_Equal))
+        AutoComplete_AddEntry(entry$)
+      EndIf
+    Next
+  EndIf
 EndProcedure
 
 Procedure.s AutoComplete_FindEnclosingClass(Line)
@@ -1071,9 +1217,11 @@ Procedure OpenAutoCompleteWindow()
     AutoComplete_IsStructure = #False
     AutoComplete_IsModule = #False
     AutoComplete_IsUsingNamespace = #False
+    AutoComplete_IsExtends = #False
     AutoComplete_StructureStart = 0
     AutoComplete_ModuleStart = 0
     AutoComplete_UsingStart = 0
+    AutoComplete_ExtendsStart = 0
     *BaseItem.SourceItem = 0
     WordStart$ = ""
     
@@ -1099,6 +1247,18 @@ Procedure OpenAutoCompleteWindow()
       If Left(UpperBefore$, 6) = "USING " Or UpperBefore$ = "USING" Or Left(UpperBefore$, 6) = "USING	"
         AutoComplete_IsUsingNamespace = #True
         AutoComplete_UsingStart = FindString(UpperBefore$, "USING") + 5
+      EndIf
+      
+      ; Check if this is an 'Extends ' statement
+      Protected pExtendsPos = FindString(UpperBefore$, "EXTENDS ")
+      If pExtendsPos = 0 : pExtendsPos = FindString(UpperBefore$, "EXTENDS	") : EndIf
+      If pExtendsPos > 0 Or UpperBefore$ = "EXTENDS"
+        AutoComplete_IsExtends = #True
+        If pExtendsPos > 0
+          AutoComplete_ExtendsStart = pExtendsPos + 7
+        Else
+          AutoComplete_ExtendsStart = Len(UpperBefore$)
+        EndIf
       EndIf
       
       Column = *ActiveSource\CurrentColumnChars-1
@@ -1230,13 +1390,20 @@ Procedure OpenAutoCompleteWindow()
     
     If AutoComplete_IsUsingNamespace
       AutoComplete_FillUsingNamespaces(WordStart$)
+    ElseIf AutoComplete_IsExtends
+      AutoComplete_FillOOP(WordStart$, ModulePrefix$, #True)
     ElseIf AutoComplete_IsStructure
       AutoComplete_FillStructured(WordStart$, StructName$, *BaseItem, BaseItemLine)
     ElseIf WordStart$ <> "" Or AutoComplete_IsModule
       AutoComplete_FillNormal(WordStart$, ModulePrefix$, EnclosingFunction$, FunctionParameter)
+      If ModulePrefix$ <> ""
+        AutoComplete_FillOOP(WordStart$, ModulePrefix$, #False)
+      Else
+        AutoComplete_FillOOP(WordStart$, "", #False)
+      EndIf
     EndIf
     
-    If AutoComplete_IsUsingNamespace Or AutoComplete_IsStructure Or AutoComplete_IsModule Or WordStart$ <> ""
+    If AutoComplete_IsUsingNamespace Or AutoComplete_IsExtends Or AutoComplete_IsStructure Or AutoComplete_IsModule Or WordStart$ <> ""
       
       ; Note:
       ;   AutoCompleteList() is unsorted And contains duplicates. But *AutoCompleteItems is sorted And has no duplicates
@@ -1476,7 +1643,13 @@ Procedure AutoComplete_CheckAutoPopup()
       ; Check for 'Using ' statement auto-popup
       Protected LineBefore$ = Left(Line$, *ActiveSource\CurrentColumnChars-1)
       Protected TrimmedB$ = Trim(LineBefore$)
-      If Left(UCase(TrimmedB$), 6) = "USING " Or UCase(TrimmedB$) = "USING" Or Left(UCase(TrimmedB$), 6) = "USING	"
+      Protected UpperB$ = UCase(TrimmedB$)
+      If Left(UpperB$, 6) = "USING " Or UpperB$ = "USING" Or Left(UpperB$, 6) = "USING	"
+        ProcedureReturn #True
+      EndIf
+      
+      ; Check for 'Extends ' statement auto-popup
+      If FindString(UpperB$, "EXTENDS ") > 0 Or FindString(UpperB$, "EXTENDS	") > 0 Or Right(UpperB$, 7) = "EXTENDS"
         ProcedureReturn #True
       EndIf
       
@@ -1567,7 +1740,10 @@ Procedure AutoComplete_WordUpdate(IsInitial=#False)
   ElseIf AutoComplete_IsUsingNamespace And (*ActiveSource\CurrentColumnChars < AutoComplete_UsingStart)
     AutoComplete_Close()
     
-  ElseIf AutoComplete_IsStructure = 0 And AutoComplete_IsModule = 0 And AutoComplete_IsUsingNamespace = 0 And (Word$ = "" Or Word$ = "*" Or Word$ = "#" Or (AutoPopupNormal And Len(Word$) < AutoCompletePopupLength))
+  ElseIf AutoComplete_IsExtends And (*ActiveSource\CurrentColumnChars < AutoComplete_ExtendsStart)
+    AutoComplete_Close()
+    
+  ElseIf AutoComplete_IsStructure = 0 And AutoComplete_IsModule = 0 And AutoComplete_IsUsingNamespace = 0 And AutoComplete_IsExtends = 0 And (Word$ = "" Or Word$ = "*" Or Word$ = "#" Or (AutoPopupNormal And Len(Word$) < AutoCompletePopupLength))
     AutoComplete_Close()
     
   ElseIf AutoComplete_IsStructure = 0 And AutoComplete_IsModule = 0 And Column < AutoComplete_StartColumn

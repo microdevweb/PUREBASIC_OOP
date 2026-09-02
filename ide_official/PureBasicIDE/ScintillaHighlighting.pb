@@ -3192,20 +3192,27 @@ CompilerIf #CompileWindows | #CompileLinux | #CompileMac
         ;   window with the mouse, *scinotify\position is -1 in this case, so
         ;   filter it. (also filters cases where we are not near any character)
         ;
-        If *scinotify\position > 0 And *ActiveSource And GetActiveGadget() = *ActiveSource\EditorGadget And *ActiveSource\IsCode
+        If *scinotify\position >= 0 And *ActiveSource And *ActiveSource\IsCode
           IsMouseDwelling    = 1 ; to know if the mouse still dwells when the result is received
           MouseDwellPosition = *scinotify\position
           
-          *Debugger.DebuggerData = 0
-          If *ActiveSource <> *ProjectInfo
-            *Debugger = GetDebuggerForFile(*ActiveSource)
-          EndIf
-          
-          If *Debugger
-            Debugger_EvaluateAtCursor(*scinotify\position)  ; evaluate by debugger
+          ; Check if hovering on or near OOP error line
+          Protected oopDwellLine = ScintillaSendMessage(EditorGadget, #SCI_LINEFROMPOSITION, *scinotify\position, 0) + 1
+          If *ActiveSource\OOP_Linter_ErrorLine > 0 And oopDwellLine = *ActiveSource\OOP_Linter_ErrorLine And *ActiveSource\OOP_Linter_ErrorMessage$ <> ""
+            Protected oopTip$ = "[Erreur OOP Ligne " + Str(oopDwellLine) + "]" + #NewLine + *ActiveSource\OOP_Linter_ErrorMessage$
+            ScintillaSendMessage(EditorGadget, #SCI_CALLTIPSHOW, *scinotify\position, ToAscii(oopTip$))
           Else
-            ; Todo: find a less intrusive way to display this info
-            ; DisplayItemAtCursor(*scinotify\position)  ; display type info by source parser
+            *Debugger.DebuggerData = 0
+            If *ActiveSource <> *ProjectInfo
+              *Debugger = GetDebuggerForFile(*ActiveSource)
+            EndIf
+            
+            If *Debugger
+              Debugger_EvaluateAtCursor(*scinotify\position)  ; evaluate by debugger
+            Else
+              ; Todo: find a less intrusive way to display this info
+              ; DisplayItemAtCursor(*scinotify\position)  ; display type info by source parser
+            EndIf
           EndIf
         EndIf
         
@@ -3497,7 +3504,7 @@ CompilerIf #CompileWindows | #CompileLinux | #CompileMac
     
     ApplyWordChars(*ActiveSource\EditorGadget)
     
-    SendEditorMessage(#SCI_SETMOUSEDWELLTIME, 750, 0)
+    SendEditorMessage(#SCI_SETMOUSEDWELLTIME, 350, 0)
     
     ; Auto adjust the horizontal scrollbar. Could have a performance impact according to the doc, to verify in practice
     ; https://www.purebasic.fr/english/viewtopic.php?f=23&t=50693
