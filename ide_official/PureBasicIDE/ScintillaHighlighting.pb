@@ -4308,19 +4308,23 @@ CompilerIf #CompileWindows | #CompileLinux | #CompileMac
       linterArgs$ = "--base-dir " + #DQUOTE$ + baseDir$ + #DQUOTE$ + " "
     EndIf
     linterArgs$ + "--check " + #DQUOTE$ + tempPBO$ + #DQUOTE$
-
     Protected prg = RunProgram(transpilerExe$, linterArgs$, "", #PB_Program_Open | #PB_Program_Read | #PB_Program_Hide)
     Protected logOut$ = ""
+    Protected maxWait.i = 30
     If prg
-      While ProgramRunning(prg)
+      While ProgramRunning(prg) And maxWait > 0
         While AvailableProgramOutput(prg)
           logOut$ + ReadProgramString(prg) + #NewLine
         Wend
         Delay(5)
+        maxWait - 1
       Wend
       While AvailableProgramOutput(prg)
         logOut$ + ReadProgramString(prg) + #NewLine
       Wend
+      If ProgramRunning(prg)
+        KillProgram(prg)
+      EndIf
       CloseProgram(prg)
       DeleteFile(tempPBO$)
 

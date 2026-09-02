@@ -1290,8 +1290,8 @@ Procedure OOP_CancelCallTip()
   LastTip$ = ""
 EndProcedure
 
-Procedure.s OOP_ExtractMethodFromFile(filePath.s, Map visitedFiles.i(), targetNamespace.s, targetClass.s, methodName.s)
-  If filePath = "" : ProcedureReturn "" : EndIf
+Procedure.s OOP_ExtractMethodFromFile(filePath.s, Map visitedFiles.i(), targetNamespace.s, targetClass.s, methodName.s, recursionDepth.i = 0)
+  If filePath = "" Or recursionDepth > 4 : ProcedureReturn "" : EndIf
   filePath = ResolveRelativePath(SourcePath$, filePath)
   Protected normPath.s = UCase(filePath)
   If normPath = "" Or FindMapElement(visitedFiles(), normPath)
@@ -1442,7 +1442,7 @@ Procedure.s OOP_ExtractMethodFromFile(filePath.s, Map visitedFiles.i(), targetNa
             EndIf
           EndIf
         EndIf
-        incRes = OOP_ExtractMethodFromFile(finalInc, visitedFiles(), targetNamespace, targetClass, methodName)
+        incRes = OOP_ExtractMethodFromFile(finalInc, visitedFiles(), targetNamespace, targetClass, methodName, recursionDepth + 1)
         If incRes <> ""
           resultProto = incRes
           Break
@@ -1454,7 +1454,7 @@ Procedure.s OOP_ExtractMethodFromFile(filePath.s, Map visitedFiles.i(), targetNa
   CloseFile(file)
   
   ; If not found in current class and class has parent, search in parent class
-  If resultProto = "" And parentClass <> ""
+  If resultProto = "" And parentClass <> "" And recursionDepth < 4
     pNs = ""
     pClsName = parentClass
     pCol = FindString(parentClass, "::")
@@ -1462,8 +1462,7 @@ Procedure.s OOP_ExtractMethodFromFile(filePath.s, Map visitedFiles.i(), targetNa
       pNs = Left(parentClass, pCol - 1)
       pClsName = Mid(parentClass, pCol + 2)
     EndIf
-    ClearMap(visitedFiles())
-    resultProto = OOP_ExtractMethodFromFile(filePath, visitedFiles(), pNs, pClsName, methodName)
+    resultProto = OOP_ExtractMethodFromFile(filePath, visitedFiles(), pNs, pClsName, methodName, recursionDepth + 1)
   EndIf
   
   ProcedureReturn resultProto
@@ -1638,7 +1637,7 @@ Procedure.s OOP_ResolveMethodPrototype(CallerExpr$, Line)
             If FileSize(SourcePath$ + incPath$) > 0 : finalInc$ = SourcePath$ + incPath$ : EndIf
           EndIf
         EndIf
-        incRes$ = OOP_ExtractMethodFromFile(finalInc$, visited(), targetNamespace$, targetClass$, methodName$)
+        incRes$ = OOP_ExtractMethodFromFile(finalInc$, visited(), targetNamespace$, targetClass$, methodName$, 1)
         If incRes$ <> ""
           ProcedureReturn incRes$
         EndIf
@@ -1676,7 +1675,7 @@ Procedure.s OOP_ResolveMethodPrototype(CallerExpr$, Line)
               If FileSize(SourcePath$ + incPath$) > 0 : finalInc$ = SourcePath$ + incPath$ : EndIf
             EndIf
           EndIf
-          incRes$ = OOP_ExtractMethodFromFile(finalInc$, visited(), pNs2$, pClsName2$, methodName$)
+          incRes$ = OOP_ExtractMethodFromFile(finalInc$, visited(), pNs2$, pClsName2$, methodName$, 1)
           If incRes$ <> ""
             ProcedureReturn incRes$
           EndIf
@@ -1685,11 +1684,11 @@ Procedure.s OOP_ResolveMethodPrototype(CallerExpr$, Line)
     Next scanL
   EndIf
   
-  ; 3. Search in other open files in IDE (safe preservation of FileList active position)
+  ; 3. Search in other open files in IDE
   PushListPosition(FileList())
   ForEach FileList()
     If @FileList() <> *ActiveSource And FileList()\FileName$ <> ""
-      incRes$ = OOP_ExtractMethodFromFile(FileList()\FileName$, visited(), targetNamespace$, targetClass$, methodName$)
+      incRes$ = OOP_ExtractMethodFromFile(FileList()\FileName$, visited(), targetNamespace$, targetClass$, methodName$, 1)
       If incRes$ <> ""
         PopListPosition(FileList())
         ProcedureReturn incRes$
@@ -1711,9 +1710,11 @@ Procedure.s GenerateQuickHelpText(Line$, Word$, Line, Column)
   EndIf
   
   ; Check if it is an OOP method call (Super::, This\, Class::, Var\)
-  Protected oopHelp$ = OOP_ResolveMethodPrototype(Word$, Line)
-  If oopHelp$ <> ""
-    ProcedureReturn oopHelp$
+  If FindString(Word$, "::") > 0 Or FindString(Word$, "\") > 0 Or Left(UCase(Word$), 5) = "SUPER"
+    Protected oopHelp$ = OOP_ResolveMethodPrototype(Word$, Line)
+    If oopHelp$ <> ""
+      ProcedureReturn oopHelp$
+    EndIf
   EndIf
   
   ; Check if it is a structured item first
