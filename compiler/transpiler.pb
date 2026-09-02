@@ -401,17 +401,24 @@ Procedure.b LoadSourceLinesRecursive(filePath.s)
     ProcedureReturn #False
   EndIf
 
+  Protected fileFormat.i = ReadStringFormat(file)
+  If fileFormat = #PB_Ascii
+    ; Default to UTF-8 for modern PB sources if no explicit BOM
+    fileFormat = #PB_UTF8
+  EndIf
+
   Protected isFirstLine.b = #True
   Protected lineNum.i = 0
   Protected dir.s = GetPathPart(filePath)
 
   While Not Eof(file)
     lineNum + 1
-    Protected rawLine.s = ReadString(file)
+    Protected rawLine.s = ReadString(file, fileFormat)
     If isFirstLine
-      If Left(rawLine, 1) = Chr(239) Or Asc(Left(rawLine, 1)) = 65279
+      ; Clean any residual BOM character or non-printable UTF prefix
+      While rawLine <> "" And (Asc(Left(rawLine, 1)) = 65279 Or Asc(Left(rawLine, 1)) = 239 Or Asc(Left(rawLine, 1)) = 187 Or Asc(Left(rawLine, 1)) = 191 Or Asc(Left(rawLine, 1)) = 0)
         rawLine = Mid(rawLine, 2)
-      EndIf
+      Wend
       isFirstLine = #False
     EndIf
 
@@ -1322,6 +1329,7 @@ Procedure.b ValidateOOPModel()
     Protected *body.OOP_MethodBody = @MethodBodies()
     Protected parentClsName.s = ""
     If FindMapElement(ClassMap(), UCase(*body\className))
+      SelectElement(Classes(), ClassMap(UCase(*body\className)))
       parentClsName = Classes()\parentName
     EndIf
 
@@ -1874,7 +1882,7 @@ Procedure.i Main()
     outputPB = ReplaceString(inputPBO, ".pbo", "_generated.pb", #PB_String_NoCase)
   EndIf
   PrintN("=================================================================")
-  PrintN("      PureBasic OOP Transpiler (Native Engine) - ALPHA 1.0       ")
+  PrintN("      PureBasic OOP Transpiler (Native Engine) - ALPHA 1.1       ")
   PrintN("=================================================================")
   PrintN("Input  PBO : " + inputPBO)
   PrintN("Output PB  : " + outputPB)
