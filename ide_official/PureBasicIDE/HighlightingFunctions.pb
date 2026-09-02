@@ -1269,10 +1269,32 @@ Procedure.s GenerateQuickHelpFromStructure(Word$, *BaseItem.SourceItem, BaseItem
   ProcedureReturn Message$
 EndProcedure
 
+Procedure OOP_ShowCallTip(callTipText$)
+  Static LastTip$
+  If *ActiveSource And *ActiveSource\EditorGadget And IsGadget(*ActiveSource\EditorGadget)
+    If callTipText$ <> "" And callTipText$ <> LastTip$
+      LastTip$ = callTipText$
+      Protected pos = ScintillaSendMessage(*ActiveSource\EditorGadget, #SCI_GETCURRENTPOS, 0, 0)
+      ScintillaSendMessage(*ActiveSource\EditorGadget, #SCI_CALLTIPSHOW, pos, ToAscii(callTipText$))
+    EndIf
+  EndIf
+EndProcedure
+
+Procedure OOP_CancelCallTip()
+  Static LastTip$
+  If *ActiveSource And *ActiveSource\EditorGadget And IsGadget(*ActiveSource\EditorGadget)
+    If ScintillaSendMessage(*ActiveSource\EditorGadget, #SCI_CALLTIPACTIVE, 0, 0)
+      ScintillaSendMessage(*ActiveSource\EditorGadget, #SCI_CALLTIPCANCEL, 0, 0)
+    EndIf
+  EndIf
+  LastTip$ = ""
+EndProcedure
+
 Procedure.s OOP_ExtractMethodFromFile(filePath.s, Map visitedFiles.i(), targetNamespace.s, targetClass.s, methodName.s)
+  If filePath = "" : ProcedureReturn "" : EndIf
   filePath = ResolveRelativePath(SourcePath$, filePath)
   Protected normPath.s = UCase(filePath)
-  If FindMapElement(visitedFiles(), normPath)
+  If normPath = "" Or FindMapElement(visitedFiles(), normPath)
     ProcedureReturn ""
   EndIf
   visitedFiles(normPath) = 1
@@ -1663,15 +1685,18 @@ Procedure.s OOP_ResolveMethodPrototype(CallerExpr$, Line)
     Next scanL
   EndIf
   
-  ; 3. Search in other open files in IDE
+  ; 3. Search in other open files in IDE (safe preservation of FileList active position)
+  PushListPosition(FileList())
   ForEach FileList()
     If @FileList() <> *ActiveSource And FileList()\FileName$ <> ""
       incRes$ = OOP_ExtractMethodFromFile(FileList()\FileName$, visited(), targetNamespace$, targetClass$, methodName$)
       If incRes$ <> ""
+        PopListPosition(FileList())
         ProcedureReturn incRes$
       EndIf
     EndIf
   Next
+  PopListPosition(FileList())
   
   ProcedureReturn ""
 EndProcedure
@@ -1854,11 +1879,9 @@ EndProcedure
 Procedure QuickHelpFromLine(line, cursorposition) ; position is 0 based!
   Shared StatusMessageTimeout.q                   ; shared for the special access in QuickHelpFromLine()
   
-  If *ActiveSource\IsCode = 0
+  If *ActiveSource = 0 Or *ActiveSource\IsCode = 0
     ChangeStatus("", 0)
-    If *ActiveSource And *ActiveSource\EditorGadget And IsGadget(*ActiveSource\EditorGadget)
-      ScintillaSendMessage(*ActiveSource\EditorGadget, #SCI_CALLTIPCANCEL, 0, 0)
-    EndIf
+    OOP_CancelCallTip()
     ProcedureReturn
   EndIf
   
@@ -1876,9 +1899,7 @@ Procedure QuickHelpFromLine(line, cursorposition) ; position is 0 based!
     
     If Message$ = "" Or FindString(Message$, "(", 1) = 0 Or FindString(Message$, ")", 1) = 0
       ChangeStatus(Message$, 0)
-      If *ActiveSource And *ActiveSource\EditorGadget And IsGadget(*ActiveSource\EditorGadget)
-        ScintillaSendMessage(*ActiveSource\EditorGadget, #SCI_CALLTIPCANCEL, 0, 0)
-      EndIf
+      OOP_CancelCallTip()
       
     Else
       ; now we check for the argument under the cursor to mark it...
@@ -1952,9 +1973,7 @@ Procedure QuickHelpFromLine(line, cursorposition) ; position is 0 based!
       
       If Right(RTrim(Test$), 1) = "(" ; the function had no parameters '()'
         ChangeStatus(Message$, 0)
-        If *ActiveSource And *ActiveSource\EditorGadget And IsGadget(*ActiveSource\EditorGadget)
-          ScintillaSendMessage(*ActiveSource\EditorGadget, #SCI_CALLTIPSHOW, ScintillaSendMessage(*ActiveSource\EditorGadget, #SCI_GETCURRENTPOS, 0, 0), ToAscii(Message$))
-        EndIf
+        OOP_ShowCallTip(Message$)
         
       Else
         
@@ -1966,9 +1985,7 @@ Procedure QuickHelpFromLine(line, cursorposition) ; position is 0 based!
         
         If position = 0 ; something did not match here!
           ChangeStatus(Message$, 0)
-          If *ActiveSource And *ActiveSource\EditorGadget And IsGadget(*ActiveSource\EditorGadget)
-            ScintillaSendMessage(*ActiveSource\EditorGadget, #SCI_CALLTIPSHOW, ScintillaSendMessage(*ActiveSource\EditorGadget, #SCI_GETCURRENTPOS, 0, 0), ToAscii(Message$))
-          EndIf
+          OOP_ShowCallTip(Message$)
           
         Else
           Endposition = FindString(Test$, ",", position+1)
@@ -1985,9 +2002,11 @@ Procedure QuickHelpFromLine(line, cursorposition) ; position is 0 based!
           Wend
           
           ; Display floating CallTip directly under text cursor
-          If *ActiveSource And *ActiveSource\EditorGadget And IsGadget(*ActiveSource\EditorGadget)
-            Protected callTipText$ = Left(Message$, position) + "-> " + Mid(Message$, position+1, Endposition-position-1) + " <-" + Right(Message$, Len(Message$)-Endposition+1)
-            ScintillaSendMessage(*ActiveSource\EditorGadget, #SCI_CALLTIPSHOW, ScintillaSendMessage(*ActiveSource\EditorGadget, #SCI_GETCURRENTPOS, 0, 0), ToAscii(callTipText$))
+          If position > 0 And Endposition > position
+            callTipText$ = Left(Message$, position) + "-> " + Mid(Message$, position+1, Endposition-position-1) + " <-" + Right(Message$, Len(Message$)-Endposition+1)
+            OOP_ShowCallTip(callTipText$)
+          Else
+            OOP_ShowCallTip(Message$)
           EndIf
           
           ; on windows, we make the thing ownerdrawn to draw the current argument in bold
@@ -2067,9 +2086,7 @@ Procedure QuickHelpFromLine(line, cursorposition) ; position is 0 based!
     EndIf
     
     ChangeStatus(Message$, 0)
-    If *ActiveSource And *ActiveSource\EditorGadget And IsGadget(*ActiveSource\EditorGadget)
-      ScintillaSendMessage(*ActiveSource\EditorGadget, #SCI_CALLTIPCANCEL, 0, 0)
-    EndIf
+    OOP_CancelCallTip()
     
   EndIf
   
