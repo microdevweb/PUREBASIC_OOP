@@ -298,14 +298,94 @@ Procedure TesterChien() {
 
 ---
 
-## 5. Plomberie PureBasic Générée
+---
+
+## 5. Framework GUI Objet PureBasic (`src/ui/UI.pbo`)
+
+Toutes les fenêtres et tous les gadgets PureBasic peuvent désormais être manipulés comme des objets natifs avec gestionnaires d'événements virtuels (`OnClick()`, `OnChange()`, `OnPaint()`, `OnClose()`, etc.), héritage de classes et création de **Custom Gadgets** personnalisés sur Canvas.
+
+### 5.1 Architecture des Classes GUI
+
+- **`UI::Component`** : Classe abstraite racine commune (propriétés `id`, `tag`, `x`, `y`, `width`, `height`, `isVisible`, `isEnabled`, `userData`).
+- **`UI::Gadget`** : Classe abstraite de base pour tous les gadgets (méthodes `SetText`, `GetText`, `SetPosition`, `SetVisible`, `SetEnabled`, `SetToolTip`, `SetColor`, `SetFont`, `SetFocus`, et callbacks virtuels `OnClick`, `OnChange`, `OnFocus`, `OnLostFocus`, `OnRightClick`, `OnCustomEvent`).
+- **`UI::Window`** : Encapsulation d'une fenêtre (`OpenWindow`, `Close`, `SetTitle`, `SetPosition`, et événements `OnClose`, `OnResize`, `OnMove`, `OnMinimize`, `OnMaximize`, `OnRestore`).
+- **`UI::Application`** : Gestionnaire global d'application et boucle d'événements centralisée (`Run()`, `Quit()`).
+- **`UI::CustomGadget`** : Gadget propriétaire moderne basé sur `CanvasGadget` avec méthode virtuelle `OnPaint(w, h)` et gestion de la souris (`OnMouseEnter`, `OnMouseDown`, `OnMouseUp`, `OnMouseMove`, `OnKeyDown`, `Redraw()`).
+
+### 5.2 Contrôles Standard Disponibles
+
+| Classe | Gadget PureBasic Sous-Jacent | Caractéristiques Principales |
+| :--- | :--- | :--- |
+| **`UI::Button`** | `ButtonGadget` | Gestion du clic via `OnClick()` |
+| **`UI::TextBox`** | `StringGadget` | `IsReadOnly()`, `SetReadOnly()`, `OnChange()` |
+| **`UI::Label`** | `TextGadget` | Affichage de texte |
+| **`UI::CheckBox`** | `CheckBoxGadget` | `IsChecked()`, `SetChecked(state)` |
+| **`UI::ProgressBar`** | `ProgressBarGadget` | `GetValue()`, `SetValue()`, `SetRange()` |
+| **`UI::Slider`** | `TrackBarGadget` | `GetValue()`, `SetValue()` |
+| **`UI::ComboBox`** | `ComboBoxGadget` | `AddItem()`, `GetSelectedIndex()`, `GetSelectedItem()`, `Clear()` |
+| **`UI::Controls::ToggleSwitch`** | `UI::CustomGadget` *(Canvas)* | Interrupteur moderne style iOS avec animation d'état |
+
+### 5.3 Exemple d'Application GUI OOP Complète
+
+```oop
+XIncludeFile "ui/UI.pbo"
+
+Using UI
+
+; 1. Création d'un bouton personnalisé avec logique métier
+Class MonBouton Extends UI::Button {
+  Protected *champSaisie.UI::TextBox
+
+  Public Method LierSaisie(*txt.UI::TextBox) {
+    This\*champSaisie = *txt
+  }
+
+  Public Method OnClick() {
+    If (This\*champSaisie) {
+      MessageRequester("Bonjour", "Bonjour " + This\*champSaisie\GetText() + " !")
+    }
+  }
+}
+
+; 2. Fenêtre Principale Orientée Objet
+Class MaFenetre Extends UI::Window {
+  Protected *saisie.UI::TextBox
+  Protected *btn.MonBouton
+  Protected *switch.UI::Controls::ToggleSwitch
+
+  Public Method Init() {
+    Super::Init("Mon Application OOP", #PB_Ignore, #PB_Ignore, 400, 200, #PB_Window_SystemMenu | #PB_Window_ScreenCentered)
+    UI::RegisterWindow(This\id, This)
+
+    This\*saisie = New UI::TextBox(20, 20, 200, 25, "Alice")
+    This\*btn = New MonBouton(230, 18, 140, 28, "Valider")
+    This\*btn\LierSaisie(This\*saisie)
+
+    This\*switch = New UI::Controls::ToggleSwitch(20, 70, 50, 26, #True)
+  }
+
+  Public Method.b OnClose() {
+    ProcedureReturn #True ; Autorise la fermeture
+  }
+}
+
+; 3. Point d'entrée
+Define *app.UI::Application = New UI::Application()
+Define *win.MaFenetre = New MaFenetre()
+
+*app\Run()
+```
+
+---
+
+## 6. Plomberie PureBasic Générée
 
 Le transpileur convertit automatiquement la syntaxe haut niveau `.pbo` en code natif PureBasic `.pb` ultra-performant :
 1. **Interfaces VTable (`_vt`)** : Définition des prototypes de méthodes avec préfixage complet (ex: `Game_Graphics_Renderer_vt`).
 2. **Structures d'Instance (`_Inst`)** : Structures mémoires contenant le pointeur `*VTable` en en-tête suivi des champs de la classe.
 3. **Dispatch Interne Sécurisé (`*This_vt`)** : Les appels internes `This\Methode()` sont automatiquement résolus via le pointeur d'interface polymorphe `*This_vt`.
 4. **DataSections VTable** : Générées pour toutes les classes concrètes (les classes abstraites n'allouent pas de VTable inutile).
-5. **Constructeurs Factory (`New_<Classe>`)** : Générés uniquement pour les classes concrètes.
+5. **Constructeurs Factory (`New_<Classe>`)** : Générés pour les classes concrètes avec héritage automatique des paramètres constructeur.
 6. **Validation Sémantique & Source Mapping** :
    - Interdiction d'instancier une classe abstraite.
    - Obligation pour une classe fille concrète d'implémenter toutes les méthodes abstraites héritées.
@@ -313,7 +393,7 @@ Le transpileur convertit automatiquement la syntaxe haut niveau `.pbo` en code n
 
 ---
 
-## 5. Guide d'Exécution & Compilation
+## 7. Guide d'Exécution & Compilation
 
 ### Transpiler un fichier `.pbo` vers `.pb` :
 ```cmd
@@ -327,6 +407,6 @@ Le transpileur convertit automatiquement la syntaxe haut niveau `.pbo` en code n
 
 ### Compiler le code PureBasic généré :
 ```cmd
-"C:\Program Files\PureBasic\Compilers\pbcompiler.exe" "src/mon_fichier_generated.pb" /CONSOLE /EXE "src/mon_fichier.exe"
+"C:\Program Files\PureBasic\Compilers\pbcompiler.exe" "src/mon_fichier_generated.pb" /EXE "src/mon_fichier.exe"
 ```
 

@@ -298,35 +298,112 @@ Procedure TestDog() {
 
 ---
 
-## 5. Generated Native PureBasic Plumbing
+## 5. Object-Oriented PureBasic GUI Framework (`src/ui/UI.pbo`)
 
-The transpiler converts high-level `.pbo` code into fast, native PureBasic `.pb` code:
-1. **Interfaces (`_vt`)**: VTable prototypes definition with fully mangled names (e.g. `Game_Graphics_Renderer_vt`).
-2. **Instance Structures (`_Inst`)**: Memory structures holding the `*VTable` pointer at offset 0 followed by fields.
-3. **Safe Internal Dispatch (`*This_vt`)**: Internal calls (`This\Method()`) resolve cleanly through the polymorphic interface pointer `*This_vt`.
-4. **VTable DataSections**: Emitted for concrete classes only.
-5. **Constructors (`New_<Class>`)**: Generated only for concrete classes.
-6. **Semantic Validations & Source Mapping**:
-   - Forbids instantiating abstract classes.
-   - Enforces that concrete subclasses implement all inherited abstract methods.
-   - `.pb.map` file maps all compiler errors/warnings back to original `.pbo` files and lines.
+All PureBasic windows and gadgets can now be manipulated as native objects with virtual event dispatchers (`OnClick()`, `OnChange()`, `OnPaint()`, `OnClose()`, etc.), class inheritance, and custom **Canvas-based Custom Gadgets**.
+
+### 5.1 GUI Architecture
+
+- **`UI::Component`**: Common root abstract class (`id`, `tag`, `x`, `y`, `width`, `height`, `isVisible`, `isEnabled`, `userData`).
+- **`UI::Gadget`**: Abstract base class for all gadgets (`SetText`, `GetText`, `SetPosition`, `SetVisible`, `SetEnabled`, `SetToolTip`, `SetColor`, `SetFont`, `SetFocus`, and virtual callbacks `OnClick`, `OnChange`, `OnFocus`, `OnLostFocus`, `OnRightClick`, `OnCustomEvent`).
+- **`UI::Window`**: OOP Window encapsulation (`OpenWindow`, `Close`, `SetTitle`, `SetPosition`, and virtual callbacks `OnClose`, `OnResize`, `OnMove`, `OnMinimize`, `OnMaximize`, `OnRestore`).
+- **`UI::Application`**: Global application manager and centralized event loop dispatcher (`Run()`, `Quit()`).
+- **`UI::CustomGadget`**: CanvasGadget owner-drawn base class with virtual `OnPaint(w, h)` and mouse/keyboard hooks (`OnMouseEnter`, `OnMouseDown`, `OnMouseUp`, `OnMouseMove`, `OnKeyDown`, `Redraw()`).
+
+### 5.2 Built-in Controls
+
+| Class | Underlying PureBasic Gadget | Main Features |
+| :--- | :--- | :--- |
+| **`UI::Button`** | `ButtonGadget` | Left click handling via `OnClick()` |
+| **`UI::TextBox`** | `StringGadget` | `IsReadOnly()`, `SetReadOnly()`, `OnChange()` |
+| **`UI::Label`** | `TextGadget` | Static and dynamic text display |
+| **`UI::CheckBox`** | `CheckBoxGadget` | `IsChecked()`, `SetChecked(state)` |
+| **`UI::ProgressBar`** | `ProgressBarGadget` | `GetValue()`, `SetValue()`, `SetRange()` |
+| **`UI::Slider`** | `TrackBarGadget` | `GetValue()`, `SetValue()` |
+| **`UI::ComboBox`** | `ComboBoxGadget` | `AddItem()`, `GetSelectedIndex()`, `GetSelectedItem()`, `Clear()` |
+| **`UI::Controls::ToggleSwitch`** | `UI::CustomGadget` *(Canvas)* | Modern iOS-style toggle switch with animated states |
+
+### 5.3 Complete GUI OOP Example
+
+```oop
+XIncludeFile "ui/UI.pbo"
+
+Using UI
+
+; 1. Custom Button with business logic
+Class GreetButton Extends UI::Button {
+  Protected *nameInput.UI::TextBox
+
+  Public Method BindInput(*txt.UI::TextBox) {
+    This\*nameInput = *txt
+  }
+
+  Public Method OnClick() {
+    If (This\*nameInput) {
+      MessageRequester("Hello", "Hello " + This\*nameInput\GetText() + "!")
+    }
+  }
+}
+
+; 2. Encapsulated OOP Window
+Class MainWindow Extends UI::Window {
+  Protected *input.UI::TextBox
+  Protected *btn.GreetButton
+  Protected *switch.UI::Controls::ToggleSwitch
+
+  Public Method Init() {
+    Super::Init("My OOP Application", #PB_Ignore, #PB_Ignore, 400, 200, #PB_Window_SystemMenu | #PB_Window_ScreenCentered)
+    UI::RegisterWindow(This\id, This)
+
+    This\*input = New UI::TextBox(20, 20, 200, 25, "Alice")
+    This\*btn = New GreetButton(230, 18, 140, 28, "Greet")
+    This\*btn\BindInput(This\*input)
+
+    This\*switch = New UI::Controls::ToggleSwitch(20, 70, 50, 26, #True)
+  }
+
+  Public Method.b OnClose() {
+    ProcedureReturn #True ; Allow window closing
+  }
+}
+
+; 3. Main entry point
+Define *app.UI::Application = New UI::Application()
+Define *win.MainWindow = New MainWindow()
+
+*app\Run()
+```
 
 ---
 
-## 5. Compilation & Execution Guide
+## 6. Generated PureBasic Mechanics
 
-### Transpile `.pbo` source to `.pb`:
+The transpiler turns `.pbo` source files into fast, clean PureBasic `.pb` code:
+1. **Interfaces (`_vt`)**: Method prototypes with full namespace prefixes (e.g. `Game_Graphics_Renderer_vt`).
+2. **Instance Structures (`_Inst`)**: Memory structures with `*VTable` pointer header followed by class fields.
+3. **Safe Internal Dispatch (`*This_vt`)**: Method calls `This\Method()` resolve through the polymorph interface pointer `*This_vt`.
+4. **DataSections**: Generated for concrete classes only (abstract classes skip allocating unused VTables).
+5. **Constructors (`New_<Class>`)**: Auto-generated with constructor parameter inheritance from parent classes.
+6. **Semantic Validation & Source Mapping**:
+   - Forbids instantiation of abstract classes.
+   - Enforces implementation of all inherited abstract methods in concrete subclasses.
+   - Generates `.pb.map` file for mapping compiler messages back to `.pbo` source line numbers.
+
+---
+
+## 7. Execution & Compilation Guide
+
+### Transpile `.pbo` to `.pb`:
 ```cmd
 "compiler/transpiler.exe" "src/my_file.pbo" "src/my_file_generated.pb"
 ```
 
-### Syntax check via CLI:
+### Validate Syntax via CLI:
 ```cmd
 "compiler/transpiler.exe" --check "src/my_file.pbo"
 ```
 
-### Compile the generated PureBasic code:
+### Compile Generated PureBasic Executable:
 ```cmd
-"C:\Program Files\PureBasic\Compilers\pbcompiler.exe" "src/my_file_generated.pb" /CONSOLE /EXE "src/my_file.exe"
+"C:\Program Files\PureBasic\Compilers\pbcompiler.exe" "src/my_file_generated.pb" /EXE "src/my_file.exe"
 ```
-

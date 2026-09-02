@@ -1,0 +1,155 @@
+; ============================================================================
+; Démonstration Complète du Framework GUI PureBasic OOP
+; Fichier : src/demo_gui_oop.pbo
+; ============================================================================
+
+XIncludeFile "ui/UI.pbo"
+
+Using UI
+Using UI::Controls
+
+; ----------------------------------------------------------------------------
+; 1. Classes Spécialisées par Héritage 
+; ----------------------------------------------------------------------------
+
+; Bouton avec comportement encapsulé
+Class GreetButton Extends UI::Button {
+  Protected *nameInput.UI::TextBox
+  Protected *statusLabel.UI::Label
+
+  Public Method BindControls(*input.UI::TextBox, *lbl.UI::Label) {
+    This\*nameInput = *input
+    This\*statusLabel = *lbl
+  }
+
+  Public Method OnClick() {
+    Protected userName.s = "Visiteur"
+    If (This\*nameInput) {
+      Protected txt.s = This\*nameInput\GetText()
+      If (txt <> "") {
+        userName = txt
+      }
+    }
+    If (This\*statusLabel) {
+      This\*statusLabel\SetText("Bonjour " + userName + " ! Heure : " + FormatDate("%hh:%ii:%ss", Date()))
+    }
+  }
+}
+
+; Custom Toggle Switch avec événement OnChange
+Class ModeSwitch Extends UI::Controls::ToggleSwitch {
+  Protected *statusLabel.UI::Label
+
+  Public Method BindLabel(*lbl.UI::Label) {
+    This\*statusLabel = *lbl
+  }
+
+  Public Method OnChange() {
+    If (This\*statusLabel) {
+      If (This\IsChecked()) {
+        This\*statusLabel\SetText("Statut : Mode TURBO Active [ON]")
+      } Else {
+        This\*statusLabel\SetText("Statut : Mode Standard [OFF]")
+      }
+    }
+  }
+}
+
+; Slider synchronisé avec ProgressBar
+Class VolumeSlider Extends UI::Slider {
+  Protected *progress.UI::ProgressBar
+  Protected *valLabel.UI::Label
+
+  Public Method BindProgress(*pb.UI::ProgressBar, *lbl.UI::Label) {
+    This\*progress = *pb
+    This\*valLabel = *lbl
+  }
+
+  Public Method OnCustomEvent(eventType.i) {
+    Protected curVal.i = This\GetValue()
+    If (This\*progress) {
+      This\*progress\SetValue(curVal)
+    }
+    If (This\*valLabel) {
+      This\*valLabel\SetText("Niveau : " + Str(curVal) + "%")
+    }
+  }
+}
+
+; ----------------------------------------------------------------------------
+; 2. Fenêtre Principale Encapsulée
+; ----------------------------------------------------------------------------
+
+Class MainWindow Extends UI::Window {
+  Protected *lblTitle.UI::Label
+  Protected *lblPrompt.UI::Label
+  Protected *txtInput.UI::TextBox
+  Protected *btnGreet.GreetButton
+  Protected *lblStatus.UI::Label
+  Protected *lblSwitch.UI::Label
+  Protected *switchTurbo.ModeSwitch
+  Protected *lblSlider.UI::Label
+  Protected *sliderVol.VolumeSlider
+  Protected *progBar.UI::ProgressBar
+  Protected *comboTheme.UI::ComboBox
+
+  Public Method Init() {
+    Super::Init("PureBasic OOP - Framework GUI Moderne", #PB_Ignore, #PB_Ignore, 480, 420, #PB_Window_SystemMenu | #PB_Window_ScreenCentered)
+    UI::RegisterWindow(This\id, This)
+
+    ; Titre
+    This\*lblTitle = New UI::Label(20, 15, 440, 25, "=== Demonstration GUI PureBasic OOP ===")
+    
+    ; Section Saisie & Bouton
+    This\*lblPrompt = New UI::Label(20, 55, 100, 20, "Votre Nom :")
+    This\*txtInput = New UI::TextBox(120, 52, 200, 25, "Developpeur PureBasic")
+    
+    This\*btnGreet = New GreetButton(330, 50, 130, 28, "Saluer !")
+
+    ; Section Toggle Switch (Custom Gadget sur Canvas)
+    This\*lblSwitch = New UI::Label(20, 100, 200, 20, "Custom Toggle Switch :")
+    This\*switchTurbo = New ModeSwitch(230, 97, 50, 26, #False)
+
+    ; Section Slider & ProgressBar
+    This\*lblSlider = New UI::Label(20, 145, 150, 20, "Niveau : 50%")
+    This\*sliderVol = New VolumeSlider(20, 170, 440, 25, 0, 100)
+    This\*sliderVol\SetValue(50)
+
+    This\*progBar = New UI::ProgressBar(20, 205, 440, 20, 0, 100)
+    This\*progBar\SetValue(50)
+
+    ; Section ComboBox
+    This\*comboTheme = New UI::ComboBox(20, 245, 200, 25)
+    This\*comboTheme\AddItem("Theme Clair (Defaut)")
+    This\*comboTheme\AddItem("Theme Sombre")
+    This\*comboTheme\AddItem("Theme Silk Moderne")
+    This\*comboTheme\SetSelectedIndex(0)
+
+    ; Statut en bas
+    This\*lblStatus = New UI::Label(20, 340, 440, 30, "Pret. Cliquez sur le bouton ou interagissez avec les widgets.")
+
+    ; Liaison des contrôles
+    This\*btnGreet\BindControls(This\*txtInput, This\*lblStatus)
+    This\*switchTurbo\BindLabel(This\*lblStatus)
+    This\*sliderVol\BindProgress(This\*progBar, This\*lblSlider)
+  }
+
+  Public Method.b OnClose() {
+    ProcedureReturn #True
+  }
+}
+
+; ----------------------------------------------------------------------------
+; 3. Lancement de l'Application
+; ----------------------------------------------------------------------------
+
+Define *app.UI::Application = New UI::Application()
+Define *mainWin.MainWindow = New MainWindow()
+
+*app\Run()
+
+; IDE Options = PureBasic 6.40 (Windows - x64)
+; CursorPosition = 95
+; FirstLine = 116
+; EnableXP
+; DPIAware
