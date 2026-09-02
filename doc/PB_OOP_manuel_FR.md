@@ -247,7 +247,58 @@ CloseConsole()
 
 ---
 
-## 4. Plomberie PureBasic Générée
+## 4. Double Syntaxe : PureBasic Classique vs Style C/C# (`{ }`)
+
+Pour combiner la **vitesse native fulgurante de PureBasic** avec une **syntaxe moderne et non verbeuse**, le transpileur prend en charge une double syntaxe complète. Vous pouvez utiliser indifféremment les mots-clés classiques ou les accolades `{ }`, et même mélanger les deux styles dans un même projet !
+
+### 4.1 Équivalence des Blocs
+
+| Structure | Syntaxe Classique | Syntaxe C-Style `{ }` |
+| :--- | :--- | :--- |
+| **Namespace** | `Namespace MonEspace ... EndNamespace` | `Namespace MonEspace { ... }` |
+| **Classe** | `Class MaClasse ... EndClass` | `Class MaClasse { ... }` |
+| **Méthode** | `Method MaMethode() ... EndMethod` | `Method MaMethode() { ... }` |
+| **Procédure** | `Procedure Calculer(x.i) ... EndProcedure` | `Procedure Calculer(x.i) { ... }` |
+| **Condition If** | `If a > 0 ... Else ... EndIf` | `If (a > 0) { ... } Else { ... }` |
+| **Boucle For** | `For i = 0 To 10 ... Next` | `For i = 0 To 10 { ... }` |
+| **Boucle While** | `While x < 100 ... Wend` | `While x < 100 { ... }` |
+| **Boucle Repeat** | `Repeat ... Until x = 0` | `Repeat { ... } Until x = 0` |
+| **Structure** | `Structure Point ... EndStructure` | `Structure Point { ... }` |
+
+### 4.2 Exemple en Syntaxe C-Style Moderne
+
+```oop
+Namespace Game::Entities {
+
+  Class Dog Extends Animal {
+    Protected race.s
+
+    Public Method Init(nom.s, race_p.s) {
+      Super::Init(nom)
+      This\race = race_p
+    }
+
+    Public Method Crier() {
+      If (This\race = "Husky") {
+        PrintN("Aouuuu !")
+      } Else {
+        PrintN("Wouaf !")
+      }
+    }
+  }
+
+}
+
+Procedure TesterChien() {
+  Using Game::Entities
+  Define *d.Dog = New Dog("Rex", "Husky")
+  *d\Crier()
+}
+```
+
+---
+
+## 5. Plomberie PureBasic Générée
 
 Le transpileur convertit automatiquement la syntaxe haut niveau `.pbo` en code natif PureBasic `.pb` ultra-performant :
 1. **Interfaces VTable (`_vt`)** : Définition des prototypes de méthodes avec préfixage complet (ex: `Game_Graphics_Renderer_vt`).

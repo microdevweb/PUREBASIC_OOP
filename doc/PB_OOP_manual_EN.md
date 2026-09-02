@@ -247,7 +247,58 @@ CloseConsole()
 
 ---
 
-## 4. Generated Native PureBasic Plumbing
+## 4. Dual Syntax: Classic PureBasic vs C/C# Style (`{ }`)
+
+To combine PureBasic's **blazing-fast native execution** with a **clean, modern, non-verbose syntax**, the transpiler supports a comprehensive dual syntax mode. You can write classic PureBasic keywords or modern C-style curly braces `{ }` seamlessly!
+
+### 4.1 Block Equivalences
+
+| Block | Classic PureBasic | C-Style `{ }` |
+| :--- | :--- | :--- |
+| **Namespace** | `Namespace MyNS ... EndNamespace` | `Namespace MyNS { ... }` |
+| **Class** | `Class MyClass ... EndClass` | `Class MyClass { ... }` |
+| **Method** | `Method MyMethod() ... EndMethod` | `Method MyMethod() { ... }` |
+| **Procedure** | `Procedure Compute(x.i) ... EndProcedure` | `Procedure Compute(x.i) { ... }` |
+| **Condition If** | `If a > 0 ... Else ... EndIf` | `If (a > 0) { ... } Else { ... }` |
+| **For Loop** | `For i = 0 To 10 ... Next` | `For i = 0 To 10 { ... }` |
+| **While Loop** | `While x < 100 ... Wend` | `While x < 100 { ... }` |
+| **Repeat Loop** | `Repeat ... Until x = 0` | `Repeat { ... } Until x = 0` |
+| **Structure** | `Structure Point ... EndStructure` | `Structure Point { ... }` |
+
+### 4.2 Modern C-Style Example
+
+```oop
+Namespace Game::Entities {
+
+  Class Dog Extends Animal {
+    Protected breed.s
+
+    Public Method Init(name.s, breed_p.s) {
+      Super::Init(name)
+      This\breed = breed_p
+    }
+
+    Public Method Speak() {
+      If (This\breed = "Husky") {
+        PrintN("Howl!")
+      } Else {
+        PrintN("Woof!")
+      }
+    }
+  }
+
+}
+
+Procedure TestDog() {
+  Using Game::Entities
+  Define *d.Dog = New Dog("Rex", "Husky")
+  *d\Speak()
+}
+```
+
+---
+
+## 5. Generated Native PureBasic Plumbing
 
 The transpiler converts high-level `.pbo` code into fast, native PureBasic `.pb` code:
 1. **Interfaces (`_vt`)**: VTable prototypes definition with fully mangled names (e.g. `Game_Graphics_Renderer_vt`).

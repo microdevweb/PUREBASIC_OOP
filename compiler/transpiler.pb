@@ -444,6 +444,251 @@ EndProcedure
 ; Parser Phase: Read and tokenize .pbo source
 ; ----------------------------------------------------------------------------
 
+Enumeration
+  #CBLOCK_NAMESPACE
+  #CBLOCK_CLASS
+  #CBLOCK_METHOD
+  #CBLOCK_PROCEDURE
+  #CBLOCK_IF
+  #CBLOCK_ELSE
+  #CBLOCK_ELSEIF
+  #CBLOCK_WHILE
+  #CBLOCK_FOR
+  #CBLOCK_FOREACH
+  #CBLOCK_REPEAT
+  #CBLOCK_SELECT
+  #CBLOCK_STRUCTURE
+  #CBLOCK_ENUMERATION
+  #CBLOCK_INTERFACE
+  #CBLOCK_MODULE
+  #CBLOCK_DECLAREMODULE
+  #CBLOCK_WITH
+  #CBLOCK_COMPILERIF
+EndEnumeration
+
+Structure CBlockEntry
+  type.i
+  openLine.i
+  openFile.s
+EndStructure
+
+Global NewList CBlockStack.CBlockEntry()
+
+Procedure.i DetectBlockOpener(code.s)
+  Protected up.s = UCase(Trim(code))
+  If Left(up, 10) = "NAMESPACE "
+    ProcedureReturn #CBLOCK_NAMESPACE
+  ElseIf Left(up, 6) = "CLASS " Or Left(up, 15) = "ABSTRACT CLASS "
+    ProcedureReturn #CBLOCK_CLASS
+  ElseIf Left(up, 7) = "METHOD " Or Left(up, 7) = "METHOD." Or Left(up, 14) = "PUBLIC METHOD " Or Left(up, 14) = "PUBLIC METHOD." Or Left(up, 17) = "PROTECTED METHOD " Or Left(up, 17) = "PROTECTED METHOD." Or Left(up, 15) = "PRIVATE METHOD " Or Left(up, 15) = "PRIVATE METHOD." Or Left(up, 16) = "OVERRIDE METHOD " Or Left(up, 16) = "OVERRIDE METHOD."
+    ProcedureReturn #CBLOCK_METHOD
+  ElseIf Left(up, 9) = "PROCEDURE" Or Left(up, 18) = "RUNTIME PROCEDURE "
+    ProcedureReturn #CBLOCK_PROCEDURE
+  ElseIf Left(up, 3) = "IF " Or Left(up, 3) = "IF(" Or up = "IF"
+    ProcedureReturn #CBLOCK_IF
+  ElseIf Left(up, 7) = "ELSEIF " Or Left(up, 7) = "ELSEIF(" Or up = "ELSEIF"
+    ProcedureReturn #CBLOCK_ELSEIF
+  ElseIf up = "ELSE" Or Left(up, 5) = "ELSE "
+    ProcedureReturn #CBLOCK_ELSE
+  ElseIf Left(up, 6) = "WHILE " Or Left(up, 6) = "WHILE(" Or up = "WHILE"
+    ProcedureReturn #CBLOCK_WHILE
+  ElseIf Left(up, 4) = "FOR "
+    ProcedureReturn #CBLOCK_FOR
+  ElseIf Left(up, 8) = "FOREACH "
+    ProcedureReturn #CBLOCK_FOREACH
+  ElseIf up = "REPEAT" Or Left(up, 7) = "REPEAT "
+    ProcedureReturn #CBLOCK_REPEAT
+  ElseIf Left(up, 7) = "SELECT "
+    ProcedureReturn #CBLOCK_SELECT
+  ElseIf Left(up, 10) = "STRUCTURE "
+    ProcedureReturn #CBLOCK_STRUCTURE
+  ElseIf up = "ENUMERATION" Or Left(up, 12) = "ENUMERATION "
+    ProcedureReturn #CBLOCK_ENUMERATION
+  ElseIf Left(up, 10) = "INTERFACE "
+    ProcedureReturn #CBLOCK_INTERFACE
+  ElseIf Left(up, 7) = "MODULE "
+    ProcedureReturn #CBLOCK_MODULE
+  ElseIf Left(up, 14) = "DECLAREMODULE "
+    ProcedureReturn #CBLOCK_DECLAREMODULE
+  ElseIf Left(up, 5) = "WITH "
+    ProcedureReturn #CBLOCK_WITH
+  ElseIf Left(up, 11) = "COMPILERIF " Or Left(up, 11) = "COMPILERIF("
+    ProcedureReturn #CBLOCK_COMPILERIF
+  EndIf
+  ProcedureReturn -1
+EndProcedure
+
+Procedure.b PreprocessCurlyBraces()
+  ClearList(CBlockStack())
+  Protected pendingOpener.i = -1
+  Protected pendingLine.i = 0
+  Protected pendingFile.s = ""
+
+  ForEach FileSourceLines()
+    Protected raw.s = FileSourceLines()\content
+    Protected lineNum.i = FileSourceLines()\srcLineNumber
+    Protected srcFile.s = FileSourceLines()\srcFile
+
+    ; Split into leading whitespace, code, and comment
+    Protected i.i, inStr.b = #False
+    Protected codeEnd.i = Len(raw)
+    Protected lenRaw.i = Len(raw)
+    
+    For i = 1 To lenRaw
+      Protected ch.s = Mid(raw, i, 1)
+      If ch = Chr(34)
+        If inStr
+          inStr = #False
+        Else
+          inStr = #True
+        EndIf
+      ElseIf ch = ";" And Not inStr
+        codeEnd = i - 1
+        Break
+      EndIf
+    Next
+
+    Protected codePart.s = Left(raw, codeEnd)
+    Protected commentPart.s = Mid(raw, codeEnd + 1)
+    Protected trimmedCode.s = Trim(codePart)
+
+    If trimmedCode = ""
+      ; Empty line or comment-only, leave as is
+      Continue
+    EndIf
+
+    ; 1. Handle standalone opening brace on its own line: "{"
+    If trimmedCode = "{"
+      If pendingOpener >= 0
+        AddElement(CBlockStack())
+        CBlockStack()\type = pendingOpener
+        CBlockStack()\openLine = pendingLine
+        CBlockStack()\openFile = pendingFile
+        pendingOpener = -1
+        ; Make this line empty, preserving comments and line count
+        FileSourceLines()\content = commentPart
+        Continue
+      Else
+        SetOOPError(lineNum, "Unexpected '{' without preceding block statement")
+        ProcedureReturn #False
+      EndIf
+    EndIf
+
+    ; If there was a pending opener on previous line but this line is not "{", clear pending
+    If pendingOpener >= 0
+      pendingOpener = -1
+    EndIf
+
+    ; 2. Handle closing brace variations: "}", "} Else {", "} Else", "} ElseIf ... {", "} Until ..."
+    If Left(trimmedCode, 1) = "}"
+      If ListSize(CBlockStack()) = 0
+        SetOOPError(lineNum, "Unexpected '}' without matching opening block")
+        ProcedureReturn #False
+      EndIf
+
+      LastElement(CBlockStack())
+      Protected topType.i = CBlockStack()\type
+      DeleteElement(CBlockStack())
+
+      Protected restOfCode.s = Trim(Mid(trimmedCode, 2))
+      Protected restUpper.s = UCase(restOfCode)
+
+      If Left(restUpper, 4) = "ELSE"
+        If Left(restUpper, 6) = "ELSEIF"
+          Protected hasOpenBrace.b = #False
+          If Right(restOfCode, 1) = "{"
+            hasOpenBrace = #True
+            restOfCode = Trim(Left(restOfCode, Len(restOfCode) - 1))
+          EndIf
+          If hasOpenBrace
+            AddElement(CBlockStack())
+            CBlockStack()\type = #CBLOCK_ELSEIF
+            CBlockStack()\openLine = lineNum
+            CBlockStack()\openFile = srcFile
+          EndIf
+          FileSourceLines()\content = restOfCode + commentPart
+          Continue
+        Else
+          ; Else
+          Protected hasOpenBrace2.b = #False
+          If Right(restOfCode, 1) = "{"
+            hasOpenBrace2 = #True
+            restOfCode = Trim(Left(restOfCode, Len(restOfCode) - 1))
+          EndIf
+          If hasOpenBrace2
+            AddElement(CBlockStack())
+            CBlockStack()\type = #CBLOCK_ELSE
+            CBlockStack()\openLine = lineNum
+            CBlockStack()\openFile = srcFile
+          EndIf
+          If restOfCode = "" : restOfCode = "Else" : EndIf
+          FileSourceLines()\content = restOfCode + commentPart
+          Continue
+        EndIf
+      ElseIf Left(restUpper, 5) = "UNTIL"
+        FileSourceLines()\content = restOfCode + commentPart
+        Continue
+      Else
+        ; Standalone closing brace
+        Protected endKeyword.s = ""
+        Select topType
+          Case #CBLOCK_NAMESPACE:     endKeyword = "EndNamespace"
+          Case #CBLOCK_CLASS:         endKeyword = "EndClass"
+          Case #CBLOCK_METHOD:        endKeyword = "EndMethod"
+          Case #CBLOCK_PROCEDURE:     endKeyword = "EndProcedure"
+          Case #CBLOCK_IF, #CBLOCK_ELSE, #CBLOCK_ELSEIF: endKeyword = "EndIf"
+          Case #CBLOCK_WHILE:         endKeyword = "Wend"
+          Case #CBLOCK_FOR, #CBLOCK_FOREACH: endKeyword = "Next"
+          Case #CBLOCK_REPEAT:        endKeyword = "Until #True"
+          Case #CBLOCK_SELECT:        endKeyword = "EndSelect"
+          Case #CBLOCK_STRUCTURE:     endKeyword = "EndStructure"
+          Case #CBLOCK_ENUMERATION:   endKeyword = "EndEnumeration"
+          Case #CBLOCK_INTERFACE:     endKeyword = "EndInterface"
+          Case #CBLOCK_MODULE:        endKeyword = "EndModule"
+          Case #CBLOCK_DECLAREMODULE: endKeyword = "EndDeclareModule"
+          Case #CBLOCK_WITH:          endKeyword = "EndWith"
+          Case #CBLOCK_COMPILERIF:    endKeyword = "CompilerEndIf"
+        EndSelect
+
+        FileSourceLines()\content = endKeyword + commentPart
+        Continue
+      EndIf
+    EndIf
+
+    ; 3. Handle opening line with trailing "{" (e.g. "Procedure Foo() {")
+    If Right(trimmedCode, 1) = "{"
+      Protected strippedCode.s = Trim(Left(trimmedCode, Len(trimmedCode) - 1))
+      Protected openerType.i = DetectBlockOpener(strippedCode)
+      If openerType >= 0
+        AddElement(CBlockStack())
+        CBlockStack()\type = openerType
+        CBlockStack()\openLine = lineNum
+        CBlockStack()\openFile = srcFile
+
+        FileSourceLines()\content = strippedCode + commentPart
+        Continue
+      EndIf
+    Else
+      ; Check if this line is a block opener without trailing "{" (might have "{" on next line)
+      Protected possibleOpener.i = DetectBlockOpener(trimmedCode)
+      If possibleOpener >= 0
+        pendingOpener = possibleOpener
+        pendingLine = lineNum
+        pendingFile = srcFile
+      EndIf
+    EndIf
+
+  Next
+
+  If ListSize(CBlockStack()) > 0
+    LastElement(CBlockStack())
+    SetOOPError(CBlockStack()\openLine, "Missing closing brace '}' for block opened at line " + Str(CBlockStack()\openLine))
+    ProcedureReturn #False
+  EndIf
+
+  ProcedureReturn #True
+EndProcedure
+
 Procedure.b ParsePBO(inputFile.s)
   LastErrorFile = inputFile
   LastErrorLine = 0
@@ -457,6 +702,10 @@ Procedure.b ParsePBO(inputFile.s)
 
   IncludedFilesMap(UCase(inputFile)) = 1
   If Not LoadSourceLinesRecursive(inputFile)
+    ProcedureReturn #False
+  EndIf
+
+  If Not PreprocessCurlyBraces()
     ProcedureReturn #False
   EndIf
 
@@ -1222,7 +1471,15 @@ Procedure.b GenerateTargetPB(outputFile.s, inputPBO.s)
     EndIf
 
     ForEach *c\Fields()
-      EmitLine("  " + *c\Fields()\name, *c\Fields()\srcLineNumber, *c\Fields()\srcFile)
+      Protected fDecl.s = *c\Fields()\name
+      Protected numItems.i = CountString(fDecl, ",") + 1
+      Protected fIdx.i
+      For fIdx = 1 To numItems
+        Protected item.s = Trim(StringField(fDecl, fIdx, ","))
+        If item <> ""
+          EmitLine("  " + item, *c\Fields()\srcLineNumber, *c\Fields()\srcFile)
+        EndIf
+      Next
     Next
 
     EmitLine("EndStructure")
