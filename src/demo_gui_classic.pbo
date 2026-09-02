@@ -1,6 +1,6 @@
 ﻿; ============================================================================
-; Demonstration Complete du Framework GUI PureBasic OOP
-; Fichier : src/demo_gui_oop.pbo
+; Demonstration du Framework GUI PureBasic OOP (Syntaxe PureBasic Standard)
+; Fichier : src/demo_gui_classic.pbo
 ; ============================================================================
 
 XIncludeFile "ui/UI.pbo"
@@ -9,78 +9,78 @@ Using UI
 Using UI::Controls
 
 ; ----------------------------------------------------------------------------
-; 1. Classes Specialisees par Heritage pour les Evenements
+; 1. Classes Specialisees par Heritage (Mots-cles classiques PureBasic)
 ; ----------------------------------------------------------------------------
 
-; Bouton avec comportement encapsule
-Class GreetButton Extends UI::Button {
+; Bouton avec logique et liaison de donnees
+Class GreetButton Extends UI::Button
   Protected *nameInput.UI::TextBox
   Protected *statusLabel.UI::Label
 
-  Public Method BindControls(*input.UI::TextBox, *lbl.UI::Label) {
+  Public Method BindControls(*input.UI::TextBox, *lbl.UI::Label)
     This\*nameInput = *input
     This\*statusLabel = *lbl
-  }
+  EndMethod
 
-  Public Method OnClick() {
+  Public Method OnClick()
     Protected userName.s = "Visiteur"
-    If (This\*nameInput) {
+    If This\*nameInput
       Protected txt.s = This\*nameInput\GetText()
-      If (txt <> "") {
+      If txt <> ""
         userName = txt
-      }
-    }
-    If (This\*statusLabel) {
+      EndIf
+    EndIf
+    If This\*statusLabel
       This\*statusLabel\SetText("Bonjour " + userName + " ! Heure : " + FormatDate("%hh:%ii:%ss", Date()))
-    }
-  }
-}
+    EndIf
+  EndMethod
+EndClass
 
-; Custom Toggle Switch avec evenement OnChange
-Class ModeSwitch Extends UI::Controls::ToggleSwitch {
+; Custom Toggle Switch sur Canvas avec callback OnChange
+Class ModeSwitch Extends UI::Controls::ToggleSwitch
   Protected *statusLabel.UI::Label
 
-  Public Method BindLabel(*lbl.UI::Label) {
+  Public Method BindLabel(*lbl.UI::Label)
     This\*statusLabel = *lbl
-  }
+  EndMethod
 
-  Public Method OnChange() {
-    If (This\*statusLabel) {
-      If (This\IsChecked()) {
+  Public Method OnChange()
+    If This\*statusLabel
+      If This\IsChecked()
         This\*statusLabel\SetText("Statut : Mode TURBO Active [ON]")
-      } Else {
+      Else
         This\*statusLabel\SetText("Statut : Mode Standard [OFF]")
-      }
-    }
-  }
-}
+      EndIf
+    EndIf
+  EndMethod
+EndClass
 
 ; Slider synchronise avec ProgressBar
-Class VolumeSlider Extends UI::Slider {
+Class VolumeSlider Extends UI::Slider
   Protected *progress.UI::ProgressBar
   Protected *valLabel.UI::Label
 
-  Public Method BindProgress(*pb.UI::ProgressBar, *lbl.UI::Label) {
+  Public Method BindProgress(*pb.UI::ProgressBar, *lbl.UI::Label)
     This\*progress = *pb
     This\*valLabel = *lbl
-  }
+  EndMethod
 
-  Public Method OnCustomEvent(eventType.i) {
+  Public Method OnCustomEvent(eventType.i)
     Protected curVal.i = This\GetValue()
-    If (This\*progress) {
+    If This\*progress
       This\*progress\SetValue(curVal)
-    }
-    If (This\*valLabel) {
+    EndIf
+    If This\*valLabel
       This\*valLabel\SetText("Niveau : " + Str(curVal) + "%")
-    }
-  }
-}
+    EndIf
+  EndMethod
+EndClass
 
 ; ----------------------------------------------------------------------------
-; 2. Fenetre Principale Encapsulee
+; 2. Fenetre Principale Encapsulee (Syntaxe Standard)
 ; ----------------------------------------------------------------------------
 
-Class MainWindow Extends UI::Window {
+Class MainWindow Extends UI::Window
   Protected *lblTitle.UI::Label
   Protected *lblPrompt.UI::Label
   Protected *txtInput.UI::TextBox
@@ -93,12 +93,12 @@ Class MainWindow Extends UI::Window {
   Protected *progBar.UI::ProgressBar
   Protected *comboTheme.UI::ComboBox
 
-  Public Method Init() {
-    Super::Init("PureBasic OOP - Framework GUI Moderne", #PB_Ignore, #PB_Ignore, 480, 420, #PB_Window_SystemMenu | #PB_Window_ScreenCentered)
+  Public Method Init()
+    Super::Init("PureBasic OOP - Framework GUI (Syntaxe Standard)", #PB_Ignore, #PB_Ignore, 480, 420, #PB_Window_SystemMenu | #PB_Window_ScreenCentered)
     UI::RegisterWindow(This\id, This)
 
     ; Titre
-    This\*lblTitle = New UI::Label(20, 15, 440, 25, "=== Demonstration GUI PureBasic OOP ===")
+    This\*lblTitle = New UI::Label(20, 15, 440, 25, "=== Demonstration GUI PureBasic OOP (Classique) ===")
     
     ; Section Saisie & Bouton
     This\*lblPrompt = New UI::Label(20, 55, 100, 20, "Votre Nom :")
@@ -137,12 +137,12 @@ Class MainWindow Extends UI::Window {
     This\*btnGreet\BindControls(This\*txtInput, This\*lblStatus)
     This\*switchTurbo\BindLabel(This\*lblStatus)
     This\*sliderVol\BindProgress(This\*progBar, This\*lblSlider)
-  }
+  EndMethod
 
-  Public Method.b OnClose() {
+  Public Method.b OnClose()
     ProcedureReturn #True ; Autorise la fermeture de la fenetre
-  }
-}
+  EndMethod
+EndClass
 
 ; ----------------------------------------------------------------------------
 ; 3. Point d'Entree du Programme

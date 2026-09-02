@@ -1,6 +1,6 @@
 # PBO_SOURCEMAP_V1
-SOURCE:src\demo_gui_oop.pbo
-TARGET:src\demo_gui_oop_generated.pb
+SOURCE:src\demo_gui_classic.pbo
+TARGET:src\demo_gui_classic_generated.pb
 MAP:
 12:8
 13:19

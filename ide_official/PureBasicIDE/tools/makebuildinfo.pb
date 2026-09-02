@@ -1,4 +1,4 @@
-﻿; --------------------------------------------------------------------------------------------
+; --------------------------------------------------------------------------------------------
 ;  Copyright (c) Fantaisie Software. All rights reserved.
 ;  Dual licensed under the GPL and Fantaisie Software licenses.
 ;  See LICENSE and LICENSE-FANTAISIE in the project root for license information.
@@ -85,7 +85,7 @@ EndIf
 FetchGitInfo()
 Compiler$ = GetCompilerVersion()
 Version$ = Trim(StringField(Compiler$, 1, "(")) ; remove "(Windows - x86)"
-Version$ = Right(Version$, Len(Version$) - 10)  ; remove "PureBasic "
+Version$ = Right(Version$, Len(Version$) - 10) + " (PureBasic OOP - ALPHA 1.0)"  ; remove "PureBasic "
 
 ;- Write output
 ;

@@ -1874,7 +1874,7 @@ Procedure.i Main()
     outputPB = ReplaceString(inputPBO, ".pbo", "_generated.pb", #PB_String_NoCase)
   EndIf
   PrintN("=================================================================")
-  PrintN("           PureBasic OOP Transpiler (Native Engine)              ")
+  PrintN("      PureBasic OOP Transpiler (Native Engine) - ALPHA 1.0       ")
   PrintN("=================================================================")
   PrintN("Input  PBO : " + inputPBO)
   PrintN("Output PB  : " + outputPB)
