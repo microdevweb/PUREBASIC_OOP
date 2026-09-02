@@ -885,6 +885,14 @@ Procedure.b ParsePBO(inputFile.s)
           Protected mName.s = Trim(Left(mDecl, p1 - 1))
           Protected mParams.s = Trim(Mid(mDecl, p1 + 1, p2 - p1 - 1))
 
+          Protected pDotInName.i = FindString(mName, ".")
+          If pDotInName > 0
+            If mRet = ""
+              mRet = Mid(mName, pDotInName)
+            EndIf
+            mName = Left(mName, pDotInName - 1)
+          EndIf
+
           AddElement(*currentClass\Methods())
           *currentClass\Methods()\name = mName
           *currentClass\Methods()\params = mParams
@@ -1082,6 +1090,14 @@ Procedure.b ParsePBO(inputFile.s)
 
         Protected classPart.s = Trim(Left(fullTargetName, p3 - 1))
         Protected m_name.s = Trim(Mid(fullTargetName, p3 + 2))
+
+        Protected pDotOutName.i = FindString(m_name, ".")
+        If pDotOutName > 0
+          If outRet = ""
+            outRet = Mid(m_name, pDotOutName)
+          EndIf
+          m_name = Left(m_name, pDotOutName - 1)
+        EndIf
 
         Protected resolvedClass.s = ResolveClassName(classPart, GetCurrentNamespace())
         Protected resolvedMangled.s = MangleIdentifier(resolvedClass)
