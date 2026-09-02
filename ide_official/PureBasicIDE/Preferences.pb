@@ -244,6 +244,7 @@ Procedure LoadPreferences()
   FoldStart$(11) = "HeaderSection" 
   FoldStart$(12) = "Class"
   FoldStart$(13) = "Method"
+  FoldStart$(14) = "Namespace"
   
   FoldEnd$(1) = ";}"
   FoldEnd$(2) = "EndMacro"
@@ -259,6 +260,7 @@ Procedure LoadPreferences()
   FoldEnd$(8) = "EndHeaderSection"
   FoldEnd$(9) = "EndClass"
   FoldEnd$(10) = "EndMethod"
+  FoldEnd$(11) = "EndNamespace"
   
   NbFoldStartWords = ReadPreferenceLong("StartWords", NbFoldStartWords)
   NbFoldEndWords = ReadPreferenceLong("EndWords", NbFoldEndWords)
@@ -882,7 +884,7 @@ Procedure LoadPreferences()
   ProcedureReturnOOPKeyword:
   DataSection
     OOPKeywordsData:
-    Data$ "Class", "EndClass", "Method", "EndMethod", "Super", "This", "New", "Init", "Free", "Public", "Protected", "Private", "Override", "Constructor", "Destructor", ""
+    Data$ "Class", "EndClass", "Method", "EndMethod", "Namespace", "EndNamespace", "Using", "Super", "This", "New", "Init", "Free", "Public", "Protected", "Private", "Override", "Constructor", "Destructor", ""
   EndDataSection
   Restore OOPKeywordsData
   Repeat

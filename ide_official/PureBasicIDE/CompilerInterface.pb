@@ -2238,7 +2238,7 @@ Procedure.b LoadOOPSourceMap(mapFilePath$)
   ProcedureReturn #False
 EndProcedure
 
-Procedure.s TranspileOOPFile(SourceFileName$)
+Procedure.s TranspileOOPFile(SourceFileName$, BaseDir$ = "")
   ClearMap(OOP_SourceLineMap())
   OOP_TranspilerError$ = ""
   OOP_TranspilerErrorLine = 0
@@ -2282,7 +2282,13 @@ Procedure.s TranspileOOPFile(SourceFileName$)
   EndIf
 
   Protected transpiledFile$ = TempPath$ + "PB_OOP_Transpiled_" + Str(Random(999999)) + ".pb"
-  Protected prg = RunProgram(transpilerExe$, #DQUOTE$ + SourceFileName$ + #DQUOTE$ + " " + #DQUOTE$ + transpiledFile$ + #DQUOTE$, "", #PB_Program_Open | #PB_Program_Read | #PB_Program_Hide)
+  Protected cmdArgs$ = ""
+  If BaseDir$ <> ""
+    cmdArgs$ = "--base-dir " + #DQUOTE$ + BaseDir$ + #DQUOTE$ + " "
+  EndIf
+  cmdArgs$ + #DQUOTE$ + SourceFileName$ + #DQUOTE$ + " " + #DQUOTE$ + transpiledFile$ + #DQUOTE$
+
+  Protected prg = RunProgram(transpilerExe$, cmdArgs$, "", #PB_Program_Open | #PB_Program_Read | #PB_Program_Hide)
   Protected outputLog$ = ""
   
   If prg
@@ -2387,7 +2393,11 @@ Procedure Compiler_CompileRun(SourceFileName$, *Source.SourceFile, CheckSyntax)
   RegisterDeleteFile(TargetFileName$)
   
   ; Transpile OOP source (.pbo / Class keywords) before passing to pbcompiler
-  Protected ActualSourceFile$ = TranspileOOPFile(SourceFileName$)
+  Protected actualBaseDir$ = ""
+  If *Source And *Source\FileName$ <> ""
+    actualBaseDir$ = GetPathPart(*Source\FileName$)
+  EndIf
+  Protected ActualSourceFile$ = TranspileOOPFile(SourceFileName$, actualBaseDir$)
   
   If ActualSourceFile$ = ""
     ; Transpilation failed due to OOP error!
@@ -2621,7 +2631,11 @@ Procedure Compiler_BuildTarget(SourceFileName$, TargetFileName$, *Target.Compile
   CompilerEndIf
   
   ; Transpile OOP source (.pbo / Class keywords) before passing to pbcompiler
-  Protected ActualSourceFile$ = TranspileOOPFile(SourceFileName$)
+  Protected actualBaseDir$ = GetPathPart(SourceFileName$)
+  If *Target And *Target\MainFile$ <> ""
+    actualBaseDir$ = GetPathPart(*Target\MainFile$)
+  EndIf
+  Protected ActualSourceFile$ = TranspileOOPFile(SourceFileName$, actualBaseDir$)
   
   If ActualSourceFile$ = ""
     ; Transpilation failed due to OOP error!

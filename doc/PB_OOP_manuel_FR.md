@@ -176,28 +176,106 @@ CloseConsole()
 
 ---
 
-## 3. Plomberie PureBasic Générée
+## 3. Espaces de Noms (Namespaces) et Projets Multi-Fichiers
+
+### 3.1 Déclaration de Namespace et Imbrication
+Les espaces de noms permettent d'organiser les classes logiquement et d'éviter tout conflit de noms :
+
+```oop
+Namespace Game::Graphics
+  Class Renderer
+    Protected width.i, height.i
+    Public Method Init(w.i, h.i)
+    Public Method Render()
+  EndClass
+EndNamespace
+```
+
+### 3.2 Utilisation, Directive `Using` et Alias
+Vous pouvez utiliser une classe soit via son nom pleinement qualifié, soit en important son namespace avec `Using`, soit en définissant un alias :
+
+```oop
+; 1. Nom pleinement qualifié
+Define *r1.Game::Graphics::Renderer = New Game::Graphics::Renderer(1920, 1080)
+
+; 2. Directive Using
+Using Game::Graphics
+Define *r2.Renderer = New Renderer(1280, 720)
+
+; 3. Alias de Namespace
+Namespace GFX = Game::Graphics
+Define *r3.GFX::Renderer = New GFX::Renderer(800, 600)
+```
+
+### 3.3 Organisation Multi-Fichiers (1 Fichier par Classe)
+Le transpileur gère nativement `IncludeFile` et `XIncludeFile` de manière récursive avec mapping de source complet :
+
+**Fichier `entities/Animal.pbo` :**
+```oop
+Namespace Game::Entities
+Abstract Class Animal
+  Protected nom.s
+  Public Method Init(nom_p.s)
+  Public Abstract Method Crier()
+EndClass
+EndNamespace
+```
+
+**Fichier `entities/Dog.pbo` :**
+```oop
+Namespace Game::Entities
+Class Dog Extends Animal
+  Public Method Crier()
+    PrintN(This\nom + " aboie !")
+  EndMethod
+EndClass
+EndNamespace
+```
+
+**Fichier principal `main.pbo` :**
+```oop
+XIncludeFile "entities/Animal.pbo"
+XIncludeFile "entities/Dog.pbo"
+
+Using Game::Entities
+
+OpenConsole()
+Define *d.Dog = New Dog("Rex")
+*d\Crier()
+CloseConsole()
+```
+
+---
+
+## 4. Plomberie PureBasic Générée
 
 Le transpileur convertit automatiquement la syntaxe haut niveau `.pbo` en code natif PureBasic `.pb` ultra-performant :
-1. **Interfaces VTable (`_vt`)** : Définition des prototypes de méthodes. L'interface de la classe abstraite est générée pour permettre le typage polymorphe.
+1. **Interfaces VTable (`_vt`)** : Définition des prototypes de méthodes avec préfixage complet (ex: `Game_Graphics_Renderer_vt`).
 2. **Structures d'Instance (`_Inst`)** : Structures mémoires contenant le pointeur `*VTable` en en-tête suivi des champs de la classe.
 3. **Dispatch Interne Sécurisé (`*This_vt`)** : Les appels internes `This\Methode()` sont automatiquement résolus via le pointeur d'interface polymorphe `*This_vt`.
 4. **DataSections VTable** : Générées pour toutes les classes concrètes (les classes abstraites n'allouent pas de VTable inutile).
 5. **Constructeurs Factory (`New_<Classe>`)** : Générés uniquement pour les classes concrètes.
-6. **Validation Sémantique** :
+6. **Validation Sémantique & Source Mapping** :
    - Interdiction d'instancier une classe abstraite.
    - Obligation pour une classe fille concrète d'implémenter toutes les méthodes abstraites héritées.
+   - Fichier `.pb.map` pour remapper chaque avertissement/erreur `pbcompiler` vers le fichier et la ligne `.pbo` d'origine.
 
 ---
 
-## 4. Guide d'Exécution & Compilation
+## 5. Guide d'Exécution & Compilation
 
 ### Transpiler un fichier `.pbo` vers `.pb` :
 ```cmd
 "compiler/transpiler.exe" "src/mon_fichier.pbo" "src/mon_fichier_generated.pb"
 ```
 
+### Vérifier la syntaxe en ligne de commande :
+```cmd
+"compiler/transpiler.exe" --check "src/mon_fichier.pbo"
+```
+
 ### Compiler le code PureBasic généré :
 ```cmd
 "C:\Program Files\PureBasic\Compilers\pbcompiler.exe" "src/mon_fichier_generated.pb" /CONSOLE /EXE "src/mon_fichier.exe"
 ```
+

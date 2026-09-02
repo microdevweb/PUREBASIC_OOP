@@ -176,28 +176,106 @@ CloseConsole()
 
 ---
 
-## 3. Generated Native PureBasic Plumbing
+## 3. Namespaces & Multi-File Projects
+
+### 3.1 Namespace Declaration & Nesting
+Namespaces logically group classes and avoid naming collisions across large projects:
+
+```oop
+Namespace Game::Graphics
+  Class Renderer
+    Protected width.i, height.i
+    Public Method Init(w.i, h.i)
+    Public Method Render()
+  EndClass
+EndNamespace
+```
+
+### 3.2 Usage, `Using` Directive & Aliases
+Classes inside namespaces can be accessed via full qualification, `Using` imports, or aliases:
+
+```oop
+; 1. Fully Qualified Name
+Define *r1.Game::Graphics::Renderer = New Game::Graphics::Renderer(1920, 1080)
+
+; 2. Using Directive
+Using Game::Graphics
+Define *r2.Renderer = New Renderer(1280, 720)
+
+; 3. Namespace Alias
+Namespace GFX = Game::Graphics
+Define *r3.GFX::Renderer = New GFX::Renderer(800, 600)
+```
+
+### 3.3 Multi-File Projects (One File Per Class)
+The transpiler natively and recursively processes `IncludeFile` and `XIncludeFile`:
+
+**File `entities/Animal.pbo`:**
+```oop
+Namespace Game::Entities
+Abstract Class Animal
+  Protected name.s
+  Public Method Init(name_p.s)
+  Public Abstract Method Speak()
+EndClass
+EndNamespace
+```
+
+**File `entities/Dog.pbo`:**
+```oop
+Namespace Game::Entities
+Class Dog Extends Animal
+  Public Method Speak()
+    PrintN(This\name + " barks!")
+  EndMethod
+EndClass
+EndNamespace
+```
+
+**Main Entry File `main.pbo`:**
+```oop
+XIncludeFile "entities/Animal.pbo"
+XIncludeFile "entities/Dog.pbo"
+
+Using Game::Entities
+
+OpenConsole()
+Define *d.Dog = New Dog("Rex")
+*d\Speak()
+CloseConsole()
+```
+
+---
+
+## 4. Generated Native PureBasic Plumbing
 
 The transpiler converts high-level `.pbo` code into fast, native PureBasic `.pb` code:
-1. **Interfaces (`_vt`)**: VTable prototypes definition. Abstract class interfaces are generated to allow polymorphic typing (`*var.AbstractClass`).
+1. **Interfaces (`_vt`)**: VTable prototypes definition with fully mangled names (e.g. `Game_Graphics_Renderer_vt`).
 2. **Instance Structures (`_Inst`)**: Memory structures holding the `*VTable` pointer at offset 0 followed by fields.
 3. **Safe Internal Dispatch (`*This_vt`)**: Internal calls (`This\Method()`) resolve cleanly through the polymorphic interface pointer `*This_vt`.
 4. **VTable DataSections**: Emitted for concrete classes only.
 5. **Constructors (`New_<Class>`)**: Generated only for concrete classes.
-6. **Semantic Validations**:
+6. **Semantic Validations & Source Mapping**:
    - Forbids instantiating abstract classes.
    - Enforces that concrete subclasses implement all inherited abstract methods.
+   - `.pb.map` file maps all compiler errors/warnings back to original `.pbo` files and lines.
 
 ---
 
-## 4. Compilation & Execution Guide
+## 5. Compilation & Execution Guide
 
 ### Transpile `.pbo` source to `.pb`:
 ```cmd
 "compiler/transpiler.exe" "src/my_file.pbo" "src/my_file_generated.pb"
 ```
 
+### Syntax check via CLI:
+```cmd
+"compiler/transpiler.exe" --check "src/my_file.pbo"
+```
+
 ### Compile the generated PureBasic code:
 ```cmd
 "C:\Program Files\PureBasic\Compilers\pbcompiler.exe" "src/my_file_generated.pb" /CONSOLE /EXE "src/my_file.exe"
 ```
+

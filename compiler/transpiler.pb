@@ -4,7 +4,8 @@
 ;              Supports Single Inheritance, Dynamic VTable Polymorphism,
 ;              Method Overriding, 'Super::' / 'Super\' calls, 'New' instantiation,
 ;              inline / out-of-class method bodies, Syntax/Semantic Checking,
-;              and Source Line Mapping (.pb.map).
+;              Source Line Mapping (.pb.map), Hierarchical Namespaces,
+;              'Using' directives, Namespace Aliases, and Multi-File Includes.
 ; Author:      MicrodevWeb
 ; ============================================================================
 
@@ -18,6 +19,7 @@ Structure OOP_Field
   name.s          ; e.g. "nom.s"
   visibility.s    ; "Public", "Protected", "Private"
   srcLineNumber.i
+  srcFile.s
 EndStructure
 
 Structure OOP_Method
@@ -29,23 +31,31 @@ Structure OOP_Method
   isOverride.b
   isAbstract.b
   srcLineNumber.i
+  srcFile.s
 EndStructure
 
 Structure OOP_VTableSlot
   methodName.s
-  implementingClass.s
-  declaringClass.s
+  implementingClass.s   ; fullName
+  declaringClass.s      ; fullName
   params.s
   returnType.s
   isAbstract.b
   srcLineNumber.i
+  srcFile.s
 EndStructure
 
 Structure OOP_Class
-  name.s
-  parentName.s    ; empty if base class
+  name.s                ; Short name e.g. "Renderer"
+  namespace.s           ; e.g. "Game::Graphics"
+  fullName.s            ; e.g. "Game::Graphics::Renderer"
+  mangledName.s         ; e.g. "Game_Graphics_Renderer"
+  parentName.s          ; Raw parent name from Extends
+  fullParentName.s      ; Resolved full parent name
+  mangledParentName.s   ; Mangled parent name
   isAbstract.b
   srcLineNumber.i
+  srcFile.s
   List Fields.OOP_Field()
   List Methods.OOP_Method()
   List VTableSlots.OOP_VTableSlot()
@@ -57,20 +67,24 @@ EndStructure
 Structure OOP_SourceLine
   content.s
   srcLineNumber.i
+  srcFile.s
 EndStructure
 
 Structure OOP_MethodBody
-  className.s
+  className.s           ; Resolved fullName
+  mangledClassName.s    ; Mangled class name
   methodName.s
   params.s
   returnType.s
   srcLineNumber.i
+  srcFile.s
   List BodyLines.OOP_SourceLine()
 EndStructure
 
 Structure OOP_GeneratedLine
   content.s
   srcLineNumber.i
+  srcFile.s
 EndStructure
 
 ; ----------------------------------------------------------------------------
@@ -78,24 +92,32 @@ EndStructure
 ; ----------------------------------------------------------------------------
 
 Global NewList Classes.OOP_Class()
-Global NewMap ClassMap.i() ; Map ClassName to ListIndex
+Global NewMap ClassMap.i()          ; Map FullName & MangledName to ListIndex
 Global NewList MethodBodies.OOP_MethodBody()
 Global NewList MainLines.OOP_SourceLine()
-Global NewList FileLines.s()
+Global NewList FileSourceLines.OOP_SourceLine()
 Global NewList GeneratedLines.OOP_GeneratedLine()
+
+Global NewList NamespaceStack.s()
+Global NewList UsingList.s()
+Global NewMap NamespaceAliases.s()  ; Alias -> Target Namespace
+Global NewMap IncludedFilesMap.i()
 
 Global LastErrorMessage.s = ""
 Global LastErrorLine.i = 0
 Global LastErrorFile.s = ""
 
-Procedure SetOOPError(lineNum.i, message.s)
+Procedure SetOOPError(lineNum.i, message.s, file.s = "")
   LastErrorLine = lineNum
   LastErrorMessage = message
+  If file <> ""
+    LastErrorFile = file
+  EndIf
   PrintN("[ERROR] Line " + Str(lineNum) + ": " + message)
 EndProcedure
 
 ; ----------------------------------------------------------------------------
-; Helper Functions
+; Helper Functions & Symbol Resolution
 ; ----------------------------------------------------------------------------
 
 Procedure.b IsIdentifierChar(c.s)
@@ -149,10 +171,6 @@ Procedure.s ReplaceWord(text.s, findWord.s, replaceWith.s)
   ProcedureReturn res
 EndProcedure
 
-; ----------------------------------------------------------------------------
-; Parser Phase: Read and tokenize .pbo source
-; ----------------------------------------------------------------------------
-
 Procedure.s StripComment(text.s)
   Protected inQuotes.b = #False
   Protected i.i, lenT.i = Len(text)
@@ -185,31 +203,262 @@ Procedure.b IsValidFieldDeclaration(decl.s)
   ProcedureReturn #False
 EndProcedure
 
+Procedure.s MangleIdentifier(id.s)
+  Protected clean.s = id
+  While Left(clean, 2) = "::"
+    clean = Mid(clean, 3)
+  Wend
+  ProcedureReturn ReplaceString(clean, "::", "_")
+EndProcedure
+
+Procedure.s GetCurrentNamespace()
+  Protected ns.s = ""
+  ForEach NamespaceStack()
+    If ns = ""
+      ns = NamespaceStack()
+    Else
+      ns + "::" + NamespaceStack()
+    EndIf
+  Next
+  ProcedureReturn ns
+EndProcedure
+
+Procedure.s ResolveClassName(ident.s, currentNS.s)
+  Protected raw.s = Trim(ident)
+  If raw = "" : ProcedureReturn "" : EndIf
+  
+  Protected result.s = raw
+  PushListPosition(Classes())
+  
+  ; 1. Root qualifier "::ClassName"
+  If Left(raw, 2) = "::"
+    Protected rootName.s = Mid(raw, 3)
+    ForEach Classes()
+      If UCase(Classes()\fullName) = UCase(rootName) Or (Classes()\namespace = "" And UCase(Classes()\name) = UCase(rootName))
+        result = Classes()\fullName
+        Break
+      EndIf
+    Next
+    PopListPosition(Classes())
+    ProcedureReturn result
+  EndIf
+  
+  ; 2. Check Alias prefix (e.g. GFX::Renderer where GFX = Game::Graphics)
+  Protected pColon.i = FindString(raw, "::")
+  If pColon > 0
+    Protected aliasKey.s = Left(raw, pColon - 1)
+    Protected aliasRest.s = Mid(raw, pColon + 2)
+    If FindMapElement(NamespaceAliases(), UCase(aliasKey))
+      Protected unaliased.s = NamespaceAliases() + "::" + aliasRest
+      ForEach Classes()
+        If UCase(Classes()\fullName) = UCase(unaliased)
+          result = Classes()\fullName
+          Break
+        EndIf
+      Next
+      If result = raw
+        result = unaliased
+      EndIf
+      PopListPosition(Classes())
+      ProcedureReturn result
+    EndIf
+  EndIf
+  
+  ; 3. Check exact match on fullName
+  ForEach Classes()
+    If UCase(Classes()\fullName) = UCase(raw)
+      result = Classes()\fullName
+      PopListPosition(Classes())
+      ProcedureReturn result
+    EndIf
+  Next
+
+  ; 4. Check relative to current namespace (e.g. currentNS = "Game::Graphics", ident = "Renderer" -> "Game::Graphics::Renderer")
+  If currentNS <> ""
+    Protected testNS.s = currentNS
+    While testNS <> ""
+      Protected testFull.s = testNS + "::" + raw
+      ForEach Classes()
+        If UCase(Classes()\fullName) = UCase(testFull)
+          result = Classes()\fullName
+          Break 2
+        EndIf
+      Next
+      ; Go up one parent namespace
+      Protected pLastColon.i = 0
+      Protected k.i
+      For k = Len(testNS) - 1 To 1 Step -1
+        If Mid(testNS, k, 2) = "::"
+          pLastColon = k
+          Break
+        EndIf
+      Next
+      If pLastColon > 0
+        testNS = Left(testNS, pLastColon - 1)
+      Else
+        testNS = ""
+      EndIf
+    Wend
+    If result <> raw
+      PopListPosition(Classes())
+      ProcedureReturn result
+    EndIf
+  EndIf
+
+  ; 5. Check in UsingList namespaces
+  Protected NewList matches.s()
+  ForEach UsingList()
+    Protected usingFull.s = UsingList() + "::" + raw
+    ForEach Classes()
+      If UCase(Classes()\fullName) = UCase(usingFull)
+        AddElement(matches())
+        matches() = Classes()\fullName
+      EndIf
+    Next
+  Next
+  
+  If ListSize(matches()) = 1
+    FirstElement(matches())
+    result = matches()
+    PopListPosition(Classes())
+    ProcedureReturn result
+  ElseIf ListSize(matches()) > 1
+    FirstElement(matches())
+    Protected m1.s = matches()
+    NextElement(matches())
+    Protected m2.s = matches()
+    SetOOPError(LastErrorLine, "Ambiguous class reference '" + raw + "': matches both '" + m1 + "' and '" + m2 + "'")
+    PopListPosition(Classes())
+    ProcedureReturn ""
+  EndIf
+
+  ; 6. Check root/global namespace
+  ForEach Classes()
+    If Classes()\namespace = "" And UCase(Classes()\name) = UCase(raw)
+      result = Classes()\fullName
+      Break
+    EndIf
+  Next
+
+  PopListPosition(Classes())
+  ProcedureReturn result
+EndProcedure
+
+; ----------------------------------------------------------------------------
+; Multi-file Recursive Loader
+; ----------------------------------------------------------------------------
+
+Global BaseDirectory.s = ""
+
+Procedure.b LoadSourceLinesRecursive(filePath.s)
+  Protected normPath.s = GetPathPart(filePath)
+  If normPath = ""
+    filePath = GetCurrentDirectory() + filePath
+  EndIf
+
+  Protected file = ReadFile(#PB_Any, filePath)
+  If Not file And BaseDirectory <> ""
+    Protected altPath.s = BaseDirectory + GetFilePart(filePath)
+    file = ReadFile(#PB_Any, altPath)
+    If file
+      filePath = altPath
+    EndIf
+  EndIf
+
+  If Not file
+    SetOOPError(1, "Cannot open source file: " + filePath)
+    ProcedureReturn #False
+  EndIf
+
+  Protected isFirstLine.b = #True
+  Protected lineNum.i = 0
+  Protected dir.s = GetPathPart(filePath)
+
+  While Not Eof(file)
+    lineNum + 1
+    Protected rawLine.s = ReadString(file)
+    If isFirstLine
+      If Left(rawLine, 1) = Chr(239) Or Asc(Left(rawLine, 1)) = 65279
+        rawLine = Mid(rawLine, 2)
+      EndIf
+      isFirstLine = #False
+    EndIf
+
+    Protected trimmed.s = Trim(rawLine)
+    Protected upper.s = UCase(trimmed)
+
+    ; Check IncludeFile or XIncludeFile
+    If Left(upper, 12) = "INCLUDEFILE " Or Left(upper, 13) = "XINCLUDEFILE "
+      Protected isXInclude.b = #False
+      If Left(upper, 13) = "XINCLUDEFILE " : isXInclude = #True : EndIf
+
+      Protected pQuote1.i = FindString(trimmed, Chr(34))
+      Protected pQuote2.i = 0
+      If pQuote1 > 0
+        pQuote2 = FindString(trimmed, Chr(34), pQuote1 + 1)
+      EndIf
+
+      If pQuote1 > 0 And pQuote2 > pQuote1
+        Protected incPath.s = Mid(trimmed, pQuote1 + 1, pQuote2 - pQuote1 - 1)
+        incPath = ReplaceString(incPath, "/", "\")
+        Protected isAbs.b = #False
+        If Mid(incPath, 2, 1) = ":" Or Left(incPath, 2) = "\\"
+          isAbs = #True
+        EndIf
+        
+        Protected finalIncPath.s = incPath
+        If Not isAbs
+          finalIncPath = dir + incPath
+          If FileSize(finalIncPath) <= 0 And BaseDirectory <> ""
+            If FileSize(BaseDirectory + incPath) > 0
+              finalIncPath = BaseDirectory + incPath
+            EndIf
+          EndIf
+        EndIf
+
+        Protected normInc.s = UCase(finalIncPath)
+        If isXInclude And FindMapElement(IncludedFilesMap(), normInc)
+          ; Already included, skip
+          Continue
+        EndIf
+        IncludedFilesMap(normInc) = 1
+
+        If Not LoadSourceLinesRecursive(finalIncPath)
+          CloseFile(file)
+          ProcedureReturn #False
+        EndIf
+        Continue
+      EndIf
+    EndIf
+
+    AddElement(FileSourceLines())
+    FileSourceLines()\content = rawLine
+    FileSourceLines()\srcLineNumber = lineNum
+    FileSourceLines()\srcFile = filePath
+  Wend
+  CloseFile(file)
+  ProcedureReturn #True
+EndProcedure
+
+; ----------------------------------------------------------------------------
+; Parser Phase: Read and tokenize .pbo source
+; ----------------------------------------------------------------------------
+
 Procedure.b ParsePBO(inputFile.s)
   LastErrorFile = inputFile
   LastErrorLine = 0
   LastErrorMessage = ""
 
-  Protected file = ReadFile(#PB_Any, inputFile)
-  If Not file
-    SetOOPError(1, "Cannot open source file: " + inputFile)
+  ClearList(FileSourceLines())
+  ClearMap(IncludedFilesMap())
+  ClearList(NamespaceStack())
+  ClearList(UsingList())
+  ClearMap(NamespaceAliases())
+
+  IncludedFilesMap(UCase(inputFile)) = 1
+  If Not LoadSourceLinesRecursive(inputFile)
     ProcedureReturn #False
   EndIf
-
-  ClearList(FileLines())
-  Protected isFirstLine.b = #True
-  While Not Eof(file)
-    AddElement(FileLines())
-    FileLines() = ReadString(file)
-    ; Strip UTF-8 BOM if present
-    If isFirstLine
-      If Left(FileLines(), 1) = Chr(239) Or Asc(Left(FileLines(), 1)) = 65279
-        FileLines() = Mid(FileLines(), 2)
-      EndIf
-      isFirstLine = #False
-    EndIf
-  Wend
-  CloseFile(file)
 
   ClearList(Classes())
   ClearMap(ClassMap())
@@ -224,14 +473,52 @@ Procedure.b ParsePBO(inputFile.s)
   Protected rawLine.s, line.s, upper.s
   Protected p1.i, p2.i, p3.i
   Protected currentLineNum.i = 0
+  Protected currentFile.s = ""
   Protected classStartLine.i = 0
   Protected methodStartLine.i = 0
 
-  ForEach FileLines()
-    currentLineNum + 1
-    rawLine = FileLines()
+  ForEach FileSourceLines()
+    currentLineNum = FileSourceLines()\srcLineNumber
+    currentFile = FileSourceLines()\srcFile
+    rawLine = FileSourceLines()\content
     line = StripComment(rawLine)
     upper = UCase(line)
+
+    ; 0. Top-Level Namespace, EndNamespace, Using, and Aliases
+    If Not inClass And Not inMethod And Not inClassMethod
+      If Left(upper, 10) = "NAMESPACE "
+        Protected nsArg.s = Trim(Mid(line, 11))
+        Protected pEq.i = FindString(nsArg, "=")
+        If pEq > 0
+          ; Namespace Alias: Namespace GFX = Game::Graphics
+          Protected aliasKey.s = Trim(Left(nsArg, pEq - 1))
+          Protected aliasVal.s = Trim(Mid(nsArg, pEq + 1))
+          NamespaceAliases(UCase(aliasKey)) = aliasVal
+          Continue
+        Else
+          ; Open Namespace block or file-level
+          AddElement(NamespaceStack())
+          NamespaceStack() = nsArg
+          Continue
+        EndIf
+
+      ElseIf upper = "ENDNAMESPACE"
+        If ListSize(NamespaceStack()) > 0
+          LastElement(NamespaceStack())
+          DeleteElement(NamespaceStack())
+          Continue
+        Else
+          SetOOPError(currentLineNum, "Unexpected 'EndNamespace' without preceding 'Namespace'")
+          ProcedureReturn #False
+        EndIf
+
+      ElseIf Left(upper, 6) = "USING "
+        Protected usingArg.s = Trim(Mid(line, 7))
+        AddElement(UsingList())
+        UsingList() = usingArg
+        Continue
+      EndIf
+    EndIf
 
     ; 1. Parsing inside Inline Class Method Body
     If inClassMethod
@@ -243,6 +530,7 @@ Procedure.b ParsePBO(inputFile.s)
         AddElement(*currentMethod\BodyLines())
         *currentMethod\BodyLines()\content = rawLine
         *currentMethod\BodyLines()\srcLineNumber = currentLineNum
+        *currentMethod\BodyLines()\srcFile = currentFile
         Continue
       EndIf
 
@@ -256,43 +544,45 @@ Procedure.b ParsePBO(inputFile.s)
         SetOOPError(currentLineNum, "Unexpected 'EndMethod' inside Class definition without matching Method header")
         ProcedureReturn #False
       Else
-        ; Handle method declarations or inline method bodies:
-        ; e.g. Public Method Init(...) or Abstract Method Dessiner() or Public Abstract Method.d Calculer()
-        Protected isAbsMeth.b = #False
+        ; Parse Class Members (Fields or Methods)
         Protected vis.s = "Public"
         Protected workLine.s = line
-        Protected workUpper.s = upper
+        Protected isAbsMeth.b = #False
         Protected matchedPrefix.b = #False
 
-        Repeat
-          workUpper = UCase(Trim(workLine))
-          If Left(workUpper, 8) = "ABSTRACT" And (Len(workUpper) = 8 Or Mid(workUpper, 9, 1) = " ")
-            isAbsMeth = #True
-            matchedPrefix = #True
-            workLine = Trim(Mid(workLine, 9))
-          ElseIf Left(workUpper, 6) = "PUBLIC" And (Len(workUpper) = 6 Or Mid(workUpper, 7, 1) = " ")
-            vis = "Public"
-            matchedPrefix = #True
-            workLine = Trim(Mid(workLine, 7))
-          ElseIf Left(workUpper, 9) = "PROTECTED" And (Len(workUpper) = 9 Or Mid(workUpper, 10, 1) = " ")
-            vis = "Protected"
-            matchedPrefix = #True
-            workLine = Trim(Mid(workLine, 10))
-          ElseIf Left(workUpper, 7) = "PRIVATE" And (Len(workUpper) = 7 Or Mid(workUpper, 8, 1) = " ")
-            vis = "Private"
-            matchedPrefix = #True
-            workLine = Trim(Mid(workLine, 8))
-          Else
-            Break
-          EndIf
-        ForEver
+        If Left(upper, 7) = "PUBLIC "
+          vis = "Public"
+          workLine = Trim(Mid(line, 8))
+          matchedPrefix = #True
+        ElseIf Left(upper, 10) = "PROTECTED "
+          vis = "Protected"
+          workLine = Trim(Mid(line, 11))
+          matchedPrefix = #True
+        ElseIf Left(upper, 8) = "PRIVATE "
+          vis = "Private"
+          workLine = Trim(Mid(line, 9))
+          matchedPrefix = #True
+        EndIf
 
-        workUpper = UCase(Trim(workLine))
+        Protected workUpper.s = UCase(workLine)
+
+        ; Check Abstract Method
+        If Left(workUpper, 9) = "ABSTRACT "
+          isAbsMeth = #True
+          workLine = Trim(Mid(workLine, 10))
+          workUpper = UCase(workLine)
+        EndIf
+
+        ; Check Method declaration inside class
         If Left(workUpper, 6) = "METHOD" And (Len(workUpper) = 6 Or Mid(workUpper, 7, 1) = " " Or Mid(workUpper, 7, 1) = ".")
+          If isAbsMeth And Not *currentClass\isAbstract
+            SetOOPError(currentLineNum, "Cannot declare Abstract Method '" + workLine + "' inside non-abstract Class '" + *currentClass\fullName + "'. Declare 'Abstract Class " + *currentClass\name + "' instead.")
+            ProcedureReturn #False
+          EndIf
+
           Protected methDecl.s = Trim(Mid(workLine, 7))
           Protected mName.s = "", mParams.s = "", mRet.s = ""
-          
-          ; Check return type in header if format Method.i Name(params)
+
           If Left(methDecl, 1) = "."
             p1 = FindString(methDecl, " ")
             If p1 > 0
@@ -324,7 +614,7 @@ Procedure.b ParsePBO(inputFile.s)
           ; Check duplicate method declaration in same class
           ForEach *currentClass\Methods()
             If UCase(*currentClass\Methods()\name) = UCase(mName)
-              SetOOPError(currentLineNum, "Duplicate Method '" + mName + "' in Class '" + *currentClass\name + "'")
+              SetOOPError(currentLineNum, "Duplicate Method '" + mName + "' in Class '" + *currentClass\fullName + "'")
               ProcedureReturn #False
             EndIf
           Next
@@ -337,6 +627,7 @@ Procedure.b ParsePBO(inputFile.s)
           *currentClass\Methods()\visibility = vis
           *currentClass\Methods()\isAbstract = isAbsMeth
           *currentClass\Methods()\srcLineNumber = currentLineNum
+          *currentClass\Methods()\srcFile = currentFile
           
           If UCase(mName) = "INIT"
             *currentClass\hasInit = #True
@@ -352,29 +643,34 @@ Procedure.b ParsePBO(inputFile.s)
 
           ; Check if this is an inline method or a single-line declaration
           Protected isInline.b = #False
-          PushListPosition(FileLines())
-          While NextElement(FileLines())
-            Protected nextLine.s = Trim(UCase(FileLines()))
+          PushListPosition(FileSourceLines())
+          While NextElement(FileSourceLines())
+            Protected nextLine.s = Trim(UCase(FileSourceLines()\content))
             If nextLine = "" Or Left(nextLine, 1) = ";"
               Continue
             ElseIf Left(nextLine, 9) = "ENDMETHOD"
               isInline = #True
               Break
-            ElseIf Left(nextLine, 8) = "ENDCLASS" Or Left(nextLine, 6) = "PUBLIC" Or Left(nextLine, 9) = "PROTECTED" Or Left(nextLine, 7) = "PRIVATE" Or Left(nextLine, 6) = "METHOD" Or Left(nextLine, 8) = "ABSTRACT"
+            ElseIf Left(nextLine, 8) = "ENDCLASS" Or Left(nextLine, 6) = "METHOD" Or Left(nextLine, 7) = "PUBLIC " Or Left(nextLine, 10) = "PROTECTED " Or Left(nextLine, 8) = "PRIVATE "
               isInline = #False
+              Break
+            Else
+              isInline = #True
               Break
             EndIf
           Wend
-          PopListPosition(FileLines())
+          PopListPosition(FileSourceLines())
 
           If isInline
             AddElement(MethodBodies())
             *currentMethod = @MethodBodies()
-            *currentMethod\className = *currentClass\name
+            *currentMethod\className = *currentClass\fullName
+            *currentMethod\mangledClassName = *currentClass\mangledName
             *currentMethod\methodName = mName
             *currentMethod\params = mParams
             *currentMethod\returnType = mRet
             *currentMethod\srcLineNumber = currentLineNum
+            *currentMethod\srcFile = currentFile
             inClassMethod = #True
             methodStartLine = currentLineNum
           EndIf
@@ -382,7 +678,7 @@ Procedure.b ParsePBO(inputFile.s)
 
         ElseIf matchedPrefix Or (line <> "" And Left(line, 1) <> ";")
           If Not IsValidFieldDeclaration(workLine)
-            SetOOPError(currentLineNum, "Syntax error or invalid declaration '" + workLine + "' in Class '" + *currentClass\name + "'")
+            SetOOPError(currentLineNum, "Syntax error or invalid declaration '" + workLine + "' in Class '" + *currentClass\fullName + "'")
             ProcedureReturn #False
           EndIf
           ; Field declaration
@@ -390,6 +686,7 @@ Procedure.b ParsePBO(inputFile.s)
           *currentClass\Fields()\name = workLine
           *currentClass\Fields()\visibility = vis
           *currentClass\Fields()\srcLineNumber = currentLineNum
+          *currentClass\Fields()\srcFile = currentFile
           Continue
         EndIf
       EndIf
@@ -404,53 +701,69 @@ Procedure.b ParsePBO(inputFile.s)
         AddElement(*currentMethod\BodyLines())
         *currentMethod\BodyLines()\content = rawLine
         *currentMethod\BodyLines()\srcLineNumber = currentLineNum
+        *currentMethod\BodyLines()\srcFile = currentFile
         Continue
       EndIf
 
-    ; 4. Outside Class/Method (Root Level)
+    ; 4. Parsing Top-Level Statements (Outside Class & Method)
     Else
-      Protected isClassDecl.b = #False
       Protected isAbsClass.b = #False
-      Protected classHeader.s = ""
-      
-      If Left(upper, 14) = "ABSTRACT CLASS" And (Len(line) = 14 Or Mid(line, 15, 1) = " ")
-        isClassDecl = #True
+      Protected classHeader.s = line
+      Protected classUpper.s = upper
+
+      If Left(classUpper, 15) = "ABSTRACT CLASS "
         isAbsClass = #True
-        classHeader = Trim(Mid(line, 15))
-      ElseIf Left(upper, 5) = "CLASS" And (Len(line) = 5 Or Mid(line, 6, 1) = " ")
-        isClassDecl = #True
-        isAbsClass = #False
-        classHeader = Trim(Mid(line, 6))
+        classHeader = Trim(Mid(line, 10))
+        classUpper = UCase(classHeader)
       EndIf
 
-      If isClassDecl
-        ; Class definition start
+      If Left(classUpper, 6) = "CLASS "
+        Protected cDecl.s = Trim(Mid(classHeader, 7))
         Protected cName.s = "", pName.s = ""
-        p1 = FindString(UCase(classHeader), "EXTENDS")
+        
+        p1 = FindString(UCase(cDecl), "EXTENDS ")
         If p1 > 0
-          cName = Trim(Left(classHeader, p1 - 1))
-          pName = Trim(Mid(classHeader, p1 + 7))
+          cName = Trim(Left(cDecl, p1 - 1))
+          pName = Trim(Mid(cDecl, p1 + 8))
         Else
-          cName = classHeader
+          cName = cDecl
         EndIf
 
         If cName = ""
-          SetOOPError(currentLineNum, "Missing class name in Class declaration")
+          SetOOPError(currentLineNum, "Missing Class name in Class declaration")
           ProcedureReturn #False
         EndIf
 
-        If FindMapElement(ClassMap(), cName)
-          SetOOPError(currentLineNum, "Duplicate Class '" + cName + "'")
+        Protected currentNS.s = GetCurrentNamespace()
+        Protected fullCName.s = cName
+        If currentNS <> ""
+          fullCName = currentNS + "::" + cName
+        EndIf
+        Protected mangledCName.s = MangleIdentifier(fullCName)
+
+        ; Check duplicate class
+        If FindMapElement(ClassMap(), UCase(fullCName))
+          SetOOPError(currentLineNum, "Duplicate Class '" + fullCName + "'")
           ProcedureReturn #False
         EndIf
 
         AddElement(Classes())
         *currentClass = @Classes()
         *currentClass\name = cName
+        *currentClass\namespace = currentNS
+        *currentClass\fullName = fullCName
+        *currentClass\mangledName = mangledCName
         *currentClass\parentName = pName
         *currentClass\isAbstract = isAbsClass
         *currentClass\srcLineNumber = currentLineNum
-        ClassMap(cName) = ListIndex(Classes())
+        *currentClass\srcFile = currentFile
+        
+        ClassMap(UCase(fullCName)) = ListIndex(Classes())
+        ClassMap(UCase(mangledCName)) = ListIndex(Classes())
+        If currentNS = ""
+          ClassMap(UCase(cName)) = ListIndex(Classes())
+        EndIf
+
         inClass = #True
         classStartLine = currentLineNum
         Continue
@@ -464,7 +777,7 @@ Procedure.b ParsePBO(inputFile.s)
         ProcedureReturn #False
 
       ElseIf Left(upper, 6) = "METHOD" And (Len(upper) = 6 Or Mid(upper, 7, 1) = " " Or Mid(upper, 7, 1) = ".")
-        ; Out-of-class method implementation: Method ClassName::MethodName(params)
+        ; Out-of-class method implementation: Method [Namespace::]ClassName::MethodName(params)
         Protected outDecl.s = Trim(Mid(line, 7))
         Protected outRet.s = ""
         
@@ -476,11 +789,20 @@ Procedure.b ParsePBO(inputFile.s)
           EndIf
         EndIf
         
+        ; Find the last "::" for method name separation
+        Protected pLastColon.i = 0
+        Protected k.i
+        For k = Len(outDecl) - 1 To 1 Step -1
+          If Mid(outDecl, k, 2) = "::"
+            pLastColon = k
+            Break
+          EndIf
+        Next
+
         Protected c_name.s = "", m_name.s = "", m_params.s = ""
-        p1 = FindString(outDecl, "::")
-        If p1 > 0
-          c_name = Trim(Left(outDecl, p1 - 1))
-          Protected afterScope.s = Trim(Mid(outDecl, p1 + 2))
+        If pLastColon > 0
+          c_name = Trim(Left(outDecl, pLastColon - 1))
+          Protected afterScope.s = Trim(Mid(outDecl, pLastColon + 2))
           p2 = FindString(afterScope, "(")
           If p2 > 0
             m_name = Trim(Left(afterScope, p2 - 1))
@@ -496,8 +818,9 @@ Procedure.b ParsePBO(inputFile.s)
           ProcedureReturn #False
         EndIf
 
-        ; Check if class exists
-        If Not FindMapElement(ClassMap(), c_name)
+        ; Resolve class name
+        Protected resolvedClass.s = ResolveClassName(c_name, GetCurrentNamespace())
+        If Not FindMapElement(ClassMap(), UCase(resolvedClass))
           SetOOPError(currentLineNum, "Method implementation for undefined Class '" + c_name + "'")
           ProcedureReturn #False
         EndIf
@@ -505,7 +828,8 @@ Procedure.b ParsePBO(inputFile.s)
         ; Check if method was declared in the class or inherited
         Protected isDeclared.b = #False
         PushListPosition(Classes())
-        SelectElement(Classes(), ClassMap(c_name))
+        SelectElement(Classes(), ClassMap(UCase(resolvedClass)))
+        Protected resolvedMangled.s = Classes()\mangledName
         ForEach Classes()\Methods()
           If UCase(Classes()\Methods()\name) = UCase(m_name)
             isDeclared = #True
@@ -522,11 +846,13 @@ Procedure.b ParsePBO(inputFile.s)
 
         AddElement(MethodBodies())
         *currentMethod = @MethodBodies()
-        *currentMethod\className = c_name
+        *currentMethod\className = resolvedClass
+        *currentMethod\mangledClassName = resolvedMangled
         *currentMethod\methodName = m_name
         *currentMethod\params = m_params
         *currentMethod\returnType = outRet
         *currentMethod\srcLineNumber = currentLineNum
+        *currentMethod\srcFile = currentFile
         inMethod = #True
         methodStartLine = currentLineNum
         Continue
@@ -536,13 +862,14 @@ Procedure.b ParsePBO(inputFile.s)
         AddElement(MainLines())
         MainLines()\content = rawLine
         MainLines()\srcLineNumber = currentLineNum
+        MainLines()\srcFile = currentFile
       EndIf
     EndIf
   Next
 
   ; Validate open blocks
   If inClass
-    SetOOPError(classStartLine, "Unclosed Class '" + *currentClass\name + "' - missing EndClass")
+    SetOOPError(classStartLine, "Unclosed Class '" + *currentClass\fullName + "' - missing EndClass")
     ProcedureReturn #False
   EndIf
 
@@ -565,12 +892,15 @@ Procedure.b BuildVTables()
 
     ; Inherit slots from parent class
     If *c\parentName <> ""
-      If Not FindMapElement(ClassMap(), *c\parentName)
-        SetOOPError(*c\srcLineNumber, "Class '" + *c\name + "' extends unknown parent class '" + *c\parentName + "'")
+      *c\fullParentName = ResolveClassName(*c\parentName, *c\namespace)
+      *c\mangledParentName = MangleIdentifier(*c\fullParentName)
+
+      If Not FindMapElement(ClassMap(), UCase(*c\fullParentName))
+        SetOOPError(*c\srcLineNumber, "Class '" + *c\fullName + "' extends unknown parent class '" + *c\parentName + "'")
         ProcedureReturn #False
       EndIf
       
-      Protected parentIdx.i = ClassMap(*c\parentName)
+      Protected parentIdx.i = ClassMap(UCase(*c\fullParentName))
       PushListPosition(Classes())
       SelectElement(Classes(), parentIdx)
       Protected *parent.OOP_Class = @Classes()
@@ -583,6 +913,7 @@ Procedure.b BuildVTables()
         *c\VTableSlots()\returnType = *parent\VTableSlots()\returnType
         *c\VTableSlots()\isAbstract = *parent\VTableSlots()\isAbstract
         *c\VTableSlots()\srcLineNumber = *parent\VTableSlots()\srcLineNumber
+        *c\VTableSlots()\srcFile = *parent\VTableSlots()\srcFile
       Next
       PopListPosition(Classes())
     EndIf
@@ -600,48 +931,27 @@ Procedure.b BuildVTables()
       Protected isOverridden.b = #False
       ForEach *c\VTableSlots()
         If UCase(*c\VTableSlots()\methodName) = UCase(*m\name)
-          *c\VTableSlots()\implementingClass = *c\name
-          *c\VTableSlots()\params = *m\params
-          *c\VTableSlots()\returnType = *m\returnType
+          *c\VTableSlots()\implementingClass = *c\fullName
           *c\VTableSlots()\isAbstract = *m\isAbstract
-          *c\VTableSlots()\srcLineNumber = *m\srcLineNumber
           *m\isOverride = #True
           isOverridden = #True
           Break
         EndIf
       Next
 
+      ; If not overriding, append new VTable slot
       If Not isOverridden
-        ; New virtual method
         AddElement(*c\VTableSlots())
         *c\VTableSlots()\methodName = *m\name
-        *c\VTableSlots()\implementingClass = *c\name
-        *c\VTableSlots()\declaringClass = *c\name
+        *c\VTableSlots()\implementingClass = *c\fullName
+        *c\VTableSlots()\declaringClass = *c\fullName
         *c\VTableSlots()\params = *m\params
         *c\VTableSlots()\returnType = *m\returnType
         *c\VTableSlots()\isAbstract = *m\isAbstract
         *c\VTableSlots()\srcLineNumber = *m\srcLineNumber
-        *m\isOverride = #False
+        *c\VTableSlots()\srcFile = *m\srcFile
       EndIf
     Next
-  Next
-
-  ; Update VTable slots if out-of-class Method implementations are present
-  ForEach MethodBodies()
-    Protected *mb.OOP_MethodBody = @MethodBodies()
-    If FindMapElement(ClassMap(), *mb\className)
-      Protected cIdx.i = ClassMap(*mb\className)
-      PushListPosition(Classes())
-      SelectElement(Classes(), cIdx)
-      Protected *targetCls.OOP_Class = @Classes()
-      ForEach *targetCls\VTableSlots()
-        If UCase(*targetCls\VTableSlots()\methodName) = UCase(*mb\methodName)
-          *targetCls\VTableSlots()\implementingClass = *mb\className
-          *targetCls\VTableSlots()\isAbstract = #False
-        EndIf
-      Next
-      PopListPosition(Classes())
-    EndIf
   Next
 
   ProcedureReturn #True
@@ -657,13 +967,13 @@ Procedure.b ValidateOOPModel()
           ; Check if there is an implementation in MethodBodies
           Protected hasImpl.b = #False
           ForEach MethodBodies()
-            If MethodBodies()\className = *c\name And UCase(MethodBodies()\methodName) = UCase(*c\VTableSlots()\methodName)
+            If MethodBodies()\className = *c\fullName And UCase(MethodBodies()\methodName) = UCase(*c\VTableSlots()\methodName)
               hasImpl = #True
               Break
             EndIf
           Next
           If Not hasImpl
-            SetOOPError(*c\srcLineNumber, "Class '" + *c\name + "' must implement abstract method '" + *c\VTableSlots()\methodName + "' declared in abstract class '" + *c\VTableSlots()\declaringClass + "' (or be declared Abstract Class).")
+            SetOOPError(*c\srcLineNumber, "Class '" + *c\fullName + "' must implement abstract method '" + *c\VTableSlots()\methodName + "' declared in abstract class '" + *c\VTableSlots()\declaringClass + "' (or be declared Abstract Class).")
             ProcedureReturn #False
           EndIf
         EndIf
@@ -674,13 +984,16 @@ Procedure.b ValidateOOPModel()
   ; 2. Check that abstract classes are not instantiated in MainLines
   ForEach Classes()
     If Classes()\isAbstract
-      Protected absName.s = Classes()\name
-      Protected absUpper.s = UCase(absName)
+      Protected absFull.s = Classes()\fullName
+      Protected absShort.s = Classes()\name
+      Protected absUpperFull.s = UCase(absFull)
+      Protected absUpperShort.s = UCase(absShort)
+
       ForEach MainLines()
         Protected mLine.s = MainLines()\content
         Protected upLine.s = UCase(mLine)
-        If FindString(upLine, "NEW(" + absUpper + ")") > 0 Or FindString(upLine, "NEW(" + absUpper + ",") > 0 Or FindString(upLine, "NEW( " + absUpper + ")") > 0 Or FindString(upLine, "NEW( " + absUpper + ",") > 0 Or FindString(upLine, "NEW " + absUpper + "(") > 0 Or FindString(upLine, "NEW  " + absUpper + "(") > 0
-          SetOOPError(MainLines()\srcLineNumber, "Cannot instantiate abstract class '" + absName + "'")
+        If FindString(upLine, "NEW " + absUpperFull + "(") > 0 Or FindString(upLine, "NEW " + absUpperShort + "(") > 0 Or FindString(upLine, "NEW(" + absUpperFull + ")") > 0 Or FindString(upLine, "NEW(" + absUpperShort + ")") > 0
+          SetOOPError(MainLines()\srcLineNumber, "Cannot instantiate abstract class '" + absFull + "'")
           ProcedureReturn #False
         EndIf
       Next
@@ -691,7 +1004,7 @@ Procedure.b ValidateOOPModel()
   ForEach MethodBodies()
     Protected *body.OOP_MethodBody = @MethodBodies()
     Protected parentClsName.s = ""
-    If FindMapElement(ClassMap(), *body\className)
+    If FindMapElement(ClassMap(), UCase(*body\className))
       parentClsName = Classes()\parentName
     EndIf
 
@@ -717,7 +1030,7 @@ EndProcedure
 ; Code Generation Phase: Emit PureBasic Code & Source Map
 ; ----------------------------------------------------------------------------
 
-Procedure.s TranspileMethodBodyLine(line.s, className.s, parentClassName.s)
+Procedure.s TranspileMethodBodyLine(line.s, className.s, parentMangledName.s)
   Protected res.s = line
   
   ; 1. Handle 'Super::Method(' or 'Super\Method(' calls
@@ -740,9 +1053,9 @@ Procedure.s TranspileMethodBodyLine(line.s, className.s, parentClassName.s)
       
       Protected trimmedAfter.s = Trim(after)
       If Left(trimmedAfter, 1) = ")"
-        res = before + parentClassName + "_" + methName + "(*This" + after
+        res = before + parentMangledName + "_" + methName + "(*This" + after
       Else
-        res = before + parentClassName + "_" + methName + "(*This, " + after
+        res = before + parentMangledName + "_" + methName + "(*This, " + after
       EndIf
     EndIf
     
@@ -753,9 +1066,9 @@ Procedure.s TranspileMethodBodyLine(line.s, className.s, parentClassName.s)
   Wend
   
   ; 2. Handle internal method calls 'This\Method(' -> '*This_vt\Method('
-  If FindMapElement(ClassMap(), className)
+  If FindMapElement(ClassMap(), UCase(className))
     PushListPosition(Classes())
-    SelectElement(Classes(), ClassMap(className))
+    SelectElement(Classes(), ClassMap(UCase(className)))
     ForEach Classes()\VTableSlots()
       Protected mName.s = Classes()\VTableSlots()\methodName
       If mName <> ""
@@ -776,34 +1089,83 @@ Procedure.s TranspileMainLine(line.s)
   Protected res.s = line
   
   ForEach Classes()
-    Protected cName.s = Classes()\name
+    Protected cFull.s = Classes()\fullName
+    Protected cShort.s = Classes()\name
+    Protected cMangled.s = Classes()\mangledName
     
-    res = ReplaceString(res, "New(" + cName + ",", "New_" + cName + "(")
-    res = ReplaceString(res, "New(" + cName + ")", "New_" + cName + "()")
-    res = ReplaceString(res, "New( " + cName + ",", "New_" + cName + "(")
-    res = ReplaceString(res, "New( " + cName + " )", "New_" + cName + "()")
+    ; Replace with FullName
+    res = ReplaceString(res, "New " + cFull + "(", "New_" + cMangled + "(")
+    res = ReplaceString(res, "New  " + cFull + "(", "New_" + cMangled + "(")
+    res = ReplaceString(res, "New(" + cFull + ",", "New_" + cMangled + "(")
+    res = ReplaceString(res, "New(" + cFull + ")", "New_" + cMangled + "()")
     
-    res = ReplaceString(res, "New " + cName + "(", "New_" + cName + "(")
-    res = ReplaceString(res, "New  " + cName + "(", "New_" + cName + "(")
-    
-    res = ReplaceString(res, "." + cName + " ", "." + cName + "_vt ")
-    res = ReplaceString(res, "." + cName + "=", "." + cName + "_vt =")
-    res = ReplaceString(res, "." + cName + ",", "." + cName + "_vt,")
-    res = ReplaceString(res, "." + cName + ")", "." + cName + "_vt)")
-    res = ReplaceString(res, "." + cName + "(", "." + cName + "_vt(")
-    res = ReplaceString(res, "." + cName + "\", "." + cName + "_vt\")
-    If Right(res, Len("." + cName)) = "." + cName
-      res = Left(res, Len(res) - Len("." + cName)) + "." + cName + "_vt"
+    res = ReplaceString(res, "." + cFull + " ", "." + cMangled + "_vt ")
+    res = ReplaceString(res, "." + cFull + "=", "." + cMangled + "_vt =")
+    res = ReplaceString(res, "." + cFull + ",", "." + cMangled + "_vt,")
+    res = ReplaceString(res, "." + cFull + ")", "." + cMangled + "_vt)")
+    res = ReplaceString(res, "." + cFull + "(", "." + cMangled + "_vt(")
+    res = ReplaceString(res, "." + cFull + "\", "." + cMangled + "_vt\")
+    If Right(res, Len("." + cFull)) = "." + cFull
+      res = Left(res, Len(res) - Len("." + cFull)) + "." + cMangled + "_vt"
+    EndIf
+
+    ; Check Alias references
+    ForEach NamespaceAliases()
+      Protected aKey.s = MapKey(NamespaceAliases())
+      Protected aTarget.s = NamespaceAliases()
+      If Classes()\namespace = aTarget
+        Protected aFull.s = aKey + "::" + cShort
+        res = ReplaceString(res, "New " + aFull + "(", "New_" + cMangled + "(")
+        res = ReplaceString(res, "New(" + aFull + ",", "New_" + cMangled + "(")
+        res = ReplaceString(res, "New(" + aFull + ")", "New_" + cMangled + "()")
+        res = ReplaceString(res, "." + aFull + " ", "." + cMangled + "_vt ")
+        res = ReplaceString(res, "." + aFull + "=", "." + cMangled + "_vt =")
+        res = ReplaceString(res, "." + aFull + ",", "." + cMangled + "_vt,")
+        res = ReplaceString(res, "." + aFull + ")", "." + cMangled + "_vt)")
+      EndIf
+    Next
+
+    ; Replace ShortName if in UsingList or root
+    Protected canUseShort.b = #False
+    If Classes()\namespace = ""
+      canUseShort = #True
+    Else
+      ForEach UsingList()
+        If UCase(UsingList()) = UCase(Classes()\namespace)
+          canUseShort = #True
+          Break
+        EndIf
+      Next
+    EndIf
+
+    If canUseShort
+      res = ReplaceString(res, "New(" + cShort + ",", "New_" + cMangled + "(")
+      res = ReplaceString(res, "New(" + cShort + ")", "New_" + cMangled + "()")
+      res = ReplaceString(res, "New( " + cShort + ",", "New_" + cMangled + "(")
+      res = ReplaceString(res, "New( " + cShort + " )", "New_" + cMangled + "()")
+      res = ReplaceString(res, "New " + cShort + "(", "New_" + cMangled + "(")
+      res = ReplaceString(res, "New  " + cShort + "(", "New_" + cMangled + "(")
+      
+      res = ReplaceString(res, "." + cShort + " ", "." + cMangled + "_vt ")
+      res = ReplaceString(res, "." + cShort + "=", "." + cMangled + "_vt =")
+      res = ReplaceString(res, "." + cShort + ",", "." + cMangled + "_vt,")
+      res = ReplaceString(res, "." + cShort + ")", "." + cMangled + "_vt)")
+      res = ReplaceString(res, "." + cShort + "(", "." + cMangled + "_vt(")
+      res = ReplaceString(res, "." + cShort + "\", "." + cMangled + "_vt\")
+      If Right(res, Len("." + cShort)) = "." + cShort
+        res = Left(res, Len(res) - Len("." + cShort)) + "." + cMangled + "_vt"
+      EndIf
     EndIf
   Next
   
   ProcedureReturn res
 EndProcedure
 
-Procedure EmitLine(content.s, srcLine.i = 0)
+Procedure EmitLine(content.s, srcLine.i = 0, srcFile.s = "")
   AddElement(GeneratedLines())
   GeneratedLines()\content = content
   GeneratedLines()\srcLineNumber = srcLine
+  GeneratedLines()\srcFile = srcFile
 EndProcedure
 
 Procedure.b GenerateTargetPB(outputFile.s, inputPBO.s)
@@ -825,17 +1187,17 @@ Procedure.b GenerateTargetPB(outputFile.s, inputPBO.s)
 
   ForEach Classes()
     Protected *c.OOP_Class = @Classes()
-    If *c\parentName <> ""
-      EmitLine("Interface " + *c\name + "_vt Extends " + *c\parentName + "_vt", *c\srcLineNumber)
+    If *c\mangledParentName <> ""
+      EmitLine("Interface " + *c\mangledName + "_vt Extends " + *c\mangledParentName + "_vt", *c\srcLineNumber, *c\srcFile)
     Else
-      EmitLine("Interface " + *c\name + "_vt", *c\srcLineNumber)
+      EmitLine("Interface " + *c\mangledName + "_vt", *c\srcLineNumber, *c\srcFile)
     EndIf
 
     ForEach *c\Methods()
       Protected *m.OOP_Method = @*c\Methods()
       If *m\visibility <> "Private" And UCase(*m\name) <> "INIT"
-        If *c\parentName = "" Or Not *m\isOverride
-          EmitLine("  " + *m\name + *m\returnType + "(" + *m\params + ")", *m\srcLineNumber)
+        If *c\mangledParentName = "" Or Not *m\isOverride
+          EmitLine("  " + *m\name + *m\returnType + "(" + *m\params + ")", *m\srcLineNumber, *m\srcFile)
         EndIf
       EndIf
     Next
@@ -852,15 +1214,15 @@ Procedure.b GenerateTargetPB(outputFile.s, inputPBO.s)
 
   ForEach Classes()
     *c = @Classes()
-    If *c\parentName <> ""
-      EmitLine("Structure " + *c\name + "_Inst Extends " + *c\parentName + "_Inst", *c\srcLineNumber)
+    If *c\mangledParentName <> ""
+      EmitLine("Structure " + *c\mangledName + "_Inst Extends " + *c\mangledParentName + "_Inst", *c\srcLineNumber, *c\srcFile)
     Else
-      EmitLine("Structure " + *c\name + "_Inst", *c\srcLineNumber)
-      EmitLine("  *VTable." + *c\name + "_vt")
+      EmitLine("Structure " + *c\mangledName + "_Inst", *c\srcLineNumber, *c\srcFile)
+      EmitLine("  *VTable." + *c\mangledName + "_vt")
     EndIf
 
     ForEach *c\Fields()
-      EmitLine("  " + *c\Fields()\name, *c\Fields()\srcLineNumber)
+      EmitLine("  " + *c\Fields()\name, *c\Fields()\srcLineNumber, *c\Fields()\srcFile)
     Next
 
     EmitLine("EndStructure")
@@ -873,85 +1235,66 @@ Procedure.b GenerateTargetPB(outputFile.s, inputPBO.s)
   EmitLine("; " + RSet("", 76, "-"))
   EmitLine("")
 
-  ; Forward Declarations
   ForEach MethodBodies()
-    Protected *mbDecl.OOP_MethodBody = @MethodBodies()
-    Protected declHeader.s = "Declare" + *mbDecl\returnType + " " + *mbDecl\className + "_" + *mbDecl\methodName + "(*This." + *mbDecl\className + "_Inst"
-    If *mbDecl\params <> ""
-      declHeader + ", " + *mbDecl\params
+    Protected *b.OOP_MethodBody = @MethodBodies()
+    Protected pDecl.s = ""
+    If *b\params <> ""
+      pDecl = "*This." + *b\mangledClassName + "_Inst, " + *b\params
+    Else
+      pDecl = "*This." + *b\mangledClassName + "_Inst"
     EndIf
-    declHeader + ")"
-    EmitLine(declHeader, *mbDecl\srcLineNumber)
+
+    EmitLine("Declare" + *b\returnType + " " + *b\mangledClassName + "_" + *b\methodName + "(" + pDecl + ")", *b\srcLineNumber, *b\srcFile)
   Next
   EmitLine("")
 
-  ; Implementations
   ForEach MethodBodies()
-    Protected *mb.OOP_MethodBody = @MethodBodies()
-    Protected parentOfClass.s = ""
-    If FindMapElement(ClassMap(), *mb\className)
-      parentOfClass = Classes()\parentName
+    *b = @MethodBodies()
+    If *b\params <> ""
+      pDecl = "*This." + *b\mangledClassName + "_Inst, " + *b\params
+    Else
+      pDecl = "*This." + *b\mangledClassName + "_Inst"
     EndIf
 
-    Protected procHeader.s = "Procedure" + *mb\returnType + " " + *mb\className + "_" + *mb\methodName + "(*This." + *mb\className + "_Inst"
-    If *mb\params <> ""
-      procHeader + ", " + *mb\params
+    EmitLine("Procedure" + *b\returnType + " " + *b\mangledClassName + "_" + *b\methodName + "(" + pDecl + ")", *b\srcLineNumber, *b\srcFile)
+    EmitLine("  Protected *This_vt." + *b\mangledClassName + "_vt = *This", *b\srcLineNumber, *b\srcFile)
+    
+    Protected parentMangled.s = ""
+    If FindMapElement(ClassMap(), UCase(*b\className))
+      parentMangled = Classes()\mangledParentName
     EndIf
-    procHeader + ")"
-    
-    EmitLine(procHeader, *mb\srcLineNumber)
-    EmitLine("  Protected *This_vt." + *mb\className + "_vt = *This", *mb\srcLineNumber)
-    
-    ForEach *mb\BodyLines()
-      Protected transpiledBody.s = TranspileMethodBodyLine(*mb\BodyLines()\content, *mb\className, parentOfClass)
-      EmitLine("  " + transpiledBody, *mb\BodyLines()\srcLineNumber)
+
+    ForEach *b\BodyLines()
+      Protected transformedLine.s = TranspileMethodBodyLine(*b\BodyLines()\content, *b\className, parentMangled)
+      EmitLine("  " + transformedLine, *b\BodyLines()\srcLineNumber, *b\BodyLines()\srcFile)
     Next
-    
-    EmitLine("EndProcedure", *mb\srcLineNumber)
+
+    EmitLine("EndProcedure")
     EmitLine("")
   Next
 
-  ; Auto-generate default Free() destructor
-  ForEach Classes()
-    *c = @Classes()
-    If *c\hasFree
-      Protected hasCustomFree.b = #False
-      ForEach MethodBodies()
-        If MethodBodies()\className = *c\name And UCase(MethodBodies()\methodName) = "FREE"
-          hasCustomFree = #True
-          Break
-        EndIf
-      Next
-      If Not hasCustomFree
-        EmitLine("Procedure " + *c\name + "_Free(*This." + *c\name + "_Inst)", *c\srcLineNumber)
-        EmitLine("  FreeStructure(*This)", *c\srcLineNumber)
-        EmitLine("EndProcedure")
-        EmitLine("")
-      EndIf
-    EndIf
-  Next
-
-  ; 4. Generate VTable DataSections
+  ; 4. Generate VTables DataSections
   EmitLine("; " + RSet("", 76, "-"))
   EmitLine("; 4. VTABLE DATASECTIONS (DYNAMIC DISPATCH)")
   EmitLine("; " + RSet("", 76, "-"))
   EmitLine("")
-  EmitLine("DataSection")
 
+  EmitLine("DataSection")
   ForEach Classes()
     *c = @Classes()
     If Not *c\isAbstract
-      EmitLine("  " + *c\name + "_VTable_Data:", *c\srcLineNumber)
+      EmitLine("  " + *c\mangledName + "_VTable_Data:", *c\srcLineNumber, *c\srcFile)
       ForEach *c\VTableSlots()
-        EmitLine("    Data.i @" + *c\VTableSlots()\implementingClass + "_" + *c\VTableSlots()\methodName + "()", *c\VTableSlots()\srcLineNumber)
+        Protected slotImpl.s = *c\VTableSlots()\implementingClass
+        Protected slotMangled.s = MangleIdentifier(slotImpl)
+        EmitLine("    Data.i @" + slotMangled + "_" + *c\VTableSlots()\methodName + "()", *c\VTableSlots()\srcLineNumber, *c\VTableSlots()\srcFile)
       Next
     EndIf
   Next
-
   EmitLine("EndDataSection")
   EmitLine("")
 
-  ; 5. Generate Constructors
+  ; 5. Generate Constructors & Destructors
   EmitLine("; " + RSet("", 76, "-"))
   EmitLine("; 5. CONSTRUCTORS & FACTORY FUNCTIONS")
   EmitLine("; " + RSet("", 76, "-"))
@@ -959,40 +1302,61 @@ Procedure.b GenerateTargetPB(outputFile.s, inputPBO.s)
 
   ForEach Classes()
     *c = @Classes()
-    If *c\isAbstract
-      Continue
-    EndIf
-
-    Protected ctorParams.s = ""
-    If *c\hasInit
-      ctorParams = *c\initParams
-    EndIf
-
-    EmitLine("Procedure.i New_" + *c\name + "(" + ctorParams + ")", *c\srcLineNumber)
-    EmitLine("  Protected *obj." + *c\name + "_Inst = AllocateStructure(" + *c\name + "_Inst)", *c\srcLineNumber)
-    EmitLine("  If *obj")
-    EmitLine("    *obj\VTable = ?" + *c\name + "_VTable_Data")
-    If *c\hasInit
-      Protected callInitParams.s = "*obj"
-      Protected i.i, numParams.i = CountString(ctorParams, ",") + 1
-      If Trim(ctorParams) <> ""
-        For i = 1 To numParams
-          Protected pToken.s = Trim(StringField(ctorParams, i, ","))
-          Protected pVar.s = StringField(pToken, 1, " ")
-          pVar = StringField(pVar, 1, "=")
-          pVar = StringField(pVar, 1, ".")
-          callInitParams + ", " + pVar
+    If Not *c\isAbstract
+      Protected initArgDecl.s = *c\initParams
+      Protected initArgPass.s = ""
+      If initArgDecl <> ""
+        Protected pCount.i = CountString(initArgDecl, ",") + 1
+        Protected pIdx.i
+        For pIdx = 1 To pCount
+          Protected paramToken.s = Trim(StringField(initArgDecl, pIdx, ","))
+          Protected pDot.i = FindString(paramToken, ".")
+          If pDot > 0
+            paramToken = Left(paramToken, pDot - 1)
+          EndIf
+          If initArgPass = ""
+            initArgPass = paramToken
+          Else
+            initArgPass + ", " + paramToken
+          EndIf
         Next
       EndIf
-      EmitLine("    " + *c\name + "_Init(" + callInitParams + ")", *c\srcLineNumber)
+
+      If initArgDecl <> ""
+        EmitLine("Procedure.i New_" + *c\mangledName + "(" + initArgDecl + ")", *c\srcLineNumber, *c\srcFile)
+      Else
+        EmitLine("Procedure.i New_" + *c\mangledName + "()", *c\srcLineNumber, *c\srcFile)
+      EndIf
+      
+      EmitLine("  Protected *obj." + *c\mangledName + "_Inst = AllocateStructure(" + *c\mangledName + "_Inst)", *c\srcLineNumber, *c\srcFile)
+      EmitLine("  If *obj", *c\srcLineNumber, *c\srcFile)
+      EmitLine("    *obj\VTable = ?" + *c\mangledName + "_VTable_Data", *c\srcLineNumber, *c\srcFile)
+      If *c\hasInit
+        If initArgPass <> ""
+          EmitLine("    " + *c\mangledName + "_Init(*obj, " + initArgPass + ")", *c\srcLineNumber, *c\srcFile)
+        Else
+          EmitLine("    " + *c\mangledName + "_Init(*obj)", *c\srcLineNumber, *c\srcFile)
+        EndIf
+      EndIf
+      EmitLine("  EndIf", *c\srcLineNumber, *c\srcFile)
+      EmitLine("  ProcedureReturn *obj", *c\srcLineNumber, *c\srcFile)
+      EmitLine("EndProcedure")
+      EmitLine("")
+
+      ; Free wrapper
+      EmitLine("Procedure Free_" + *c\mangledName + "(*obj." + *c\mangledName + "_Inst)", *c\srcLineNumber, *c\srcFile)
+      EmitLine("  If *obj", *c\srcLineNumber, *c\srcFile)
+      If *c\hasFree
+        EmitLine("    " + *c\mangledName + "_Free(*obj)", *c\srcLineNumber, *c\srcFile)
+      EndIf
+      EmitLine("    FreeStructure(*obj)", *c\srcLineNumber, *c\srcFile)
+      EmitLine("  EndIf", *c\srcLineNumber, *c\srcFile)
+      EmitLine("EndProcedure")
+      EmitLine("")
     EndIf
-    EmitLine("  EndIf")
-    EmitLine("  ProcedureReturn *obj")
-    EmitLine("EndProcedure")
-    EmitLine("")
   Next
 
-  ; 6. Generate Main Execution Code
+  ; 6. Generate Main Program Execution
   EmitLine("; " + RSet("", 76, "-"))
   EmitLine("; 6. MAIN PROGRAM EXECUTION")
   EmitLine("; " + RSet("", 76, "-"))
@@ -1000,22 +1364,17 @@ Procedure.b GenerateTargetPB(outputFile.s, inputPBO.s)
 
   ForEach MainLines()
     Protected transpiledMain.s = TranspileMainLine(MainLines()\content)
-    EmitLine(transpiledMain, MainLines()\srcLineNumber)
+    EmitLine(transpiledMain, MainLines()\srcLineNumber, MainLines()\srcFile)
   Next
 
-  ; Write Target .pb File
-  Protected file = CreateFile(#PB_Any, outputFile)
-  If Not file
+  ; Write output file
+  Protected outFile = CreateFile(#PB_Any, outputFile)
+  If Not outFile
     SetOOPError(1, "Cannot create output file: " + outputFile)
     ProcedureReturn #False
   EndIf
 
-  ForEach GeneratedLines()
-    WriteStringN(file, GeneratedLines()\content)
-  Next
-  CloseFile(file)
-
-  ; Write Target .pb.map File
+  ; Write .map file
   Protected mapFile.s = outputFile + ".map"
   Protected fMap = CreateFile(#PB_Any, mapFile)
   If fMap
@@ -1023,63 +1382,104 @@ Procedure.b GenerateTargetPB(outputFile.s, inputPBO.s)
     WriteStringN(fMap, "SOURCE:" + inputPBO)
     WriteStringN(fMap, "TARGET:" + outputFile)
     WriteStringN(fMap, "MAP:")
-    Protected pbLineIdx.i = 0
-    ForEach GeneratedLines()
-      pbLineIdx + 1
-      If GeneratedLines()\srcLineNumber > 0
-        WriteStringN(fMap, Str(pbLineIdx) + ":" + Str(GeneratedLines()\srcLineNumber))
-      EndIf
-    Next
-    CloseFile(fMap)
+  EndIf
+
+  Protected genLineNum.i = 0
+  ForEach GeneratedLines()
+    genLineNum + 1
+    WriteStringN(outFile, GeneratedLines()\content)
+    If fMap And GeneratedLines()\srcLineNumber > 0
+      WriteStringN(fMap, Str(genLineNum) + ":" + Str(GeneratedLines()\srcLineNumber))
+    EndIf
+  Next
+
+  CloseFile(outFile)
+  If fMap : CloseFile(fMap) : EndIf
+
+  ProcedureReturn #True
+EndProcedure
+
+; ----------------------------------------------------------------------------
+; Transpiler Orchestration
+; ----------------------------------------------------------------------------
+
+Procedure.b TranspileSourceFile(inputFile.s, outputFile.s)
+  If Not ParsePBO(inputFile)
+    ProcedureReturn #False
+  EndIf
+
+  If Not BuildVTables()
+    ProcedureReturn #False
+  EndIf
+
+  If Not ValidateOOPModel()
+    ProcedureReturn #False
+  EndIf
+
+  If Not GenerateTargetPB(outputFile, inputFile)
+    ProcedureReturn #False
+  EndIf
+
+  ProcedureReturn #True
+EndProcedure
+
+Procedure.b CheckSourceFileSyntax(inputFile.s)
+  If Not ParsePBO(inputFile)
+    ProcedureReturn #False
+  EndIf
+
+  If Not BuildVTables()
+    ProcedureReturn #False
+  EndIf
+
+  If Not ValidateOOPModel()
+    ProcedureReturn #False
   EndIf
 
   ProcedureReturn #True
 EndProcedure
 
 ; ----------------------------------------------------------------------------
-; Public Transpiler Function for IDE / CLI
-; ----------------------------------------------------------------------------
-
-Procedure.b TranspileSourceFile(inputPBO.s, outputPB.s)
-  If Not ParsePBO(inputPBO)
-    ProcedureReturn #False
-  EndIf
-  If Not BuildVTables()
-    ProcedureReturn #False
-  EndIf
-  If Not ValidateOOPModel()
-    ProcedureReturn #False
-  EndIf
-  ProcedureReturn GenerateTargetPB(outputPB, inputPBO)
-EndProcedure
-
-Procedure.b CheckSourceFileSyntax(inputPBO.s)
-  If Not ParsePBO(inputPBO)
-    ProcedureReturn #False
-  EndIf
-  If Not BuildVTables()
-    ProcedureReturn #False
-  EndIf
-  If Not ValidateOOPModel()
-    ProcedureReturn #False
-  EndIf
-  ProcedureReturn #True
-EndProcedure
-
-; ----------------------------------------------------------------------------
-; Main CLI Entry Point
+; Main Entry Point (CLI)
 ; ----------------------------------------------------------------------------
 
 Procedure.i Main()
   OpenConsole()
 
   Protected argCount.i = CountProgramParameters()
-  Protected arg0.s = ProgramParameter(0)
-  Protected arg1.s = ProgramParameter(1)
+  Protected i.i
+  Protected checkMode.b = #False
+  Protected checkFile.s = ""
+  Protected inputPBO.s = ""
+  Protected outputPB.s = ""
 
-  ; Support --check or -c syntax checking flag
-  If UCase(arg0) = "--CHECK" Or UCase(arg0) = "-C" Or UCase(arg0) = "/CHECK"
-    Protected checkFile.s = arg1
+  For i = 0 To argCount - 1
+    Protected param.s = ProgramParameter(i)
+    If UCase(param) = "--BASE-DIR" Or UCase(param) = "-B"
+      i + 1
+      If i < argCount
+        BaseDirectory = ProgramParameter(i)
+        If BaseDirectory <> "" And Right(BaseDirectory, 1) <> "\"
+          BaseDirectory + "\"
+        EndIf
+      EndIf
+    ElseIf UCase(param) = "--CHECK" Or UCase(param) = "-C" Or UCase(param) = "/CHECK"
+      checkMode = #True
+      i + 1
+      If i < argCount
+        checkFile = ProgramParameter(i)
+      EndIf
+    Else
+      If inputPBO = ""
+        inputPBO = param
+      ElseIf outputPB = ""
+        outputPB = param
+      EndIf
+    EndIf
+  Next
+
+  If checkMode
+    If checkFile = "" : checkFile = inputPBO : EndIf
     If checkFile = ""
       PrintN("[ERROR] Missing filename for --check")
       CloseConsole()
@@ -1095,9 +1495,6 @@ Procedure.i Main()
     EndIf
   EndIf
 
-  Protected inputPBO.s = arg0
-  Protected outputPB.s = arg1
-
   If inputPBO = ""
     inputPBO = "../src/test_polymorphisme.pbo"
     outputPB = "../src/test_polymorphisme_generated.pb"
@@ -1111,6 +1508,9 @@ Procedure.i Main()
   PrintN("=================================================================")
   PrintN("Input  PBO : " + inputPBO)
   PrintN("Output PB  : " + outputPB)
+  If BaseDirectory <> ""
+    PrintN("Base Dir   : " + BaseDirectory)
+  EndIf
   PrintN("")
 
   If Not TranspileSourceFile(inputPBO, outputPB)

@@ -4259,7 +4259,18 @@ CompilerIf #CompileWindows | #CompileLinux | #CompileMac
     EndIf
     FreeMemory(*fullBuf)
 
-    Protected prg = RunProgram(transpilerExe$, "--check " + #DQUOTE$ + tempPBO$ + #DQUOTE$, "", #PB_Program_Open | #PB_Program_Read | #PB_Program_Hide)
+    Protected baseDir$ = ""
+    If *Source\FileName$ <> ""
+      baseDir$ = GetPathPart(*Source\FileName$)
+    EndIf
+
+    Protected linterArgs$ = ""
+    If baseDir$ <> ""
+      linterArgs$ = "--base-dir " + #DQUOTE$ + baseDir$ + #DQUOTE$ + " "
+    EndIf
+    linterArgs$ + "--check " + #DQUOTE$ + tempPBO$ + #DQUOTE$
+
+    Protected prg = RunProgram(transpilerExe$, linterArgs$, "", #PB_Program_Open | #PB_Program_Read | #PB_Program_Hide)
     Protected logOut$ = ""
     If prg
       While ProgramRunning(prg)
