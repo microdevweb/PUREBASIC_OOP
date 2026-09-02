@@ -1,115 +1,198 @@
 # PureBasic OOP Reference Manual (English)
 
-Welcome to the official documentation of the Object-Oriented Programming (OOP) transpiler for PureBasic.
+Welcome to the official documentation for the PureBasic Object-Oriented transpiler and language layer.
 
 ---
 
-## 1. Introduction
+## 1. Foundations of Object-Oriented Programming (OOP)
 
-PureBasic OOP brings modern Object-Oriented syntax while retaining the high execution speed, small footprint, and native compilation power of PureBasic.
+Object-Oriented Programming (OOP) is a programming paradigm organized around **data** and their **associated operations**, packaged into self-contained units called **Objects**.
 
-### Key Features:
-- **Classes & Methods**: Clean object declaration with `Class` and `Method`.
-- **Single Inheritance**: Class inheritance using the `Extends` keyword.
-- **Dynamic VTable Polymorphism**: Automatic resolution of virtual method tables and method overriding.
-- **Parent Invocation `Super::`**: Reuse parent class method implementations with `Super::Method(...)`.
-- **Encapsulation**: Access control for fields and methods (`Public`, `Protected`, `Private`).
-- **Constructors & Destructors**: Instantiation via `New ClassName(...)` and memory release via `*obj\Free()`.
+It is built on 5 fundamental pillars:
+
+### 1.1 Classes and Objects
+- **Class**: The blueprint defining the structure (fields/attributes) and behavior (methods).
+- **Object (Instance)**: A concrete entity instantiated in memory based on a class (e.g., class `Dog` instantiates the object `Buddy`).
+
+### 1.2 Encapsulation
+Encapsulation bundles data and the functions that manipulate them, restricting unauthorized external access:
+- **`Public`**: Accessible anywhere (both inside and outside the object).
+- **`Protected`**: Accessible only within the declaring class and its derived (child) subclasses.
+- **`Private`**: Accessible strictly inside the declaring class.
+
+### 1.3 Inheritance (`Extends`)
+Inheritance enables a derived (child) class to reuse and extend fields and methods from a base (parent) class, promoting code reuse and clear hierarchies.
+
+### 1.4 Polymorphism (Dynamic VTable Dispatch)
+Polymorphism allows manipulating various derived objects uniformly via a reference to their common base class. Method calls dynamically resolve at runtime to the real object's implementation through the Virtual Method Table (*VTable*).
+
+### 1.5 Abstraction (Abstract Classes & Abstract Methods)
+Abstraction defines a generalized contract without supplying all implementation details:
+- **Abstract Class** (`Abstract Class`): An incomplete class serving as a blueprint/contract. It **cannot be instantiated directly**.
+- **Abstract Method** (`Abstract Method`): A method prototype without a body. Any concrete child class **must** implement this method.
+- **Concrete / Default Method**: An abstract class can also provide methods with default implementation, which child classes can inherit as-is, override completely, or override partially using `Super::`.
 
 ---
 
-## 2. Syntax & Grammar
+## 2. PureBasic OOP Syntax & Grammar (.pbo)
 
-### 2.1 Class Declaration and Inheritance
+### 2.1 Declaring Abstract and Concrete Classes
+
 ```oop
-; Base class
-Class Animal
-  Protected nom.s
-  Protected age.i
+; ----------------------------------------------------------------------------
+; 1. ABSTRACT CLASS (Base contract / blueprint)
+; ----------------------------------------------------------------------------
+Abstract Class Shape
+  Protected name.s
+  Protected color.s
+
+  ; Constructor
+  Public Method Init(name_p.s, color_p.s)
+
+  ; Abstract Methods (Contract: mandatory in concrete child classes)
+  Public Abstract Method.d CalculateArea()
+  Public Abstract Method.d CalculatePerimeter()
+  Public Abstract Method Draw()
+
+  ; Concrete Method with default implementation in abstract class
+  Public Method DisplayInfo()
   
-  Public Method Init(nom_p.s, age_p.i)
-  Public Method Crier()
+  ; Destructor
   Public Method Free()
 EndClass
 
-; Derived class
-Class Chien Extends Animal
-  Protected race.s
+; ----------------------------------------------------------------------------
+; 2. CONCRETE CLASS (Inherits from Abstract Class)
+; ----------------------------------------------------------------------------
+Class Rectangle Extends Shape
+  Protected width.d
+  Protected height.d
+
+  Public Method Init(name_p.s, color_p.s, w.d, h.d)
   
-  Public Method Init(nom_p.s, age_p.i, race_p.s)
-  Public Method Crier()              ; Overrides parent method
-  Public Method Rapporter(objet.s)   ; Specific new method
-  Public Method Free()               ; Destructor
+  ; Mandatory implementations of abstract methods
+  Public Method.d CalculateArea()
+  Public Method.d CalculatePerimeter()
+  Public Method Draw()
+  
+  ; Overriding the default method
+  Public Method DisplayInfo()
+  
+  Public Method Free()
 EndClass
 ```
 
-### 2.2 Method Implementation and `Super::`
-Methods access their internal fields using the `This` instance pointer.
-To invoke a parent implementation, use `Super::`.
+---
+
+### 2.2 Method Implementation, `This`, and `Super::`
+
+Methods access instance attributes and internal methods using `This`.
+To invoke a parent class's behavior (partial override), use `Super::`.
 
 ```oop
-Method Animal::Init(nom_p.s, age_p.i)
-  This\nom = nom_p
-  This\age = age_p
+; --- Abstract Class Implementation ---
+
+Method Shape::Init(name_p.s, color_p.s)
+  This\name = name_p
+  This\color = color_p
 EndMethod
 
-Method Animal::Crier()
-  PrintN("[Animal] " + This\nom + " makes a generic sound.")
+Method Shape::DisplayInfo()
+  PrintN("[Shape: " + This\name + " | Color: " + This\color + "]")
 EndMethod
 
-Method Animal::Free()
+Method Shape::Free()
   FreeStructure(This)
 EndMethod
 
-Method Chien::Init(nom_p.s, age_p.i, race_p.s)
-  Super::Init(nom_p, age_p) ; Initialize parent fields
-  This\race = race_p
+; --- Concrete Subclass Rectangle Implementation ---
+
+Method Rectangle::Init(name_p.s, color_p.s, w.d, h.d)
+  Super::Init(name_p, color_p) ; Initialize inherited base attributes
+  This\width = w
+  This\height = h
 EndMethod
 
-Method Chien::Crier()
-  Super::Crier() ; Call parent behavior
-  PrintN("   ==> DOG (" + This\race + ") : Woof ! Woof !")
+Method.d Rectangle::CalculateArea()
+  ProcedureReturn This\width * This\height
 EndMethod
 
-Method Chien::Rapporter(objet.s)
-  PrintN(This\nom + " fetches: " + objet)
+Method.d Rectangle::CalculatePerimeter()
+  ProcedureReturn 2 * (This\width + This\height)
 EndMethod
 
-Method Chien::Free()
+Method Rectangle::Draw()
+  PrintN("   ==> [DRAW] Rectangle " + StrD(This\width, 2) + "x" + StrD(This\height, 2) + " (" + This\color + ")")
+EndMethod
+
+; Partial Override: invoke Super::DisplayInfo() then add details
+Method Rectangle::DisplayInfo()
+  Super::DisplayInfo()
+  PrintN("       Dimensions : " + StrD(This\width, 2) + " x " + StrD(This\height, 2) + " | Area=" + StrD(This\CalculateArea(), 2))
+EndMethod
+
+Method Rectangle::Free()
   Super::Free()
 EndMethod
 ```
 
-### 2.3 Polymorphic Usage
+---
+
+### 2.3 Usage and Polymorphism
+
 ```oop
-Define *monChien.Chien = New Chien("Buddy", 4, "Retriever")
-*monChien\Crier()
+OpenConsole()
 
-; Dynamic Polymorphism via parent-type list / pointer
-NewList *refuge.Animal()
-AddElement(*refuge()) : *refuge() = *monChien
+; 1. Concrete Instantiations
+Define *rect.Rectangle = New Rectangle("MyRectangle", "Blue", 10.0, 5.0)
+Define *circle.Circle = New Circle("MyCircle", "Red", 4.0)
 
-ForEach *refuge()
-  *refuge()\Crier() ; Dynamically dispatches to Chien::Crier()
-  *refuge()\Free()  ; Clean polymorphic destructor dispatch
+; Note: Direct instantiation of an abstract class is strictly forbidden:
+; Define *err.Shape = New Shape(...) ; -> Transpilation error!
+
+; 2. Dynamic Polymorphism using a List of Abstract Class type
+NewList *shapes.Shape()
+
+AddElement(*shapes()) : *shapes() = *rect
+AddElement(*shapes()) : *shapes() = *circle
+AddElement(*shapes()) : *shapes() = New Rectangle("BigRectangle", "Green", 20.0, 15.0)
+
+; 3. Polymorphic loop: dynamically dispatches to the concrete class methods
+ForEach *shapes()
+  *shapes()\DisplayInfo()
+  *shapes()\Draw()
+  PrintN("   Area = " + StrD(*shapes()\CalculateArea(), 2))
+  PrintN("")
 Next
+
+; 4. Polymorphic memory cleanup
+ForEach *shapes()
+  *shapes()\Free()
+Next
+ClearList(*shapes())
+
+CloseConsole()
 ```
 
 ---
 
-## 3. Generated PureBasic Plumbing
+## 3. Generated Native PureBasic Plumbing
 
-The transpiler maps OOP abstractions to native PureBasic constructs:
-1. `Interface Chien_vt Extends Animal_vt` (declaring only added methods).
-2. `Structure Chien_Inst Extends Animal_Inst` (with `*VTable` pointer header).
-3. `DataSection` containing the function pointers with overridden methods in proper slots.
-4. Factory constructors `New_Chien(...)` initializing structure instances and VTable references.
+The transpiler converts high-level `.pbo` code into fast, native PureBasic `.pb` code:
+1. **Interfaces (`_vt`)**: VTable prototypes definition. Abstract class interfaces are generated to allow polymorphic typing (`*var.AbstractClass`).
+2. **Instance Structures (`_Inst`)**: Memory structures holding the `*VTable` pointer at offset 0 followed by fields.
+3. **Safe Internal Dispatch (`*This_vt`)**: Internal calls (`This\Method()`) resolve cleanly through the polymorphic interface pointer `*This_vt`.
+4. **VTable DataSections**: Emitted for concrete classes only.
+5. **Constructors (`New_<Class>`)**: Generated only for concrete classes.
+6. **Semantic Validations**:
+   - Forbids instantiating abstract classes.
+   - Enforces that concrete subclasses implement all inherited abstract methods.
 
 ---
 
-## 4. Build & Execution Guide
+## 4. Compilation & Execution Guide
 
-### Transpile `.pbo` to `.pb`:
+### Transpile `.pbo` source to `.pb`:
 ```cmd
 "compiler/transpiler.exe" "src/my_file.pbo" "src/my_file_generated.pb"
 ```

@@ -6,7 +6,7 @@
 ; ----------------------------------------------------------------------------
 ; 1. CLASSE DE BASE : Animal
 ; ----------------------------------------------------------------------------
-Class Animal
+Abstract Class Animal
   Protected nom.s
   Protected age.i
   
@@ -164,3 +164,9 @@ PrintN("")
 PrintN("Appuyez sur Entree pour quitter...")
 Input()
 CloseConsole()
+
+; IDE Options = PureBasic 6.40 (Windows - x64)
+; CursorPosition = 10
+; Folding = -
+; EnableXP
+; DPIAware

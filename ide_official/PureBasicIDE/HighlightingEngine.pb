@@ -127,9 +127,9 @@ Global SourceStringFormat
 Global NbASMKeywords.l ; Need to be a 'long' as the 'Data' is declared as long (32/64 bits)
 
 CompilerIf #SpiderBasic
-  #NbBasicKeywords = 98
+  #NbBasicKeywords = 99
 CompilerElse
-  #NbBasicKeywords = 118
+  #NbBasicKeywords = 119
 CompilerEndIf
 
 #BasicTypeChars = "ABCUWLSFDQI" ; characters that are basic types (uppercase)
@@ -185,6 +185,7 @@ CompilerEndIf
 ;   it is faster to refer to keywords by index than by name
 ;
 Enumeration 1
+  #KEYWORD_Abstract
   #KEYWORD_Align
   #KEYWORD_And
   #KEYWORD_Array

@@ -4,108 +4,189 @@ Bienvenue dans la documentation officielle du transpileur et de la couche Orient
 
 ---
 
-## 1. Introduction
+## 1. Les Fondements de la Programmation Orientée Objet (POO)
 
-PureBasic OOP apporte une syntaxe Orientée Objet de haut niveau tout en conservant la vitesse, la légèreté et la puissance de compilation native de PureBasic.
+La Programmation Orientée Objet (POO) est un paradigme de programmation qui structure une application autour de **données** et de **traitements associés**, regroupés en entités cohérentes appelées **Objets**.
 
-### Caractéristiques Principales :
-- **Classes & Méthodes** : Déclaration propre via `Class` et `Method`.
-- **Héritage Simple** : Support de l'héritage de classes via le mot-clé `Extends`.
-- **Polymorphisme VTable Dynamique** : Résolution automatique des tables virtuelles et des surcharges de méthodes (*method overriding*).
-- **Appel Parent `Super::`** : Possibilité d'appeler l'implémentation de la méthode parente via `Super::Methode(...)`.
-- **Encapsulation** : Gestion de la visibilité des attributs et méthodes (`Public`, `Protected`, `Private`).
-- **Constructeurs et Destructeurs** : Instanciation automatique (`New Classe(...)`) et libération mémoire propre (`*obj\Free()`).
+Elle repose sur 5 piliers fondamentaux :
+
+### 1.1 Les Classes et les Objets
+- **La Classe** : C'est le plan de construction (ou moule) qui définit la structure (attributs / champs) et le comportement (méthodes).
+- **L'Objet (ou Instance)** : C'est une occurrence concrète créée en mémoire à partir d'une classe (par exemple, la classe `Chien` permet de créer l'objet `Médor`).
+
+### 1.2 L'Encapsulation
+L'encapsulation permet de regrouper les données et les fonctions qui les manipulent, tout en protégeant les données internes contre les accès extérieurs non autorisés :
+- **`Public`** : Accessible depuis n'importe où (à l'intérieur et à l'extérieur de l'objet).
+- **`Protected`** : Accessible uniquement par la classe qui le déclare et par ses classes filles (héritières).
+- **`Private`** : Strictement réservé à la classe qui le déclare.
+
+### 1.3 L'Héritage (`Extends`)
+L'héritage permet à une classe dérivée (fille) de réutiliser et d'étendre les attributs et les méthodes d'une classe de base (parente). Cela favorise la réutilisation du code et l'organisation hiérarchique.
+
+### 1.4 Le Polymorphisme (Dispatch Dynamique via VTable)
+Le polymorphisme permet de manipuler différents types d'objets dérivés à travers une référence commune vers leur classe parente. Lors de l'appel d'une méthode, le programme exécute dynamiquement la version spécifique à la classe réelle de l'objet grâce à la table des méthodes virtuelles (*VTable*).
+
+### 1.5 L'Abstraction (Classes et Méthodes Abstraites)
+L'abstraction permet de définir un concept général sans en fournir toute l'implémentation :
+- **Classe Abstraite** (`Abstract Class`) : Une classe incomplète servant de modèle ou de contrat. Elle **ne peut pas être instanciée directement**.
+- **Méthode Abstraite** (`Abstract Method`) : Un prototype de méthode sans corps d'implémentation. Toute classe fille concrète a **l'obligation** d'implémenter cette méthode.
+- **Méthode Concrète / Par Défaut** : Une classe abstraite peut aussi contenir des méthodes avec un code par défaut, que la classe fille peut conserver, surcharger totalement ou surcharger partiellement via `Super::`.
 
 ---
 
-## 2. Syntaxe & Grammaire Objet
+## 2. Syntaxe & Grammaire Objet PureBasic (.pbo)
 
-### 2.1 Déclaration de Classes et Héritage
+### 2.1 Déclaration des Classes Abstraites et Concrètes
+
 ```oop
-; Classe de base
-Class Animal
+; ----------------------------------------------------------------------------
+; 1. CLASSE ABSTRAITE (Modèle de base / Contrat)
+; ----------------------------------------------------------------------------
+Abstract Class FormeGeometrique
   Protected nom.s
-  Protected age.i
+  Protected couleur.s
+
+  ; Constructeur
+  Public Method Init(nom_p.s, couleur_p.s)
+
+  ; Méthodes Abstraites (Obligatoires dans les classes filles concrètes)
+  Public Abstract Method.d CalculerAire()
+  Public Abstract Method.d CalculerPerimetre()
+  Public Abstract Method Dessiner()
+
+  ; Méthode concrète avec implémentation par défaut dans la classe abstraite
+  Public Method AfficherInfos()
   
-  Public Method Init(nom_p.s, age_p.i)
-  Public Method Crier()
+  ; Destructeur
   Public Method Free()
 EndClass
 
-; Classe dérivée
-Class Chien Extends Animal
-  Protected race.s
+; ----------------------------------------------------------------------------
+; 2. CLASSE CONCRÈTE (Hérite de la classe abstraite)
+; ----------------------------------------------------------------------------
+Class Rectangle Extends FormeGeometrique
+  Protected largeur.d
+  Protected hauteur.d
+
+  Public Method Init(nom_p.s, couleur_p.s, l.d, h.d)
   
-  Public Method Init(nom_p.s, age_p.i, race_p.s)
-  Public Method Crier()              ; Surcharge (Override)
-  Public Method Rapporter(objet.s)   ; Nouvelle méthode
-  Public Method Free()               ; Destructeur
+  ; Implémentation obligatoire des méthodes abstraites du parent
+  Public Method.d CalculerAire()
+  Public Method.d CalculerPerimetre()
+  Public Method Dessiner()
+  
+  ; Surcharge de la méthode concrète
+  Public Method AfficherInfos()
+  
+  Public Method Free()
 EndClass
 ```
 
-### 2.2 Implémentation des Méthodes et `Super::`
-Chaque méthode accède à ses attributs internes via la référence d'instance `This`.
-Pour appeler la méthode parente, utilisez le préfixe `Super::`.
+---
+
+### 2.2 Implémentation des Méthodes, `This` et `Super::`
+
+Chaque méthode accède à ses membres internes via l'identifiant `This`.
+Pour appeler le comportement de la classe parente (surcharge partielle), on utilise `Super::`.
 
 ```oop
-Method Animal::Init(nom_p.s, age_p.i)
+; --- Implémentation de la Classe Abstraite ---
+
+Method FormeGeometrique::Init(nom_p.s, couleur_p.s)
   This\nom = nom_p
-  This\age = age_p
+  This\couleur = couleur_p
 EndMethod
 
-Method Animal::Crier()
-  PrintN("[Animal] " + This\nom + " émet un son générique.")
+Method FormeGeometrique::AfficherInfos()
+  PrintN("[Forme: " + This\nom + " | Couleur: " + This\couleur + "]")
 EndMethod
 
-Method Animal::Free()
+Method FormeGeometrique::Free()
   FreeStructure(This)
 EndMethod
 
-Method Chien::Init(nom_p.s, age_p.i, race_p.s)
-  Super::Init(nom_p, age_p) ; Initialisation du parent
-  This\race = race_p
+; --- Implémentation de la Classe Fille Rectangle ---
+
+Method Rectangle::Init(nom_p.s, couleur_p.s, l.d, h.d)
+  Super::Init(nom_p, couleur_p) ; Initialise les attributs hérités
+  This\largeur = l
+  This\hauteur = h
 EndMethod
 
-Method Chien::Crier()
-  Super::Crier() ; Appel du comportement parent
-  PrintN("   ==> CHIEN (" + This\race + ") : Wouaf ! Wouaf !")
+Method.d Rectangle::CalculerAire()
+  ProcedureReturn This\largeur * This\hauteur
 EndMethod
 
-Method Chien::Rapporter(objet.s)
-  PrintN(This\nom + " rapporte : " + objet)
+Method.d Rectangle::CalculerPerimetre()
+  ProcedureReturn 2 * (This\largeur + This\hauteur)
 EndMethod
 
-Method Chien::Free()
+Method Rectangle::Dessiner()
+  PrintN("   ==> [DESSIN] Rectangle " + StrD(This\largeur, 2) + "x" + StrD(This\hauteur, 2) + " (" + This\couleur + ")")
+EndMethod
+
+; Surcharge Partielle : appel du parent Super:: puis enrichissement
+Method Rectangle::AfficherInfos()
+  Super::AfficherInfos()
+  PrintN("       Dimensions : " + StrD(This\largeur, 2) + " x " + StrD(This\hauteur, 2) + " | Aire=" + StrD(This\CalculerAire(), 2))
+EndMethod
+
+Method Rectangle::Free()
   Super::Free()
 EndMethod
 ```
 
+---
+
 ### 2.3 Utilisation et Polymorphisme
+
 ```oop
-; 1. Instanciation concrète
-Define *monChien.Chien = New Chien("Médor", 4, "Labrador")
-*monChien\Crier()
-*monChien\Rapporter("la balle")
+OpenConsole()
 
-; 2. Polymorphisme dynamique via liste ou pointeur de type parent
-NewList *refuge.Animal()
-AddElement(*refuge()) : *refuge() = *monChien
+; 1. Instanciations concrètes
+Define *rect.Rectangle = New Rectangle("MonRectangle", "Bleu", 10.0, 5.0)
+Define *cercle.Cercle = New Cercle("MonCercle", "Rouge", 4.0)
 
-ForEach *refuge()
-  *refuge()\Crier() ; Dispatch dynamique vers Chien::Crier() !
-  *refuge()\Free()  ; Libération polymorphe
+; NB: L'instanciation directe d'une classe abstraite est strictement interdite :
+; Define *err.FormeGeometrique = New FormeGeometrique(...) ; -> ERREUR de transpilation !
+
+; 2. Polymorphisme dynamique via liste de type parent abstrait
+NewList *formes.FormeGeometrique()
+
+AddElement(*formes()) : *formes() = *rect
+AddElement(*formes()) : *formes() = *cercle
+AddElement(*formes()) : *formes() = New Rectangle("GrandRectangle", "Vert", 20.0, 15.0)
+
+; 3. Parcours polymorphe : dispatch automatique vers la classe concrète réelle
+ForEach *formes()
+  *formes()\AfficherInfos()
+  *formes()\Dessiner()
+  PrintN("   Aire = " + StrD(*formes()\CalculerAire(), 2))
+  PrintN("")
 Next
+
+; 4. Nettoyage mémoire polymorphe
+ForEach *formes()
+  *formes()\Free()
+Next
+ClearList(*formes())
+
+CloseConsole()
 ```
 
 ---
 
 ## 3. Plomberie PureBasic Générée
 
-Le transpileur convertit automatiquement les classes en constructions natives PureBasic :
-1. `Interface Chien_vt Extends Animal_vt` contenant uniquement les nouvelles méthodes ajoutées.
-2. `Structure Chien_Inst Extends Animal_Inst` avec le pointeur `*VTable` en tête de structure.
-3. `DataSection` contenant les adresses des procédures avec les méthodes surchargées correctement positionnées.
-4. Fonctions constructeurs `New_Chien(...)` allouant la structure et initialisant la `VTable`.
+Le transpileur convertit automatiquement la syntaxe haut niveau `.pbo` en code natif PureBasic `.pb` ultra-performant :
+1. **Interfaces VTable (`_vt`)** : Définition des prototypes de méthodes. L'interface de la classe abstraite est générée pour permettre le typage polymorphe.
+2. **Structures d'Instance (`_Inst`)** : Structures mémoires contenant le pointeur `*VTable` en en-tête suivi des champs de la classe.
+3. **Dispatch Interne Sécurisé (`*This_vt`)** : Les appels internes `This\Methode()` sont automatiquement résolus via le pointeur d'interface polymorphe `*This_vt`.
+4. **DataSections VTable** : Générées pour toutes les classes concrètes (les classes abstraites n'allouent pas de VTable inutile).
+5. **Constructeurs Factory (`New_<Classe>`)** : Générés uniquement pour les classes concrètes.
+6. **Validation Sémantique** :
+   - Interdiction d'instancier une classe abstraite.
+   - Obligation pour une classe fille concrète d'implémenter toutes les méthodes abstraites héritées.
 
 ---
 

@@ -22,10 +22,11 @@ DataSection
   ;       defined in "HighlightingEngine.pb".
 
   BasicKeywords:
-  Data$ "Align", "", " "
-  Data$ "And", "", " "
-  Data$ "Array", "", " "
-  Data$ "As", "", " "
+  Data$ "Abstract"         , "", " "
+  Data$ "Align"            , "", " "
+  Data$ "And"              , "", " "
+  Data$ "Array"            , "", " "
+  Data$ "As"               , "", " "
 
   Data$ "Break", "", ""
 

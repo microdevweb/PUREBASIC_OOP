@@ -25,18 +25,22 @@ Structure OOP_Method
   returnType.s    ; e.g. ".i", ".s", ""
   visibility.s    ; "Public", "Protected", "Private"
   isOverride.b
+  isAbstract.b
 EndStructure
 
 Structure OOP_VTableSlot
   methodName.s
   implementingClass.s
+  declaringClass.s
   params.s
   returnType.s
+  isAbstract.b
 EndStructure
 
 Structure OOP_Class
   name.s
   parentName.s    ; empty if base class
+  isAbstract.b
   List Fields.OOP_Field()
   List Methods.OOP_Method()
   List VTableSlots.OOP_VTableSlot()
@@ -181,31 +185,43 @@ Procedure.b ParsePBO(inputFile.s)
         inClass = #False
         *currentClass = #Null
         Continue
-
-      ; Handle method declarations or inline method bodies:
-      ; e.g. Public Method Init(...) or Method Init(...)
-      ElseIf Left(upper, 6) = "PUBLIC" Or Left(upper, 9) = "PROTECTED" Or Left(upper, 7) = "PRIVATE" Or Left(upper, 6) = "METHOD"
+      Else
+        ; Handle method declarations or inline method bodies:
+        ; e.g. Public Method Init(...) or Abstract Method Dessiner() or Public Abstract Method.d Calculer()
+        Protected isAbsMeth.b = #False
         Protected vis.s = "Public"
-        Protected rest.s = ""
-        If Left(upper, 6) = "PUBLIC"
-          vis = "Public"
-          rest = Trim(Mid(line, 7))
-        ElseIf Left(upper, 9) = "PROTECTED"
-          vis = "Protected"
-          rest = Trim(Mid(line, 10))
-        ElseIf Left(upper, 7) = "PRIVATE"
-          vis = "Private"
-          rest = Trim(Mid(line, 8))
-        Else
-          vis = "Public"
-          rest = line
-        EndIf
+        Protected workLine.s = line
+        Protected workUpper.s = upper
+        Protected matchedPrefix.b = #False
 
-        Protected restUpper.s = UCase(rest)
-        If Left(restUpper, 6) = "METHOD"
+        Repeat
+          workUpper = UCase(Trim(workLine))
+          If Left(workUpper, 8) = "ABSTRACT" And (Len(workUpper) = 8 Or Mid(workUpper, 9, 1) = " ")
+            isAbsMeth = #True
+            matchedPrefix = #True
+            workLine = Trim(Mid(workLine, 9))
+          ElseIf Left(workUpper, 6) = "PUBLIC" And (Len(workUpper) = 6 Or Mid(workUpper, 7, 1) = " ")
+            vis = "Public"
+            matchedPrefix = #True
+            workLine = Trim(Mid(workLine, 7))
+          ElseIf Left(workUpper, 9) = "PROTECTED" And (Len(workUpper) = 9 Or Mid(workUpper, 10, 1) = " ")
+            vis = "Protected"
+            matchedPrefix = #True
+            workLine = Trim(Mid(workLine, 10))
+          ElseIf Left(workUpper, 7) = "PRIVATE" And (Len(workUpper) = 7 Or Mid(workUpper, 8, 1) = " ")
+            vis = "Private"
+            matchedPrefix = #True
+            workLine = Trim(Mid(workLine, 8))
+          Else
+            Break
+          EndIf
+        ForEver
+
+        workUpper = UCase(Trim(workLine))
+        If Left(workUpper, 6) = "METHOD" And (Len(workUpper) = 6 Or Mid(workUpper, 7, 1) = " " Or Mid(workUpper, 7, 1) = ".")
           ; Method declaration / inline definition inside class
-          Protected methDecl.s = Trim(Mid(rest, 7))
-          Protected mName.s, mParams.s = "", mRet.s = ""
+          Protected methDecl.s = Trim(Mid(workLine, 7))
+          Protected mName.s = "", mParams.s = "", mRet.s = ""
           
           ; Check return type in header if format Method.i Name(params)
           If Left(methDecl, 1) = "."
@@ -242,12 +258,18 @@ Procedure.b ParsePBO(inputFile.s)
           *currentClass\Methods()\params = mParams
           *currentClass\Methods()\returnType = mRet
           *currentClass\Methods()\visibility = vis
+          *currentClass\Methods()\isAbstract = isAbsMeth
           
           If UCase(mName) = "INIT"
             *currentClass\hasInit = #True
             *currentClass\initParams = mParams
           ElseIf UCase(mName) = "FREE"
             *currentClass\hasFree = #True
+          EndIf
+
+          ; Abstract method cannot have an inline body
+          If isAbsMeth
+            Continue
           EndIf
 
           ; Check if this is an inline method or a single-line declaration
@@ -261,7 +283,7 @@ Procedure.b ParsePBO(inputFile.s)
             ElseIf Left(nextLine, 9) = "ENDMETHOD"
               isInline = #True
               Break
-            ElseIf Left(nextLine, 8) = "ENDCLASS" Or Left(nextLine, 6) = "PUBLIC" Or Left(nextLine, 9) = "PROTECTED" Or Left(nextLine, 7) = "PRIVATE" Or Left(nextLine, 6) = "METHOD"
+            ElseIf Left(nextLine, 8) = "ENDCLASS" Or Left(nextLine, 6) = "PUBLIC" Or Left(nextLine, 9) = "PROTECTED" Or Left(nextLine, 7) = "PRIVATE" Or Left(nextLine, 6) = "METHOD" Or Left(nextLine, 8) = "ABSTRACT"
               isInline = #False
               Break
             EndIf
@@ -279,23 +301,13 @@ Procedure.b ParsePBO(inputFile.s)
           EndIf
           Continue
 
-        Else
+        ElseIf matchedPrefix Or (line <> "" And Left(line, 1) <> ";")
           ; Field declaration: e.g. "nom.s", "age.i", "List items.s()"
           AddElement(*currentClass\Fields())
-          *currentClass\Fields()\name = rest
+          *currentClass\Fields()\name = workLine
           *currentClass\Fields()\visibility = vis
           Continue
         EndIf
-
-      ElseIf line = "" Or Left(line, 1) = ";"
-        ; Empty line or comment in class
-        Continue
-      Else
-        ; Implicit field declaration (without Public/Protected keyword)
-        AddElement(*currentClass\Fields())
-        *currentClass\Fields()\name = line
-        *currentClass\Fields()\visibility = "Public"
-        Continue
       EndIf
 
     ; 3. Parsing inside Out-of-Class Method Implementation (Method Class::Name())
@@ -312,9 +324,22 @@ Procedure.b ParsePBO(inputFile.s)
 
     ; 4. Outside Class/Method (Root Level)
     Else
-      If Left(upper, 5) = "CLASS" And (Len(line) = 5 Or Mid(line, 6, 1) = " ")
+      Protected isClassDecl.b = #False
+      Protected isAbsClass.b = #False
+      Protected classHeader.s = ""
+      
+      If Left(upper, 14) = "ABSTRACT CLASS" And (Len(line) = 14 Or Mid(line, 15, 1) = " ")
+        isClassDecl = #True
+        isAbsClass = #True
+        classHeader = Trim(Mid(line, 15))
+      ElseIf Left(upper, 5) = "CLASS" And (Len(line) = 5 Or Mid(line, 6, 1) = " ")
+        isClassDecl = #True
+        isAbsClass = #False
+        classHeader = Trim(Mid(line, 6))
+      EndIf
+
+      If isClassDecl
         ; Class definition start
-        Protected classHeader.s = Trim(Mid(line, 6))
         Protected cName.s = "", pName.s = ""
         p1 = FindString(UCase(classHeader), "EXTENDS")
         If p1 > 0
@@ -328,12 +353,13 @@ Procedure.b ParsePBO(inputFile.s)
         *currentClass = @Classes()
         *currentClass\name = cName
         *currentClass\parentName = pName
+        *currentClass\isAbstract = isAbsClass
         ClassMap(cName) = ListIndex(Classes())
         inClass = #True
         Continue
 
-      ElseIf Left(upper, 6) = "METHOD" And (Len(line) = 6 Or Mid(line, 7, 1) = " ")
-        ; Method implementation: e.g. Method Chien::Crier() or Method.i Chien::Calculer(x.i)
+      ElseIf Left(upper, 6) = "METHOD" And (Len(line) = 6 Or Mid(line, 7, 1) = " " Or Mid(line, 7, 1) = ".")
+        ; Method implementation: e.g. Method Chien::Crier() or Method.i Chien::Calculer(x.i) or Method.d Chien::CalculerAire()
         Protected implHeader.s = Trim(Mid(line, 7))
         Protected implRet.s = ""
         If Left(implHeader, 1) = "."
@@ -393,7 +419,7 @@ EndProcedure
 ; Semantic Analysis Phase: VTable Construction & Polymorphism Resolution
 ; ----------------------------------------------------------------------------
 
-Procedure BuildVTables()
+Procedure.b BuildVTables()
   ForEach Classes()
     Protected *c.OOP_Class = @Classes()
     ClearList(*c\VTableSlots())
@@ -410,8 +436,10 @@ Procedure BuildVTables()
         AddElement(*c\VTableSlots())
         *c\VTableSlots()\methodName = *parent\VTableSlots()\methodName
         *c\VTableSlots()\implementingClass = *parent\VTableSlots()\implementingClass
+        *c\VTableSlots()\declaringClass = *parent\VTableSlots()\declaringClass
         *c\VTableSlots()\params = *parent\VTableSlots()\params
         *c\VTableSlots()\returnType = *parent\VTableSlots()\returnType
+        *c\VTableSlots()\isAbstract = *parent\VTableSlots()\isAbstract
       Next
       
       PopListPosition(Classes())
@@ -434,6 +462,7 @@ Procedure BuildVTables()
           *c\VTableSlots()\implementingClass = *c\name
           *c\VTableSlots()\params = *m\params
           *c\VTableSlots()\returnType = *m\returnType
+          *c\VTableSlots()\isAbstract = *m\isAbstract
           *m\isOverride = #True
           isOverridden = #True
           Break
@@ -445,12 +474,77 @@ Procedure BuildVTables()
         AddElement(*c\VTableSlots())
         *c\VTableSlots()\methodName = *m\name
         *c\VTableSlots()\implementingClass = *c\name
+        *c\VTableSlots()\declaringClass = *c\name
         *c\VTableSlots()\params = *m\params
         *c\VTableSlots()\returnType = *m\returnType
+        *c\VTableSlots()\isAbstract = *m\isAbstract
         *m\isOverride = #False
       EndIf
     Next
   Next
+
+  ; Update VTable slots if out-of-class Method implementations are present
+  ForEach MethodBodies()
+    Protected *mb.OOP_MethodBody = @MethodBodies()
+    If FindMapElement(ClassMap(), *mb\className)
+      Protected cIdx.i = ClassMap(*mb\className)
+      PushListPosition(Classes())
+      SelectElement(Classes(), cIdx)
+      Protected *targetCls.OOP_Class = @Classes()
+      ForEach *targetCls\VTableSlots()
+        If UCase(*targetCls\VTableSlots()\methodName) = UCase(*mb\methodName)
+          *targetCls\VTableSlots()\implementingClass = *mb\className
+          *targetCls\VTableSlots()\isAbstract = #False
+        EndIf
+      Next
+      PopListPosition(Classes())
+    EndIf
+  Next
+
+  ProcedureReturn #True
+EndProcedure
+
+Procedure.b ValidateOOPModel()
+  ; 1. Check that concrete classes implement all abstract methods
+  ForEach Classes()
+    Protected *c.OOP_Class = @Classes()
+    If Not *c\isAbstract
+      ForEach *c\VTableSlots()
+        If *c\VTableSlots()\isAbstract
+          ; Check if there is an implementation in MethodBodies
+          Protected hasImpl.b = #False
+          ForEach MethodBodies()
+            If MethodBodies()\className = *c\name And UCase(MethodBodies()\methodName) = UCase(*c\VTableSlots()\methodName)
+              hasImpl = #True
+              Break
+            EndIf
+          Next
+          If Not hasImpl
+            PrintN("[ERROR] Class '" + *c\name + "' must implement abstract method '" + *c\VTableSlots()\methodName + "' declared in abstract class '" + *c\VTableSlots()\declaringClass + "' (or be declared Abstract Class).")
+            ProcedureReturn #False
+          EndIf
+        EndIf
+      Next
+    EndIf
+  Next
+
+  ; 2. Check that abstract classes are not instantiated in MainLines
+  ForEach Classes()
+    If Classes()\isAbstract
+      Protected absName.s = Classes()\name
+      Protected absUpper.s = UCase(absName)
+      ForEach MainLines()
+        Protected mLine.s = MainLines()
+        Protected upLine.s = UCase(mLine)
+        If FindString(upLine, "NEW(" + absUpper + ")") > 0 Or FindString(upLine, "NEW(" + absUpper + ",") > 0 Or FindString(upLine, "NEW( " + absUpper + ")") > 0 Or FindString(upLine, "NEW( " + absUpper + ",") > 0 Or FindString(upLine, "NEW " + absUpper + "(") > 0 Or FindString(upLine, "NEW  " + absUpper + "(") > 0
+          PrintN("[ERROR] Cannot instantiate abstract class '" + absName + "'.")
+          ProcedureReturn #False
+        EndIf
+      Next
+    EndIf
+  Next
+
+  ProcedureReturn #True
 EndProcedure
 
 ; ----------------------------------------------------------------------------
@@ -492,15 +586,15 @@ Procedure.s TranspileMethodBodyLine(line.s, className.s, parentClassName.s)
     EndIf
   Wend
   
-  ; 2. Handle internal method calls 'This\Method(' -> '*This\VTable\Method('
+  ; 2. Handle internal method calls 'This\Method(' -> '*This_vt\Method('
   If FindMapElement(ClassMap(), className)
     PushListPosition(Classes())
     SelectElement(Classes(), ClassMap(className))
     ForEach Classes()\VTableSlots()
       Protected mName.s = Classes()\VTableSlots()\methodName
       If mName <> ""
-        res = ReplaceString(res, "This\" + mName + "(", "*This\VTable\" + mName + "(")
-        res = ReplaceString(res, "*This\" + mName + "(", "*This\VTable\" + mName + "(")
+        res = ReplaceString(res, "This\" + mName + "(", "*This_vt\" + mName + "(")
+        res = ReplaceString(res, "*This\" + mName + "(", "*This_vt\" + mName + "(")
       EndIf
     Next
     PopListPosition(Classes())
@@ -624,7 +718,19 @@ Procedure.b GenerateTargetPB(outputFile.s)
   WriteStringN(file, "; " + RSet("", 76, "-"))
   WriteStringN(file, "")
 
-  ; Emit Prototypes/Declare if needed, or Procedures directly
+  ; Emit Forward Declarations (Declare)
+  ForEach MethodBodies()
+    Protected *mbDecl.OOP_MethodBody = @MethodBodies()
+    Protected declHeader.s = "Declare" + *mbDecl\returnType + " " + *mbDecl\className + "_" + *mbDecl\methodName + "(*This." + *mbDecl\className + "_Inst"
+    If *mbDecl\params <> ""
+      declHeader + ", " + *mbDecl\params
+    EndIf
+    declHeader + ")"
+    WriteStringN(file, declHeader)
+  Next
+  WriteStringN(file, "")
+
+  ; Emit Procedure implementations
   ForEach MethodBodies()
     Protected *mb.OOP_MethodBody = @MethodBodies()
     Protected parentOfClass.s = ""
@@ -640,6 +746,7 @@ Procedure.b GenerateTargetPB(outputFile.s)
     procHeader + ")"
     
     WriteStringN(file, procHeader)
+    WriteStringN(file, "  Protected *This_vt." + *mb\className + "_vt = *This")
     
     ; Body Lines
     ForEach *mb\BodyLines()
@@ -682,10 +789,12 @@ Procedure.b GenerateTargetPB(outputFile.s)
 
   ForEach Classes()
     *c = @Classes()
-    WriteStringN(file, "  " + *c\name + "_VTable_Data:")
-    ForEach *c\VTableSlots()
-      WriteStringN(file, "    Data.i @" + *c\VTableSlots()\implementingClass + "_" + *c\VTableSlots()\methodName + "()")
-    Next
+    If Not *c\isAbstract
+      WriteStringN(file, "  " + *c\name + "_VTable_Data:")
+      ForEach *c\VTableSlots()
+        WriteStringN(file, "    Data.i @" + *c\VTableSlots()\implementingClass + "_" + *c\VTableSlots()\methodName + "()")
+      Next
+    EndIf
   Next
 
   WriteStringN(file, "EndDataSection")
@@ -701,6 +810,10 @@ Procedure.b GenerateTargetPB(outputFile.s)
 
   ForEach Classes()
     *c = @Classes()
+    If *c\isAbstract
+      Continue
+    EndIf
+
     Protected ctorParams.s = ""
     If *c\hasInit
       ctorParams = *c\initParams
@@ -758,7 +871,12 @@ Procedure.b TranspileSourceFile(inputPBO.s, outputPB.s)
   If Not ParsePBO(inputPBO)
     ProcedureReturn #False
   EndIf
-  BuildVTables()
+  If Not BuildVTables()
+    ProcedureReturn #False
+  EndIf
+  If Not ValidateOOPModel()
+    ProcedureReturn #False
+  EndIf
   ProcedureReturn GenerateTargetPB(outputPB)
 EndProcedure
 
