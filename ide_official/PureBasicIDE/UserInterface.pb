@@ -382,6 +382,12 @@ Procedure CreateIDEPopupMenu()
     ShortcutMenuItem(#MENU_AutoIndent,         Language("MenuItem","AutoIndent"))
     
     MenuBar()
+    OpenSubMenu("PureBasic OOP")
+    MenuItem(#MENU_OOP_GenerateConstructor, "Generate Constructor (Init)")
+    MenuItem(#MENU_OOP_GenerateSuperConstructor, "Generate Super Constructor (Super::Init)")
+    CloseSubMenu()
+    
+    MenuBar()
     ShortcutMenuItem(#MENU_LastViewedLine, Language("MenuItem","LastViewedLine"))
     
     If EnableFolding
@@ -1247,6 +1253,12 @@ Procedure MainMenuEvent(MenuItemID)
     Case #MENU_AutoIndent
       AutoIndent()
       ;AlignComments()
+      
+    Case #MENU_OOP_GenerateConstructor
+      OOP_GenerateConstructor(#False)
+      
+    Case #MENU_OOP_GenerateSuperConstructor
+      OOP_GenerateConstructor(#True)
       
     Case #MENU_SelectAll
       SelectAll()

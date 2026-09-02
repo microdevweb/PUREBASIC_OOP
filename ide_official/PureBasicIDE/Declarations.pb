@@ -33,6 +33,7 @@ Declare Compiler_BuildTarget(SourceFileName$, TargetFileName$, *Target.CompileTa
 Declare OOP_Linter_CheckSource(*Source.SourceFile)
 Declare OOP_Linter_ClearErrors(*Source.SourceFile)
 Declare OOP_Linter_SetError(*Source.SourceFile, lineNum.i, message.s)
+Declare OOP_GenerateConstructor(IncludeSuper.b)
 
 ;- HelpViewer.pb
 ;- WindowsHelp.pb

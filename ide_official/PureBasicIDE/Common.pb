@@ -1123,6 +1123,9 @@ Enumeration 0
   
   #MENU_ProcedureListUpdate
   
+  #MENU_OOP_GenerateConstructor
+  #MENU_OOP_GenerateSuperConstructor
+  
   #MENU_LastShortcutItemDummy ; to avoid changing #MENU_LastShortcutItem every time
   #MENU_LastShortcutItem = #MENU_LastShortcutItemDummy-1
   
