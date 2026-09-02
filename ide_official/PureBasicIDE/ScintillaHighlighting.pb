@@ -3036,7 +3036,7 @@ CompilerIf #CompileWindows | #CompileLinux | #CompileMac
             EndIf
           EndIf
           
-          If AutoCompleteWindowOpen = 0 And (*scinotify\ch = '\' Or *scinotify\ch = ':' Or ValidCharacters(*scinotify\ch & $FF)) And AutoComplete_CheckAutoPopup()
+          If AutoCompleteWindowOpen = 0 And (*scinotify\ch = '\' Or *scinotify\ch = ':' Or *scinotify\ch = ' ' Or *scinotify\ch = 9 Or ValidCharacters(*scinotify\ch & $FF)) And AutoComplete_CheckAutoPopup()
             position = SendEditorMessage(#SCI_GETCURRENTPOS, 0, 0)
             line = SendEditorMessage(#SCI_LINEFROMPOSITION, position, 0)
             position = CountCharacters(*ActiveSource\EditorGadget, SendEditorMessage(#SCI_POSITIONFROMLINE, line, 0), position)
