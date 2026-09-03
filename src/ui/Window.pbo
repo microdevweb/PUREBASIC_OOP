@@ -19,6 +19,7 @@ Namespace UI {
       This\parentID = parent_p
       This\id = OpenWindow(#PB_Any, x_p, y_p, w_p, h_p, title_p, flags_p, parent_p)
       If (This\id) {
+        UI_RegisterWindow(This\id, @This)
         This\x = WindowX(This\id)
         This\y = WindowY(This\id)
         This\width = WindowWidth(This\id)
@@ -65,6 +66,7 @@ Namespace UI {
 
     Public Method Close() {
       If (This\id And IsWindow(This\id)) {
+        UI_UnregisterWindow(This\id)
         CloseWindow(This\id)
         This\id = 0
       }

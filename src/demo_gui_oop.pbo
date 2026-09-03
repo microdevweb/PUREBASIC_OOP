@@ -1,4 +1,4 @@
-﻿; ============================================================================
+; ============================================================================
 ; Demonstration Complete du Framework GUI PureBasic OOP
 ; Fichier : src/demo_gui_oop.pbo
 ; ============================================================================
@@ -151,4 +151,4 @@ Class MainWindow Extends UI::Window {
 Define *app.UI::Application = New UI::Application()
 Define *mainWin.MainWindow = New MainWindow()
 
-*app\Run()
+*app\Run(*mainWin)

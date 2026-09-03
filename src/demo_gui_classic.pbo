@@ -1,4 +1,4 @@
-﻿; ============================================================================
+; ============================================================================
 ; Demonstration du Framework GUI PureBasic OOP (Syntaxe PureBasic Standard)
 ; Fichier : src/demo_gui_classic.pbo
 ; ============================================================================
@@ -151,4 +151,4 @@ EndClass
 Define *app.UI::Application = New UI::Application()
 Define *mainWin.MainWindow = New MainWindow()
 
-*app\Run()
+*app\Run(*mainWin)

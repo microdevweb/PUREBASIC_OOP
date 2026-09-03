@@ -37,12 +37,25 @@ Namespace UI {
 
   Class Application {
     Protected isRunning.b
+    Protected *mainWindow.Window
 
     Public Method Init() {
       This\isRunning = #False
+      This\*mainWindow = #Null
     }
 
-    Public Method Run() {
+    Public Method SetMainWindow(*win_p.Window) {
+      This\*mainWindow = *win_p
+    }
+
+    Public Method.i GetMainWindow() {
+      ProcedureReturn This\*mainWindow
+    }
+
+    Public Method Run(*mainWin_p.Window = 0) {
+      If (*mainWin_p) {
+        This\*mainWindow = *mainWin_p
+      }
       This\isRunning = #True
       Protected ev.i, evGadget.i, evWin.i, evType.i
 
@@ -75,7 +88,7 @@ Namespace UI {
                 If (*targetWin\OnClose()) {
                   *targetWin\Close()
                   UI_UnregisterWindow(evWin)
-                  If (MapSize(UI_WindowMap()) = 0) {
+                  If (*targetWin = This\*mainWindow Or MapSize(UI_WindowMap()) = 0) {
                     This\isRunning = #False
                   }
                 }
