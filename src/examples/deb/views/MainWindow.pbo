@@ -24,6 +24,7 @@ Class MainWindow Extends UI::Window
     ; Instanciate layouts
     ; = button layout
     This\*button_layout = New UI::Layouts::StackPanel()
+    This\*button_layout\SetMargin(10,10,10,10)
     This\*button_layout\SetOrientation(#UI_Orientation_Horizontal)
     This\*button_layout\AddChild(This\*bt_new)
     This\*button_layout\AddChild(This\*bt_edit)
@@ -35,6 +36,6 @@ Class MainWindow Extends UI::Window
   EndMethod
 EndClass
 ; IDE Options = PureBasic 6.40 (Windows - x64)
-; CursorPosition = 31
+; CursorPosition = 26
 ; EnableXP
 ; DPIAware

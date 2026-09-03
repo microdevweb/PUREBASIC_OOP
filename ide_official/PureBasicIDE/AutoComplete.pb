@@ -238,6 +238,111 @@ Procedure AutoComplete_AddConstantsFromSorted(*Parser.ParserData, Prefix$, *Igno
   
 EndProcedure
 
+Global NewMap OOP_ConstVisitedFilesMap.i()
+
+Procedure AutoComplete_OOP_ScanConstantsFromFile(FilePath$, WordStart$, Recursion = 0)
+  If Recursion > 5 Or FilePath$ = ""
+    ProcedureReturn
+  EndIf
+  
+  Protected NormPath$ = OOP_NormalizePath(FilePath$)
+  If FindMapElement(OOP_ConstVisitedFilesMap(), NormPath$)
+    ProcedureReturn
+  EndIf
+  OOP_ConstVisitedFilesMap(NormPath$) = #True
+  
+  Protected FileHandle = ReadFile(#PB_Any, FilePath$)
+  If FileHandle = 0
+    ProcedureReturn
+  EndIf
+  
+  Protected BaseDir$ = GetPathPart(FilePath$)
+  Protected NewList IncludedFiles.s()
+  Protected PrefixLen = Len(WordStart$)
+  Protected WordUpper$ = UCase(WordStart$)
+  
+  While Not Eof(FileHandle)
+    Protected LineText$ = Trim(ReadString(FileHandle))
+    If LineText$ = "" Or Left(LineText$, 1) = ";"
+      Continue
+    EndIf
+    
+    Protected Upper$ = UCase(LineText$)
+    
+    ; Collect included files
+    If Left(Upper$, 13) = "XINCLUDEFILE " Or Left(Upper$, 12) = "INCLUDEFILE " Or Left(Upper$, 13) = "XINCLUDEFILE	" Or Left(Upper$, 12) = "INCLUDEFILE	"
+      Protected pQuote1 = FindString(LineText$, Chr(34), 1)
+      If pQuote1 > 0
+        Protected pQuote2 = FindString(LineText$, Chr(34), pQuote1 + 1)
+        If pQuote2 > pQuote1
+          Protected Inc$ = Mid(LineText$, pQuote1 + 1, pQuote2 - pQuote1 - 1)
+          AddElement(IncludedFiles()) : IncludedFiles() = BaseDir$ + Inc$
+        EndIf
+      EndIf
+      Continue
+    EndIf
+    
+    Protected ConstName$ = ""
+    If Left(LineText$, 1) = "#"
+      Protected EndPos = 2
+      While EndPos <= Len(LineText$)
+        Protected C = Asc(Mid(LineText$, EndPos, 1))
+        If (C >= 'a' And C <= 'z') Or (C >= 'A' And C <= 'Z') Or (C >= '0' And C <= '9') Or C = '_' Or C = '$'
+          EndPos + 1
+        Else
+          Break
+        EndIf
+      Wend
+      ConstName$ = Left(LineText$, EndPos - 1)
+    EndIf
+    
+    If ConstName$ <> ""
+      If PrefixLen = 0 Or Left(UCase(ConstName$), PrefixLen) = WordUpper$
+        AutoComplete_AddEntry(ConstName$)
+      EndIf
+    EndIf
+  Wend
+  CloseFile(FileHandle)
+  
+  ForEach IncludedFiles()
+    AutoComplete_OOP_ScanConstantsFromFile(IncludedFiles(), WordStart$, Recursion + 1)
+  Next IncludedFiles()
+EndProcedure
+
+Procedure AutoComplete_OOP_AddConstantsFromActiveSource(WordStart$)
+  If *ActiveSource = 0
+    ProcedureReturn
+  EndIf
+  
+  ClearMap(OOP_ConstVisitedFilesMap())
+  
+  Protected BaseDir$ = GetPathPart(*ActiveSource\FileName$)
+  If BaseDir$ = "" : BaseDir$ = GetCurrentDirectory() : EndIf
+  
+  Protected LineCount = ScintillaSendMessage(*ActiveSource\EditorGadget, #SCI_GETLINECOUNT, 0, 0)
+  Protected line.i
+  Protected NewList IncludedFiles.s()
+  
+  For line = 0 To LineCount - 1
+    Protected LineText$ = Trim(GetLine(line, *ActiveSource))
+    Protected Upper$ = UCase(LineText$)
+    If Left(Upper$, 13) = "XINCLUDEFILE " Or Left(Upper$, 12) = "INCLUDEFILE " Or Left(Upper$, 13) = "XINCLUDEFILE	" Or Left(Upper$, 12) = "INCLUDEFILE	"
+      Protected pQuote1 = FindString(LineText$, Chr(34), 1)
+      If pQuote1 > 0
+        Protected pQuote2 = FindString(LineText$, Chr(34), pQuote1 + 1)
+        If pQuote2 > pQuote1
+          Protected Inc$ = Mid(LineText$, pQuote1 + 1, pQuote2 - pQuote1 - 1)
+          AddElement(IncludedFiles()) : IncludedFiles() = BaseDir$ + Inc$
+        EndIf
+      EndIf
+    EndIf
+  Next line
+  
+  ForEach IncludedFiles()
+    AutoComplete_OOP_ScanConstantsFromFile(IncludedFiles(), WordStart$, 0)
+  Next IncludedFiles()
+EndProcedure
+
 Procedure AutoComplete_AddFromSorted(*Parser.ParserData, Prefix$, *Ignore.SourceItem, SingleModuleOnly)
   
   If *Parser\SortedValid
@@ -395,6 +500,9 @@ Procedure AutoComplete_FillNormal(WordStart$, ModulePrefix$, EnclosingFunction$,
         Next FileList()
         ChangeCurrentElement(FileList(), *ActiveSource) ; important!
       EndIf
+      
+      ; Add constants from OOP XIncludeFile headers
+      AutoComplete_OOP_AddConstantsFromActiveSource(WordStart$)
       
     EndIf
     
