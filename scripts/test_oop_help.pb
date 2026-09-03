@@ -1,5 +1,6 @@
 ; ============================================================================
 ; Test suite for PureBasic OOP Contextual Help System
+; Author:      MicrodevWeb
 ; ============================================================================
 
 EnableExplicit
@@ -53,6 +54,12 @@ AssertTrue(Bool(GetOOPHelpPage("Slider") = "ui/slider.html"), "Mapping: Slider -
 AssertTrue(Bool(GetOOPHelpPage("TextBox") = "ui/textbox.html"), "Mapping: TextBox -> ui/textbox.html")
 AssertTrue(Bool(GetOOPHelpPage("ToggleSwitch") = "ui/toggleswitch.html"), "Mapping: ToggleSwitch -> ui/toggleswitch.html")
 
+; Responsive Layouts
+AssertTrue(Bool(GetOOPHelpPage("Container") = "ui/container.html"), "Mapping: Container -> ui/container.html")
+AssertTrue(Bool(GetOOPHelpPage("StackPanel") = "ui/stackpanel.html"), "Mapping: StackPanel -> ui/stackpanel.html")
+AssertTrue(Bool(GetOOPHelpPage("DockPanel") = "ui/dockpanel.html"), "Mapping: DockPanel -> ui/dockpanel.html")
+AssertTrue(Bool(GetOOPHelpPage("Grid") = "ui/grid.html"), "Mapping: Grid -> ui/grid.html")
+
 ; 3. Test Fallback (Non-OOP purebasic keywords must return empty so native PB help handles them)
 AssertTrue(Bool(GetOOPHelpPage("OpenWindow") = ""), "Fallback: OpenWindow -> empty (Native PB)")
 AssertTrue(Bool(GetOOPHelpPage("MessageRequester") = ""), "Fallback: MessageRequester -> empty (Native PB)")
@@ -66,7 +73,7 @@ Define Dim langs.s(1)
 langs(0) = "fr"
 langs(1) = "en"
 
-Define Dim pages.s(17)
+Define Dim pages.s(22)
 pages(0) = "index.html"
 pages(1) = "keywords/class.html"
 pages(2) = "keywords/method.html"
@@ -84,11 +91,16 @@ pages(13) = "ui/combobox.html"
 pages(14) = "ui/label.html"
 pages(15) = "ui/progressbar.html"
 pages(16) = "ui/slider.html"
-pages(17) = "ui/toggleswitch.html"
+pages(17) = "ui/textbox.html"
+pages(18) = "ui/toggleswitch.html"
+pages(19) = "ui/container.html"
+pages(20) = "ui/stackpanel.html"
+pages(21) = "ui/dockpanel.html"
+pages(22) = "ui/grid.html"
 
 Define l, p
 For l = 0 To 1
-  For p = 0 To 17
+  For p = 0 To 22
     Define checkPath.s = baseDir + langs(l) + "\" + ReplaceString(pages(p), "/", "\")
     AssertTrue(Bool(FileSize(checkPath) > 0), "File exists: " + langs(l) + "/" + pages(p))
   Next

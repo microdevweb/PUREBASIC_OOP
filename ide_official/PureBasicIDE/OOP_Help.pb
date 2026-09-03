@@ -1,6 +1,7 @@
 ; ============================================================================
 ; PureBasic OOP - Contextual Help System
 ; Dispatches F1 on OOP keywords and UI classes to dedicated HTML documentation
+; Author:      MicrodevWeb
 ; ============================================================================
 
 Procedure.s GetOOPHelpPage(Keyword.s)
@@ -67,6 +68,19 @@ Procedure.s GetOOPHelpPage(Keyword.s)
       
     Case "toggleswitch"
       ProcedureReturn "ui/toggleswitch.html"
+      
+    ; Responsive Layouts (WPF Style)
+    Case "container"
+      ProcedureReturn "ui/container.html"
+      
+    Case "stackpanel"
+      ProcedureReturn "ui/stackpanel.html"
+      
+    Case "dockpanel"
+      ProcedureReturn "ui/dockpanel.html"
+      
+    Case "grid"
+      ProcedureReturn "ui/grid.html"
       
     Default
       ProcedureReturn ""

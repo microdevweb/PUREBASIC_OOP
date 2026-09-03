@@ -85,11 +85,26 @@
         </div>
         <p class='page-lead'>Disposition lin&eacute;aire automatique verticale ou horizontale avec espacements.</p>
       </div>
-<div class='doc-section'><h2 class='section-title'>Description</h2><p>La classe <code>UI::Layouts::StackPanel</code> empile ses composants enfants selon une orientation lin&eacute;aire (verticale ou horizontale) avec espacement configurable (<code>Spacing</code>).</p><p>Chaque enfant respecte ses marges (<code>Margin</code>) et ses alignements (<code>Left</code>, <code>Center</code>, <code>Right</code>, <code>Stretch</code>).</p></div><div class='doc-section'><h2 class='section-title'>Exemple d'Utilisation</h2><div class='code-container'>  <div class='code-header'><span class='code-title'>StackPanel Vertical (.pbo)</span><span class='code-badge'>PBO</span></div>  <pre><code><span class='kw'>Define</span> *panel.<span class='tp'>StackPanel</span> = <span class='kw'>New</span> <span class='tp'>StackPanel</span>(#UI_Orientation_Vertical, <span class='num'>10</span>)
-*panel\\<span class='fn'>SetPaddingAll</span>(<span class='num'>15</span>)
-*panel\\<span class='fn'>AddChild</span>(<span class='kw'>New</span> <span class='tp'>Button</span>(<span class='str'>'Premier Bouton'</span>))
-*panel\\<span class='fn'>AddChild</span>(<span class='kw'>New</span> <span class='tp'>Button</span>(<span class='str'>'Deuxi&egrave;me Bouton'</span>))
-*win\\<span class='fn'>SetContent</span>(*panel)</code></pre></div></div>
+<div class='doc-section'><h2 class='section-title'>Description</h2><p>La classe <code>UI::Layouts::StackPanel</code> dispose ses composants enfants sur une seule ligne s&eacute;quentielle, orient&eacute;e soit verticalement (de haut en bas), soit horizontalement (de gauche &agrave; droite).</p><p>Un espacement constant (<code>Spacing</code>) peut &ecirc;tre configur&eacute; entre chaque &eacute;l&eacute;ment cons&eacute;cutif.</p></div><div class='doc-section'><h2 class='section-title'>Constantes d'Orientation</h2><div class='table-wrapper'>  <table>    <tr><th>Constante</th><th>Valeur</th><th>Description</th></tr>    <tr><td><code>#UI_Orientation_Vertical</code></td><td><code>0</code></td><td>Empilement vertical (par d&eacute;faut). Les &eacute;l&eacute;ments s'&eacute;tirent sur toute la largeur disponible.</td></tr>    <tr><td><code>#UI_Orientation_Horizontal</code></td><td><code>1</code></td><td>Alignement horizontal c&ocirc;te &agrave; c&ocirc;te. Id&eacute;al pour les barres d'outils ou barres d'actions.</td></tr>  </table></div></div><div class='doc-section'><h2 class='section-title'>Constructeurs & M&eacute;thodes</h2><div class='table-wrapper'>  <table>    <tr><th>M&eacute;thode</th><th>Description</th></tr>    <tr><td><code>Init()</code></td><td>Cr&eacute;e un StackPanel vertical avec un espacement de 0 pixel.</td></tr>    <tr><td><code>Init(orientation.i)</code></td><td>Cr&eacute;e un StackPanel avec l'orientation choisie (Verticale ou Horizontale).</td></tr>    <tr><td><code>Init(orientation.i, spacing.i)</code></td><td>Cr&eacute;e un StackPanel avec orientation et espacement personnalis&eacute;s entre chaque enfant.</td></tr>    <tr><td><code>SetOrientation(orient.i)</code></td><td>Modifie dynamiquement l'orientation (<code>#UI_Orientation_Vertical</code> ou <code>#UI_Orientation_Horizontal</code>).</td></tr>    <tr><td><code>GetOrientation()</code></td><td>Retourne l'orientation actuelle.</td></tr>    <tr><td><code>SetSpacing(sp.i)</code></td><td>D&eacute;finit l'espacement en pixels entre les &eacute;l&eacute;ments.</td></tr>    <tr><td><code>GetSpacing()</code></td><td>Retourne l'espacement actuel.</td></tr>  </table></div></div><div class='doc-section'><h2 class='section-title'>Exemple : Formulaire Vertical & Barre d'Actions</h2><div class='code-container'>  <div class='code-header'><span class='code-title'>StackPanels imbriqu&eacute;s (.pbo)</span><span class='code-badge'>PBO</span></div>  <pre><code><span class='kw'>Using</span> UI
+<span class='kw'>Using</span> UI::Layouts
+<span class='kw'>Using</span> UI::Controls
+
+<span class='cm'>; Panneau principal vertical avec 10px d'espacement</span>
+<span class='kw'>Define</span> *mainStack.<span class='tp'>StackPanel</span> = <span class='kw'>New</span> <span class='tp'>StackPanel</span>(#UI_Orientation_Vertical, <span class='num'>10</span>)
+*mainStack\\<span class='fn'>SetPaddingAll</span>(<span class='num'>20</span>)
+
+<span class='kw'>Define</span> *txtNom.<span class='tp'>TextBox</span> = <span class='kw'>New</span> <span class='tp'>TextBox</span>(<span class='num'>0</span>, <span class='num'>0</span>, <span class='num'>300</span>, <span class='num'>32</span>, <span class='str'>'Entrez votre nom'</span>)
+<span class='kw'>Define</span> *txtEmail.<span class='tp'>TextBox</span> = <span class='kw'>New</span> <span class='tp'>TextBox</span>(<span class='num'>0</span>, <span class='num'>0</span>, <span class='num'>300</span>, <span class='num'>32</span>, <span class='str'>'Entrez votre email'</span>)
+*mainStack\\<span class='fn'>AddChild</span>(*txtNom)
+*mainStack\\<span class='fn'>AddChild</span>(*txtEmail)
+
+<span class='cm'>; Barre de boutons horizontale en bas</span>
+<span class='kw'>Define</span> *btnBar.<span class='tp'>StackPanel</span> = <span class='kw'>New</span> <span class='tp'>StackPanel</span>(#UI_Orientation_Horizontal, <span class='num'>8</span>)
+*btnBar\\<span class='fn'>AddChild</span>(<span class='kw'>New</span> <span class='tp'>Button</span>(<span class='str'>'Valider'</span>, <span class='num'>100</span>, <span class='num'>35</span>))
+*btnBar\\<span class='fn'>AddChild</span>(<span class='kw'>New</span> <span class='tp'>Button</span>(<span class='str'>'Annuler'</span>, <span class='num'>100</span>, <span class='num'>35</span>))
+*mainStack\\<span class='fn'>AddChild</span>(*btnBar)
+
+*win\\<span class='fn'>SetContent</span>(*mainStack)</code></pre></div></div>
     </main>
   </div>
   <footer class='doc-footer'>

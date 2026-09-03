@@ -85,12 +85,28 @@
         </div>
         <p class='page-lead'>Ancrage p&eacute;riph&eacute;rique sur les 4 bords avec remplissage central automatique.</p>
       </div>
-<div class='doc-section'><h2 class='section-title'>Description</h2><p>La classe <code>UI::Layouts::DockPanel</code> ancre ses contr&ocirc;les sur les 4 bords de l'espace disponible (<code>#UI_Dock_Top</code>, <code>#UI_Dock_Bottom</code>, <code>#UI_Dock_Left</code>, <code>#UI_Dock_Right</code>) et remplit automatiquement l'espace r&eacute;siduel au centre (<code>#UI_Dock_Fill</code> ou <code>LastChildFill</code>).</p></div><div class='doc-section'><h2 class='section-title'>Exemple : En-t&ecirc;te, Barre lat&eacute;rale et Zone centrale</h2><div class='code-container'>  <div class='code-header'><span class='code-title'>Mise en page d'application moderne (.pbo)</span><span class='code-badge'>PBO</span></div>  <pre><code><span class='kw'>Define</span> *dock.<span class='tp'>DockPanel</span> = <span class='kw'>New</span> <span class='tp'>DockPanel</span>(#True)
-*dock\\<span class='fn'>SetDock</span>(*menuBar, #UI_Dock_Top)
-*dock\\<span class='fn'>SetDock</span>(*statusBar, #UI_Dock_Bottom)
-*dock\\<span class='fn'>SetDock</span>(*sideNav, #UI_Dock_Left)
-*dock\\<span class='fn'>SetDock</span>(*mainEditor, #UI_Dock_Fill)
-*win\\<span class='fn'>SetContent</span>(*dock)</code></pre></div></div>
+<div class='doc-section'><h2 class='section-title'>Description</h2><p>La classe <code>UI::Layouts::DockPanel</code> ancre ses composants enfants le long de ses 4 bordures ext&eacute;rieures (Haut, Bas, Gauche, Droite) et attribue automatiquement tout l'espace r&eacute;siduel au centre &agrave; son dernier enfant (propri&eacute;t&eacute; <code>LastChildFill</code>).</p><p>C'est le conteneur id&eacute;al pour structurer l'architecture globale d'une application professionnelle (menu en haut, barre d'&eacute;tat en bas, barre d'outils &agrave; gauche, zone de travail au centre).</p></div><div class='doc-section'><h2 class='section-title'>Constantes d'Ancrage</h2><div class='table-wrapper'>  <table>    <tr><th>Constante</th><th>Valeur</th><th>Description</th></tr>    <tr><td><code>#UI_Dock_Top</code></td><td><code>0</code></td><td>Ancre le composant en haut en occupant toute la largeur disponible.</td></tr>    <tr><td><code>#UI_Dock_Bottom</code></td><td><code>1</code></td><td>Ancre le composant en bas en occupant toute la largeur disponible.</td></tr>    <tr><td><code>#UI_Dock_Left</code></td><td><code>2</code></td><td>Ancre le composant &agrave; gauche sur la hauteur r&eacute;siduelle.</td></tr>    <tr><td><code>#UI_Dock_Right</code></td><td><code>3</code></td><td>Ancre le composant &agrave; droite sur la hauteur r&eacute;siduelle.</td></tr>    <tr><td><code>#UI_Dock_Fill</code></td><td><code>4</code></td><td>Remplissage automatique : occupe la totalit&eacute; de l'espace central disponible.</td></tr>  </table></div></div><div class='doc-section'><h2 class='section-title'>M&eacute;thodes Principales</h2><div class='table-wrapper'>  <table>    <tr><th>M&eacute;thode</th><th>Description</th></tr>    <tr><td><code>Init(lastChildFill.b = #True)</code></td><td>Cr&eacute;e un DockPanel avec activation ou non du remplissage central automatique pour le dernier enfant.</td></tr>    <tr><td><code>SetDock(*child, dockEdge.i)</code></td><td>Attache un enfant et lui assigne son bord d'ancrage (<code>#UI_Dock_Top</code>, <code>#UI_Dock_Bottom</code>, etc.).</td></tr>    <tr><td><code>GetDock(*child)</code></td><td>Renvoie la valeur d'ancrage actuelle du composant.</td></tr>    <tr><td><code>SetLastChildFill(fill.b)</code></td><td>Active (<code>#True</code>) ou d&eacute;sactive (<code>#False</code>) l'agrandissement automatique du dernier enfant.</td></tr>    <tr><td><code>GetLastChildFill()</code></td><td>Retourne l'&eacute;tat de la propri&eacute;t&eacute; <code>LastChildFill</code>.</td></tr>  </table></div></div><div class='doc-section'><h2 class='section-title'>Exemple : Architecture Compl&egrave;te d'Application</h2><div class='code-container'>  <div class='code-header'><span class='code-title'>Mise en page compl&egrave;te avec DockPanel (.pbo)</span><span class='code-badge'>PBO</span></div>  <pre><code><span class='kw'>Define</span> *root.<span class='tp'>DockPanel</span> = <span class='kw'>New</span> <span class='tp'>DockPanel</span>(#True)
+*root\\<span class='fn'>SetPaddingAll</span>(<span class='num'>5</span>)
+
+<span class='cm'>; 1. En-t&ecirc;te fix&eacute; en haut</span>
+<span class='kw'>Define</span> *header.<span class='tp'>StackPanel</span> = <span class='kw'>New</span> <span class='tp'>StackPanel</span>(#UI_Orientation_Horizontal, <span class='num'>5</span>)
+*header\\<span class='fn'>SetHeight</span>(<span class='num'>40</span>)
+*root\\<span class='fn'>SetDock</span>(*header, #UI_Dock_Top)
+
+<span class='cm'>; 2. Barre d'&eacute;tat fix&eacute;e en bas</span>
+<span class='kw'>Define</span> *status.<span class='tp'>Label</span> = <span class='kw'>New</span> <span class='tp'>Label</span>(<span class='num'>0</span>, <span class='num'>0</span>, <span class='num'>400</span>, <span class='num'>25</span>, <span class='str'>'Pr&ecirc;t'</span>)
+*root\\<span class='fn'>SetDock</span>(*status, #UI_Dock_Bottom)
+
+<span class='cm'>; 3. Navigation lat&eacute;rale &agrave; gauche</span>
+<span class='kw'>Define</span> *nav.<span class='tp'>StackPanel</span> = <span class='kw'>New</span> <span class='tp'>StackPanel</span>(#UI_Orientation_Vertical, <span class='num'>6</span>)
+*nav\\<span class='fn'>SetWidth</span>(<span class='num'>180</span>)
+*root\\<span class='fn'>SetDock</span>(*nav, #UI_Dock_Left)
+
+<span class='cm'>; 4. Zone centrale de travail (Fill automatique)</span>
+<span class='kw'>Define</span> *editor.<span class='tp'>TextBox</span> = <span class='kw'>New</span> <span class='tp'>TextBox</span>(<span class='num'>0</span>, <span class='num'>0</span>, <span class='num'>100</span>, <span class='num'>100</span>, <span class='str'>'Document...'</span>)
+*root\\<span class='fn'>SetDock</span>(*editor, #UI_Dock_Fill)
+
+*win\\<span class='fn'>SetContent</span>(*root)</code></pre></div></div>
     </main>
   </div>
   <footer class='doc-footer'>
