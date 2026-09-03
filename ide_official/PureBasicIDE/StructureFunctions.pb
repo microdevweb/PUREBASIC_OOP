@@ -847,6 +847,7 @@ Procedure FindClassInterfaceFromSource(*Source.SourceFile, Name$, List Output.s(
   Protected Success = #False
   Protected LineCount = ScintillaSendMessage(*Source\EditorGadget, #SCI_GETLINECOUNT, 0, 0)
   Protected InsideTargetClass = #False
+  Protected ClassBraceDepth = 0
   Protected ExtendsClass$ = ""
   Protected CurrentNamespace$ = ""
   Protected TargetShort$ = LCase(OOP_GetShortName(Name$))
@@ -873,7 +874,7 @@ Procedure FindClassInterfaceFromSource(*Source.SourceFile, Name$, List Output.s(
     EndIf
     
     ; Check start of Class
-    If Left(Upper$, 6) = "CLASS " Or Left(Upper$, 6) = "CLASS	"
+    If Not InsideTargetClass And (Left(Upper$, 6) = "CLASS " Or Left(Upper$, 6) = "CLASS	")
       Protected CurrentClassName$ = Trim(Mid(LineText$, 7))
       Protected ExtendsPos = FindString(UCase(CurrentClassName$), "EXTENDS ")
       If ExtendsPos = 0
@@ -896,46 +897,57 @@ Procedure FindClassInterfaceFromSource(*Source.SourceFile, Name$, List Output.s(
       If LCase(CurrentClassName$) = TargetFull$ Or FullClass$ = TargetFull$ Or LCase(CurrentClassName$) = TargetShort$
         InsideTargetClass = #True
         Success = #True
+        ClassBraceDepth = CountString(LineText$, "{") - CountString(LineText$, "}")
         Continue
       EndIf
     EndIf
     
     If InsideTargetClass
-      If Left(Upper$, 8) = "ENDCLASS" Or LineText$ = "}"
+      If Left(Upper$, 8) = "ENDCLASS"
+        InsideTargetClass = #False
         Break
       EndIf
       
-      ; Parse members
+      If ClassBraceDepth > 0
+        ClassBraceDepth + CountString(LineText$, "{") - CountString(LineText$, "}")
+        If ClassBraceDepth <= 0
+          InsideTargetClass = #False
+          Break
+        EndIf
+      EndIf
+      
+      ; Strip inline comment
       Protected SemiColon = FindString(LineText$, ";")
       If SemiColon > 0
         LineText$ = Trim(Left(LineText$, SemiColon - 1))
       EndIf
       Upper$ = UCase(LineText$)
       
-      ; 1) Methods: [Public|Private] Method Name(...)
-      Protected IsMethod = #False
-      Protected IsPublic = #True
-      Protected MethodRest$ = ""
-      
-      If Left(Upper$, 14) = "PUBLIC METHOD " Or Left(Upper$, 14) = "PUBLIC METHOD	"
-        IsMethod = #True
-        IsPublic = #True
-        MethodRest$ = Trim(Mid(LineText$, 15))
-      ElseIf Left(Upper$, 15) = "PRIVATE METHOD " Or Left(Upper$, 15) = "PRIVATE METHOD	"
-        IsMethod = #True
-        IsPublic = #False
-        MethodRest$ = Trim(Mid(LineText$, 16))
-      ElseIf Left(Upper$, 7) = "METHOD " Or Left(Upper$, 7) = "METHOD	"
-        IsMethod = #True
-        IsPublic = #True
-        MethodRest$ = Trim(Mid(LineText$, 8))
-      EndIf
-      
-      If IsMethod
+      ; 1) Methods: [Public|Protected|Private] [Override] Method[.<type>] Name(...)
+      Protected pMethod = FindString(Upper$, "METHOD")
+      If pMethod > 0
+        Protected Prefix$ = Trim(Left(Upper$, pMethod - 1))
+        Protected IsPublic = #True
+        If FindString(Prefix$, "PRIVATE") > 0
+          IsPublic = #False
+        EndIf
+        
         If IncludePrivate Or IsPublic
+          Protected MethodRest$ = Trim(Mid(LineText$, pMethod + 6))
+          ; Skip return type if present (.i, .s, etc.)
+          If Left(MethodRest$, 1) = "."
+            Protected pSpace = FindString(MethodRest$, " ")
+            If pSpace = 0 : pSpace = FindString(MethodRest$, Chr(9)) : EndIf
+            If pSpace > 0
+              MethodRest$ = Trim(Mid(MethodRest$, pSpace + 1))
+            EndIf
+          EndIf
+          
           Protected MethodName$ = Trim(StringField(MethodRest$, 1, "("))
           If Right(MethodName$, 1) = "{" : MethodName$ = Trim(Left(MethodName$, Len(MethodName$) - 1)) : EndIf
-          If MethodName$ <> ""
+          
+          ; Exclude constructor Init from member access autocomplete
+          If MethodName$ <> "" And LCase(MethodName$) <> "init"
             If FindString(MethodRest$, "(")
               Protected Args$ = Mid(MethodRest$, FindString(MethodRest$, "("))
               If FindString(Args$, "{") : Args$ = Trim(Left(Args$, FindString(Args$, "{") - 1)) : EndIf
@@ -953,15 +965,15 @@ Procedure FindClassInterfaceFromSource(*Source.SourceFile, Name$, List Output.s(
       ; 2) Fields: Protected / Public / Private
       Protected IsField = #False
       Protected FieldRest$ = ""
-      If Left(Upper$, 10) = "PROTECTED " Or Left(Upper$, 10) = "PROTECTED	"
-        IsField = #True
-        If IncludePrivate : FieldRest$ = Trim(Mid(LineText$, 11)) : EndIf
-      ElseIf Left(Upper$, 7) = "PUBLIC " Or Left(Upper$, 7) = "PUBLIC	"
+      If Left(Upper$, 7) = "PUBLIC " Or Left(Upper$, 7) = "PUBLIC	"
         IsField = #True
         FieldRest$ = Trim(Mid(LineText$, 8))
-      ElseIf Left(Upper$, 8) = "PRIVATE " Or Left(Upper$, 8) = "PRIVATE	"
+      ElseIf IncludePrivate And (Left(Upper$, 10) = "PROTECTED " Or Left(Upper$, 10) = "PROTECTED	")
         IsField = #True
-        If IncludePrivate : FieldRest$ = Trim(Mid(LineText$, 9)) : EndIf
+        FieldRest$ = Trim(Mid(LineText$, 11))
+      ElseIf IncludePrivate And (Left(Upper$, 8) = "PRIVATE " Or Left(Upper$, 8) = "PRIVATE	")
+        IsField = #True
+        FieldRest$ = Trim(Mid(LineText$, 9))
       EndIf
       
       If IsField And FieldRest$ <> ""
@@ -1002,6 +1014,7 @@ Procedure FindClassInterfaceFromFile(FilePath$, Name$, List Output.s(), IncludeP
   
   Protected Success = #False
   Protected InsideTargetClass = #False
+  Protected ClassBraceDepth = 0
   Protected ExtendsClass$ = ""
   Protected CurrentNamespace$ = ""
   Protected TargetShort$ = LCase(OOP_GetShortName(Name$))
@@ -1042,7 +1055,7 @@ Procedure FindClassInterfaceFromFile(FilePath$, Name$, List Output.s(), IncludeP
     EndIf
     
     ; Check Class start
-    If Left(Upper$, 6) = "CLASS " Or Left(Upper$, 6) = "CLASS	"
+    If Not InsideTargetClass And (Left(Upper$, 6) = "CLASS " Or Left(Upper$, 6) = "CLASS	")
       Protected CurrentClassName$ = Trim(Mid(LineText$, 7))
       Protected ExtendsPos = FindString(UCase(CurrentClassName$), "EXTENDS ")
       If ExtendsPos = 0
@@ -1065,13 +1078,23 @@ Procedure FindClassInterfaceFromFile(FilePath$, Name$, List Output.s(), IncludeP
       If LCase(CurrentClassName$) = TargetFull$ Or FullClass$ = TargetFull$ Or LCase(CurrentClassName$) = TargetShort$
         InsideTargetClass = #True
         Success = #True
+        ClassBraceDepth = CountString(LineText$, "{") - CountString(LineText$, "}")
         Continue
       EndIf
     EndIf
     
     If InsideTargetClass
-      If Left(Upper$, 8) = "ENDCLASS" Or LineText$ = "}"
+      If Left(Upper$, 8) = "ENDCLASS"
+        InsideTargetClass = #False
         Break
+      EndIf
+      
+      If ClassBraceDepth > 0
+        ClassBraceDepth + CountString(LineText$, "{") - CountString(LineText$, "}")
+        If ClassBraceDepth <= 0
+          InsideTargetClass = #False
+          Break
+        EndIf
       EndIf
       
       Protected SemiColon = FindString(LineText$, ";")
@@ -1080,30 +1103,31 @@ Procedure FindClassInterfaceFromFile(FilePath$, Name$, List Output.s(), IncludeP
       EndIf
       Upper$ = UCase(LineText$)
       
-      ; 1) Methods: [Public|Private] Method Name(...)
-      Protected IsMethod = #False
-      Protected IsPublic = #True
-      Protected MethodRest$ = ""
-      
-      If Left(Upper$, 14) = "PUBLIC METHOD " Or Left(Upper$, 14) = "PUBLIC METHOD	"
-        IsMethod = #True
-        IsPublic = #True
-        MethodRest$ = Trim(Mid(LineText$, 15))
-      ElseIf Left(Upper$, 15) = "PRIVATE METHOD " Or Left(Upper$, 15) = "PRIVATE METHOD	"
-        IsMethod = #True
-        IsPublic = #False
-        MethodRest$ = Trim(Mid(LineText$, 16))
-      ElseIf Left(Upper$, 7) = "METHOD " Or Left(Upper$, 7) = "METHOD	"
-        IsMethod = #True
-        IsPublic = #True
-        MethodRest$ = Trim(Mid(LineText$, 8))
-      EndIf
-      
-      If IsMethod
+      ; 1) Methods: [Public|Protected|Private] [Override] Method[.<type>] Name(...)
+      Protected pMethod = FindString(Upper$, "METHOD")
+      If pMethod > 0
+        Protected Prefix$ = Trim(Left(Upper$, pMethod - 1))
+        Protected IsPublic = #True
+        If FindString(Prefix$, "PRIVATE") > 0
+          IsPublic = #False
+        EndIf
+        
         If IncludePrivate Or IsPublic
+          Protected MethodRest$ = Trim(Mid(LineText$, pMethod + 6))
+          ; Skip return type if present (.i, .s, etc.)
+          If Left(MethodRest$, 1) = "."
+            Protected pSpace = FindString(MethodRest$, " ")
+            If pSpace = 0 : pSpace = FindString(MethodRest$, Chr(9)) : EndIf
+            If pSpace > 0
+              MethodRest$ = Trim(Mid(MethodRest$, pSpace + 1))
+            EndIf
+          EndIf
+          
           Protected MethodName$ = Trim(StringField(MethodRest$, 1, "("))
           If Right(MethodName$, 1) = "{" : MethodName$ = Trim(Left(MethodName$, Len(MethodName$) - 1)) : EndIf
-          If MethodName$ <> ""
+          
+          ; Exclude constructor Init from member access autocomplete
+          If MethodName$ <> "" And LCase(MethodName$) <> "init"
             If FindString(MethodRest$, "(")
               Protected Args$ = Mid(MethodRest$, FindString(MethodRest$, "("))
               If FindString(Args$, "{") : Args$ = Trim(Left(Args$, FindString(Args$, "{") - 1)) : EndIf
@@ -1121,15 +1145,15 @@ Procedure FindClassInterfaceFromFile(FilePath$, Name$, List Output.s(), IncludeP
       ; 2) Fields: Protected / Public / Private
       Protected IsField = #False
       Protected FieldRest$ = ""
-      If Left(Upper$, 10) = "PROTECTED " Or Left(Upper$, 10) = "PROTECTED	"
-        IsField = #True
-        If IncludePrivate : FieldRest$ = Trim(Mid(LineText$, 11)) : EndIf
-      ElseIf Left(Upper$, 7) = "PUBLIC " Or Left(Upper$, 7) = "PUBLIC	"
+      If Left(Upper$, 7) = "PUBLIC " Or Left(Upper$, 7) = "PUBLIC	"
         IsField = #True
         FieldRest$ = Trim(Mid(LineText$, 8))
-      ElseIf Left(Upper$, 8) = "PRIVATE " Or Left(Upper$, 8) = "PRIVATE	"
+      ElseIf IncludePrivate And (Left(Upper$, 10) = "PROTECTED " Or Left(Upper$, 10) = "PROTECTED	")
         IsField = #True
-        If IncludePrivate : FieldRest$ = Trim(Mid(LineText$, 9)) : EndIf
+        FieldRest$ = Trim(Mid(LineText$, 11))
+      ElseIf IncludePrivate And (Left(Upper$, 8) = "PRIVATE " Or Left(Upper$, 8) = "PRIVATE	")
+        IsField = #True
+        FieldRest$ = Trim(Mid(LineText$, 9))
       EndIf
       
       If IsField And FieldRest$ <> ""

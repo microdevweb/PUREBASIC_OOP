@@ -21,12 +21,12 @@ Class MainWindow Extends UI::Window
     ; Instanciate layouts
     *main_layout = New UI::Layouts::DockPanel
     *button_layout = New UI::Layouts::StackPanel
-    *button_layout\
+    *button_layout
     *button_layout\AddChild(*bt_new)
     *button_layout\AddChild(*bt_edit)
   EndMethod
 EndClass
 ; IDE Options = PureBasic 6.40 (Windows - x64)
-; CursorPosition = 14
+; CursorPosition = 23
 ; EnableXP
 ; DPIAware
