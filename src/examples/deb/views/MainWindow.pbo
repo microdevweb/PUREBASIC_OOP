@@ -11,6 +11,7 @@ Class MainWindow Extends UI::Window
     Super::Init("Contact V1")
     *bt_new = New UI::Button
   
+  
   EndMethod
 EndClass
 ; IDE Options = PureBasic 6.40 (Windows - x64)
