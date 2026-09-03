@@ -11,6 +11,8 @@ Class MainWindow Extends UI::Window
     Super::Init("Contact V1")
     *bt_new = New UI::Button
   
+
+  
   
   EndMethod
 EndClass
