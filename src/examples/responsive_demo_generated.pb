@@ -57,10 +57,13 @@ EndMacro
 Macro UI_RegisterWindow(id_p, w_p)
   If (id_p >= 0 And w_p)
     UI_WindowMap(Str(id_p)) = w_p
+    SmartWindowRefresh(id_p, #True)
+    BindEvent(#PB_Event_SizeWindow, @UI_GlobalSizeCallback(), id_p)
   EndIf
 EndMacro
 Macro UI_UnregisterWindow(id_p)
   If (FindMapElement(UI_WindowMap(), Str(id_p)))
+    UnbindEvent(#PB_Event_SizeWindow, @UI_GlobalSizeCallback(), id_p)
     DeleteMapElement(UI_WindowMap(), Str(id_p))
   EndIf
 EndMacro
@@ -368,6 +371,7 @@ EndStructure
 
 Global NewMap UI_GadgetMap.i()
 Global NewMap UI_WindowMap.i()
+Declare UI_GlobalSizeCallback()
 
 ; ----------------------------------------------------------------------------
 ; 3. METHOD PROCEDURES IMPLEMENTATION
@@ -3715,6 +3719,17 @@ EndProcedure
 
 
 
+
+
+Procedure UI_GlobalSizeCallback()
+  Protected evWin.i = EventWindow()
+  If (FindMapElement(UI_WindowMap(), Str(evWin)))
+    Protected *w.UI_Window_vt = UI_WindowMap()
+    If (*w)
+      *w\OnResize(WindowWidth(evWin), WindowHeight(evWin))
+    EndIf
+  EndIf
+EndProcedure
 
 
 
