@@ -5,18 +5,26 @@ Using UI::Controls
 Using UI::Layouts
 
 Class MainWindow Extends UI::Window
+  ; BUTTONS
   Private *bt_new.UI::Button
   Private *bt_edit.UI::Button
+  Private *bt_delete.UI::Button
+  ; LAYOUT
+  Private *main_layout.UI::Layouts::DockPanel
+  Private *button_layout.UI::Layouts::StackPanel
   Public Method Init() 
     Super::Init("Contact V1")
-    *bt_new = New UI::Button
-  
-
-  
-  
+    ; Instanciate buttons
+    *bt_new = New UI::Button("add")
+    *bt_edit = New UI::Button("edit")
+    *bt_edit = New UI::Button("delete")
+    ; Instanciate layouts
+    *main_layout = New UI::Layouts::DockPanel
+    *button_layout = New UI::Layouts::StackPanel
+    *button_layout\
   EndMethod
 EndClass
 ; IDE Options = PureBasic 6.40 (Windows - x64)
-; CursorPosition = 11
+; CursorPosition = 23
 ; EnableXP
 ; DPIAware

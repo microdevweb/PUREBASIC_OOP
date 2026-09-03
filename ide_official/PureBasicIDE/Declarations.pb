@@ -653,6 +653,7 @@ Declare LocateStructureBaseItem(Line$, Position, *pItem.INTEGER, *pLine.INTEGER,
 Declare IsLineContinuation(*Buffer, *Pointer.PTR) ; returns true if *Pointer is the end of a line with continuation
 Declare IsContinuedLineStart(Line$)               ; returns true if Line$ is the beginning of a line with line continuation at the end
 Declare.s Parser_Cleanup(Input$)                  ; cleanup a prototype string (remove newlines, line continutaions and extra whitespace)
+Declare Parser_GetVariables(*pCursor.PTR, DefaultType$, Scope, Mode)
 Declare CharsToBytes(Line$, Start, Encoding, Chars)   ; Convert a char offset (0-based) to a byte offset in the specified encoding
 Declare BytesToChars(Line$, Start, Encoding, Bytes)   ; Convert a byte offset (0-based) to a char offset in the specified encoding
 
