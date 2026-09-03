@@ -1,0 +1,18 @@
+﻿
+XIncludeFile "ui/UI.pbo"
+
+Using UI
+Using UI::Controls
+
+Class MainWindow Extends UI::Window
+  Method Init
+  Public Method Init() {
+    Super::Init("Test",#PB_Ignore, #PB_Ignore, 480, 420, #PB_Window_SystemMenu | #PB_Window_ScreenCentered)
+  }
+)
+EndClass
+
+Define *app.UI::Application = New UI::Application()
+Define *mainWin.MainWindow = New MainWindow()
+
+*app\Run()
