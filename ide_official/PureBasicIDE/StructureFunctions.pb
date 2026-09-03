@@ -851,6 +851,7 @@ Procedure FindClassInterfaceFromSource(*Source.SourceFile, Name$, List Output.s(
   Protected CurrentNamespace$ = ""
   Protected TargetShort$ = LCase(OOP_GetShortName(Name$))
   Protected TargetFull$ = LCase(Name$)
+  Protected line.i, fieldIdx.i
   
   For line = 0 To LineCount - 1
     Protected LineText$ = Trim(GetLine(line, *Source))
@@ -965,13 +966,13 @@ Procedure FindClassInterfaceFromSource(*Source.SourceFile, Name$, List Output.s(
       
       If IsField And FieldRest$ <> ""
         Protected Count = CountString(FieldRest$, ",") + 1
-        For f = 1 To Count
-          Protected SingleField$ = Trim(StringField(FieldRest$, f, ","))
+        For fieldIdx = 1 To Count
+          Protected SingleField$ = Trim(StringField(FieldRest$, fieldIdx, ","))
           If SingleField$ <> ""
             AddElement(Output())
             Output() = SingleField$
           EndIf
-        Next f
+        Next fieldIdx
       EndIf
     EndIf
   Next line
@@ -994,8 +995,8 @@ Procedure FindClassInterfaceFromFile(FilePath$, Name$, List Output.s(), IncludeP
   EndIf
   OOP_VisitedFilesMap(NormPath$) = #True
   
-  Protected f = ReadFile(#PB_Any, FilePath$)
-  If f = 0
+  Protected FileHandle = ReadFile(#PB_Any, FilePath$)
+  If FileHandle = 0
     ProcedureReturn #False
   EndIf
   
@@ -1007,9 +1008,10 @@ Procedure FindClassInterfaceFromFile(FilePath$, Name$, List Output.s(), IncludeP
   Protected TargetFull$ = LCase(Name$)
   Protected NewList IncludedFiles.s()
   Protected BaseDir$ = GetPathPart(FilePath$)
+  Protected fieldIdx.i
   
-  While Not Eof(f)
-    Protected LineText$ = Trim(ReadString(f))
+  While Not Eof(FileHandle)
+    Protected LineText$ = Trim(ReadString(FileHandle))
     
     If LineText$ = "" Or Left(LineText$, 1) = ";"
       Continue
@@ -1132,17 +1134,17 @@ Procedure FindClassInterfaceFromFile(FilePath$, Name$, List Output.s(), IncludeP
       
       If IsField And FieldRest$ <> ""
         Protected Count = CountString(FieldRest$, ",") + 1
-        For f = 1 To Count
-          Protected SingleField$ = Trim(StringField(FieldRest$, f, ","))
+        For fieldIdx = 1 To Count
+          Protected SingleField$ = Trim(StringField(FieldRest$, fieldIdx, ","))
           If SingleField$ <> ""
             AddElement(Output())
             Output() = SingleField$
           EndIf
-        Next f
+        Next fieldIdx
       EndIf
     EndIf
   Wend
-  CloseFile(f)
+  CloseFile(FileHandle)
   
   ; If target was found and extends another class, resolve the parent
   If Success And ExtendsClass$ <> ""
@@ -1195,8 +1197,9 @@ Procedure FindClassInterface(Name$, List Output.s(), IncludePrivate = #True, Rec
     Protected BaseDir$ = GetPathPart(*ActiveSource\FileName$)
     If BaseDir$ = "" : BaseDir$ = GetCurrentDirectory() : EndIf
     Protected LineCount = ScintillaSendMessage(*ActiveSource\EditorGadget, #SCI_GETLINECOUNT, 0, 0)
-    For line = 0 To LineCount - 1
-      Protected LineText$ = Trim(GetLine(line, *ActiveSource))
+    Protected scanLine.i
+    For scanLine = 0 To LineCount - 1
+      Protected LineText$ = Trim(GetLine(scanLine, *ActiveSource))
       Protected Upper$ = UCase(LineText$)
       If Left(Upper$, 13) = "XINCLUDEFILE " Or Left(Upper$, 12) = "INCLUDEFILE " Or Left(Upper$, 13) = "XINCLUDEFILE	" Or Left(Upper$, 12) = "INCLUDEFILE	"
         Protected pQuote1 = FindString(LineText$, Chr(34), 1)
@@ -1211,7 +1214,7 @@ Procedure FindClassInterface(Name$, List Output.s(), IncludePrivate = #True, Rec
           EndIf
         EndIf
       EndIf
-    Next line
+    Next scanLine
   EndIf
   
   ProcedureReturn #False
