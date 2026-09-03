@@ -49,6 +49,7 @@ AssertTrue(Bool(GetOOPHelpPage("Button") = "ui/button.html"), "Mapping: Button -
 AssertTrue(Bool(GetOOPHelpPage("CheckBox") = "ui/checkbox.html"), "Mapping: CheckBox -> ui/checkbox.html")
 AssertTrue(Bool(GetOOPHelpPage("ComboBox") = "ui/combobox.html"), "Mapping: ComboBox -> ui/combobox.html")
 AssertTrue(Bool(GetOOPHelpPage("Label") = "ui/label.html"), "Mapping: Label -> ui/label.html")
+AssertTrue(Bool(GetOOPHelpPage("ListIcon") = "ui/listicon.html"), "Mapping: ListIcon -> ui/listicon.html")
 AssertTrue(Bool(GetOOPHelpPage("ProgressBar") = "ui/progressbar.html"), "Mapping: ProgressBar -> ui/progressbar.html")
 AssertTrue(Bool(GetOOPHelpPage("Slider") = "ui/slider.html"), "Mapping: Slider -> ui/slider.html")
 AssertTrue(Bool(GetOOPHelpPage("TextBox") = "ui/textbox.html"), "Mapping: TextBox -> ui/textbox.html")

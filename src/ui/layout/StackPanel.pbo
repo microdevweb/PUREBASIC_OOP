@@ -30,6 +30,12 @@ Namespace UI::Layouts {
       This\spacing = sp
     }
 
+    Public Method Init(orient.i, sp.i, w_p.i, h_p.i) {
+      Super::Init(w_p, h_p)
+      This\orientation = orient
+      This\spacing = sp
+    }
+
     Public Method SetOrientation(o.i) {
       This\orientation = o
       This\UpdateLayout()

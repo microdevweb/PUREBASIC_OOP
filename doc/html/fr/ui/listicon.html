@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang='en'>
+<html lang='fr'>
 <head>
   <meta charset='UTF-8'>
   <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-  <title>StackPanel Class - PureBasic OOP Documentation</title>
+  <title>Classe ListIcon - PureBasic OOP Documentation</title>
   <link rel='stylesheet' href='../../css/doc_theme.css'>
 </head>
 <body>
@@ -16,11 +16,11 @@
     <div class='header-controls'>
       <div class='search-box'>
         <span class='search-icon'>&#128269;</span>
-        <input type='text' class='search-input' id='search-input' placeholder='Search docs...'>
+        <input type='text' class='search-input' id='search-input' placeholder='Rechercher...'>
       </div>
       <div class='lang-switch'>
-        <a href='../fr/ui/stackpanel.html' class='lang-btn'>FR</a>
-        <a href='#' class='lang-btn active'>EN</a>
+        <a href='#' class='lang-btn active'>FR</a>
+        <a href='../en/ui/listicon.html' class='lang-btn'>EN</a>
       </div>
     </div>
   </header>
@@ -28,13 +28,13 @@
   <div class='layout-container'>
 <nav class='doc-sidebar'>
   <div class='nav-section'>
-    <div class='nav-section-title'>Getting Started</div>
+    <div class='nav-section-title'>Introduction</div>
     <ul class='nav-list'>
-      <li class='nav-item'><a href='../index.html'><span>Overview</span></a></li>
+      <li class='nav-item'><a href='../index.html'><span>Vue d'ensemble</span></a></li>
     </ul>
   </div>
   <div class='nav-section'>
-    <div class='nav-section-title'>OOP Keywords</div>
+    <div class='nav-section-title'>Mots-clés POO</div>
     <ul class='nav-list'>
       <li class='nav-item'><a href='../keywords/class.html'><span>Class / Abstract</span><span class='badge badge-kw'>KW</span></a></li>
       <li class='nav-item'><a href='../keywords/method.html'><span>Method / Override</span><span class='badge badge-kw'>KW</span></a></li>
@@ -46,7 +46,7 @@
     </ul>
   </div>
   <div class='nav-section'>
-    <div class='nav-section-title'>UI Components</div>
+    <div class='nav-section-title'>Composants UI</div>
     <ul class='nav-list'>
       <li class='nav-item'><a href='../ui/application.html'><span>Application</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/window.html'><span>Window</span><span class='badge badge-ui'>UI</span></a></li>
@@ -55,7 +55,7 @@
       <li class='nav-item'><a href='../ui/checkbox.html'><span>CheckBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/combobox.html'><span>ComboBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/label.html'><span>Label</span><span class='badge badge-ui'>UI</span></a></li>
-      <li class='nav-item'><a href='../ui/listicon.html'><span>ListIcon</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item active'><a href='../ui/listicon.html'><span>ListIcon</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/progressbar.html'><span>ProgressBar</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/slider.html'><span>Slider</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/textbox.html'><span>TextBox</span><span class='badge badge-ui'>UI</span></a></li>
@@ -63,10 +63,10 @@
     </ul>
   </div>
   <div class='nav-section'>
-    <div class='nav-section-title'>Responsive Layouts (WPF)</div>
+    <div class='nav-section-title'>Layouts Responsifs (WPF)</div>
     <ul class='nav-list'>
       <li class='nav-item'><a href='../ui/container.html'><span>Container</span><span class='badge badge-wpf'>WPF</span></a></li>
-      <li class='nav-item active'><a href='../ui/stackpanel.html'><span>StackPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
+      <li class='nav-item'><a href='../ui/stackpanel.html'><span>StackPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/dockpanel.html'><span>DockPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/grid.html'><span>Grid</span><span class='badge badge-wpf'>WPF</span></a></li>
     </ul>
@@ -74,37 +74,53 @@
 </nav>
     <main class='doc-content'>
       <div class='breadcrumb'>
-        <a href='../index.html'>Home</a>
+        <a href='../index.html'>Accueil</a>
         
         <span class='breadcrumb-separator'>/</span>
-        <span>UI Components</span>
+        <span>Composants UI</span>
         <span class='breadcrumb-separator'>/</span>
-        <span style='color: var(--accent-blue);'>StackPanel Class</span>
+        <span style='color: var(--accent-blue);'>Classe ListIcon</span>
         
       </div>
       
       <div class='page-header'>
         <div class='title-row'>
-          <h1 class='page-title'>StackPanel Class</h1>
-          <span class='badge badge-ui'>Layout</span>
+          <h1 class='page-title'>Classe ListIcon</h1>
+          <span class='badge badge-ui'>UI Class</span>
         </div>
-        <p class='page-lead'>Linear vertical or horizontal layout panel with multi-constructors.</p>
+        <p class='page-lead'>Table et grille de données multi-colonnes avec multi-constructeurs.</p>
       </div>
       
       
 <div class='doc-section'>
   <h2 class='section-title'>Description</h2>
-  <p>The <code>UI::Layouts::StackPanel</code> arranges child elements into a single linear flow (vertical or horizontal) with configurable spacing between items.</p>
+  <p>La classe <code>UI::ListIcon</code> encapsule une table / grille de données multi-colonnes (<code>ListIconGadget</code>) avec sélection de ligne et gestion d'événements.</p>
 </div>
 <div class='doc-section'>
-  <h2 class='section-title'>Overloaded Constructors</h2>
+  <h2 class='section-title'>Constructeurs Surchargés</h2>
   <div class='table-wrapper'>
     <table>
-      <tr><th>Constructor</th><th>Description</th></tr>
-      <tr><td><code>Init()</code></td><td>Vertical StackPanel with 5px spacing by default.</td></tr>
-      <tr><td><code>Init(orientation.i)</code></td><td>StackPanel with chosen orientation (<code>#UI_Orientation_Vertical</code> or <code>#UI_Orientation_Horizontal</code>).</td></tr>
-      <tr><td><code>Init(orientation.i, spacing.i)</code></td><td>Custom orientation and spacing.</td></tr>
-      <tr><td><code>Init(orientation.i, spacing.i, w.i, h.i)</code></td><td>Custom orientation, spacing, and dimensions.</td></tr>
+      <tr><th>Constructeur</th><th>Description</th></tr>
+      <tr><td><code>Init(title.s, colWidth.i)</code></td><td>Crée la table avec sa première colonne (pleine ligne sélectionnable par défaut).</td></tr>
+      <tr><td><code>Init(title.s, colWidth.i, flags.i)</code></td><td>Création avec flags personnalisés (<code>#PB_ListIcon_GridLines</code>, <code>#PB_ListIcon_CheckBoxes</code>, etc.).</td></tr>
+      <tr><td><code>Init(x.i, y.i, w.i, h.i, title.s, colWidth.i)</code></td><td>Positionnement absolu et dimensions.</td></tr>
+      <tr><td><code>Init(x.i, y.i, w.i, h.i, title.s, colWidth.i, flags.i)</code></td><td>Complet avec position, dimensions, titre de colonne et flags.</td></tr>
+    </table>
+  </div>
+</div>
+<div class='doc-section'>
+  <h2 class='section-title'>M&eacute;thodes Principales</h2>
+  <div class='table-wrapper'>
+    <table>
+      <tr><th>Méthode</th><th>Description</th></tr>
+      <tr><td><code>AddColumn(colIdx.i, title.s, width.i)</code></td><td>Ajoute une nouvelle colonne à la table.</td></tr>
+      <tr><td><code>AddItem(text.s, icon.i = 0, itemIdx.i = -1)</code></td><td>Insère une nouvelle ligne (champs séparés par <code>Chr(10)</code>).</td></tr>
+      <tr><td><code>GetSelectedIndex()</code> / <code>SetSelectedIndex(idx.i)</code></td><td>Index de la ligne active (-1 si aucune).</td></tr>
+      <tr><td><code>GetItemText(itemIdx.i, colIdx.i = 0)</code></td><td>Récupère le texte d'une cellule spécifique.</td></tr>
+      <tr><td><code>SetItemText(itemIdx.i, colIdx.i, text.s)</code></td><td>Modifie le texte d'une cellule spécifique.</td></tr>
+      <tr><td><code>GetItemCount()</code></td><td>Nombre total de lignes dans la table.</td></tr>
+      <tr><td><code>Clear()</code></td><td>Supprime toutes les lignes.</td></tr>
+      <tr><td><code>RemoveItem(idx.i)</code></td><td>Supprime une ligne spécifique.</td></tr>
     </table>
   </div>
 </div>

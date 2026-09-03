@@ -63,6 +63,7 @@ Procedure.s GetNav(lang.s, currentKey.s, relPath.s)
     n + "      <li class='nav-item" + Iif(Bool(currentKey="checkbox"), " active", "") + "'><a href='" + relPath + "ui/checkbox.html'><span>CheckBox</span><span class='badge badge-ui'>UI</span></a></li>" + #CRLF$
     n + "      <li class='nav-item" + Iif(Bool(currentKey="combobox"), " active", "") + "'><a href='" + relPath + "ui/combobox.html'><span>ComboBox</span><span class='badge badge-ui'>UI</span></a></li>" + #CRLF$
     n + "      <li class='nav-item" + Iif(Bool(currentKey="label"), " active", "") + "'><a href='" + relPath + "ui/label.html'><span>Label</span><span class='badge badge-ui'>UI</span></a></li>" + #CRLF$
+    n + "      <li class='nav-item" + Iif(Bool(currentKey="listicon"), " active", "") + "'><a href='" + relPath + "ui/listicon.html'><span>ListIcon</span><span class='badge badge-ui'>UI</span></a></li>" + #CRLF$
     n + "      <li class='nav-item" + Iif(Bool(currentKey="progressbar"), " active", "") + "'><a href='" + relPath + "ui/progressbar.html'><span>ProgressBar</span><span class='badge badge-ui'>UI</span></a></li>" + #CRLF$
     n + "      <li class='nav-item" + Iif(Bool(currentKey="slider"), " active", "") + "'><a href='" + relPath + "ui/slider.html'><span>Slider</span><span class='badge badge-ui'>UI</span></a></li>" + #CRLF$
     n + "      <li class='nav-item" + Iif(Bool(currentKey="textbox"), " active", "") + "'><a href='" + relPath + "ui/textbox.html'><span>TextBox</span><span class='badge badge-ui'>UI</span></a></li>" + #CRLF$
@@ -106,6 +107,7 @@ Procedure.s GetNav(lang.s, currentKey.s, relPath.s)
     n + "      <li class='nav-item" + Iif(Bool(currentKey="checkbox"), " active", "") + "'><a href='" + relPath + "ui/checkbox.html'><span>CheckBox</span><span class='badge badge-ui'>UI</span></a></li>" + #CRLF$
     n + "      <li class='nav-item" + Iif(Bool(currentKey="combobox"), " active", "") + "'><a href='" + relPath + "ui/combobox.html'><span>ComboBox</span><span class='badge badge-ui'>UI</span></a></li>" + #CRLF$
     n + "      <li class='nav-item" + Iif(Bool(currentKey="label"), " active", "") + "'><a href='" + relPath + "ui/label.html'><span>Label</span><span class='badge badge-ui'>UI</span></a></li>" + #CRLF$
+    n + "      <li class='nav-item" + Iif(Bool(currentKey="listicon"), " active", "") + "'><a href='" + relPath + "ui/listicon.html'><span>ListIcon</span><span class='badge badge-ui'>UI</span></a></li>" + #CRLF$
     n + "      <li class='nav-item" + Iif(Bool(currentKey="progressbar"), " active", "") + "'><a href='" + relPath + "ui/progressbar.html'><span>ProgressBar</span><span class='badge badge-ui'>UI</span></a></li>" + #CRLF$
     n + "      <li class='nav-item" + Iif(Bool(currentKey="slider"), " active", "") + "'><a href='" + relPath + "ui/slider.html'><span>Slider</span><span class='badge badge-ui'>UI</span></a></li>" + #CRLF$
     n + "      <li class='nav-item" + Iif(Bool(currentKey="textbox"), " active", "") + "'><a href='" + relPath + "ui/textbox.html'><span>TextBox</span><span class='badge badge-ui'>UI</span></a></li>" + #CRLF$
@@ -517,154 +519,87 @@ Define fr_window.s = "<div class='doc-section'>" +
 
 SaveHTML(BaseDocDir + "fr\ui\window.html", BuildPage("fr", "window", "ui/window.html", "Classe Window", "Cr&eacute;ation flexible de fen&ecirc;tres avec constructeurs multiples et accesseurs dynamiques.", "badge-ui", "UI Class", fr_window))
 
+; ============================================================================
+; FRENCH UI PAGES
+; ============================================================================
+
 ; FR UI: Gadget / Component
 Define fr_gadget.s = "<div class='doc-section'>" +
   "<h2 class='section-title'>Description</h2>" +
-  "<p>La classe <code>Gadget</code> est la classe abstraite de base pour tous les contr&ocirc;les graphiques UI (boutons, listes, sliders, interrupteurs, etc.).</p>" +
-  "<p>Elle fournit le positionnement (x, y, width, height), la visibilit&eacute;, et le syst&egrave;me unifi&eacute; de gestion des &eacute;v&eacute;nements (<code>OnClick</code>, <code>OnChange</code>...).</p>" +
+  "<p>La classe abstraite <code>UI::Component</code> et sa sp&eacute;cialisation <code>UI::Gadget</code> constituent le socle de tous les contr&ocirc;les graphiques et panneaux de mise en page responsive.</p>" +
+  "<p>Elles fournissent la gestion automatique des coordonn&eacute;es (<code>x</code>, <code>y</code>, <code>width</code>, <code>height</code>), des dimensions minimales / maximales, des marges (<code>Margin</code>), des alignements (<code>HorizontalAlignment</code>, <code>VerticalAlignment</code>), de la visibilit&eacute;, de l'&eacute;tat activ&eacute;/d&eacute;sactiv&eacute;, et du routage unifi&eacute; des &eacute;v&eacute;nements.</p>" +
+  "</div>" +
+  "<div class='doc-section'>" +
+  "<h2 class='section-title'>M&eacute;thodes Principales</h2>" +
+  "<div class='table-wrapper'>" +
+  "  <table>" +
+  "    <tr><th>M&eacute;thode</th><th>Description</th></tr>" +
+  "    <tr><td><code>SetMargin(l.i, t.i, r.i, b.i)</code> / <code>SetMarginAll(m.i)</code></td><td>D&eacute;finit les marges externes autour du contr&ocirc;le.</td></tr>" +
+  "    <tr><td><code>SetHorizontalAlignment(align.i)</code></td><td>Alignement horizontal (<code>#UI_Align_Left</code>, <code>#UI_Align_Center</code>, <code>#UI_Align_Right</code>, <code>#UI_Align_Stretch</code>).</td></tr>" +
+  "    <tr><td><code>SetVerticalAlignment(align.i)</code></td><td>Alignement vertical (<code>#UI_Align_Top</code>, <code>#UI_Align_Middle</code>, <code>#UI_Align_Bottom</code>, <code>#UI_Align_VStretch</code>).</td></tr>" +
+  "    <tr><td><code>SetVisible(v.b)</code> / <code>IsVisible()</code></td><td>Contr&ocirc;le la visibilit&eacute; du composant.</td></tr>" +
+  "    <tr><td><code>SetEnabled(e.b)</code> / <code>IsEnabled()</code></td><td>Active ou d&eacute;sactive l'interaction utilisateur.</td></tr>" +
+  "    <tr><td><code>SetToolTip(tip.s)</code></td><td>D&eacute;finit l'infobulle d'aide au survol.</td></tr>" +
+  "    <tr><td><code>SetFocus()</code></td><td>Donne le focus clavier au gadget.</td></tr>" +
+  "  </table>" +
+  "</div>" +
   "</div>"
 
-SaveHTML(BaseDocDir + "fr\ui\gadget.html", BuildPage("fr", "gadget", "ui/gadget.html", "Classe Gadget & Component", "Classe de base abstraite pour tous les contr&ocirc;les UI.", "badge-ui", "UI Class", fr_gadget))
+SaveHTML(BaseDocDir + "fr\ui\gadget.html", BuildPage("fr", "gadget", "ui/gadget.html", "Classe Gadget & Component", "Classe de base abstraite pour tous les contr&ocirc;les UI et layouts.", "badge-ui", "UI Class", fr_gadget))
 
 ; FR UI: Button
 Define fr_button.s = "<div class='doc-section'>" +
   "<h2 class='section-title'>Description</h2>" +
-  "<p>La classe <code>Button</code> encapsule un bouton cliquable natif ou personnalis&eacute; avec gestion directe du callback d'&eacute;v&eacute;nement <code>OnClick</code>.</p>" +
+  "<p>La classe <code>UI::Button</code> encapsule un bouton poussoir cliquable PureBasic avec gestion directe de l'&eacute;v&eacute;nement virtuel <code>OnClick()</code> et prise en charge des layouts r&eacute;actifs.</p>" +
+  "</div>" +
+  "<div class='doc-section'>" +
+  "<h2 class='section-title'>Constructeurs Surcharg&eacute;s</h2>" +
+  "<div class='table-wrapper'>" +
+  "  <table>" +
+  "    <tr><th>Constructeur</th><th>Description</th></tr>" +
+  "    <tr><td><code>Init(text.s)</code></td><td>Cr&eacute;e un bouton avec texte (taille par d&eacute;faut 120&times;30 pour les layouts automatiques).</td></tr>" +
+  "    <tr><td><code>Init(text.s, w.i, h.i)</code></td><td>Cr&eacute;e un bouton avec texte et dimensions sp&eacute;cifi&eacute;es.</td></tr>" +
+  "    <tr><td><code>Init(x.i, y.i, w.i, h.i, text.s)</code></td><td>Positionnement absolu avec coordonn&eacute;es, dimensions et texte.</td></tr>" +
+  "    <tr><td><code>Init(x.i, y.i, w.i, h.i, text.s, flags.i)</code></td><td>Cr&eacute;ation compl&egrave;te avec flags PureBasic (ex: <code>#PB_Button_Default</code>, <code>#PB_Button_Toggle</code>).</td></tr>" +
+  "  </table>" +
+  "</div>" +
   "</div>" +
   "<div class='doc-section'>" +
   "<h2 class='section-title'>Exemple d'utilisation</h2>" +
   "<div class='code-container'>" +
-  "  <div class='code-header'><span class='code-title'>Bouton avec callback (.pbo)</span><span class='code-badge'>PBO</span></div>" +
-  "  <pre><code><span class='kw'>Protected</span> *btn.<span class='tp'>Button</span> = <span class='kw'>NewObject</span>(<span class='tp'>Button</span>, <span class='num'>10</span>, <span class='num'>10</span>, <span class='num'>120</span>, <span class='num'>35</span>, 'Cliquez-moi')" + #CRLF$ +
-  "*win\\<span class='fn'>AddGadget</span>(*btn)" + #CRLF$ +
-  "*btn\\<span class='fn'>SetText</span>('Nouveau Texte')</code></pre>" +
+  "  <div class='code-header'><span class='code-title'>Bouton standard & personnalis&eacute; (.pbo)</span><span class='code-badge'>PBO</span></div>" +
+  "  <pre><code><span class='kw'>Using</span> <span class='tp'>UI</span>" + #CRLF$ +
+  #CRLF$ +
+  "<span class='cm'>; 1. Cr&eacute;ation simple pour un layout</span>" + #CRLF$ +
+  "<span class='kw'>Define</span> *btnValider.<span class='tp'>Button</span> = <span class='kw'>New</span> <span class='tp'>Button</span>(<span class='str'>'Valider'</span>)" + #CRLF$ +
+  "*stackPanel\\<span class='fn'>AddChild</span>(*btnValider)" + #CRLF$ +
+  #CRLF$ +
+  "<span class='cm'>; 2. Bouton personnalis&eacute; avec logique de clic</span>" + #CRLF$ +
+  "<span class='kw'>Class</span> MonBouton <span class='kw'>Extends</span> <span class='tp'>Button</span> {" + #CRLF$ +
+  "  <span class='kw'>Public</span> <span class='kw'>Method</span> <span class='fn'>OnClick</span>() {" + #CRLF$ +
+  "    <span class='fn'>MessageRequester</span>(<span class='str'>'Info'</span>, <span class='str'>'Clic sur '</span> + <span class='kw'>This</span>\\<span class='fn'>GetText</span>())" + #CRLF$ +
+  "  }" + #CRLF$ +
+  "}"</code></pre>" +
   "</div>" +
   "</div>"
 
-SaveHTML(BaseDocDir + "fr\ui\button.html", BuildPage("fr", "button", "ui/button.html", "Classe Button", "Contr&ocirc;le bouton cliquable avec gestion d'&eacute;v&eacute;nements.", "badge-ui", "UI Class", fr_button))
+SaveHTML(BaseDocDir + "fr\ui\button.html", BuildPage("fr", "button", "ui/button.html", "Classe Button", "Contr&ocirc;le bouton poussoir cliquable avec multi-constructeurs et gestion d'&eacute;v&eacute;nements.", "badge-ui", "UI Class", fr_button))
 
-; FR UI: Other controls
-SaveHTML(BaseDocDir + "fr\ui\checkbox.html", BuildPage("fr", "checkbox", "ui/checkbox.html", "Classe CheckBox", "Case &agrave; cocher avec &eacute;tat s&eacute;lectionn&eacute;/d&eacute;s&eacute;lectionn&eacute;.", "badge-ui", "UI Class", "<p>Encapsule une case &agrave; cocher native avec m&eacute;thodes <code>SetState(state)</code> et <code>GetState()</code>.</p>"))
-SaveHTML(BaseDocDir + "fr\ui\combobox.html", BuildPage("fr", "combobox", "ui/combobox.html", "Classe ComboBox", "Liste d&eacute;roulante s&eacute;lectionnable.", "badge-ui", "UI Class", "<p>Gestion de liste d'&eacute;l&eacute;ments avec <code>AddItem(text.s)</code>, <code>GetSelected()</code> et <code>SetSelected(index)</code>.</p>"))
-SaveHTML(BaseDocDir + "fr\ui\label.html", BuildPage("fr", "label", "ui/label.html", "Classe Label", "Texte statique et libell&eacute; d'interface.", "badge-ui", "UI Class", "<p>Affiche un libell&eacute; textuel avec alignement et styles personnalisables.</p>"))
-SaveHTML(BaseDocDir + "fr\ui\progressbar.html", BuildPage("fr", "progressbar", "ui/progressbar.html", "Classe ProgressBar", "Barre de progression visuelle.", "badge-ui", "UI Class", "<p>Indicateur d'avancement avec <code>SetProgress(value)</code> et <code>SetRange(min, max)</code>.</p>"))
-SaveHTML(BaseDocDir + "fr\ui\slider.html", BuildPage("fr", "slider", "ui/slider.html", "Classe Slider", "Curseur de r&eacute;glage lin&eacute;aire.", "badge-ui", "UI Class", "<p>Curseur interactif horizontal/vertical avec notification de changement de valeur.</p>"))
-SaveHTML(BaseDocDir + "fr\ui\textbox.html", BuildPage("fr", "textbox", "ui/textbox.html", "Classe TextBox", "Champ de saisie texte simple ou multiligne.", "badge-ui", "UI Class", "<p>Contr&ocirc;le de saisie avec accesseurs <code>GetText()</code>, <code>SetText(str)</code> et validation.</p>"))
-SaveHTML(BaseDocDir + "fr\ui\toggleswitch.html", BuildPage("fr", "toggleswitch", "ui/toggleswitch.html", "Classe ToggleSwitch", "Interrupteur &agrave; bascule moderne (Style iOS/Material).", "badge-ui", "UI Class", "<p>Composant vectoriel moderne CustomGadget pour &eacute;tats On/Off avec animation fluide.</p>"))
-
-;; FR UI: Responsive Layouts (WPF Style)
-Define fr_container.s = "<div class='doc-section'>" +
+; FR UI: TextBox
+Define fr_textbox.s = "<div class='doc-section'>" +
   "<h2 class='section-title'>Description</h2>" +
-  "<p>La classe <code>UI::Layouts::Container</code> est la classe abstraite fondatrice de tout le syst&egrave;me de disposition responsive de PureBasic OOP. Inspir&eacute;e du mod&egrave;le WPF / XAML de .NET, elle permet de cr&eacute;er des interfaces graphiques modernes qui s'adaptent automatiquement &agrave; toutes les r&eacute;solutions d'&eacute;cran et aux redimensionnements de fen&ecirc;tres.</p>" +
-  "<p>Elle impl&eacute;mente le cycle de mise en page automatique (<code>Arrange</code>) et g&egrave;re les marges int&eacute;rieures (<code>Padding</code>) ainsi que la collection de composants enfants.</p>" +
+  "<p>La classe <code>UI::TextBox</code> encapsule un champ de saisie texte (<code>StringGadget</code>) avec acc&egrave;s direct au texte, validation et &eacute;v&eacute;nement <code>OnChange()</code>.</p>" +
   "</div>" +
   "<div class='doc-section'>" +
-  "<h2 class='section-title'>Propri&eacute;t&eacute;s de positionnement des composants (UI::Component)</h2>" +
-  "<p>Tous les composants graphiques (boutons, champs texte, sous-panneaux) h&eacute;ritent de <code>UI::Component</code> et disposent de propri&eacute;t&eacute;s pour contr&ocirc;ler leur comportement au sein des conteneurs :</p>" +
+  "<h2 class='section-title'>Constructeurs Surcharg&eacute;s</h2>" +
   "<div class='table-wrapper'>" +
   "  <table>" +
-  "    <tr><th>M&eacute;thode / Propri&eacute;t&eacute;</th><th>Description</th></tr>" +
-  "    <tr><td><code>SetMargin(l.i, t.i, r.i, b.i)</code></td><td>D&eacute;finit les marges externes (gauche, haut, droite, bas) en pixels.</td></tr>" +
-  "    <tr><td><code>SetMarginAll(m.i)</code></td><td>Applique une marge externe uniforme sur les 4 c&ocirc;t&eacute;s.</td></tr>" +
-  "    <tr><td><code>SetHorizontalAlignment(align.i)</code></td><td>Alignement horizontal : <code>#UI_Align_Left</code>, <code>#UI_Align_Center</code>, <code>#UI_Align_Right</code>, <code>#UI_Align_Stretch</code>.</td></tr>" +
-  "    <tr><td><code>SetVerticalAlignment(align.i)</code></td><td>Alignement vertical : <code>#UI_Align_Top</code>, <code>#UI_Align_Middle</code>, <code>#UI_Align_Bottom</code>, <code>#UI_Align_VStretch</code>.</td></tr>" +
-  "    <tr><td><code>SetMinWidth(minW.i)</code> / <code>SetMaxWidth(maxW.i)</code></td><td>Contraintes de largeur minimale et maximale.</td></tr>" +
-  "    <tr><td><code>SetMinHeight(minH.i)</code></td><td>Contrainte de hauteur minimale.</td></tr>" +
-  "  </table>" +
-  "</div>" +
-  "</div>" +
-  "<div class='doc-section'>" +
-  "<h2 class='section-title'>M&eacute;thodes de Container</h2>" +
-  "<div class='table-wrapper'>" +
-  "  <table>" +
-  "    <tr><th>M&eacute;thode</th><th>Param&egrave;tres & Retour</th><th>Description</th></tr>" +
-  "    <tr><td><code>AddChild(*child)</code></td><td><code>*child.UI::Component</code></td><td>Ajoute un composant enfant &agrave; la liste du conteneur.</td></tr>" +
-  "    <tr><td><code>RemoveChild(*child)</code></td><td><code>*child.UI::Component</code></td><td>Retire le composant de la disposition.</td></tr>" +
-  "    <tr><td><code>ClearChildren()</code></td><td>Aucun</td><td>Supprime tous les composants enfants attach&eacute;s.</td></tr>" +
-  "    <tr><td><code>GetChildrenCount()</code></td><td>Retourne <code>.i</code></td><td>Renvoie le nombre d'enfants pr&eacute;sents dans le conteneur.</td></tr>" +
-  "    <tr><td><code>SetPadding(l, t, r, b)</code></td><td><code>l.i, t.i, r.i, b.i</code></td><td>D&eacute;finit les marges internes (espace vide entre le bord du conteneur et ses enfants).</td></tr>" +
-  "    <tr><td><code>SetPaddingAll(p)</code></td><td><code>p.i</code></td><td>D&eacute;finit une marge interne uniforme sur les 4 c&ocirc;t&eacute;s.</td></tr>" +
-  "    <tr><td><code>Arrange(x, y, w, h)</code></td><td><code>x.i, y.i, w.i, h.i</code></td><td>Recalcule et applique le positionnement de tous les enfants dans la zone allou&eacute;e.</td></tr>" +
-  "  </table>" +
-  "</div>" +
-  "</div>"
-
-SaveHTML(BaseDocDir + "fr\ui\container.html", BuildPage("fr", "container", "ui/container.html", "Classe Container", "Classe de base abstraite pour tous les panneaux de disposition responsive WPF.", "badge-ui", "Layout", fr_container))
-
-Define fr_stackpanel.s = "<div class='doc-section'>" +
-  "<h2 class='section-title'>Description</h2>" +
-  "<p>La classe <code>UI::Layouts::StackPanel</code> dispose ses composants enfants sur une seule ligne s&eacute;quentielle, orient&eacute;e soit verticalement (de haut en bas), soit horizontalement (de gauche &agrave; droite).</p>" +
-  "<p>Un espacement constant (<code>Spacing</code>) peut &ecirc;tre configur&eacute; entre chaque &eacute;l&eacute;ment cons&eacute;cutif.</p>" +
-  "</div>" +
-  "<div class='doc-section'>" +
-  "<h2 class='section-title'>Constantes d'Orientation</h2>" +
-  "<div class='table-wrapper'>" +
-  "  <table>" +
-  "    <tr><th>Constante</th><th>Valeur</th><th>Description</th></tr>" +
-  "    <tr><td><code>#UI_Orientation_Vertical</code></td><td><code>0</code></td><td>Empilement vertical (par d&eacute;faut). Les &eacute;l&eacute;ments s'&eacute;tirent sur toute la largeur disponible.</td></tr>" +
-  "    <tr><td><code>#UI_Orientation_Horizontal</code></td><td><code>1</code></td><td>Alignement horizontal c&ocirc;te &agrave; c&ocirc;te. Id&eacute;al pour les barres d'outils ou barres d'actions.</td></tr>" +
-  "  </table>" +
-  "</div>" +
-  "</div>" +
-  "<div class='doc-section'>" +
-  "<h2 class='section-title'>Constructeurs & M&eacute;thodes</h2>" +
-  "<div class='table-wrapper'>" +
-  "  <table>" +
-  "    <tr><th>M&eacute;thode</th><th>Description</th></tr>" +
-  "    <tr><td><code>Init()</code></td><td>Cr&eacute;e un StackPanel vertical avec un espacement de 0 pixel.</td></tr>" +
-  "    <tr><td><code>Init(orientation.i)</code></td><td>Cr&eacute;e un StackPanel avec l'orientation choisie (Verticale ou Horizontale).</td></tr>" +
-  "    <tr><td><code>Init(orientation.i, spacing.i)</code></td><td>Cr&eacute;e un StackPanel avec orientation et espacement personnalis&eacute;s entre chaque enfant.</td></tr>" +
-  "    <tr><td><code>SetOrientation(orient.i)</code></td><td>Modifie dynamiquement l'orientation (<code>#UI_Orientation_Vertical</code> ou <code>#UI_Orientation_Horizontal</code>).</td></tr>" +
-  "    <tr><td><code>GetOrientation()</code></td><td>Retourne l'orientation actuelle.</td></tr>" +
-  "    <tr><td><code>SetSpacing(sp.i)</code></td><td>D&eacute;finit l'espacement en pixels entre les &eacute;l&eacute;ments.</td></tr>" +
-  "    <tr><td><code>GetSpacing()</code></td><td>Retourne l'espacement actuel.</td></tr>" +
-  "  </table>" +
-  "</div>" +
-  "</div>" +
-  "<div class='doc-section'>" +
-  "<h2 class='section-title'>Exemple : Formulaire Vertical & Barre d'Actions</h2>" +
-  "<div class='code-container'>" +
-  "  <div class='code-header'><span class='code-title'>StackPanels imbriqu&eacute;s (.pbo)</span><span class='code-badge'>PBO</span></div>" +
-  "  <pre><code><span class='kw'>Using</span> UI" + #CRLF$ +
-  "<span class='kw'>Using</span> UI::Layouts" + #CRLF$ +
-  "<span class='kw'>Using</span> UI::Controls" + #CRLF$ +
-  #CRLF$ +
-  "<span class='cm'>; Panneau principal vertical avec 10px d'espacement</span>" + #CRLF$ +
-  "<span class='kw'>Define</span> *mainStack.<span class='tp'>StackPanel</span> = <span class='kw'>New</span> <span class='tp'>StackPanel</span>(#UI_Orientation_Vertical, <span class='num'>10</span>)" + #CRLF$ +
-  "*mainStack\\<span class='fn'>SetPaddingAll</span>(<span class='num'>20</span>)" + #CRLF$ +
-  #CRLF$ +
-  "<span class='kw'>Define</span> *txtNom.<span class='tp'>TextBox</span> = <span class='kw'>New</span> <span class='tp'>TextBox</span>(<span class='num'>0</span>, <span class='num'>0</span>, <span class='num'>300</span>, <span class='num'>32</span>, <span class='str'>'Entrez votre nom'</span>)" + #CRLF$ +
-  "<span class='kw'>Define</span> *txtEmail.<span class='tp'>TextBox</span> = <span class='kw'>New</span> <span class='tp'>TextBox</span>(<span class='num'>0</span>, <span class='num'>0</span>, <span class='num'>300</span>, <span class='num'>32</span>, <span class='str'>'Entrez votre email'</span>)" + #CRLF$ +
-  "*mainStack\\<span class='fn'>AddChild</span>(*txtNom)" + #CRLF$ +
-  "*mainStack\\<span class='fn'>AddChild</span>(*txtEmail)" + #CRLF$ +
-  #CRLF$ +
-  "<span class='cm'>; Barre de boutons horizontale en bas</span>" + #CRLF$ +
-  "<span class='kw'>Define</span> *btnBar.<span class='tp'>StackPanel</span> = <span class='kw'>New</span> <span class='tp'>StackPanel</span>(#UI_Orientation_Horizontal, <span class='num'>8</span>)" + #CRLF$ +
-  "*btnBar\\<span class='fn'>AddChild</span>(<span class='kw'>New</span> <span class='tp'>Button</span>(<span class='str'>'Valider'</span>, <span class='num'>100</span>, <span class='num'>35</span>))" + #CRLF$ +
-  "*btnBar\\<span class='fn'>AddChild</span>(<span class='kw'>New</span> <span class='tp'>Button</span>(<span class='str'>'Annuler'</span>, <span class='num'>100</span>, <span class='num'>35</span>))" + #CRLF$ +
-  "*mainStack\\<span class='fn'>AddChild</span>(*btnBar)" + #CRLF$ +
-  #CRLF$ +
-  "*win\\<span class='fn'>SetContent</span>(*mainStack)</code></pre>" +
-  "</div>" +
-  "</div>"
-
-SaveHTML(BaseDocDir + "fr\ui\stackpanel.html", BuildPage("fr", "stackpanel", "ui/stackpanel.html", "Classe StackPanel", "Disposition lin&eacute;aire automatique verticale ou horizontale avec espacements.", "badge-ui", "Layout", fr_stackpanel))
-
-Define fr_dockpanel.s = "<div class='doc-section'>" +
-  "<h2 class='section-title'>Description</h2>" +
-  "<p>La classe <code>UI::Layouts::DockPanel</code> ancre ses composants enfants le long de ses 4 bordures ext&eacute;rieures (Haut, Bas, Gauche, Droite) et attribue automatiquement tout l'espace r&eacute;siduel au centre &agrave; son dernier enfant (propri&eacute;t&eacute; <code>LastChildFill</code>).</p>" +
-  "<p>C'est le conteneur id&eacute;al pour structurer l'architecture globale d'une application professionnelle (menu en haut, barre d'&eacute;tat en bas, barre d'outils &agrave; gauche, zone de travail au centre).</p>" +
-  "</div>" +
-  "<div class='doc-section'>" +
-  "<h2 class='section-title'>Constantes d'Ancrage</h2>" +
-  "<div class='table-wrapper'>" +
-  "  <table>" +
-  "    <tr><th>Constante</th><th>Valeur</th><th>Description</th></tr>" +
-  "    <tr><td><code>#UI_Dock_Top</code></td><td><code>0</code></td><td>Ancre le composant en haut en occupant toute la largeur disponible.</td></tr>" +
-  "    <tr><td><code>#UI_Dock_Bottom</code></td><td><code>1</code></td><td>Ancre le composant en bas en occupant toute la largeur disponible.</td></tr>" +
-  "    <tr><td><code>#UI_Dock_Left</code></td><td><code>2</code></td><td>Ancre le composant &agrave; gauche sur la hauteur r&eacute;siduelle.</td></tr>" +
-  "    <tr><td><code>#UI_Dock_Right</code></td><td><code>3</code></td><td>Ancre le composant &agrave; droite sur la hauteur r&eacute;siduelle.</td></tr>" +
-  "    <tr><td><code>#UI_Dock_Fill</code></td><td><code>4</code></td><td>Remplissage automatique : occupe la totalit&eacute; de l'espace central disponible.</td></tr>" +
+  "    <tr><th>Constructeur</th><th>Description</th></tr>" +
+  "    <tr><td><code>Init()</code></td><td>Champ vide (150&times;25 par d&eacute;faut).</td></tr>" +
+  "    <tr><td><code>Init(defaultText.s)</code></td><td>Champ initialis&eacute; avec le texte par d&eacute;faut.</td></tr>" +
+  "    <tr><td><code>Init(defaultText.s, w.i, h.i)</code></td><td>Champ avec texte et dimensions souhait&eacute;es.</td></tr>" +
+  "    <tr><td><code>Init(x.i, y.i, w.i, h.i, defaultText.s)</code></td><td>Positionnement absolu, dimensions et texte.</td></tr>" +
+  "    <tr><td><code>Init(x.i, y.i, w.i, h.i, defaultText.s, flags.i)</code></td><td>Complet avec flags PureBasic (ex: <code>#PB_String_Password</code>, <code>#PB_String_Numeric</code>, <code>#PB_String_ReadOnly</code>).</td></tr>" +
   "  </table>" +
   "</div>" +
   "</div>" +
@@ -673,112 +608,355 @@ Define fr_dockpanel.s = "<div class='doc-section'>" +
   "<div class='table-wrapper'>" +
   "  <table>" +
   "    <tr><th>M&eacute;thode</th><th>Description</th></tr>" +
-  "    <tr><td><code>Init(lastChildFill.b = #True)</code></td><td>Cr&eacute;e un DockPanel avec activation ou non du remplissage central automatique pour le dernier enfant.</td></tr>" +
-  "    <tr><td><code>SetDock(*child, dockEdge.i)</code></td><td>Attache un enfant et lui assigne son bord d'ancrage (<code>#UI_Dock_Top</code>, <code>#UI_Dock_Bottom</code>, etc.).</td></tr>" +
-  "    <tr><td><code>GetDock(*child)</code></td><td>Renvoie la valeur d'ancrage actuelle du composant.</td></tr>" +
-  "    <tr><td><code>SetLastChildFill(fill.b)</code></td><td>Active (<code>#True</code>) ou d&eacute;sactive (<code>#False</code>) l'agrandissement automatique du dernier enfant.</td></tr>" +
-  "    <tr><td><code>GetLastChildFill()</code></td><td>Retourne l'&eacute;tat de la propri&eacute;t&eacute; <code>LastChildFill</code>.</td></tr>" +
+  "    <tr><td><code>GetText()</code> / <code>SetText(str.s)</code></td><td>Lecture et modification du contenu textuel.</td></tr>" +
+  "    <tr><td><code>SetReadOnly(state.b)</code> / <code>IsReadOnly()</code></td><td>Verrouille le champ en lecture seule.</td></tr>" +
+  "    <tr><td><code>OnChange()</code></td><td>M&eacute;thode virtuelle d&eacute;clench&eacute;e &agrave; chaque frappe au clavier.</td></tr>" +
   "  </table>" +
-  "</div>" +
-  "</div>" +
-  "<div class='doc-section'>" +
-  "<h2 class='section-title'>Exemple : Architecture Compl&egrave;te d'Application</h2>" +
-  "<div class='code-container'>" +
-  "  <div class='code-header'><span class='code-title'>Mise en page compl&egrave;te avec DockPanel (.pbo)</span><span class='code-badge'>PBO</span></div>" +
-  "  <pre><code><span class='kw'>Define</span> *root.<span class='tp'>DockPanel</span> = <span class='kw'>New</span> <span class='tp'>DockPanel</span>(#True)" + #CRLF$ +
-  "*root\\<span class='fn'>SetPaddingAll</span>(<span class='num'>5</span>)" + #CRLF$ +
-  #CRLF$ +
-  "<span class='cm'>; 1. En-t&ecirc;te fix&eacute; en haut</span>" + #CRLF$ +
-  "<span class='kw'>Define</span> *header.<span class='tp'>StackPanel</span> = <span class='kw'>New</span> <span class='tp'>StackPanel</span>(#UI_Orientation_Horizontal, <span class='num'>5</span>)" + #CRLF$ +
-  "*header\\<span class='fn'>SetHeight</span>(<span class='num'>40</span>)" + #CRLF$ +
-  "*root\\<span class='fn'>SetDock</span>(*header, #UI_Dock_Top)" + #CRLF$ +
-  #CRLF$ +
-  "<span class='cm'>; 2. Barre d'&eacute;tat fix&eacute;e en bas</span>" + #CRLF$ +
-  "<span class='kw'>Define</span> *status.<span class='tp'>Label</span> = <span class='kw'>New</span> <span class='tp'>Label</span>(<span class='num'>0</span>, <span class='num'>0</span>, <span class='num'>400</span>, <span class='num'>25</span>, <span class='str'>'Pr&ecirc;t'</span>)" + #CRLF$ +
-  "*root\\<span class='fn'>SetDock</span>(*status, #UI_Dock_Bottom)" + #CRLF$ +
-  #CRLF$ +
-  "<span class='cm'>; 3. Navigation lat&eacute;rale &agrave; gauche</span>" + #CRLF$ +
-  "<span class='kw'>Define</span> *nav.<span class='tp'>StackPanel</span> = <span class='kw'>New</span> <span class='tp'>StackPanel</span>(#UI_Orientation_Vertical, <span class='num'>6</span>)" + #CRLF$ +
-  "*nav\\<span class='fn'>SetWidth</span>(<span class='num'>180</span>)" + #CRLF$ +
-  "*root\\<span class='fn'>SetDock</span>(*nav, #UI_Dock_Left)" + #CRLF$ +
-  #CRLF$ +
-  "<span class='cm'>; 4. Zone centrale de travail (Fill automatique)</span>" + #CRLF$ +
-  "<span class='kw'>Define</span> *editor.<span class='tp'>TextBox</span> = <span class='kw'>New</span> <span class='tp'>TextBox</span>(<span class='num'>0</span>, <span class='num'>0</span>, <span class='num'>100</span>, <span class='num'>100</span>, <span class='str'>'Document...'</span>)" + #CRLF$ +
-  "*root\\<span class='fn'>SetDock</span>(*editor, #UI_Dock_Fill)" + #CRLF$ +
-  #CRLF$ +
-  "*win\\<span class='fn'>SetContent</span>(*root)</code></pre>" +
   "</div>" +
   "</div>"
 
-SaveHTML(BaseDocDir + "fr\ui\dockpanel.html", BuildPage("fr", "dockpanel", "ui/dockpanel.html", "Classe DockPanel", "Ancrage p&eacute;riph&eacute;rique sur les 4 bords avec remplissage central automatique.", "badge-ui", "Layout", fr_dockpanel))
+SaveHTML(BaseDocDir + "fr\ui\textbox.html", BuildPage("fr", "textbox", "ui/textbox.html", "Classe TextBox", "Champ de saisie texte avec multi-constructeurs et &eacute;v&eacute;nement OnChange.", "badge-ui", "UI Class", fr_textbox))
 
-Define fr_grid.s = "<div class='doc-section'>" +
+; FR UI: Label
+Define fr_label.s = "<div class='doc-section'>" +
   "<h2 class='section-title'>Description</h2>" +
-  "<p>La classe <code>UI::Layouts::Grid</code> d&eacute;finit une zone de mise en page sous forme de tableau bidimensionnel compos&eacute; de lignes (Rows) et de colonnes (Columns). C'est le conteneur de disposition le plus puissant et flexible de PureBasic OOP.</p>" +
-  "<p>Inspir&eacute;e directement du moteur WPF de Microsoft, elle supporte 3 modes de dimensionnement pour chaque ligne et colonne :</p>" +
-  "<ul>" +
-  "  <li><strong>Pixels fixes (Absolute) :</strong> Une valeur num&eacute;rique comme <code>'150'</code> ou <code>'200px'</code> r&eacute;serve une taille exacte et constante.</li>" +
-  "  <li><strong>Automatique (Auto) :</strong> La cha&icirc;ne <code>'Auto'</code> adapte automatiquement la largeur/hauteur en fonction de la taille demand&eacute;e par les composants enfants de la cellule.</li>" +
-  "  <li><strong>Proportionnel (Star Sizing *) :</strong> Les d&eacute;finitions comme <code>'*'</code>, <code>'2*'</code>, <code>'3*'</code> partagent dynamiquement tout l'espace restant apr&egrave;s attribution des tailles fixes et Auto. Par exemple, <code>'3*'</code> et <code>'1*'</code> attribuent 75% et 25% de la largeur r&eacute;siduelle.</li>" +
-  "</ul>" +
+  "<p>La classe <code>UI::Label</code> encapsule un texte statique d'interface (<code>TextGadget</code>) avec styles et alignements.</p>" +
   "</div>" +
   "<div class='doc-section'>" +
-  "<h2 class='section-title'>Fusion de Cellules (RowSpan & ColSpan)</h2>" +
-  "<p>Un composant peut occuper plusieurs cellules adjacentes gr&acirc;ce aux param&egrave;tres <code>rowSpan</code> et <code>colSpan</code> de la m&eacute;thode <code>SetCell</code> ou via <code>SetCellSpan</code>.</p>" +
-  "</div>" +
-  "<div class='doc-section'>" +
-  "<h2 class='section-title'>M&eacute;thodes Principales de Grid</h2>" +
+  "<h2 class='section-title'>Constructeurs Surcharg&eacute;s</h2>" +
   "<div class='table-wrapper'>" +
   "  <table>" +
-  "    <tr><th>M&eacute;thode</th><th>Param&egrave;tres</th><th>Description</th></tr>" +
-  "    <tr><td><code>Init()</code></td><td>Aucun</td><td>Initialise une nouvelle grille vide sans lignes ni colonnes.</td></tr>" +
-  "    <tr><td><code>AddColumn(def.s)</code></td><td><code>'150'</code>, <code>'Auto'</code>, <code>'*'</code>, <code>'2*'</code>...</td><td>Ajoute une colonne &agrave; droite avec la d&eacute;finition de dimension sp&eacute;cifi&eacute;e.</td></tr>" +
-  "    <tr><td><code>AddRow(def.s)</code></td><td><code>'40'</code>, <code>'Auto'</code>, <code>'*'</code>, <code>'3*'</code>...</td><td>Ajoute une ligne en bas avec la d&eacute;finition de dimension sp&eacute;cifi&eacute;e.</td></tr>" +
-  "    <tr><td><code>SetCell(*child, row, col, [rowSpan], [colSpan])</code></td><td><code>*child, r.i, c.i, rs.i=1, cs.i=1</code></td><td>Place un composant dans la cellule &agrave; la ligne <code>row</code> et colonne <code>col</code> (index&eacute;es &agrave; partir de 0).</td></tr>" +
-  "    <tr><td><code>SetCellSpan(*child, rowSpan.i, colSpan.i)</code></td><td><code>*child, rs.i, cs.i</code></td><td>Modifie l'&eacute;tendue d'un enfant sur plusieurs lignes et colonnes.</td></tr>" +
-  "    <tr><td><code>ClearDefinitions()</code></td><td>Aucun</td><td>R&eacute;initialise toutes les d&eacute;finitions de lignes et colonnes.</td></tr>" +
-  "    <tr><td><code>GetColumnCount()</code></td><td>Retourne <code>.i</code></td><td>Renvoie le nombre de colonnes d&eacute;finies.</td></tr>" +
-  "    <tr><td><code>GetRowCount()</code></td><td>Retourne <code>.i</code></td><td>Renvoie le nombre de lignes d&eacute;finies.</td></tr>" +
+  "    <tr><th>Constructeur</th><th>Description</th></tr>" +
+  "    <tr><td><code>Init(text.s)</code></td><td>Texte statique (dimensions automatiques pour layout).</td></tr>" +
+  "    <tr><td><code>Init(text.s, w.i, h.i)</code></td><td>Texte et dimensions personnalis&eacute;es.</td></tr>" +
+  "    <tr><td><code>Init(x.i, y.i, w.i, h.i, text.s)</code></td><td>Positionnement absolu, dimensions et texte.</td></tr>" +
+  "    <tr><td><code>Init(x.i, y.i, w.i, h.i, text.s, flags.i)</code></td><td>Complet avec flags d'alignement (<code>#PB_Text_Center</code>, <code>#PB_Text_Right</code>, <code>#PB_Text_Border</code>).</td></tr>" +
+  "  </table>" +
+  "</div>" +
+  "</div>"
+
+SaveHTML(BaseDocDir + "fr\ui\label.html", BuildPage("fr", "label", "ui/label.html", "Classe Label", "Libell&eacute; texte statique avec multi-constructeurs et alignements.", "badge-ui", "UI Class", fr_label))
+
+; FR UI: CheckBox
+Define fr_checkbox.s = "<div class='doc-section'>" +
+  "<h2 class='section-title'>Description</h2>" +
+  "<p>La classe <code>UI::CheckBox</code> encapsule une case &agrave; cocher bool&eacute;enne avec &eacute;tats actif/inactif et callback <code>OnClick()</code>.</p>" +
+  "</div>" +
+  "<div class='doc-section'>" +
+  "<h2 class='section-title'>Constructeurs Surcharg&eacute;s</h2>" +
+  "<div class='table-wrapper'>" +
+  "  <table>" +
+  "    <tr><th>Constructeur</th><th>Description</th></tr>" +
+  "    <tr><td><code>Init(text.s)</code></td><td>Case &agrave; cocher d&eacute;coch&eacute;e par d&eacute;faut (150&times;25).</td></tr>" +
+  "    <tr><td><code>Init(text.s, checked.b)</code></td><td>Case avec texte et &eacute;tat initial sp&eacute;cifi&eacute;.</td></tr>" +
+  "    <tr><td><code>Init(text.s, w.i, h.i, checked.b)</code></td><td>Case avec texte, dimensions et &eacute;tat initial.</td></tr>" +
+  "    <tr><td><code>Init(x.i, y.i, w.i, h.i, text.s, flags.i)</code></td><td>Complet avec position absolue et flags.</td></tr>" +
   "  </table>" +
   "</div>" +
   "</div>" +
   "<div class='doc-section'>" +
-  "<h2 class='section-title'>Exemple : Grille Responsive &Eacute;diteur + Volet d'Inspection</h2>" +
-  "<div class='code-container'>" +
-  "  <div class='code-header'><span class='code-title'>Grille WPF avec Star Sizing et ColSpan (.pbo)</span><span class='code-badge'>PBO</span></div>" +
-  "  <pre><code><span class='kw'>Define</span> *grid.<span class='tp'>Grid</span> = <span class='kw'>New</span> <span class='tp'>Grid</span>()" + #CRLF$ +
-  "*grid\\<span class='fn'>SetPaddingAll</span>(<span class='num'>8</span>)" + #CRLF$ +
-  #CRLF$ +
-  "<span class='cm'>; Colonnes : Barre lat&eacute;rale (180px fixe), Zone centrale (3* soit 75%), Volet droit (1* soit 25%)</span>" + #CRLF$ +
-  "*grid\\<span class='fn'>AddColumn</span>(<span class='str'>'180'</span>)" + #CRLF$ +
-  "*grid\\<span class='fn'>AddColumn</span>(<span class='str'>'3*'</span>)" + #CRLF$ +
-  "*grid\\<span class='fn'>AddColumn</span>(<span class='str'>'1*'</span>)" + #CRLF$ +
-  #CRLF$ +
-  "<span class='cm'>; Lignes : Barre d'outils (40px fixe), Zone de contenu fluide (*)</span>" + #CRLF$ +
-  "*grid\\<span class='fn'>AddRow</span>(<span class='str'>'40'</span>)" + #CRLF$ +
-  "*grid\\<span class='fn'>AddRow</span>(<span class='str'>'*'</span>)" + #CRLF$ +
-  #CRLF$ +
-  "<span class='cm'>; Ligne 0 : Barre de recherche fusionn&eacute;e sur 2 colonnes (ColSpan=2)</span>" + #CRLF$ +
-  "<span class='kw'>Define</span> *search.<span class='tp'>TextBox</span> = <span class='kw'>New</span> <span class='tp'>TextBox</span>(<span class='num'>0</span>, <span class='num'>0</span>, <span class='num'>100</span>, <span class='num'>30</span>, <span class='str'>'Recherche...'</span>)" + #CRLF$ +
-  "*grid\\<span class='fn'>SetCell</span>(*search, <span class='num'>0</span>, <span class='num'>1</span>, <span class='num'>1</span>, <span class='num'>2</span>) <span class='cm'>; Row 0, Col 1, ColSpan 2</span>" + #CRLF$ +
-  #CRLF$ +
-  "<span class='cm'>; Colonne 0 : Menu lat&eacute;ral occupant les 2 lignes (RowSpan=2)</span>" + #CRLF$ +
-  "<span class='kw'>Define</span> *sidebar.<span class='tp'>StackPanel</span> = <span class='kw'>New</span> <span class='tp'>StackPanel</span>(#UI_Orientation_Vertical, <span class='num'>5</span>)" + #CRLF$ +
-  "*grid\\<span class='fn'>SetCell</span>(*sidebar, <span class='num'>0</span>, <span class='num'>0</span>, <span class='num'>2</span>, <span class='num'>1</span>) <span class='cm'>; Row 0, Col 0, RowSpan 2</span>" + #CRLF$ +
-  #CRLF$ +
-  "<span class='cm'>; Ligne 1 : Zone d'&eacute;dition principale (Col 1) et Propri&eacute;t&eacute;s (Col 2)</span>" + #CRLF$ +
-  "<span class='kw'>Define</span> *mainEditor.<span class='tp'>TextBox</span> = <span class='kw'>New</span> <span class='tp'>TextBox</span>(<span class='num'>0</span>, <span class='num'>0</span>, <span class='num'>100</span>, <span class='num'>100</span>, <span class='str'>'&Eacute;diteur de code'</span>)" + #CRLF$ +
-  "<span class='kw'>Define</span> *propPanel.<span class='tp'>TextBox</span> = <span class='kw'>New</span> <span class='tp'>TextBox</span>(<span class='num'>0</span>, <span class='num'>0</span>, <span class='num'>100</span>, <span class='num'>100</span>, <span class='str'>'Propri&eacute;t&eacute;s'</span>)" + #CRLF$ +
-  "*grid\\<span class='fn'>SetCell</span>(*mainEditor, <span class='num'>1</span>, <span class='num'>1</span>)" + #CRLF$ +
-  "*grid\\<span class='fn'>SetCell</span>(*propPanel, <span class='num'>1</span>, <span class='num'>2</span>)" + #CRLF$ +
-  #CRLF$ +
-  "*win\\<span class='fn'>SetContent</span>(*grid)</code></pre>" +
+  "<h2 class='section-title'>M&eacute;thodes Principales</h2>" +
+  "<div class='table-wrapper'>" +
+  "  <table>" +
+  "    <tr><th>M&eacute;thode</th><th>Description</th></tr>" +
+  "    <tr><td><code>IsChecked()</code></td><td>Renvoie <code>#True</code> si coch&eacute;e, <code>#False</code> sinon.</td></tr>" +
+  "    <tr><td><code>SetChecked(state.b)</code></td><td>Modifie l'&eacute;tat de la case &agrave; cocher.</td></tr>" +
+  "  </table>" +
   "</div>" +
   "</div>"
 
-SaveHTML(BaseDocDir + "fr\ui\grid.html", BuildPage("fr", "grid", "ui/grid.html", "Classe Grid", "Grille bidimensionnelle responsive avec unit&eacute;s fixes, Auto et proportionnelles (*).", "badge-ui", "Layout", fr_grid))
+SaveHTML(BaseDocDir + "fr\ui\checkbox.html", BuildPage("fr", "checkbox", "ui/checkbox.html", "Classe CheckBox", "Case &agrave; cocher bool&eacute;enne avec multi-constructeurs et gestion d'&eacute;tat.", "badge-ui", "UI Class", fr_checkbox))
 
+; FR UI: ComboBox
+Define fr_combobox.s = "<div class='doc-section'>" +
+  "<h2 class='section-title'>Description</h2>" +
+  "<p>La classe <code>UI::ComboBox</code> encapsule une liste d&eacute;roulante s&eacute;lectionnable avec &eacute;v&eacute;nement <code>OnChange()</code>.</p>" +
+  "</div>" +
+  "<div class='doc-section'>" +
+  "<h2 class='section-title'>Constructeurs Surcharg&eacute;s</h2>" +
+  "<div class='table-wrapper'>" +
+  "  <table>" +
+  "    <tr><th>Constructeur</th><th>Description</th></tr>" +
+  "    <tr><td><code>Init()</code></td><td>Liste d&eacute;roulante par d&eacute;faut (150&times;25).</td></tr>" +
+  "    <tr><td><code>Init(w.i, h.i)</code></td><td>Dimensions personnalis&eacute;es.</td></tr>" +
+  "    <tr><td><code>Init(x.i, y.i, w.i, h.i)</code></td><td>Position absolue et dimensions.</td></tr>" +
+  "    <tr><td><code>Init(x.i, y.i, w.i, h.i, flags.i)</code></td><td>Complet avec flags PureBasic (ex: <code>#PB_ComboBox_Editable</code>, <code>#PB_ComboBox_LowerCase</code>).</td></tr>" +
+  "  </table>" +
+  "</div>" +
+  "</div>" +
+  "<div class='doc-section'>" +
+  "<h2 class='section-title'>M&eacute;thodes Principales</h2>" +
+  "<div class='table-wrapper'>" +
+  "  <table>" +
+  "    <tr><th>M&eacute;thode</th><th>Description</th></tr>" +
+  "    <tr><td><code>AddItem(text.s)</code></td><td>Ajoute un &eacute;l&eacute;ment &agrave; la fin de la liste.</td></tr>" +
+  "    <tr><td><code>GetSelectedIndex()</code> / <code>SetSelectedIndex(idx.i)</code></td><td>Index de l'&eacute;l&eacute;ment actif (0 &agrave; N-1, ou -1 si aucun).</td></tr>" +
+  "    <tr><td><code>GetSelectedItem()</code></td><td>Renvoie le texte de l'&eacute;l&eacute;ment actuellement s&eacute;lectionn&eacute;.</td></tr>" +
+  "    <tr><td><code>Clear()</code></td><td>Vide tous les &eacute;l&eacute;ments de la liste.</td></tr>" +
+  "  </table>" +
+  "</div>" +
+  "</div>"
 
+SaveHTML(BaseDocDir + "fr\ui\combobox.html", BuildPage("fr", "combobox", "ui/combobox.html", "Classe ComboBox", "Liste d&eacute;roulante s&eacute;lectionnable avec multi-constructeurs.", "badge-ui", "UI Class", fr_combobox))
+
+; FR UI: ListIcon
+Define fr_listicon.s = "<div class='doc-section'>" +
+  "<h2 class='section-title'>Description</h2>" +
+  "<p>La classe <code>UI::ListIcon</code> encapsule une table / grille de donn&eacute;es multi-colonnes (<code>ListIconGadget</code>) avec s&eacute;lection de ligne et gestion d'&eacute;v&eacute;nements.</p>" +
+  "</div>" +
+  "<div class='doc-section'>" +
+  "<h2 class='section-title'>Constructeurs Surcharg&eacute;s</h2>" +
+  "<div class='table-wrapper'>" +
+  "  <table>" +
+  "    <tr><th>Constructeur</th><th>Description</th></tr>" +
+  "    <tr><td><code>Init(title.s, colWidth.i)</code></td><td>Cr&eacute;e la table avec sa premi&egrave;re colonne (pleine ligne s&eacute;lectionnable par d&eacute;faut).</td></tr>" +
+  "    <tr><td><code>Init(title.s, colWidth.i, flags.i)</code></td><td>Cr&eacute;ation avec flags personnalis&eacute;s (<code>#PB_ListIcon_GridLines</code>, <code>#PB_ListIcon_CheckBoxes</code>, etc.).</td></tr>" +
+  "    <tr><td><code>Init(x.i, y.i, w.i, h.i, title.s, colWidth.i)</code></td><td>Positionnement absolu et dimensions.</td></tr>" +
+  "    <tr><td><code>Init(x.i, y.i, w.i, h.i, title.s, colWidth.i, flags.i)</code></td><td>Complet avec position, dimensions, titre de colonne et flags.</td></tr>" +
+  "  </table>" +
+  "</div>" +
+  "</div>" +
+  "<div class='doc-section'>" +
+  "<h2 class='section-title'>M&eacute;thodes Principales</h2>" +
+  "<div class='table-wrapper'>" +
+  "  <table>" +
+  "    <tr><th>M&eacute;thode</th><th>Description</th></tr>" +
+  "    <tr><td><code>AddColumn(colIdx.i, title.s, width.i)</code></td><td>Ajoute une nouvelle colonne &agrave; la table.</td></tr>" +
+  "    <tr><td><code>AddItem(text.s, icon.i = 0, itemIdx.i = -1)</code></td><td>Ins&egrave;re une nouvelle ligne (champs s&eacute;par&eacute;s par <code>Chr(10)</code>).</td></tr>" +
+  "    <tr><td><code>GetSelectedIndex()</code> / <code>SetSelectedIndex(idx.i)</code></td><td>Index de la ligne active (-1 si aucune).</td></tr>" +
+  "    <tr><td><code>GetItemText(itemIdx.i, colIdx.i = 0)</code></td><td>R&eacute;cup&egrave;re le texte d'une cellule sp&eacute;cifique.</td></tr>" +
+  "    <tr><td><code>SetItemText(itemIdx.i, colIdx.i, text.s)</code></td><td>Modifie le texte d'une cellule sp&eacute;cifique.</td></tr>" +
+  "    <tr><td><code>GetItemCount()</code></td><td>Nombre total de lignes dans la table.</td></tr>" +
+  "    <tr><td><code>Clear()</code></td><td>Supprime toutes les lignes.</td></tr>" +
+  "    <tr><td><code>RemoveItem(idx.i)</code></td><td>Supprime une ligne sp&eacute;cifique.</td></tr>" +
+  "  </table>" +
+  "</div>" +
+  "</div>"
+
+SaveHTML(BaseDocDir + "fr\ui\listicon.html", BuildPage("fr", "listicon", "ui/listicon.html", "Classe ListIcon", "Table et grille de donn&eacute;es multi-colonnes avec multi-constructeurs.", "badge-ui", "UI Class", fr_listicon))
+
+; FR UI: ProgressBar
+Define fr_progressbar.s = "<div class='doc-section'>" +
+  "<h2 class='section-title'>Description</h2>" +
+  "<p>La classe <code>UI::ProgressBar</code> fournit une barre de progression visuelle pour le suivi des traitements.</p>" +
+  "</div>" +
+  "<div class='doc-section'>" +
+  "<h2 class='section-title'>Constructeurs Surcharg&eacute;s</h2>" +
+  "<div class='table-wrapper'>" +
+  "  <table>" +
+  "    <tr><th>Constructeur</th><th>Description</th></tr>" +
+  "    <tr><td><code>Init()</code></td><td>Plage par d&eacute;faut 0..100 (200&times;25).</td></tr>" +
+  "    <tr><td><code>Init(min.i, max.i)</code></td><td>Plage minimale et maximale sp&eacute;cifi&eacute;es.</td></tr>" +
+  "    <tr><td><code>Init(min.i, max.i, w.i, h.i)</code></td><td>Plage et dimensions souhait&eacute;es.</td></tr>" +
+  "    <tr><td><code>Init(x.i, y.i, w.i, h.i, min.i, max.i, flags.i)</code></td><td>Complet avec position absolue, plage et flags (<code>#PB_ProgressBar_Smooth</code>, <code>#PB_ProgressBar_Vertical</code>).</td></tr>" +
+  "  </table>" +
+  "</div>" +
+  "</div>" +
+  "<div class='doc-section'>" +
+  "<h2 class='section-title'>M&eacute;thodes Principales</h2>" +
+  "<div class='table-wrapper'>" +
+  "  <table>" +
+  "    <tr><th>M&eacute;thode</th><th>Description</th></tr>" +
+  "    <tr><td><code>GetValue()</code></td><td>Renvoie la valeur actuelle de progression.</td></tr>" +
+  "    <tr><td><code>SetValue(v.i)</code></td><td>Met &agrave; jour la valeur de progression.</td></tr>" +
+  "  </table>" +
+  "</div>" +
+  "</div>"
+
+SaveHTML(BaseDocDir + "fr\ui\progressbar.html", BuildPage("fr", "progressbar", "ui/progressbar.html", "Classe ProgressBar", "Indicateur visuel d'avancement avec multi-constructeurs.", "badge-ui", "UI Class", fr_progressbar))
+
+; FR UI: Slider
+Define fr_slider.s = "<div class='doc-section'>" +
+  "<h2 class='section-title'>Description</h2>" +
+  "<p>La classe <code>UI::Slider</code> encapsule un curseur de r&eacute;glage lin&eacute;aire (<code>TrackBarGadget</code>).</p>" +
+  "</div>" +
+  "<div class='doc-section'>" +
+  "<h2 class='section-title'>Constructeurs Surcharg&eacute;s</h2>" +
+  "<div class='table-wrapper'>" +
+  "  <table>" +
+  "    <tr><th>Constructeur</th><th>Description</th></tr>" +
+  "    <tr><td><code>Init()</code></td><td>Plage par d&eacute;faut 0..100 (200&times;25).</td></tr>" +
+  "    <tr><td><code>Init(min.i, max.i)</code></td><td>Plage minimale et maximale sp&eacute;cifi&eacute;es.</td></tr>" +
+  "    <tr><td><code>Init(min.i, max.i, w.i, h.i)</code></td><td>Plage et dimensions souhait&eacute;es.</td></tr>" +
+  "    <tr><td><code>Init(x.i, y.i, w.i, h.i, min.i, max.i, flags.i)</code></td><td>Complet avec position absolue, plage et flags (<code>#PB_TrackBar_Ticks</code>, <code>#PB_TrackBar_Vertical</code>).</td></tr>" +
+  "  </table>" +
+  "</div>" +
+  "</div>" +
+  "<div class='doc-section'>" +
+  "<h2 class='section-title'>M&eacute;thodes Principales</h2>" +
+  "<div class='table-wrapper'>" +
+  "  <table>" +
+  "    <tr><th>M&eacute;thode</th><th>Description</th></tr>" +
+  "    <tr><td><code>GetValue()</code></td><td>Renvoie la position actuelle du curseur.</td></tr>" +
+  "    <tr><td><code>SetValue(v.i)</code></td><td>Modifie la position du curseur.</td></tr>" +
+  "  </table>" +
+  "</div>" +
+  "</div>"
+
+SaveHTML(BaseDocDir + "fr\ui\slider.html", BuildPage("fr", "slider", "ui/slider.html", "Classe Slider", "Curseur de r&eacute;glage lin&eacute;aire avec multi-constructeurs.", "badge-ui", "UI Class", fr_slider))
+
+; FR UI: ToggleSwitch
+Define fr_toggleswitch.s = "<div class='doc-section'>" +
+  "<h2 class='section-title'>Description</h2>" +
+  "<p>La classe <code>UI::Controls::ToggleSwitch</code> est un contr&ocirc;le moderne vectoriel (<code>CustomGadget</code> sur Canvas) repr&eacute;sentant un interrupteur style iOS / Material.</p>" +
+  "</div>" +
+  "<div class='doc-section'>" +
+  "<h2 class='section-title'>Constructeurs Surcharg&eacute;s</h2>" +
+  "<div class='table-wrapper'>" +
+  "  <table>" +
+  "    <tr><th>Constructeur</th><th>Description</th></tr>" +
+  "    <tr><td><code>Init()</code></td><td>Interrupteur d&eacute;sactiv&eacute; par d&eacute;faut (50&times;26).</td></tr>" +
+  "    <tr><td><code>Init(checked.b)</code></td><td>&Eacute;tat initial activ&eacute; / d&eacute;sactiv&eacute;.</td></tr>" +
+  "    <tr><td><code>Init(w.i, h.i, checked.b)</code></td><td>Dimensions et &eacute;tat initial.</td></tr>" +
+  "    <tr><td><code>Init(x.i, y.i, w.i, h.i, checked.b)</code></td><td>Position absolue, dimensions et &eacute;tat initial.</td></tr>" +
+  "  </table>" +
+  "</div>" +
+  "</div>" +
+  "<div class='doc-section'>" +
+  "<h2 class='section-title'>M&eacute;thodes Principales</h2>" +
+  "<div class='table-wrapper'>" +
+  "  <table>" +
+  "    <tr><th>M&eacute;thode</th><th>Description</th></tr>" +
+  "    <tr><td><code>IsChecked()</code></td><td>Renvoie <code>#True</code> si activ&eacute;, <code>#False</code> sinon.</td></tr>" +
+  "    <tr><td><code>SetChecked(state.b)</code></td><td>Modifie l'&eacute;tat et redessine le composant.</td></tr>" +
+  "    <tr><td><code>OnChange()</code></td><td>Callback virtuel d&eacute;clench&eacute; lors du basculement.</td></tr>" +
+  "  </table>" +
+  "</div>" +
+  "</div>"
+
+SaveHTML(BaseDocDir + "fr\ui\toggleswitch.html", BuildPage("fr", "toggleswitch", "ui/toggleswitch.html", "Classe ToggleSwitch", "Interrupteur vectoriel moderne (Style iOS) avec multi-constructeurs.", "badge-ui", "UI Class", fr_toggleswitch))
+
+; FR UI: Layouts Container
+Define fr_container.s = "<div class='doc-section'>" +
+  "<h2 class='section-title'>Description</h2>" +
+  "<p>La classe <code>UI::Layouts::Container</code> est la classe abstraite fondatrice de tout le syst&egrave;me de disposition responsive de PureBasic OOP. Inspir&eacute;e du mod&egrave;le WPF / XAML de .NET, elle permet de cr&eacute;er des interfaces graphiques modernes qui s'adaptent automatiquement &agrave; toutes les r&eacute;solutions d'&eacute;cran et aux redimensionnements de fen&ecirc;tres.</p>" +
+  "<p>Elle impl&eacute;mente le cycle de mise en page automatique (<code>Arrange</code>) et g&egrave;re les marges int&eacute;rieures (<code>Padding</code>) ainsi que la collection de composants enfants.</p>" +
+  "</div>" +
+  "<div class='doc-section'>" +
+  "<h2 class='section-title'>Constructeurs Surcharg&eacute;s</h2>" +
+  "<div class='table-wrapper'>" +
+  "  <table>" +
+  "    <tr><th>Constructeur</th><th>Description</th></tr>" +
+  "    <tr><td><code>Init()</code></td><td>Conteneur par d&eacute;faut (stretch horizontal et vertical).</td></tr>" +
+  "    <tr><td><code>Init(w.i, h.i)</code></td><td>Conteneur avec dimensions initiales.</td></tr>" +
+  "    <tr><td><code>Init(x.i, y.i, w.i, h.i)</code></td><td>Conteneur avec position absolue et dimensions.</td></tr>" +
+  "  </table>" +
+  "</div>" +
+  "</div>" +
+  "<div class='doc-section'>" +
+  "<h2 class='section-title'>M&eacute;thodes de Container</h2>" +
+  "<div class='table-wrapper'>" +
+  "  <table>" +
+  "    <tr><th>M&eacute;thode</th><th>Description</th></tr>" +
+  "    <tr><td><code>AddChild(*child)</code></td><td>Ajoute un composant enfant &agrave; la disposition.</td></tr>" +
+  "    <tr><td><code>RemoveChild(*child)</code></td><td>Retire un composant enfant.</td></tr>" +
+  "    <tr><td><code>ClearChildren()</code></td><td>Supprime tous les composants enfants.</td></tr>" +
+  "    <tr><td><code>SetPadding(l, t, r, b)</code></td><td>D&eacute;finit les marges internes en pixels.</td></tr>" +
+  "    <tr><td><code>SetPaddingAll(p)</code></td><td>D&eacute;finit une marge interne uniforme.</td></tr>" +
+  "    <tr><td><code>Arrange(x, y, w, h)</code></td><td>Recalcule le positionnement de tous les enfants.</td></tr>" +
+  "  </table>" +
+  "</div>" +
+  "</div>"
+
+SaveHTML(BaseDocDir + "fr\ui\container.html", BuildPage("fr", "container", "ui/container.html", "Classe Container", "Classe de base abstraite pour tous les panneaux de disposition responsive WPF.", "badge-ui", "Layout", fr_container))
+
+; FR UI: StackPanel
+Define fr_stackpanel.s = "<div class='doc-section'>" +
+  "<h2 class='section-title'>Description</h2>" +
+  "<p>La classe <code>UI::Layouts::StackPanel</code> dispose ses composants enfants sur une seule ligne s&eacute;quentielle, orient&eacute;e soit verticalement (de haut en bas), soit horizontalement (de gauche &agrave; droite).</p>" +
+  "<p>Un espacement constant (<code>Spacing</code>) peut &ecirc;tre configur&eacute; entre chaque &eacute;l&eacute;ment cons&eacute;cutif.</p>" +
+  "</div>" +
+  "<div class='doc-section'>" +
+  "<h2 class='section-title'>Constructeurs Surcharg&eacute;s</h2>" +
+  "<div class='table-wrapper'>" +
+  "  <table>" +
+  "    <tr><th>Constructeur</th><th>Description</th></tr>" +
+  "    <tr><td><code>Init()</code></td><td>StackPanel vertical avec espacement de 5 pixels par d&eacute;faut.</td></tr>" +
+  "    <tr><td><code>Init(orientation.i)</code></td><td>StackPanel avec orientation choisie (<code>#UI_Orientation_Vertical</code> ou <code>#UI_Orientation_Horizontal</code>).</td></tr>" +
+  "    <tr><td><code>Init(orientation.i, spacing.i)</code></td><td>Orientation et espacement personnalis&eacute;s.</td></tr>" +
+  "    <tr><td><code>Init(orientation.i, spacing.i, w.i, h.i)</code></td><td>Orientation, espacement et dimensions sp&eacute;cifi&eacute;es.</td></tr>" +
+  "  </table>" +
+  "</div>" +
+  "</div>" +
+  "<div class='doc-section'>" +
+  "<h2 class='section-title'>Exemple d'utilisation</h2>" +
+  "<div class='code-container'>" +
+  "  <div class='code-header'><span class='code-title'>StackPanel vertical (.pbo)</span><span class='code-badge'>PBO</span></div>" +
+  "  <pre><code><span class='kw'>Define</span> *panel.<span class='tp'>StackPanel</span> = <span class='kw'>New</span> <span class='tp'>StackPanel</span>(#UI_Orientation_Vertical, <span class='num'>10</span>)" + #CRLF$ +
+  "*panel\\<span class='fn'>SetPaddingAll</span>(<span class='num'>15</span>)" + #CRLF$ +
+  "*panel\\<span class='fn'>AddChild</span>(<span class='kw'>New</span> <span class='tp'>Button</span>(<span class='str'>'Premier Bouton'</span>))" + #CRLF$ +
+  "*panel\\<span class='fn'>AddChild</span>(<span class='kw'>New</span> <span class='tp'>Button</span>(<span class='str'>'Deuxi&egrave;me Bouton'</span>))" + #CRLF$ +
+  "*win\\<span class='fn'>SetRootComponent</span>(*panel)</code></pre>" +
+  "</div>" +
+  "</div>"
+
+SaveHTML(BaseDocDir + "fr\ui\stackpanel.html", BuildPage("fr", "stackpanel", "ui/stackpanel.html", "Classe StackPanel", "Disposition lin&eacute;aire automatique verticale ou horizontale avec multi-constructeurs.", "badge-ui", "Layout", fr_stackpanel))
+
+; FR UI: DockPanel
+Define fr_dockpanel.s = "<div class='doc-section'>" +
+  "<h2 class='section-title'>Description</h2>" +
+  "<p>La classe <code>UI::Layouts::DockPanel</code> ancre ses composants enfants le long de ses 4 bordures ext&eacute;rieures (Haut, Bas, Gauche, Droite) et attribue automatiquement tout l'espace r&eacute;siduel au centre &agrave; son dernier enfant (propri&eacute;t&eacute; <code>LastChildFill</code>).</p>" +
+  "</div>" +
+  "<div class='doc-section'>" +
+  "<h2 class='section-title'>Constructeurs Surcharg&eacute;s</h2>" +
+  "<div class='table-wrapper'>" +
+  "  <table>" +
+  "    <tr><th>Constructeur</th><th>Description</th></tr>" +
+  "    <tr><td><code>Init()</code></td><td>DockPanel avec <code>LastChildFill = #True</code> par d&eacute;faut.</td></tr>" +
+  "    <tr><td><code>Init(lastChildFill.b)</code></td><td>Activation ou non du remplissage central automatique pour le dernier enfant.</td></tr>" +
+  "    <tr><td><code>Init(lastChildFill.b, w.i, h.i)</code></td><td>Remplissage central et dimensions sp&eacute;cifi&eacute;es.</td></tr>" +
+  "  </table>" +
+  "</div>" +
+  "</div>" +
+  "<div class='doc-section'>" +
+  "<h2 class='section-title'>Constantes d'Ancrage</h2>" +
+  "<div class='table-wrapper'>" +
+  "  <table>" +
+  "    <tr><th>Constante</th><th>Description</th></tr>" +
+  "    <tr><td><code>#UI_Dock_Top</code></td><td>Ancre le composant en haut en occupant toute la largeur.</td></tr>" +
+  "    <tr><td><code>#UI_Dock_Bottom</code></td><td>Ancre le composant en bas en occupant toute la largeur.</td></tr>" +
+  "    <tr><td><code>#UI_Dock_Left</code></td><td>Ancre le composant &agrave; gauche sur la hauteur r&eacute;siduelle.</td></tr>" +
+  "    <tr><td><code>#UI_Dock_Right</code></td><td>Ancre le composant &agrave; droite sur la hauteur r&eacute;siduelle.</td></tr>" +
+  "    <tr><td><code>#UI_Dock_Fill</code></td><td>Occupe la totalit&eacute; de l'espace central disponible.</td></tr>" +
+  "  </table>" +
+  "</div>" +
+  "</div>"
+
+SaveHTML(BaseDocDir + "fr\ui\dockpanel.html", BuildPage("fr", "dockpanel", "ui/dockpanel.html", "Classe DockPanel", "Disposition par ancrage sur les bords et remplissage central.", "badge-ui", "Layout", fr_dockpanel))
+
+; FR UI: Grid
+Define fr_grid.s = "<div class='doc-section'>" +
+  "<h2 class='section-title'>Description</h2>" +
+  "<p>La classe <code>UI::Layouts::Grid</code> d&eacute;finit une grille 2D flexible en lignes et colonnes, avec dimensionnement en pixels, <code>'Auto'</code> ou proportionnel Star (<code>'*'</code>, <code>'2*'</code>).</p>" +
+  "</div>" +
+  "<div class='doc-section'>" +
+  "<h2 class='section-title'>Constructeurs Surcharg&eacute;s</h2>" +
+  "<div class='table-wrapper'>" +
+  "  <table>" +
+  "    <tr><th>Constructeur</th><th>Description</th></tr>" +
+  "    <tr><td><code>Init()</code></td><td>Grille 2D r&eacute;active par d&eacute;faut.</td></tr>" +
+  "    <tr><td><code>Init(w.i, h.i)</code></td><td>Grille 2D avec dimensions initiales.</td></tr>" +
+  "  </table>" +
+  "</div>" +
+  "</div>" +
+  "<div class='doc-section'>" +
+  "<h2 class='section-title'>Exemple d'utilisation</h2>" +
+  "<div class='code-container'>" +
+  "  <div class='code-header'><span class='code-title'>Grille avec Star Sizing (.pbo)</span><span class='code-badge'>PBO</span></div>" +
+  "  <pre><code><span class='kw'>Define</span> *grid.<span class='tp'>Grid</span> = <span class='kw'>New</span> <span class='tp'>Grid</span>()" + #CRLF$ +
+  "*grid\\<span class='fn'>AddColumn</span>(<span class='str'>'200'</span>)  <span class='cm'>; Colonne 0: 200px fixe</span>" + #CRLF$ +
+  "*grid\\<span class='fn'>AddColumn</span>(<span class='str'>'3*'</span>)   <span class='cm'>; Colonne 1: 75% largeur restante</span>" + #CRLF$ +
+  "*grid\\<span class='fn'>AddColumn</span>(<span class='str'>'1*'</span>)   <span class='cm'>; Colonne 2: 25% largeur restante</span>" + #CRLF$ +
+  "*grid\\<span class='fn'>AddRow</span>(<span class='str'>'50'</span>)      <span class='cm'>; Ligne 0: 50px en-t&ecirc;te</span>" + #CRLF$ +
+  "*grid\\<span class='fn'>AddRow</span>(<span class='str'>'*'</span>)       <span class='cm'>; Ligne 1: Contenu fluide</span>" + #CRLF$ +
+  #CRLF$ +
+  "*grid\\<span class='fn'>SetCell</span>(*sidebar, <span class='num'>0</span>, <span class='num'>0</span>, <span class='num'>2</span>, <span class='num'>1</span>) <span class='cm'>; RowSpan=2</span>" + #CRLF$ +
+  "*grid\\<span class='fn'>SetCell</span>(*mainView, <span class='num'>1</span>, <span class='num'>1</span>)" + #CRLF$ +
+  "*win\\<span class='fn'>SetRootComponent</span>(*grid)</code></pre>" +
+  "</div>" +
+  "</div>"
+
+SaveHTML(BaseDocDir + "fr\ui\grid.html", BuildPage("fr", "grid", "ui/grid.html", "Classe Grid", "Grille responsive 2D avec dimensionnement en pixels, Auto et Star (*).", "badge-ui", "Layout", fr_grid))
 ; ============================================================================
 ; 2. ENGLISH PAGES
 ; ============================================================================
@@ -933,106 +1111,298 @@ Define en_window.s = "<div class='doc-section'>" +
   "</div>" +
   "</div>"
 
-SaveHTML(BaseDocDir + "en\ui\window.html", BuildPage("en", "window", "ui/window.html", "Window Class", "Flexible GUI window management with multi-constructors and dynamic setters.", "badge-ui", "UI Class", en_window))
-SaveHTML(BaseDocDir + "en\ui\gadget.html", BuildPage("en", "gadget", "ui/gadget.html", "Gadget & Component Classes", "Abstract base class for all UI controls.", "badge-ui", "UI Class", "<p>Unified base control handling coordinates (x, y, w, h), visibility, and event routing.</p>"))
-SaveHTML(BaseDocDir + "en\ui\button.html", BuildPage("en", "button", "ui/button.html", "Button Class", "Clickable button control with event handling.", "badge-ui", "UI Class", "<p>Standard push button with text, dimensions, and <code>OnClick</code> callbacks.</p>"))
-SaveHTML(BaseDocDir + "en\ui\checkbox.html", BuildPage("en", "checkbox", "ui/checkbox.html", "CheckBox Class", "Checkable toggle box.", "badge-ui", "UI Class", "<p>Toggle checkable box with <code>SetState()</code> and <code>GetState()</code>.</p>"))
-SaveHTML(BaseDocDir + "en\ui\combobox.html", BuildPage("en", "combobox", "ui/combobox.html", "ComboBox Class", "Drop-down selection list.", "badge-ui", "UI Class", "<p>Dropdown selection component with item management.</p>"))
-SaveHTML(BaseDocDir + "en\ui\label.html", BuildPage("en", "label", "ui/label.html", "Label Class", "Static text display.", "badge-ui", "UI Class", "<p>Static text display with customizable typography.</p>"))
-SaveHTML(BaseDocDir + "en\ui\progressbar.html", BuildPage("en", "progressbar", "ui/progressbar.html", "ProgressBar Class", "Visual progress indicator.", "badge-ui", "UI Class", "<p>Linear progress bar with progress tracking.</p>"))
-SaveHTML(BaseDocDir + "en\ui\slider.html", BuildPage("en", "slider", "ui/slider.html", "Slider Class", "Interactive trackbar slider.", "badge-ui", "UI Class", "<p>Interactive trackbar for numerical value adjustment.</p>"))
-SaveHTML(BaseDocDir + "en\ui\textbox.html", BuildPage("en", "textbox", "ui/textbox.html", "TextBox Class", "Text input field.", "badge-ui", "UI Class", "<p>Single-line or multi-line text input control.</p>"))
-SaveHTML(BaseDocDir + "en\ui\toggleswitch.html", BuildPage("en", "toggleswitch", "ui/toggleswitch.html", "ToggleSwitch Class", "Modern toggle switch (iOS/Material style).", "badge-ui", "UI Class", "<p>Vector-rendered CustomGadget for On/Off toggle states with smooth animations.</p>"))
 
-; EN UI: Responsive Layouts (WPF Style)
-Define en_container.s = "<div class='doc-section'>" +
+; ============================================================================
+; ENGLISH UI PAGES
+; ============================================================================
+
+; EN UI: Window
+Define en_window.s = "<div class='doc-section'>" +
   "<h2 class='section-title'>Description</h2>" +
-  "<p>The <code>UI::Layouts::Container</code> class is the abstract foundation for all responsive layout panels. Inspired by WPF / .NET, it coordinates child components and executes automatic two-pass layout cycles (<code>Measure</code> &amp; <code>Arrange</code>).</p>" +
-  "<p>It manages child control collections and internal edge paddings (<code>Padding</code>).</p>" +
+  "<p>The <code>UI::Window</code> class encapsulates a top-level native GUI window with multi-constructors, synchronized getters/setters, automated DPI-aware resizing, and virtual event lifecycle hooks (<code>OnClose()</code>, <code>OnResize()</code>...).</p>" +
   "</div>" +
   "<div class='doc-section'>" +
-  "<h2 class='section-title'>Key Methods</h2>" +
+  "<h2 class='section-title'>Overloaded Constructors</h2>" +
   "<div class='table-wrapper'>" +
   "  <table>" +
-  "    <tr><th>Method</th><th>Description</th></tr>" +
-  "    <tr><td><code>AddChild(*child.Component)</code></td><td>Adds a child component to the container.</td></tr>" +
-  "    <tr><td><code>RemoveChild(*child.Component)</code></td><td>Removes a child component from the container.</td></tr>" +
-  "    <tr><td><code>ClearChildren()</code></td><td>Clears and disposes of all attached child components.</td></tr>" +
-  "    <tr><td><code>SetPadding(l.i, t.i, r.i, b.i)</code></td><td>Sets container inner padding (left, top, right, bottom) in pixels.</td></tr>" +
-  "    <tr><td><code>SetPaddingAll(p.i)</code></td><td>Applies uniform inner padding across all 4 sides.</td></tr>" +
-  "    <tr><td><code>Arrange(x.i, y.i, w.i, h.i)</code></td><td>Recalculates child layout within the assigned boundary box.</td></tr>" +
+  "    <tr><th>Constructor</th><th>Description</th></tr>" +
+  "    <tr><td><code>Init(title.s)</code></td><td>Centered 800&times;600 window with minimize, maximize, and resize controls.</td></tr>" +
+  "    <tr><td><code>Init(title.s, w.i, h.i)</code></td><td>Centered resizable window with custom width and height.</td></tr>" +
+  "    <tr><td><code>Init(title.s, w.i, h.i, flags.i)</code></td><td>Window with custom dimensions and PureBasic flags.</td></tr>" +
+  "    <tr><td><code>Init(title.s, x.i, y.i, w.i, h.i)</code></td><td>Window with absolute coordinates and dimensions.</td></tr>" +
+  "    <tr><td><code>Init(title.s, x.i, y.i, w.i, h.i, flags.i)</code></td><td>Window with absolute coordinates, dimensions, and flags.</td></tr>" +
+  "    <tr><td><code>Init(title.s, x.i, y.i, w.i, h.i, flags.i, parent.i)</code></td><td>Full window initialization with parent window ID.</td></tr>" +
+  "  </table>" +
+  "</div>" +
+  "</div>"
+
+SaveHTML(BaseDocDir + "en\ui\window.html", BuildPage("en", "window", "ui/window.html", "Window Class", "Flexible GUI window management with multi-constructors and dynamic setters.", "badge-ui", "UI Class", en_window))
+
+; EN UI: Gadget / Component
+Define en_gadget.s = "<div class='doc-section'>" +
+  "<h2 class='section-title'>Description</h2>" +
+  "<p>The abstract <code>UI::Component</code> and <code>UI::Gadget</code> classes form the foundation for all GUI controls and responsive layout panels.</p>" +
+  "<p>They provide unified coordinate bounds (x, y, w, h), alignment constraints, margins, visibility, and event routing.</p>" +
+  "</div>"
+
+SaveHTML(BaseDocDir + "en\ui\gadget.html", BuildPage("en", "gadget", "ui/gadget.html", "Gadget & Component Classes", "Abstract base class for all UI controls and layout panels.", "badge-ui", "UI Class", en_gadget))
+
+; EN UI: Button
+Define en_button.s = "<div class='doc-section'>" +
+  "<h2 class='section-title'>Description</h2>" +
+  "<p>The <code>UI::Button</code> class encapsulates a clickable push button with multi-constructors and <code>OnClick()</code> virtual handler.</p>" +
+  "</div>" +
+  "<div class='doc-section'>" +
+  "<h2 class='section-title'>Overloaded Constructors</h2>" +
+  "<div class='table-wrapper'>" +
+  "  <table>" +
+  "    <tr><th>Constructor</th><th>Description</th></tr>" +
+  "    <tr><td><code>Init(text.s)</code></td><td>Button with text (auto 120&times;30 default for layout containers).</td></tr>" +
+  "    <tr><td><code>Init(text.s, w.i, h.i)</code></td><td>Button with text and custom dimensions.</td></tr>" +
+  "    <tr><td><code>Init(x.i, y.i, w.i, h.i, text.s)</code></td><td>Absolute position, dimensions, and text.</td></tr>" +
+  "    <tr><td><code>Init(x.i, y.i, w.i, h.i, text.s, flags.i)</code></td><td>Full constructor with PureBasic flags.</td></tr>" +
+  "  </table>" +
+  "</div>" +
+  "</div>"
+
+SaveHTML(BaseDocDir + "en\ui\button.html", BuildPage("en", "button", "ui/button.html", "Button Class", "Clickable push button with multi-constructors and event dispatch.", "badge-ui", "UI Class", en_button))
+
+; EN UI: TextBox
+Define en_textbox.s = "<div class='doc-section'>" +
+  "<h2 class='section-title'>Description</h2>" +
+  "<p>The <code>UI::TextBox</code> class encapsulates a single-line editable text input (<code>StringGadget</code>) with <code>OnChange()</code> notification.</p>" +
+  "</div>" +
+  "<div class='doc-section'>" +
+  "<h2 class='section-title'>Overloaded Constructors</h2>" +
+  "<div class='table-wrapper'>" +
+  "  <table>" +
+  "    <tr><th>Constructor</th><th>Description</th></tr>" +
+  "    <tr><td><code>Init()</code></td><td>Empty text box (150&times;25 default).</td></tr>" +
+  "    <tr><td><code>Init(defaultText.s)</code></td><td>Text box with default text.</td></tr>" +
+  "    <tr><td><code>Init(defaultText.s, w.i, h.i)</code></td><td>Text box with default text and custom dimensions.</td></tr>" +
+  "    <tr><td><code>Init(x.i, y.i, w.i, h.i, defaultText.s)</code></td><td>Absolute coordinates, dimensions, and default text.</td></tr>" +
+  "    <tr><td><code>Init(x.i, y.i, w.i, h.i, defaultText.s, flags.i)</code></td><td>Full constructor with flags (Password, Numeric, ReadOnly).</td></tr>" +
+  "  </table>" +
+  "</div>" +
+  "</div>"
+
+SaveHTML(BaseDocDir + "en\ui\textbox.html", BuildPage("en", "textbox", "ui/textbox.html", "TextBox Class", "Text input field with multi-constructors and change events.", "badge-ui", "UI Class", en_textbox))
+
+; EN UI: Label
+Define en_label.s = "<div class='doc-section'>" +
+  "<h2 class='section-title'>Description</h2>" +
+  "<p>The <code>UI::Label</code> class displays static text with customizable alignments and styles.</p>" +
+  "</div>" +
+  "<div class='doc-section'>" +
+  "<h2 class='section-title'>Overloaded Constructors</h2>" +
+  "<div class='table-wrapper'>" +
+  "  <table>" +
+  "    <tr><th>Constructor</th><th>Description</th></tr>" +
+  "    <tr><td><code>Init(text.s)</code></td><td>Static text label (auto-sized for layouts).</td></tr>" +
+  "    <tr><td><code>Init(text.s, w.i, h.i)</code></td><td>Label with text and custom dimensions.</td></tr>" +
+  "    <tr><td><code>Init(x.i, y.i, w.i, h.i, text.s)</code></td><td>Absolute position, dimensions, and text.</td></tr>" +
+  "    <tr><td><code>Init(x.i, y.i, w.i, h.i, text.s, flags.i)</code></td><td>Full constructor with alignment flags (<code>#PB_Text_Center</code>, <code>#PB_Text_Right</code>).</td></tr>" +
+  "  </table>" +
+  "</div>" +
+  "</div>"
+
+SaveHTML(BaseDocDir + "en\ui\label.html", BuildPage("en", "label", "ui/label.html", "Label Class", "Static text label with multi-constructors and alignment options.", "badge-ui", "UI Class", en_label))
+
+; EN UI: CheckBox
+Define en_checkbox.s = "<div class='doc-section'>" +
+  "<h2 class='section-title'>Description</h2>" +
+  "<p>The <code>UI::CheckBox</code> class encapsulates a boolean toggle checkbox with checked state management.</p>" +
+  "</div>" +
+  "<div class='doc-section'>" +
+  "<h2 class='section-title'>Overloaded Constructors</h2>" +
+  "<div class='table-wrapper'>" +
+  "  <table>" +
+  "    <tr><th>Constructor</th><th>Description</th></tr>" +
+  "    <tr><td><code>Init(text.s)</code></td><td>Unchecked checkbox (150&times;25 default).</td></tr>" +
+  "    <tr><td><code>Init(text.s, checked.b)</code></td><td>Checkbox with text and initial state.</td></tr>" +
+  "    <tr><td><code>Init(text.s, w.i, h.i, checked.b)</code></td><td>Checkbox with text, dimensions, and initial state.</td></tr>" +
+  "    <tr><td><code>Init(x.i, y.i, w.i, h.i, text.s, flags.i)</code></td><td>Full constructor with position and flags.</td></tr>" +
+  "  </table>" +
+  "</div>" +
+  "</div>"
+
+SaveHTML(BaseDocDir + "en\ui\checkbox.html", BuildPage("en", "checkbox", "ui/checkbox.html", "CheckBox Class", "Toggle checkbox with multi-constructors and state accessors.", "badge-ui", "UI Class", en_checkbox))
+
+; EN UI: ComboBox
+Define en_combobox.s = "<div class='doc-section'>" +
+  "<h2 class='section-title'>Description</h2>" +
+  "<p>The <code>UI::ComboBox</code> class provides a drop-down list selection box with item management.</p>" +
+  "</div>" +
+  "<div class='doc-section'>" +
+  "<h2 class='section-title'>Overloaded Constructors</h2>" +
+  "<div class='table-wrapper'>" +
+  "  <table>" +
+  "    <tr><th>Constructor</th><th>Description</th></tr>" +
+  "    <tr><td><code>Init()</code></td><td>Drop-down selection box (150&times;25 default).</td></tr>" +
+  "    <tr><td><code>Init(w.i, h.i)</code></td><td>ComboBox with custom dimensions.</td></tr>" +
+  "    <tr><td><code>Init(x.i, y.i, w.i, h.i)</code></td><td>Absolute coordinates and dimensions.</td></tr>" +
+  "    <tr><td><code>Init(x.i, y.i, w.i, h.i, flags.i)</code></td><td>Full constructor with flags (<code>#PB_ComboBox_Editable</code>, etc.).</td></tr>" +
+  "  </table>" +
+  "</div>" +
+  "</div>"
+
+SaveHTML(BaseDocDir + "en\ui\combobox.html", BuildPage("en", "combobox", "ui/combobox.html", "ComboBox Class", "Drop-down selection box with multi-constructors.", "badge-ui", "UI Class", en_combobox))
+
+; EN UI: ListIcon
+Define en_listicon.s = "<div class='doc-section'>" +
+  "<h2 class='section-title'>Description</h2>" +
+  "<p>The <code>UI::ListIcon</code> class encapsulates a multi-column data grid table (<code>ListIconGadget</code>) with selection and row manipulation.</p>" +
+  "</div>" +
+  "<div class='doc-section'>" +
+  "<h2 class='section-title'>Overloaded Constructors</h2>" +
+  "<div class='table-wrapper'>" +
+  "  <table>" +
+  "    <tr><th>Constructor</th><th>Description</th></tr>" +
+  "    <tr><td><code>Init(title.s, colWidth.i)</code></td><td>Initializes table with its primary column (full row select by default).</td></tr>" +
+  "    <tr><td><code>Init(title.s, colWidth.i, flags.i)</code></td><td>Table with custom flags (<code>#PB_ListIcon_GridLines</code>, <code>#PB_ListIcon_CheckBoxes</code>, etc.).</td></tr>" +
+  "    <tr><td><code>Init(x.i, y.i, w.i, h.i, title.s, colWidth.i)</code></td><td>Absolute position and dimensions.</td></tr>" +
+  "    <tr><td><code>Init(x.i, y.i, w.i, h.i, title.s, colWidth.i, flags.i)</code></td><td>Full constructor with position, dimensions, title, and flags.</td></tr>" +
+  "  </table>" +
+  "</div>" +
+  "</div>"
+
+SaveHTML(BaseDocDir + "en\ui\listicon.html", BuildPage("en", "listicon", "ui/listicon.html", "ListIcon Class", "Multi-column data grid table with multi-constructors.", "badge-ui", "UI Class", en_listicon))
+
+; EN UI: ProgressBar
+Define en_progressbar.s = "<div class='doc-section'>" +
+  "<h2 class='section-title'>Description</h2>" +
+  "<p>The <code>UI::ProgressBar</code> class provides a visual progress indicator.</p>" +
+  "</div>" +
+  "<div class='doc-section'>" +
+  "<h2 class='section-title'>Overloaded Constructors</h2>" +
+  "<div class='table-wrapper'>" +
+  "  <table>" +
+  "    <tr><th>Constructor</th><th>Description</th></tr>" +
+  "    <tr><td><code>Init()</code></td><td>Default range 0..100 (200&times;25).</td></tr>" +
+  "    <tr><td><code>Init(min.i, max.i)</code></td><td>Custom min and max range.</td></tr>" +
+  "    <tr><td><code>Init(min.i, max.i, w.i, h.i)</code></td><td>Custom range and dimensions.</td></tr>" +
+  "    <tr><td><code>Init(x.i, y.i, w.i, h.i, min.i, max.i, flags.i)</code></td><td>Full constructor with position, range, and flags.</td></tr>" +
+  "  </table>" +
+  "</div>" +
+  "</div>"
+
+SaveHTML(BaseDocDir + "en\ui\progressbar.html", BuildPage("en", "progressbar", "ui/progressbar.html", "ProgressBar Class", "Visual progress indicator with multi-constructors.", "badge-ui", "UI Class", en_progressbar))
+
+; EN UI: Slider
+Define en_slider.s = "<div class='doc-section'>" +
+  "<h2 class='section-title'>Description</h2>" +
+  "<p>The <code>UI::Slider</code> class encapsulates a linear TrackBar adjustment slider.</p>" +
+  "</div>" +
+  "<div class='doc-section'>" +
+  "<h2 class='section-title'>Overloaded Constructors</h2>" +
+  "<div class='table-wrapper'>" +
+  "  <table>" +
+  "    <tr><th>Constructor</th><th>Description</th></tr>" +
+  "    <tr><td><code>Init()</code></td><td>Default range 0..100 (200&times;25).</td></tr>" +
+  "    <tr><td><code>Init(min.i, max.i)</code></td><td>Custom min and max range.</td></tr>" +
+  "    <tr><td><code>Init(min.i, max.i, w.i, h.i)</code></td><td>Custom range and dimensions.</td></tr>" +
+  "    <tr><td><code>Init(x.i, y.i, w.i, h.i, min.i, max.i, flags.i)</code></td><td>Full constructor with position, range, and flags.</td></tr>" +
+  "  </table>" +
+  "</div>" +
+  "</div>"
+
+SaveHTML(BaseDocDir + "en\ui\slider.html", BuildPage("en", "slider", "ui/slider.html", "Slider Class", "Interactive trackbar slider with multi-constructors.", "badge-ui", "UI Class", en_slider))
+
+; EN UI: ToggleSwitch
+Define en_toggleswitch.s = "<div class='doc-section'>" +
+  "<h2 class='section-title'>Description</h2>" +
+  "<p>The <code>UI::Controls::ToggleSwitch</code> is a modern vector-rendered CustomGadget on Canvas implementing an iOS / Material style toggle switch.</p>" +
+  "</div>" +
+  "<div class='doc-section'>" +
+  "<h2 class='section-title'>Overloaded Constructors</h2>" +
+  "<div class='table-wrapper'>" +
+  "  <table>" +
+  "    <tr><th>Constructor</th><th>Description</th></tr>" +
+  "    <tr><td><code>Init()</code></td><td>Default unchecked switch (50&times;26).</td></tr>" +
+  "    <tr><td><code>Init(checked.b)</code></td><td>Initial on/off state.</td></tr>" +
+  "    <tr><td><code>Init(w.i, h.i, checked.b)</code></td><td>Custom dimensions and initial state.</td></tr>" +
+  "    <tr><td><code>Init(x.i, y.i, w.i, h.i, checked.b)</code></td><td>Absolute coordinates, dimensions, and initial state.</td></tr>" +
+  "  </table>" +
+  "</div>" +
+  "</div>"
+
+SaveHTML(BaseDocDir + "en\ui\toggleswitch.html", BuildPage("en", "toggleswitch", "ui/toggleswitch.html", "ToggleSwitch Class", "Modern vector-rendered iOS-style toggle switch.", "badge-ui", "UI Class", en_toggleswitch))
+
+; EN UI: Container
+Define en_container.s = "<div class='doc-section'>" +
+  "<h2 class='section-title'>Description</h2>" +
+  "<p>The <code>UI::Layouts::Container</code> class is the abstract foundation for all responsive layout panels. Inspired by WPF / .NET, it coordinates child components and executes automatic two-pass layout cycles (<code>Arrange</code>).</p>" +
+  "</div>" +
+  "<div class='doc-section'>" +
+  "<h2 class='section-title'>Overloaded Constructors</h2>" +
+  "<div class='table-wrapper'>" +
+  "  <table>" +
+  "    <tr><th>Constructor</th><th>Description</th></tr>" +
+  "    <tr><td><code>Init()</code></td><td>Default container (stretch alignment).</td></tr>" +
+  "    <tr><td><code>Init(w.i, h.i)</code></td><td>Container with initial dimensions.</td></tr>" +
+  "    <tr><td><code>Init(x.i, y.i, w.i, h.i)</code></td><td>Container with absolute coordinates and dimensions.</td></tr>" +
   "  </table>" +
   "</div>" +
   "</div>"
 
 SaveHTML(BaseDocDir + "en\ui\container.html", BuildPage("en", "container", "ui/container.html", "Container Class", "Abstract base class for all WPF-style responsive layout panels.", "badge-ui", "Layout", en_container))
 
+; EN UI: StackPanel
 Define en_stackpanel.s = "<div class='doc-section'>" +
   "<h2 class='section-title'>Description</h2>" +
-  "<p>The <code>UI::Layouts::StackPanel</code> arranges child elements into a single line that can be oriented horizontally or vertically, with configurable spacing between items.</p>" +
-  "<p>Each child component respects its own margins (<code>Margin</code>) and alignment constraints (<code>Left</code>, <code>Center</code>, <code>Right</code>, <code>Stretch</code>).</p>" +
+  "<p>The <code>UI::Layouts::StackPanel</code> arranges child elements into a single linear flow (vertical or horizontal) with configurable spacing between items.</p>" +
   "</div>" +
   "<div class='doc-section'>" +
-  "<h2 class='section-title'>Usage Example</h2>" +
-  "<div class='code-container'>" +
-  "  <div class='code-header'><span class='code-title'>Vertical StackPanel (.pbo)</span><span class='code-badge'>PBO</span></div>" +
-  "  <pre><code><span class='kw'>Define</span> *panel.<span class='tp'>StackPanel</span> = <span class='kw'>New</span> <span class='tp'>StackPanel</span>(#UI_Orientation_Vertical, <span class='num'>10</span>)" + #CRLF$ +
-  "*panel\\<span class='fn'>SetPaddingAll</span>(<span class='num'>15</span>)" + #CRLF$ +
-  "*panel\\<span class='fn'>AddChild</span>(<span class='kw'>New</span> <span class='tp'>Button</span>(<span class='str'>'First Button'</span>))" + #CRLF$ +
-  "*panel\\<span class='fn'>AddChild</span>(<span class='kw'>New</span> <span class='tp'>Button</span>(<span class='str'>'Second Button'</span>))" + #CRLF$ +
-  "*win\\<span class='fn'>SetContent</span>(*panel)</code></pre>" +
+  "<h2 class='section-title'>Overloaded Constructors</h2>" +
+  "<div class='table-wrapper'>" +
+  "  <table>" +
+  "    <tr><th>Constructor</th><th>Description</th></tr>" +
+  "    <tr><td><code>Init()</code></td><td>Vertical StackPanel with 5px spacing by default.</td></tr>" +
+  "    <tr><td><code>Init(orientation.i)</code></td><td>StackPanel with chosen orientation (<code>#UI_Orientation_Vertical</code> or <code>#UI_Orientation_Horizontal</code>).</td></tr>" +
+  "    <tr><td><code>Init(orientation.i, spacing.i)</code></td><td>Custom orientation and spacing.</td></tr>" +
+  "    <tr><td><code>Init(orientation.i, spacing.i, w.i, h.i)</code></td><td>Custom orientation, spacing, and dimensions.</td></tr>" +
+  "  </table>" +
   "</div>" +
   "</div>"
 
-SaveHTML(BaseDocDir + "en\ui\stackpanel.html", BuildPage("en", "stackpanel", "ui/stackpanel.html", "StackPanel Class", "Linear vertical or horizontal layout panel with automatic spacing.", "badge-ui", "Layout", en_stackpanel))
+SaveHTML(BaseDocDir + "en\ui\stackpanel.html", BuildPage("en", "stackpanel", "ui/stackpanel.html", "StackPanel Class", "Linear vertical or horizontal layout panel with multi-constructors.", "badge-ui", "Layout", en_stackpanel))
 
+; EN UI: DockPanel
 Define en_dockpanel.s = "<div class='doc-section'>" +
   "<h2 class='section-title'>Description</h2>" +
-  "<p>The <code>UI::Layouts::DockPanel</code> positions child elements along its 4 outer edges (<code>#UI_Dock_Top</code>, <code>#UI_Dock_Bottom</code>, <code>#UI_Dock_Left</code>, <code>#UI_Dock_Right</code>) and automatically expands the last child to fill all remaining central space (<code>#UI_Dock_Fill</code> or <code>LastChildFill</code>).</p>" +
+  "<p>The <code>UI::Layouts::DockPanel</code> positions child elements along its 4 outer edges (Top, Bottom, Left, Right) and expands the last child to fill central space.</p>" +
   "</div>" +
   "<div class='doc-section'>" +
-  "<h2 class='section-title'>Usage Example: Modern App Shell</h2>" +
-  "<div class='code-container'>" +
-  "  <div class='code-header'><span class='code-title'>Full Application Shell Layout (.pbo)</span><span class='code-badge'>PBO</span></div>" +
-  "  <pre><code><span class='kw'>Define</span> *dock.<span class='tp'>DockPanel</span> = <span class='kw'>New</span> <span class='tp'>DockPanel</span>(#True)" + #CRLF$ +
-  "*dock\\<span class='fn'>SetDock</span>(*toolbar, #UI_Dock_Top)" + #CRLF$ +
-  "*dock\\<span class='fn'>SetDock</span>(*statusBar, #UI_Dock_Bottom)" + #CRLF$ +
-  "*dock\\<span class='fn'>SetDock</span>(*sideNav, #UI_Dock_Left)" + #CRLF$ +
-  "*dock\\<span class='fn'>SetDock</span>(*mainEditor, #UI_Dock_Fill)" + #CRLF$ +
-  "*win\\<span class='fn'>SetContent</span>(*dock)</code></pre>" +
+  "<h2 class='section-title'>Overloaded Constructors</h2>" +
+  "<div class='table-wrapper'>" +
+  "  <table>" +
+  "    <tr><th>Constructor</th><th>Description</th></tr>" +
+  "    <tr><td><code>Init()</code></td><td>DockPanel with <code>LastChildFill = #True</code> by default.</td></tr>" +
+  "    <tr><td><code>Init(lastChildFill.b)</code></td><td>Custom LastChildFill toggle.</td></tr>" +
+  "    <tr><td><code>Init(lastChildFill.b, w.i, h.i)</code></td><td>Custom LastChildFill and initial dimensions.</td></tr>" +
+  "  </table>" +
   "</div>" +
   "</div>"
 
-SaveHTML(BaseDocDir + "en\ui\dockpanel.html", BuildPage("en", "dockpanel", "ui/dockpanel.html", "DockPanel Class", "Edge-docking layout panel with automatic central filling.", "badge-ui", "Layout", en_dockpanel))
+SaveHTML(BaseDocDir + "en\ui\dockpanel.html", BuildPage("en", "dockpanel", "ui/dockpanel.html", "DockPanel Class", "Edge-docking layout panel with central space filling.", "badge-ui", "Layout", en_dockpanel))
 
+; EN UI: Grid
 Define en_grid.s = "<div class='doc-section'>" +
   "<h2 class='section-title'>Description</h2>" +
-  "<p>The <code>UI::Layouts::Grid</code> defines a flexible 2D grid area consisting of rows and columns. Inspired by WPF, it supports 3 robust sizing modes:</p>" +
-  "<ul>" +
-  "  <li><strong>Fixed Pixels:</strong> <code>'150'</code> or <code>'200px'</code>.</li>" +
-  "  <li><strong>Auto Sizing:</strong> <code>'Auto'</code> (contracts/expands to fit child content).</li>" +
-  "  <li><strong>Proportional Star Sizing:</strong> <code>'*'</code>, <code>'2*'</code>, <code>'3*'</code> (dynamically partitions available space).</li>" +
-  "</ul>" +
-  "<p>Child elements can span multiple rows and columns using <code>SetCellSpan(child, rowSpan, colSpan)</code>.</p>" +
+  "<p>The <code>UI::Layouts::Grid</code> defines a flexible 2D grid of rows and columns with fixed, <code>'Auto'</code>, and Star (<code>'*'</code>, <code>'2*'</code>) proportional sizing.</p>" +
   "</div>" +
   "<div class='doc-section'>" +
-  "<h2 class='section-title'>Usage Example</h2>" +
-  "<div class='code-container'>" +
-  "  <div class='code-header'><span class='code-title'>Responsive Star Grid (.pbo)</span><span class='code-badge'>PBO</span></div>" +
-  "  <pre><code><span class='kw'>Define</span> *grid.<span class='tp'>Grid</span> = <span class='kw'>New</span> <span class='tp'>Grid</span>()" + #CRLF$ +
-  "*grid\\<span class='fn'>AddColumn</span>(<span class='str'>'200'</span>)  <span class='cm'>; Column 0: 200px fixed</span>" + #CRLF$ +
-  "*grid\\<span class='fn'>AddColumn</span>(<span class='str'>'3*'</span>)   <span class='cm'>; Column 1: 75% of remaining width</span>" + #CRLF$ +
-  "*grid\\<span class='fn'>AddColumn</span>(<span class='str'>'1*'</span>)   <span class='cm'>; Column 2: 25% of remaining width</span>" + #CRLF$ +
-  "*grid\\<span class='fn'>AddRow</span>(<span class='str'>'50'</span>)      <span class='cm'>; Row 0: 50px header</span>" + #CRLF$ +
-  "*grid\\<span class='fn'>AddRow</span>(<span class='str'>'*'</span>)       <span class='cm'>; Row 1: Fluid content</span>" + #CRLF$ +
-  #CRLF$ +
-  "*grid\\<span class='fn'>SetCell</span>(*sidebar, <span class='num'>0</span>, <span class='num'>0</span>, <span class='num'>2</span>, <span class='num'>1</span>) <span class='cm'>; RowSpan=2</span>" + #CRLF$ +
-  "*grid\\<span class='fn'>SetCell</span>(*mainView, <span class='num'>1</span>, <span class='num'>1</span>)" + #CRLF$ +
-  "*win\\<span class='fn'>SetContent</span>(*grid)</code></pre>" +
+  "<h2 class='section-title'>Overloaded Constructors</h2>" +
+  "<div class='table-wrapper'>" +
+  "  <table>" +
+  "    <tr><th>Constructor</th><th>Description</th></tr>" +
+  "    <tr><td><code>Init()</code></td><td>Default 2D responsive grid.</td></tr>" +
+  "    <tr><td><code>Init(w.i, h.i)</code></td><td>Grid with initial dimensions.</td></tr>" +
+  "  </table>" +
   "</div>" +
   "</div>"
 
-SaveHTML(BaseDocDir + "en\ui\grid.html", BuildPage("en", "grid", "ui/grid.html", "Grid Class", "Two-dimensional responsive layout grid with fixed, Auto and Star (*) proportional sizing.", "badge-ui", "Layout", en_grid))
+SaveHTML(BaseDocDir + "en\ui\grid.html", BuildPage("en", "grid", "ui/grid.html", "Grid Class", "Two-dimensional responsive layout grid with Star proportional sizing.", "badge-ui", "Layout", en_grid))
 
 PrintN("Doc generation finished successfully with UTF-8 BOM & HTML entities!")
 End 0

@@ -676,7 +676,10 @@ Declare UI_Application_Run_void(*This.UI_Application_Inst)
 Declare UI_Application_Run_p(*This.UI_Application_Inst, *mainWin_p.UI_Window_vt)
 Declare UI_Application_Quit(*This.UI_Application_Inst)
 Declare UI_Application_Free(*This.UI_Application_Inst)
-Declare UI_CustomGadget_Init(*This.UI_CustomGadget_Inst, x_p.i, y_p.i, w_p.i, h_p.i, flags_p.i)
+Declare UI_CustomGadget_Init_void(*This.UI_CustomGadget_Inst)
+Declare UI_CustomGadget_Init_i_i(*This.UI_CustomGadget_Inst, w_p.i, h_p.i)
+Declare UI_CustomGadget_Init_i_i_i_i(*This.UI_CustomGadget_Inst, x_p.i, y_p.i, w_p.i, h_p.i)
+Declare UI_CustomGadget_Init_i_i_i_i_i(*This.UI_CustomGadget_Inst, x_p.i, y_p.i, w_p.i, h_p.i, flags_p.i)
 Declare UI_CustomGadget_Redraw(*This.UI_CustomGadget_Inst)
 Declare UI_CustomGadget_OnMouseEnter(*This.UI_CustomGadget_Inst)
 Declare UI_CustomGadget_OnMouseLeave(*This.UI_CustomGadget_Inst)
@@ -686,7 +689,9 @@ Declare UI_CustomGadget_OnMouseMove(*This.UI_CustomGadget_Inst, mx.i, my.i)
 Declare UI_CustomGadget_OnKeyDown(*This.UI_CustomGadget_Inst, key.i)
 Declare UI_CustomGadget_OnCustomEvent(*This.UI_CustomGadget_Inst, eventType.i)
 Declare UI_CustomGadget_Free(*This.UI_CustomGadget_Inst)
-Declare UI_Layouts_Container_Init(*This.UI_Layouts_Container_Inst)
+Declare UI_Layouts_Container_Init_void(*This.UI_Layouts_Container_Inst)
+Declare UI_Layouts_Container_Init_i_i(*This.UI_Layouts_Container_Inst, w_p.i, h_p.i)
+Declare UI_Layouts_Container_Init_i_i_i_i(*This.UI_Layouts_Container_Inst, x_p.i, y_p.i, w_p.i, h_p.i)
 Declare UI_Layouts_Container_SetPadding(*This.UI_Layouts_Container_Inst, l.i, t.i, r.i, b.i)
 Declare UI_Layouts_Container_SetPaddingAll(*This.UI_Layouts_Container_Inst, p.i)
 Declare.i UI_Layouts_Container_GetPaddingLeft(*This.UI_Layouts_Container_Inst)
@@ -702,6 +707,7 @@ Declare UI_Layouts_Container_Arrange(*This.UI_Layouts_Container_Inst, nx.i, ny.i
 Declare UI_Layouts_StackPanel_Init_void(*This.UI_Layouts_StackPanel_Inst)
 Declare UI_Layouts_StackPanel_Init_i(*This.UI_Layouts_StackPanel_Inst, orient.i)
 Declare UI_Layouts_StackPanel_Init_i_i(*This.UI_Layouts_StackPanel_Inst, orient.i, sp.i)
+Declare UI_Layouts_StackPanel_Init_i_i_i_i(*This.UI_Layouts_StackPanel_Inst, orient.i, sp.i, w_p.i, h_p.i)
 Declare UI_Layouts_StackPanel_SetOrientation(*This.UI_Layouts_StackPanel_Inst, o.i)
 Declare.i UI_Layouts_StackPanel_GetOrientation(*This.UI_Layouts_StackPanel_Inst)
 Declare UI_Layouts_StackPanel_SetSpacing(*This.UI_Layouts_StackPanel_Inst, sp.i)
@@ -709,13 +715,15 @@ Declare.i UI_Layouts_StackPanel_GetSpacing(*This.UI_Layouts_StackPanel_Inst)
 Declare UI_Layouts_StackPanel_Arrange(*This.UI_Layouts_StackPanel_Inst, nx.i, ny.i, nw.i, nh.i)
 Declare UI_Layouts_DockPanel_Init_void(*This.UI_Layouts_DockPanel_Inst)
 Declare UI_Layouts_DockPanel_Init_b(*This.UI_Layouts_DockPanel_Inst, fill.b)
+Declare UI_Layouts_DockPanel_Init_b_i_i(*This.UI_Layouts_DockPanel_Inst, fill.b, w_p.i, h_p.i)
 Declare UI_Layouts_DockPanel_SetLastChildFill(*This.UI_Layouts_DockPanel_Inst, fill.b)
 Declare.b UI_Layouts_DockPanel_GetLastChildFill(*This.UI_Layouts_DockPanel_Inst)
 Declare UI_Layouts_DockPanel_AddDockChild(*This.UI_Layouts_DockPanel_Inst, *child.UI_Component_vt, dockType.i)
 Declare UI_Layouts_DockPanel_SetDock(*This.UI_Layouts_DockPanel_Inst, *child.UI_Component_vt, dockType.i)
 Declare.i UI_Layouts_DockPanel_GetDock(*This.UI_Layouts_DockPanel_Inst, *child.UI_Component_vt)
 Declare UI_Layouts_DockPanel_Arrange(*This.UI_Layouts_DockPanel_Inst, nx.i, ny.i, nw.i, nh.i)
-Declare UI_Layouts_Grid_Init(*This.UI_Layouts_Grid_Inst)
+Declare UI_Layouts_Grid_Init_void(*This.UI_Layouts_Grid_Inst)
+Declare UI_Layouts_Grid_Init_i_i(*This.UI_Layouts_Grid_Inst, w_p.i, h_p.i)
 Declare UI_Layouts_Grid_ParseDefinition(*This.UI_Layouts_Grid_Inst, *outDef.UI_GridDef, defStr.s)
 Declare UI_Layouts_Grid_AddRow(*This.UI_Layouts_Grid_Inst, defStr.s)
 Declare UI_Layouts_Grid_AddColumn(*This.UI_Layouts_Grid_Inst, defStr.s)
@@ -727,6 +735,7 @@ Declare UI_Button_Init_s_i_i(*This.UI_Button_Inst, text_p.s, w_p.i, h_p.i)
 Declare UI_Button_Init_i_i_i_i_s(*This.UI_Button_Inst, x_p.i, y_p.i, w_p.i, h_p.i, text_p.s)
 Declare UI_Button_Init_i_i_i_i_s_i(*This.UI_Button_Inst, x_p.i, y_p.i, w_p.i, h_p.i, text_p.s, flags_p.i)
 Declare UI_Button_Free(*This.UI_Button_Inst)
+Declare UI_TextBox_Init_void(*This.UI_TextBox_Inst)
 Declare UI_TextBox_Init_s(*This.UI_TextBox_Inst, defaultText_p.s)
 Declare UI_TextBox_Init_s_i_i(*This.UI_TextBox_Inst, defaultText_p.s, w_p.i, h_p.i)
 Declare UI_TextBox_Init_i_i_i_i_s(*This.UI_TextBox_Inst, x_p.i, y_p.i, w_p.i, h_p.i, defaultText_p.s)
@@ -739,26 +748,41 @@ Declare UI_Label_Init_s_i_i(*This.UI_Label_Inst, text_p.s, w_p.i, h_p.i)
 Declare UI_Label_Init_i_i_i_i_s(*This.UI_Label_Inst, x_p.i, y_p.i, w_p.i, h_p.i, text_p.s)
 Declare UI_Label_Init_i_i_i_i_s_i(*This.UI_Label_Inst, x_p.i, y_p.i, w_p.i, h_p.i, text_p.s, flags_p.i)
 Declare UI_Label_Free(*This.UI_Label_Inst)
-Declare UI_CheckBox_Init(*This.UI_CheckBox_Inst, x_p.i, y_p.i, w_p.i, h_p.i, text_p.s, flags_p.i)
+Declare UI_CheckBox_Init_s(*This.UI_CheckBox_Inst, text_p.s)
+Declare UI_CheckBox_Init_s_b(*This.UI_CheckBox_Inst, text_p.s, checked_p.b)
+Declare UI_CheckBox_Init_s_i_i_b(*This.UI_CheckBox_Inst, text_p.s, w_p.i, h_p.i, checked_p.b)
+Declare UI_CheckBox_Init_i_i_i_i_s_i(*This.UI_CheckBox_Inst, x_p.i, y_p.i, w_p.i, h_p.i, text_p.s, flags_p.i)
 Declare.b UI_CheckBox_IsChecked(*This.UI_CheckBox_Inst)
 Declare UI_CheckBox_SetChecked(*This.UI_CheckBox_Inst, checked.b)
 Declare UI_CheckBox_Free(*This.UI_CheckBox_Inst)
-Declare UI_ProgressBar_Init(*This.UI_ProgressBar_Inst, x_p.i, y_p.i, w_p.i, h_p.i, min_p.i, max_p.i, flags_p.i)
+Declare UI_ProgressBar_Init_void(*This.UI_ProgressBar_Inst)
+Declare UI_ProgressBar_Init_i_i(*This.UI_ProgressBar_Inst, min_p.i, max_p.i)
+Declare UI_ProgressBar_Init_i_i_i_i(*This.UI_ProgressBar_Inst, min_p.i, max_p.i, w_p.i, h_p.i)
+Declare UI_ProgressBar_Init_i_i_i_i_i_i_i(*This.UI_ProgressBar_Inst, x_p.i, y_p.i, w_p.i, h_p.i, min_p.i, max_p.i, flags_p.i)
 Declare.i UI_ProgressBar_GetValue(*This.UI_ProgressBar_Inst)
 Declare UI_ProgressBar_SetValue(*This.UI_ProgressBar_Inst, v.i)
 Declare UI_ProgressBar_Free(*This.UI_ProgressBar_Inst)
-Declare UI_Slider_Init(*This.UI_Slider_Inst, x_p.i, y_p.i, w_p.i, h_p.i, min_p.i, max_p.i, flags_p.i)
+Declare UI_Slider_Init_void(*This.UI_Slider_Inst)
+Declare UI_Slider_Init_i_i(*This.UI_Slider_Inst, min_p.i, max_p.i)
+Declare UI_Slider_Init_i_i_i_i(*This.UI_Slider_Inst, min_p.i, max_p.i, w_p.i, h_p.i)
+Declare UI_Slider_Init_i_i_i_i_i_i_i(*This.UI_Slider_Inst, x_p.i, y_p.i, w_p.i, h_p.i, min_p.i, max_p.i, flags_p.i)
 Declare.i UI_Slider_GetValue(*This.UI_Slider_Inst)
 Declare UI_Slider_SetValue(*This.UI_Slider_Inst, v.i)
 Declare UI_Slider_Free(*This.UI_Slider_Inst)
-Declare UI_ComboBox_Init(*This.UI_ComboBox_Inst, x_p.i, y_p.i, w_p.i, h_p.i, flags_p.i)
+Declare UI_ComboBox_Init_void(*This.UI_ComboBox_Inst)
+Declare UI_ComboBox_Init_i_i(*This.UI_ComboBox_Inst, w_p.i, h_p.i)
+Declare UI_ComboBox_Init_i_i_i_i(*This.UI_ComboBox_Inst, x_p.i, y_p.i, w_p.i, h_p.i)
+Declare UI_ComboBox_Init_i_i_i_i_i(*This.UI_ComboBox_Inst, x_p.i, y_p.i, w_p.i, h_p.i, flags_p.i)
 Declare UI_ComboBox_AddItem(*This.UI_ComboBox_Inst, text.s)
 Declare.i UI_ComboBox_GetSelectedIndex(*This.UI_ComboBox_Inst)
 Declare UI_ComboBox_SetSelectedIndex(*This.UI_ComboBox_Inst, idx.i)
 Declare.s UI_ComboBox_GetSelectedItem(*This.UI_ComboBox_Inst)
 Declare UI_ComboBox_Clear(*This.UI_ComboBox_Inst)
 Declare UI_ComboBox_Free(*This.UI_ComboBox_Inst)
-Declare UI_Controls_ToggleSwitch_Init(*This.UI_Controls_ToggleSwitch_Inst, x_p.i, y_p.i, w_p.i, h_p.i, defaultState_p.b)
+Declare UI_Controls_ToggleSwitch_Init_void(*This.UI_Controls_ToggleSwitch_Inst)
+Declare UI_Controls_ToggleSwitch_Init_b(*This.UI_Controls_ToggleSwitch_Inst, defaultState_p.b)
+Declare UI_Controls_ToggleSwitch_Init_i_i_b(*This.UI_Controls_ToggleSwitch_Inst, w_p.i, h_p.i, defaultState_p.b)
+Declare UI_Controls_ToggleSwitch_Init_i_i_i_i_b(*This.UI_Controls_ToggleSwitch_Inst, x_p.i, y_p.i, w_p.i, h_p.i, defaultState_p.b)
 Declare.b UI_Controls_ToggleSwitch_IsChecked(*This.UI_Controls_ToggleSwitch_Inst)
 Declare UI_Controls_ToggleSwitch_SetChecked(*This.UI_Controls_ToggleSwitch_Inst, state.b)
 Declare UI_Controls_ToggleSwitch_OnClick(*This.UI_Controls_ToggleSwitch_Inst)
@@ -868,22 +892,28 @@ Declare Free_UI_Window(*obj.UI_Window_Inst)
 Declare.i New_UI_Application_void()
 Declare.i New_UI_Application_s(appName_p.s)
 Declare Free_UI_Application(*obj.UI_Application_Inst)
-Declare.i New_UI_Layouts_Container()
+Declare.i New_UI_Layouts_Container_void()
+Declare.i New_UI_Layouts_Container_i_i(w_p.i, h_p.i)
+Declare.i New_UI_Layouts_Container_i_i_i_i(x_p.i, y_p.i, w_p.i, h_p.i)
 Declare Free_UI_Layouts_Container(*obj.UI_Layouts_Container_Inst)
 Declare.i New_UI_Layouts_StackPanel_void()
 Declare.i New_UI_Layouts_StackPanel_i(orient.i)
 Declare.i New_UI_Layouts_StackPanel_i_i(orient.i, sp.i)
+Declare.i New_UI_Layouts_StackPanel_i_i_i_i(orient.i, sp.i, w_p.i, h_p.i)
 Declare Free_UI_Layouts_StackPanel(*obj.UI_Layouts_StackPanel_Inst)
 Declare.i New_UI_Layouts_DockPanel_void()
 Declare.i New_UI_Layouts_DockPanel_b(fill.b)
+Declare.i New_UI_Layouts_DockPanel_b_i_i(fill.b, w_p.i, h_p.i)
 Declare Free_UI_Layouts_DockPanel(*obj.UI_Layouts_DockPanel_Inst)
-Declare.i New_UI_Layouts_Grid()
+Declare.i New_UI_Layouts_Grid_void()
+Declare.i New_UI_Layouts_Grid_i_i(w_p.i, h_p.i)
 Declare Free_UI_Layouts_Grid(*obj.UI_Layouts_Grid_Inst)
 Declare.i New_UI_Button_s(text_p.s)
 Declare.i New_UI_Button_s_i_i(text_p.s, w_p.i, h_p.i)
 Declare.i New_UI_Button_i_i_i_i_s(x_p.i, y_p.i, w_p.i, h_p.i, text_p.s)
 Declare.i New_UI_Button_i_i_i_i_s_i(x_p.i, y_p.i, w_p.i, h_p.i, text_p.s, flags_p.i)
 Declare Free_UI_Button(*obj.UI_Button_Inst)
+Declare.i New_UI_TextBox_void()
 Declare.i New_UI_TextBox_s(defaultText_p.s)
 Declare.i New_UI_TextBox_s_i_i(defaultText_p.s, w_p.i, h_p.i)
 Declare.i New_UI_TextBox_i_i_i_i_s(x_p.i, y_p.i, w_p.i, h_p.i, defaultText_p.s)
@@ -894,15 +924,30 @@ Declare.i New_UI_Label_s_i_i(text_p.s, w_p.i, h_p.i)
 Declare.i New_UI_Label_i_i_i_i_s(x_p.i, y_p.i, w_p.i, h_p.i, text_p.s)
 Declare.i New_UI_Label_i_i_i_i_s_i(x_p.i, y_p.i, w_p.i, h_p.i, text_p.s, flags_p.i)
 Declare Free_UI_Label(*obj.UI_Label_Inst)
-Declare.i New_UI_CheckBox(x_p.i, y_p.i, w_p.i, h_p.i, text_p.s, flags_p.i)
+Declare.i New_UI_CheckBox_s(text_p.s)
+Declare.i New_UI_CheckBox_s_b(text_p.s, checked_p.b)
+Declare.i New_UI_CheckBox_s_i_i_b(text_p.s, w_p.i, h_p.i, checked_p.b)
+Declare.i New_UI_CheckBox_i_i_i_i_s_i(x_p.i, y_p.i, w_p.i, h_p.i, text_p.s, flags_p.i)
 Declare Free_UI_CheckBox(*obj.UI_CheckBox_Inst)
-Declare.i New_UI_ProgressBar(x_p.i, y_p.i, w_p.i, h_p.i, min_p.i, max_p.i, flags_p.i)
+Declare.i New_UI_ProgressBar_void()
+Declare.i New_UI_ProgressBar_i_i(min_p.i, max_p.i)
+Declare.i New_UI_ProgressBar_i_i_i_i(min_p.i, max_p.i, w_p.i, h_p.i)
+Declare.i New_UI_ProgressBar_i_i_i_i_i_i_i(x_p.i, y_p.i, w_p.i, h_p.i, min_p.i, max_p.i, flags_p.i)
 Declare Free_UI_ProgressBar(*obj.UI_ProgressBar_Inst)
-Declare.i New_UI_Slider(x_p.i, y_p.i, w_p.i, h_p.i, min_p.i, max_p.i, flags_p.i)
+Declare.i New_UI_Slider_void()
+Declare.i New_UI_Slider_i_i(min_p.i, max_p.i)
+Declare.i New_UI_Slider_i_i_i_i(min_p.i, max_p.i, w_p.i, h_p.i)
+Declare.i New_UI_Slider_i_i_i_i_i_i_i(x_p.i, y_p.i, w_p.i, h_p.i, min_p.i, max_p.i, flags_p.i)
 Declare Free_UI_Slider(*obj.UI_Slider_Inst)
-Declare.i New_UI_ComboBox(x_p.i, y_p.i, w_p.i, h_p.i, flags_p.i)
+Declare.i New_UI_ComboBox_void()
+Declare.i New_UI_ComboBox_i_i(w_p.i, h_p.i)
+Declare.i New_UI_ComboBox_i_i_i_i(x_p.i, y_p.i, w_p.i, h_p.i)
+Declare.i New_UI_ComboBox_i_i_i_i_i(x_p.i, y_p.i, w_p.i, h_p.i, flags_p.i)
 Declare Free_UI_ComboBox(*obj.UI_ComboBox_Inst)
-Declare.i New_UI_Controls_ToggleSwitch(x_p.i, y_p.i, w_p.i, h_p.i, defaultState_p.b)
+Declare.i New_UI_Controls_ToggleSwitch_void()
+Declare.i New_UI_Controls_ToggleSwitch_b(defaultState_p.b)
+Declare.i New_UI_Controls_ToggleSwitch_i_i_b(w_p.i, h_p.i, defaultState_p.b)
+Declare.i New_UI_Controls_ToggleSwitch_i_i_i_i_b(x_p.i, y_p.i, w_p.i, h_p.i, defaultState_p.b)
 Declare Free_UI_Controls_ToggleSwitch(*obj.UI_Controls_ToggleSwitch_Inst)
 Declare.i New_UI_ListIcon_s_i(title_p.s, colWidth_p.i)
 Declare.i New_UI_ListIcon_s_i_i(title_p.s, colWidth_p.i, flags_p.i)
@@ -1719,9 +1764,53 @@ Procedure UI_Application_Free(*This.UI_Application_Inst)
         *This_vt\Quit()
 EndProcedure
 
-Procedure UI_CustomGadget_Init(*This.UI_CustomGadget_Inst, x_p.i, y_p.i, w_p.i, h_p.i, flags_p.i)
+Procedure UI_CustomGadget_Init_void(*This.UI_CustomGadget_Inst)
   Protected *This_vt.UI_CustomGadget_vt = *This
+        UI_Gadget_Init(*This)
+        *This\x = 0 : *This\y = 0 : *This\width = 100 : *This\height = 30
+        *This\desiredWidth = 100 : *This\desiredHeight = 30
+        *This\isVisible = #True : *This\isEnabled = #True
+        *This\isHovered = #False : *This\isPressed = #False
+        *This\id = CanvasGadget(#PB_Any, 0, 0, 100, 30, #PB_Canvas_Keyboard)
+  If (*This\id)
+          UI_RegisterGadget(*This\id, *This)
+          *This_vt\Redraw()
+  EndIf
+EndProcedure
+
+Procedure UI_CustomGadget_Init_i_i(*This.UI_CustomGadget_Inst, w_p.i, h_p.i)
+  Protected *This_vt.UI_CustomGadget_vt = *This
+        UI_Gadget_Init(*This)
+        *This\x = 0 : *This\y = 0 : *This\width = w_p : *This\height = h_p
+        *This\desiredWidth = w_p : *This\desiredHeight = h_p
+        *This\isVisible = #True : *This\isEnabled = #True
+        *This\isHovered = #False : *This\isPressed = #False
+        *This\id = CanvasGadget(#PB_Any, 0, 0, w_p, h_p, #PB_Canvas_Keyboard)
+  If (*This\id)
+          UI_RegisterGadget(*This\id, *This)
+          *This_vt\Redraw()
+  EndIf
+EndProcedure
+
+Procedure UI_CustomGadget_Init_i_i_i_i(*This.UI_CustomGadget_Inst, x_p.i, y_p.i, w_p.i, h_p.i)
+  Protected *This_vt.UI_CustomGadget_vt = *This
+        UI_Gadget_Init(*This)
         *This\x = x_p : *This\y = y_p : *This\width = w_p : *This\height = h_p
+        *This\desiredWidth = w_p : *This\desiredHeight = h_p
+        *This\isVisible = #True : *This\isEnabled = #True
+        *This\isHovered = #False : *This\isPressed = #False
+        *This\id = CanvasGadget(#PB_Any, x_p, y_p, w_p, h_p, #PB_Canvas_Keyboard)
+  If (*This\id)
+          UI_RegisterGadget(*This\id, *This)
+          *This_vt\Redraw()
+  EndIf
+EndProcedure
+
+Procedure UI_CustomGadget_Init_i_i_i_i_i(*This.UI_CustomGadget_Inst, x_p.i, y_p.i, w_p.i, h_p.i, flags_p.i)
+  Protected *This_vt.UI_CustomGadget_vt = *This
+        UI_Gadget_Init(*This)
+        *This\x = x_p : *This\y = y_p : *This\width = w_p : *This\height = h_p
+        *This\desiredWidth = w_p : *This\desiredHeight = h_p
         *This\isVisible = #True : *This\isEnabled = #True
         *This\isHovered = #False : *This\isPressed = #False
         *This\id = CanvasGadget(#PB_Any, x_p, y_p, w_p, h_p, flags_p | #PB_Canvas_Keyboard)
@@ -1817,9 +1906,35 @@ Procedure UI_CustomGadget_Free(*This.UI_CustomGadget_Inst)
   EndIf
 EndProcedure
 
-Procedure UI_Layouts_Container_Init(*This.UI_Layouts_Container_Inst)
+Procedure UI_Layouts_Container_Init_void(*This.UI_Layouts_Container_Inst)
   Protected *This_vt.UI_Layouts_Container_vt = *This
         UI_Component_Init(*This)
+        *This\paddingLeft = 0
+        *This\paddingTop = 0
+        *This\paddingRight = 0
+        *This\paddingBottom = 0
+        *This\horizontalAlignment = #UI_Align_Stretch
+        *This\verticalAlignment = #UI_Align_VStretch
+EndProcedure
+
+Procedure UI_Layouts_Container_Init_i_i(*This.UI_Layouts_Container_Inst, w_p.i, h_p.i)
+  Protected *This_vt.UI_Layouts_Container_vt = *This
+        UI_Component_Init(*This)
+        *This\width = w_p : *This\height = h_p
+        *This\desiredWidth = w_p : *This\desiredHeight = h_p
+        *This\paddingLeft = 0
+        *This\paddingTop = 0
+        *This\paddingRight = 0
+        *This\paddingBottom = 0
+        *This\horizontalAlignment = #UI_Align_Stretch
+        *This\verticalAlignment = #UI_Align_VStretch
+EndProcedure
+
+Procedure UI_Layouts_Container_Init_i_i_i_i(*This.UI_Layouts_Container_Inst, x_p.i, y_p.i, w_p.i, h_p.i)
+  Protected *This_vt.UI_Layouts_Container_vt = *This
+        UI_Component_Init(*This)
+        *This\x = x_p : *This\y = y_p : *This\width = w_p : *This\height = h_p
+        *This\desiredWidth = w_p : *This\desiredHeight = h_p
         *This\paddingLeft = 0
         *This\paddingTop = 0
         *This\paddingRight = 0
@@ -1937,21 +2052,28 @@ EndProcedure
 
 Procedure UI_Layouts_StackPanel_Init_void(*This.UI_Layouts_StackPanel_Inst)
   Protected *This_vt.UI_Layouts_StackPanel_vt = *This
-        UI_Layouts_Container_Init(*This)
+        UI_Layouts_Container_Init_void(*This)
         *This\orientation = #UI_Orientation_Vertical
         *This\spacing = 5
 EndProcedure
 
 Procedure UI_Layouts_StackPanel_Init_i(*This.UI_Layouts_StackPanel_Inst, orient.i)
   Protected *This_vt.UI_Layouts_StackPanel_vt = *This
-        UI_Layouts_Container_Init(*This)
+        UI_Layouts_Container_Init_void(*This)
         *This\orientation = orient
         *This\spacing = 5
 EndProcedure
 
 Procedure UI_Layouts_StackPanel_Init_i_i(*This.UI_Layouts_StackPanel_Inst, orient.i, sp.i)
   Protected *This_vt.UI_Layouts_StackPanel_vt = *This
-        UI_Layouts_Container_Init(*This)
+        UI_Layouts_Container_Init_void(*This)
+        *This\orientation = orient
+        *This\spacing = sp
+EndProcedure
+
+Procedure UI_Layouts_StackPanel_Init_i_i_i_i(*This.UI_Layouts_StackPanel_Inst, orient.i, sp.i, w_p.i, h_p.i)
+  Protected *This_vt.UI_Layouts_StackPanel_vt = *This
+        UI_Layouts_Container_Init_i_i(*This, w_p, h_p)
         *This\orientation = orient
         *This\spacing = sp
 EndProcedure
@@ -2065,13 +2187,19 @@ EndProcedure
 
 Procedure UI_Layouts_DockPanel_Init_void(*This.UI_Layouts_DockPanel_Inst)
   Protected *This_vt.UI_Layouts_DockPanel_vt = *This
-        UI_Layouts_Container_Init(*This)
+        UI_Layouts_Container_Init_void(*This)
         *This\lastChildFill = #True
 EndProcedure
 
 Procedure UI_Layouts_DockPanel_Init_b(*This.UI_Layouts_DockPanel_Inst, fill.b)
   Protected *This_vt.UI_Layouts_DockPanel_vt = *This
-        UI_Layouts_Container_Init(*This)
+        UI_Layouts_Container_Init_void(*This)
+        *This\lastChildFill = fill
+EndProcedure
+
+Procedure UI_Layouts_DockPanel_Init_b_i_i(*This.UI_Layouts_DockPanel_Inst, fill.b, w_p.i, h_p.i)
+  Protected *This_vt.UI_Layouts_DockPanel_vt = *This
+        UI_Layouts_Container_Init_i_i(*This, w_p, h_p)
         *This\lastChildFill = fill
 EndProcedure
 
@@ -2216,9 +2344,14 @@ Procedure UI_Layouts_DockPanel_Arrange(*This.UI_Layouts_DockPanel_Inst, nx.i, ny
         Next
 EndProcedure
 
-Procedure UI_Layouts_Grid_Init(*This.UI_Layouts_Grid_Inst)
+Procedure UI_Layouts_Grid_Init_void(*This.UI_Layouts_Grid_Inst)
   Protected *This_vt.UI_Layouts_Grid_vt = *This
-        UI_Layouts_Container_Init(*This)
+        UI_Layouts_Container_Init_void(*This)
+EndProcedure
+
+Procedure UI_Layouts_Grid_Init_i_i(*This.UI_Layouts_Grid_Inst, w_p.i, h_p.i)
+  Protected *This_vt.UI_Layouts_Grid_vt = *This
+        UI_Layouts_Container_Init_i_i(*This, w_p, h_p)
 EndProcedure
 
 Procedure UI_Layouts_Grid_ParseDefinition(*This.UI_Layouts_Grid_Inst, *outDef.UI_GridDef, defStr.s)
@@ -2515,6 +2648,18 @@ Procedure UI_Button_Free(*This.UI_Button_Inst)
   EndIf
 EndProcedure
 
+Procedure UI_TextBox_Init_void(*This.UI_TextBox_Inst)
+  Protected *This_vt.UI_TextBox_vt = *This
+        UI_Gadget_Init(*This)
+        *This\x = 0 : *This\y = 0 : *This\width = 150 : *This\height = 25
+        *This\desiredWidth = 150 : *This\desiredHeight = 25
+        *This\isVisible = #True : *This\isEnabled = #True
+        *This\id = StringGadget(#PB_Any, 0, 0, 150, 25, "", 0)
+  If (*This\id)
+          UI_RegisterGadget(*This\id, *This)
+  EndIf
+EndProcedure
+
 Procedure UI_TextBox_Init_s(*This.UI_TextBox_Inst, defaultText_p.s)
   Protected *This_vt.UI_TextBox_vt = *This
         UI_Gadget_Init(*This)
@@ -2642,9 +2787,49 @@ Procedure UI_Label_Free(*This.UI_Label_Inst)
   EndIf
 EndProcedure
 
-Procedure UI_CheckBox_Init(*This.UI_CheckBox_Inst, x_p.i, y_p.i, w_p.i, h_p.i, text_p.s, flags_p.i)
+Procedure UI_CheckBox_Init_s(*This.UI_CheckBox_Inst, text_p.s)
   Protected *This_vt.UI_CheckBox_vt = *This
+        UI_Gadget_Init(*This)
+        *This\x = 0 : *This\y = 0 : *This\width = 150 : *This\height = 25
+        *This\desiredWidth = 150 : *This\desiredHeight = 25
+        *This\isVisible = #True : *This\isEnabled = #True
+        *This\id = CheckBoxGadget(#PB_Any, 0, 0, 150, 25, text_p, 0)
+  If (*This\id)
+          UI_RegisterGadget(*This\id, *This)
+  EndIf
+EndProcedure
+
+Procedure UI_CheckBox_Init_s_b(*This.UI_CheckBox_Inst, text_p.s, checked_p.b)
+  Protected *This_vt.UI_CheckBox_vt = *This
+        UI_Gadget_Init(*This)
+        *This\x = 0 : *This\y = 0 : *This\width = 150 : *This\height = 25
+        *This\desiredWidth = 150 : *This\desiredHeight = 25
+        *This\isVisible = #True : *This\isEnabled = #True
+        *This\id = CheckBoxGadget(#PB_Any, 0, 0, 150, 25, text_p, 0)
+  If (*This\id)
+          SetGadgetState(*This\id, checked_p)
+          UI_RegisterGadget(*This\id, *This)
+  EndIf
+EndProcedure
+
+Procedure UI_CheckBox_Init_s_i_i_b(*This.UI_CheckBox_Inst, text_p.s, w_p.i, h_p.i, checked_p.b)
+  Protected *This_vt.UI_CheckBox_vt = *This
+        UI_Gadget_Init(*This)
+        *This\x = 0 : *This\y = 0 : *This\width = w_p : *This\height = h_p
+        *This\desiredWidth = w_p : *This\desiredHeight = h_p
+        *This\isVisible = #True : *This\isEnabled = #True
+        *This\id = CheckBoxGadget(#PB_Any, 0, 0, w_p, h_p, text_p, 0)
+  If (*This\id)
+          SetGadgetState(*This\id, checked_p)
+          UI_RegisterGadget(*This\id, *This)
+  EndIf
+EndProcedure
+
+Procedure UI_CheckBox_Init_i_i_i_i_s_i(*This.UI_CheckBox_Inst, x_p.i, y_p.i, w_p.i, h_p.i, text_p.s, flags_p.i)
+  Protected *This_vt.UI_CheckBox_vt = *This
+        UI_Gadget_Init(*This)
         *This\x = x_p : *This\y = y_p : *This\width = w_p : *This\height = h_p
+        *This\desiredWidth = w_p : *This\desiredHeight = h_p
         *This\isVisible = #True : *This\isEnabled = #True
         *This\id = CheckBoxGadget(#PB_Any, x_p, y_p, w_p, h_p, text_p, flags_p)
   If (*This\id)
@@ -2675,9 +2860,50 @@ Procedure UI_CheckBox_Free(*This.UI_CheckBox_Inst)
   EndIf
 EndProcedure
 
-Procedure UI_ProgressBar_Init(*This.UI_ProgressBar_Inst, x_p.i, y_p.i, w_p.i, h_p.i, min_p.i, max_p.i, flags_p.i)
+Procedure UI_ProgressBar_Init_void(*This.UI_ProgressBar_Inst)
   Protected *This_vt.UI_ProgressBar_vt = *This
+        UI_Gadget_Init(*This)
+        *This\x = 0 : *This\y = 0 : *This\width = 200 : *This\height = 25
+        *This\desiredWidth = 200 : *This\desiredHeight = 25
+        *This\minVal = 0 : *This\maxVal = 100
+        *This\isVisible = #True : *This\isEnabled = #True
+        *This\id = ProgressBarGadget(#PB_Any, 0, 0, 200, 25, 0, 100, 0)
+  If (*This\id)
+          UI_RegisterGadget(*This\id, *This)
+  EndIf
+EndProcedure
+
+Procedure UI_ProgressBar_Init_i_i(*This.UI_ProgressBar_Inst, min_p.i, max_p.i)
+  Protected *This_vt.UI_ProgressBar_vt = *This
+        UI_Gadget_Init(*This)
+        *This\x = 0 : *This\y = 0 : *This\width = 200 : *This\height = 25
+        *This\desiredWidth = 200 : *This\desiredHeight = 25
+        *This\minVal = min_p : *This\maxVal = max_p
+        *This\isVisible = #True : *This\isEnabled = #True
+        *This\id = ProgressBarGadget(#PB_Any, 0, 0, 200, 25, min_p, max_p, 0)
+  If (*This\id)
+          UI_RegisterGadget(*This\id, *This)
+  EndIf
+EndProcedure
+
+Procedure UI_ProgressBar_Init_i_i_i_i(*This.UI_ProgressBar_Inst, min_p.i, max_p.i, w_p.i, h_p.i)
+  Protected *This_vt.UI_ProgressBar_vt = *This
+        UI_Gadget_Init(*This)
+        *This\x = 0 : *This\y = 0 : *This\width = w_p : *This\height = h_p
+        *This\desiredWidth = w_p : *This\desiredHeight = h_p
+        *This\minVal = min_p : *This\maxVal = max_p
+        *This\isVisible = #True : *This\isEnabled = #True
+        *This\id = ProgressBarGadget(#PB_Any, 0, 0, w_p, h_p, min_p, max_p, 0)
+  If (*This\id)
+          UI_RegisterGadget(*This\id, *This)
+  EndIf
+EndProcedure
+
+Procedure UI_ProgressBar_Init_i_i_i_i_i_i_i(*This.UI_ProgressBar_Inst, x_p.i, y_p.i, w_p.i, h_p.i, min_p.i, max_p.i, flags_p.i)
+  Protected *This_vt.UI_ProgressBar_vt = *This
+        UI_Gadget_Init(*This)
         *This\x = x_p : *This\y = y_p : *This\width = w_p : *This\height = h_p
+        *This\desiredWidth = w_p : *This\desiredHeight = h_p
         *This\minVal = min_p : *This\maxVal = max_p
         *This\isVisible = #True : *This\isEnabled = #True
         *This\id = ProgressBarGadget(#PB_Any, x_p, y_p, w_p, h_p, min_p, max_p, flags_p)
@@ -2709,9 +2935,50 @@ Procedure UI_ProgressBar_Free(*This.UI_ProgressBar_Inst)
   EndIf
 EndProcedure
 
-Procedure UI_Slider_Init(*This.UI_Slider_Inst, x_p.i, y_p.i, w_p.i, h_p.i, min_p.i, max_p.i, flags_p.i)
+Procedure UI_Slider_Init_void(*This.UI_Slider_Inst)
   Protected *This_vt.UI_Slider_vt = *This
+        UI_Gadget_Init(*This)
+        *This\x = 0 : *This\y = 0 : *This\width = 200 : *This\height = 25
+        *This\desiredWidth = 200 : *This\desiredHeight = 25
+        *This\minVal = 0 : *This\maxVal = 100
+        *This\isVisible = #True : *This\isEnabled = #True
+        *This\id = TrackBarGadget(#PB_Any, 0, 0, 200, 25, 0, 100, 0)
+  If (*This\id)
+          UI_RegisterGadget(*This\id, *This)
+  EndIf
+EndProcedure
+
+Procedure UI_Slider_Init_i_i(*This.UI_Slider_Inst, min_p.i, max_p.i)
+  Protected *This_vt.UI_Slider_vt = *This
+        UI_Gadget_Init(*This)
+        *This\x = 0 : *This\y = 0 : *This\width = 200 : *This\height = 25
+        *This\desiredWidth = 200 : *This\desiredHeight = 25
+        *This\minVal = min_p : *This\maxVal = max_p
+        *This\isVisible = #True : *This\isEnabled = #True
+        *This\id = TrackBarGadget(#PB_Any, 0, 0, 200, 25, min_p, max_p, 0)
+  If (*This\id)
+          UI_RegisterGadget(*This\id, *This)
+  EndIf
+EndProcedure
+
+Procedure UI_Slider_Init_i_i_i_i(*This.UI_Slider_Inst, min_p.i, max_p.i, w_p.i, h_p.i)
+  Protected *This_vt.UI_Slider_vt = *This
+        UI_Gadget_Init(*This)
+        *This\x = 0 : *This\y = 0 : *This\width = w_p : *This\height = h_p
+        *This\desiredWidth = w_p : *This\desiredHeight = h_p
+        *This\minVal = min_p : *This\maxVal = max_p
+        *This\isVisible = #True : *This\isEnabled = #True
+        *This\id = TrackBarGadget(#PB_Any, 0, 0, w_p, h_p, min_p, max_p, 0)
+  If (*This\id)
+          UI_RegisterGadget(*This\id, *This)
+  EndIf
+EndProcedure
+
+Procedure UI_Slider_Init_i_i_i_i_i_i_i(*This.UI_Slider_Inst, x_p.i, y_p.i, w_p.i, h_p.i, min_p.i, max_p.i, flags_p.i)
+  Protected *This_vt.UI_Slider_vt = *This
+        UI_Gadget_Init(*This)
         *This\x = x_p : *This\y = y_p : *This\width = w_p : *This\height = h_p
+        *This\desiredWidth = w_p : *This\desiredHeight = h_p
         *This\minVal = min_p : *This\maxVal = max_p
         *This\isVisible = #True : *This\isEnabled = #True
         *This\id = TrackBarGadget(#PB_Any, x_p, y_p, w_p, h_p, min_p, max_p, flags_p)
@@ -2743,9 +3010,47 @@ Procedure UI_Slider_Free(*This.UI_Slider_Inst)
   EndIf
 EndProcedure
 
-Procedure UI_ComboBox_Init(*This.UI_ComboBox_Inst, x_p.i, y_p.i, w_p.i, h_p.i, flags_p.i)
+Procedure UI_ComboBox_Init_void(*This.UI_ComboBox_Inst)
   Protected *This_vt.UI_ComboBox_vt = *This
+        UI_Gadget_Init(*This)
+        *This\x = 0 : *This\y = 0 : *This\width = 150 : *This\height = 25
+        *This\desiredWidth = 150 : *This\desiredHeight = 25
+        *This\isVisible = #True : *This\isEnabled = #True
+        *This\id = ComboBoxGadget(#PB_Any, 0, 0, 150, 25, 0)
+  If (*This\id)
+          UI_RegisterGadget(*This\id, *This)
+  EndIf
+EndProcedure
+
+Procedure UI_ComboBox_Init_i_i(*This.UI_ComboBox_Inst, w_p.i, h_p.i)
+  Protected *This_vt.UI_ComboBox_vt = *This
+        UI_Gadget_Init(*This)
+        *This\x = 0 : *This\y = 0 : *This\width = w_p : *This\height = h_p
+        *This\desiredWidth = w_p : *This\desiredHeight = h_p
+        *This\isVisible = #True : *This\isEnabled = #True
+        *This\id = ComboBoxGadget(#PB_Any, 0, 0, w_p, h_p, 0)
+  If (*This\id)
+          UI_RegisterGadget(*This\id, *This)
+  EndIf
+EndProcedure
+
+Procedure UI_ComboBox_Init_i_i_i_i(*This.UI_ComboBox_Inst, x_p.i, y_p.i, w_p.i, h_p.i)
+  Protected *This_vt.UI_ComboBox_vt = *This
+        UI_Gadget_Init(*This)
         *This\x = x_p : *This\y = y_p : *This\width = w_p : *This\height = h_p
+        *This\desiredWidth = w_p : *This\desiredHeight = h_p
+        *This\isVisible = #True : *This\isEnabled = #True
+        *This\id = ComboBoxGadget(#PB_Any, x_p, y_p, w_p, h_p, 0)
+  If (*This\id)
+          UI_RegisterGadget(*This\id, *This)
+  EndIf
+EndProcedure
+
+Procedure UI_ComboBox_Init_i_i_i_i_i(*This.UI_ComboBox_Inst, x_p.i, y_p.i, w_p.i, h_p.i, flags_p.i)
+  Protected *This_vt.UI_ComboBox_vt = *This
+        UI_Gadget_Init(*This)
+        *This\x = x_p : *This\y = y_p : *This\width = w_p : *This\height = h_p
+        *This\desiredWidth = w_p : *This\desiredHeight = h_p
         *This\isVisible = #True : *This\isEnabled = #True
         *This\id = ComboBoxGadget(#PB_Any, x_p, y_p, w_p, h_p, flags_p)
   If (*This\id)
@@ -2799,9 +3104,36 @@ Procedure UI_ComboBox_Free(*This.UI_ComboBox_Inst)
   EndIf
 EndProcedure
 
-Procedure UI_Controls_ToggleSwitch_Init(*This.UI_Controls_ToggleSwitch_Inst, x_p.i, y_p.i, w_p.i, h_p.i, defaultState_p.b)
+Procedure UI_Controls_ToggleSwitch_Init_void(*This.UI_Controls_ToggleSwitch_Inst)
   Protected *This_vt.UI_Controls_ToggleSwitch_vt = *This
-        UI_CustomGadget_Init(*This, x_p, y_p, w_p, h_p, 0)
+        UI_CustomGadget_Init_i_i(*This, 50, 26)
+        *This\isChecked = #False
+        *This\activeColor = RGB(52, 199, 89)      ; iOS Green
+        *This\inactiveColor = RGB(200, 200, 205)  ; Light Gray
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure UI_Controls_ToggleSwitch_Init_b(*This.UI_Controls_ToggleSwitch_Inst, defaultState_p.b)
+  Protected *This_vt.UI_Controls_ToggleSwitch_vt = *This
+        UI_CustomGadget_Init_i_i(*This, 50, 26)
+        *This\isChecked = defaultState_p
+        *This\activeColor = RGB(52, 199, 89)      ; iOS Green
+        *This\inactiveColor = RGB(200, 200, 205)  ; Light Gray
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure UI_Controls_ToggleSwitch_Init_i_i_b(*This.UI_Controls_ToggleSwitch_Inst, w_p.i, h_p.i, defaultState_p.b)
+  Protected *This_vt.UI_Controls_ToggleSwitch_vt = *This
+        UI_CustomGadget_Init_i_i(*This, w_p, h_p)
+        *This\isChecked = defaultState_p
+        *This\activeColor = RGB(52, 199, 89)      ; iOS Green
+        *This\inactiveColor = RGB(200, 200, 205)  ; Light Gray
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure UI_Controls_ToggleSwitch_Init_i_i_i_i_b(*This.UI_Controls_ToggleSwitch_Inst, x_p.i, y_p.i, w_p.i, h_p.i, defaultState_p.b)
+  Protected *This_vt.UI_Controls_ToggleSwitch_vt = *This
+        UI_CustomGadget_Init_i_i_i_i(*This, x_p, y_p, w_p, h_p)
         *This\isChecked = defaultState_p
         *This\activeColor = RGB(52, 199, 89)      ; iOS Green
         *This\inactiveColor = RGB(200, 200, 205)  ; Light Gray
@@ -2852,11 +3184,9 @@ Procedure UI_Controls_ToggleSwitch_OnPaint(*This.UI_Controls_ToggleSwitch_Inst, 
   If (*This\isChecked)
           knobX = w - knobDiameter - knobPadding
   EndIf
+        Protected knobY.i = knobPadding
   
-        ; Subtle shadow under knob
-        Circle(knobX + knobRadius, radius + 1, knobRadius, RGB(180, 180, 180))
-        ; Knob circle
-        Circle(knobX + knobRadius, radius, knobRadius, RGB(255, 255, 255))
+        RoundBox(knobX, knobY, knobDiameter, knobDiameter, knobRadius, knobRadius, RGB(255, 255, 255))
 EndProcedure
 
 Procedure UI_ListIcon_Init_s_i(*This.UI_ListIcon_Inst, title_p.s, colWidth_p.i)
@@ -5146,11 +5476,29 @@ Procedure Free_UI_Application(*obj.UI_Application_Inst)
   EndIf
 EndProcedure
 
-Procedure.i New_UI_Layouts_Container()
+Procedure.i New_UI_Layouts_Container_void()
   Protected *obj.UI_Layouts_Container_Inst = AllocateStructure(UI_Layouts_Container_Inst)
   If *obj
     *obj\VTable = ?UI_Layouts_Container_VTable_Data
-    UI_Layouts_Container_Init(*obj)
+    UI_Layouts_Container_Init_void(*obj)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure.i New_UI_Layouts_Container_i_i(w_p.i, h_p.i)
+  Protected *obj.UI_Layouts_Container_Inst = AllocateStructure(UI_Layouts_Container_Inst)
+  If *obj
+    *obj\VTable = ?UI_Layouts_Container_VTable_Data
+    UI_Layouts_Container_Init_i_i(*obj, w_p, h_p)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure.i New_UI_Layouts_Container_i_i_i_i(x_p.i, y_p.i, w_p.i, h_p.i)
+  Protected *obj.UI_Layouts_Container_Inst = AllocateStructure(UI_Layouts_Container_Inst)
+  If *obj
+    *obj\VTable = ?UI_Layouts_Container_VTable_Data
+    UI_Layouts_Container_Init_i_i_i_i(*obj, x_p, y_p, w_p, h_p)
   EndIf
   ProcedureReturn *obj
 EndProcedure
@@ -5188,6 +5536,15 @@ Procedure.i New_UI_Layouts_StackPanel_i_i(orient.i, sp.i)
   ProcedureReturn *obj
 EndProcedure
 
+Procedure.i New_UI_Layouts_StackPanel_i_i_i_i(orient.i, sp.i, w_p.i, h_p.i)
+  Protected *obj.UI_Layouts_StackPanel_Inst = AllocateStructure(UI_Layouts_StackPanel_Inst)
+  If *obj
+    *obj\VTable = ?UI_Layouts_StackPanel_VTable_Data
+    UI_Layouts_StackPanel_Init_i_i_i_i(*obj, orient, sp, w_p, h_p)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
 Procedure Free_UI_Layouts_StackPanel(*obj.UI_Layouts_StackPanel_Inst)
   If *obj
     FreeStructure(*obj)
@@ -5212,17 +5569,35 @@ Procedure.i New_UI_Layouts_DockPanel_b(fill.b)
   ProcedureReturn *obj
 EndProcedure
 
+Procedure.i New_UI_Layouts_DockPanel_b_i_i(fill.b, w_p.i, h_p.i)
+  Protected *obj.UI_Layouts_DockPanel_Inst = AllocateStructure(UI_Layouts_DockPanel_Inst)
+  If *obj
+    *obj\VTable = ?UI_Layouts_DockPanel_VTable_Data
+    UI_Layouts_DockPanel_Init_b_i_i(*obj, fill, w_p, h_p)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
 Procedure Free_UI_Layouts_DockPanel(*obj.UI_Layouts_DockPanel_Inst)
   If *obj
     FreeStructure(*obj)
   EndIf
 EndProcedure
 
-Procedure.i New_UI_Layouts_Grid()
+Procedure.i New_UI_Layouts_Grid_void()
   Protected *obj.UI_Layouts_Grid_Inst = AllocateStructure(UI_Layouts_Grid_Inst)
   If *obj
     *obj\VTable = ?UI_Layouts_Grid_VTable_Data
-    UI_Layouts_Grid_Init(*obj)
+    UI_Layouts_Grid_Init_void(*obj)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure.i New_UI_Layouts_Grid_i_i(w_p.i, h_p.i)
+  Protected *obj.UI_Layouts_Grid_Inst = AllocateStructure(UI_Layouts_Grid_Inst)
+  If *obj
+    *obj\VTable = ?UI_Layouts_Grid_VTable_Data
+    UI_Layouts_Grid_Init_i_i(*obj, w_p, h_p)
   EndIf
   ProcedureReturn *obj
 EndProcedure
@@ -5274,6 +5649,15 @@ Procedure Free_UI_Button(*obj.UI_Button_Inst)
     UI_Button_Free(*obj)
     FreeStructure(*obj)
   EndIf
+EndProcedure
+
+Procedure.i New_UI_TextBox_void()
+  Protected *obj.UI_TextBox_Inst = AllocateStructure(UI_TextBox_Inst)
+  If *obj
+    *obj\VTable = ?UI_TextBox_VTable_Data
+    UI_TextBox_Init_void(*obj)
+  EndIf
+  ProcedureReturn *obj
 EndProcedure
 
 Procedure.i New_UI_TextBox_s(defaultText_p.s)
@@ -5362,11 +5746,38 @@ Procedure Free_UI_Label(*obj.UI_Label_Inst)
   EndIf
 EndProcedure
 
-Procedure.i New_UI_CheckBox(x_p.i, y_p.i, w_p.i, h_p.i, text_p.s, flags_p.i)
+Procedure.i New_UI_CheckBox_s(text_p.s)
   Protected *obj.UI_CheckBox_Inst = AllocateStructure(UI_CheckBox_Inst)
   If *obj
     *obj\VTable = ?UI_CheckBox_VTable_Data
-    UI_CheckBox_Init(*obj, x_p, y_p, w_p, h_p, text_p, flags_p)
+    UI_CheckBox_Init_s(*obj, text_p)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure.i New_UI_CheckBox_s_b(text_p.s, checked_p.b)
+  Protected *obj.UI_CheckBox_Inst = AllocateStructure(UI_CheckBox_Inst)
+  If *obj
+    *obj\VTable = ?UI_CheckBox_VTable_Data
+    UI_CheckBox_Init_s_b(*obj, text_p, checked_p)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure.i New_UI_CheckBox_s_i_i_b(text_p.s, w_p.i, h_p.i, checked_p.b)
+  Protected *obj.UI_CheckBox_Inst = AllocateStructure(UI_CheckBox_Inst)
+  If *obj
+    *obj\VTable = ?UI_CheckBox_VTable_Data
+    UI_CheckBox_Init_s_i_i_b(*obj, text_p, w_p, h_p, checked_p)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure.i New_UI_CheckBox_i_i_i_i_s_i(x_p.i, y_p.i, w_p.i, h_p.i, text_p.s, flags_p.i)
+  Protected *obj.UI_CheckBox_Inst = AllocateStructure(UI_CheckBox_Inst)
+  If *obj
+    *obj\VTable = ?UI_CheckBox_VTable_Data
+    UI_CheckBox_Init_i_i_i_i_s_i(*obj, x_p, y_p, w_p, h_p, text_p, flags_p)
   EndIf
   ProcedureReturn *obj
 EndProcedure
@@ -5378,11 +5789,38 @@ Procedure Free_UI_CheckBox(*obj.UI_CheckBox_Inst)
   EndIf
 EndProcedure
 
-Procedure.i New_UI_ProgressBar(x_p.i, y_p.i, w_p.i, h_p.i, min_p.i, max_p.i, flags_p.i)
+Procedure.i New_UI_ProgressBar_void()
   Protected *obj.UI_ProgressBar_Inst = AllocateStructure(UI_ProgressBar_Inst)
   If *obj
     *obj\VTable = ?UI_ProgressBar_VTable_Data
-    UI_ProgressBar_Init(*obj, x_p, y_p, w_p, h_p, min_p, max_p, flags_p)
+    UI_ProgressBar_Init_void(*obj)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure.i New_UI_ProgressBar_i_i(min_p.i, max_p.i)
+  Protected *obj.UI_ProgressBar_Inst = AllocateStructure(UI_ProgressBar_Inst)
+  If *obj
+    *obj\VTable = ?UI_ProgressBar_VTable_Data
+    UI_ProgressBar_Init_i_i(*obj, min_p, max_p)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure.i New_UI_ProgressBar_i_i_i_i(min_p.i, max_p.i, w_p.i, h_p.i)
+  Protected *obj.UI_ProgressBar_Inst = AllocateStructure(UI_ProgressBar_Inst)
+  If *obj
+    *obj\VTable = ?UI_ProgressBar_VTable_Data
+    UI_ProgressBar_Init_i_i_i_i(*obj, min_p, max_p, w_p, h_p)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure.i New_UI_ProgressBar_i_i_i_i_i_i_i(x_p.i, y_p.i, w_p.i, h_p.i, min_p.i, max_p.i, flags_p.i)
+  Protected *obj.UI_ProgressBar_Inst = AllocateStructure(UI_ProgressBar_Inst)
+  If *obj
+    *obj\VTable = ?UI_ProgressBar_VTable_Data
+    UI_ProgressBar_Init_i_i_i_i_i_i_i(*obj, x_p, y_p, w_p, h_p, min_p, max_p, flags_p)
   EndIf
   ProcedureReturn *obj
 EndProcedure
@@ -5394,11 +5832,38 @@ Procedure Free_UI_ProgressBar(*obj.UI_ProgressBar_Inst)
   EndIf
 EndProcedure
 
-Procedure.i New_UI_Slider(x_p.i, y_p.i, w_p.i, h_p.i, min_p.i, max_p.i, flags_p.i)
+Procedure.i New_UI_Slider_void()
   Protected *obj.UI_Slider_Inst = AllocateStructure(UI_Slider_Inst)
   If *obj
     *obj\VTable = ?UI_Slider_VTable_Data
-    UI_Slider_Init(*obj, x_p, y_p, w_p, h_p, min_p, max_p, flags_p)
+    UI_Slider_Init_void(*obj)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure.i New_UI_Slider_i_i(min_p.i, max_p.i)
+  Protected *obj.UI_Slider_Inst = AllocateStructure(UI_Slider_Inst)
+  If *obj
+    *obj\VTable = ?UI_Slider_VTable_Data
+    UI_Slider_Init_i_i(*obj, min_p, max_p)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure.i New_UI_Slider_i_i_i_i(min_p.i, max_p.i, w_p.i, h_p.i)
+  Protected *obj.UI_Slider_Inst = AllocateStructure(UI_Slider_Inst)
+  If *obj
+    *obj\VTable = ?UI_Slider_VTable_Data
+    UI_Slider_Init_i_i_i_i(*obj, min_p, max_p, w_p, h_p)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure.i New_UI_Slider_i_i_i_i_i_i_i(x_p.i, y_p.i, w_p.i, h_p.i, min_p.i, max_p.i, flags_p.i)
+  Protected *obj.UI_Slider_Inst = AllocateStructure(UI_Slider_Inst)
+  If *obj
+    *obj\VTable = ?UI_Slider_VTable_Data
+    UI_Slider_Init_i_i_i_i_i_i_i(*obj, x_p, y_p, w_p, h_p, min_p, max_p, flags_p)
   EndIf
   ProcedureReturn *obj
 EndProcedure
@@ -5410,11 +5875,38 @@ Procedure Free_UI_Slider(*obj.UI_Slider_Inst)
   EndIf
 EndProcedure
 
-Procedure.i New_UI_ComboBox(x_p.i, y_p.i, w_p.i, h_p.i, flags_p.i)
+Procedure.i New_UI_ComboBox_void()
   Protected *obj.UI_ComboBox_Inst = AllocateStructure(UI_ComboBox_Inst)
   If *obj
     *obj\VTable = ?UI_ComboBox_VTable_Data
-    UI_ComboBox_Init(*obj, x_p, y_p, w_p, h_p, flags_p)
+    UI_ComboBox_Init_void(*obj)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure.i New_UI_ComboBox_i_i(w_p.i, h_p.i)
+  Protected *obj.UI_ComboBox_Inst = AllocateStructure(UI_ComboBox_Inst)
+  If *obj
+    *obj\VTable = ?UI_ComboBox_VTable_Data
+    UI_ComboBox_Init_i_i(*obj, w_p, h_p)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure.i New_UI_ComboBox_i_i_i_i(x_p.i, y_p.i, w_p.i, h_p.i)
+  Protected *obj.UI_ComboBox_Inst = AllocateStructure(UI_ComboBox_Inst)
+  If *obj
+    *obj\VTable = ?UI_ComboBox_VTable_Data
+    UI_ComboBox_Init_i_i_i_i(*obj, x_p, y_p, w_p, h_p)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure.i New_UI_ComboBox_i_i_i_i_i(x_p.i, y_p.i, w_p.i, h_p.i, flags_p.i)
+  Protected *obj.UI_ComboBox_Inst = AllocateStructure(UI_ComboBox_Inst)
+  If *obj
+    *obj\VTable = ?UI_ComboBox_VTable_Data
+    UI_ComboBox_Init_i_i_i_i_i(*obj, x_p, y_p, w_p, h_p, flags_p)
   EndIf
   ProcedureReturn *obj
 EndProcedure
@@ -5426,11 +5918,38 @@ Procedure Free_UI_ComboBox(*obj.UI_ComboBox_Inst)
   EndIf
 EndProcedure
 
-Procedure.i New_UI_Controls_ToggleSwitch(x_p.i, y_p.i, w_p.i, h_p.i, defaultState_p.b)
+Procedure.i New_UI_Controls_ToggleSwitch_void()
   Protected *obj.UI_Controls_ToggleSwitch_Inst = AllocateStructure(UI_Controls_ToggleSwitch_Inst)
   If *obj
     *obj\VTable = ?UI_Controls_ToggleSwitch_VTable_Data
-    UI_Controls_ToggleSwitch_Init(*obj, x_p, y_p, w_p, h_p, defaultState_p)
+    UI_Controls_ToggleSwitch_Init_void(*obj)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure.i New_UI_Controls_ToggleSwitch_b(defaultState_p.b)
+  Protected *obj.UI_Controls_ToggleSwitch_Inst = AllocateStructure(UI_Controls_ToggleSwitch_Inst)
+  If *obj
+    *obj\VTable = ?UI_Controls_ToggleSwitch_VTable_Data
+    UI_Controls_ToggleSwitch_Init_b(*obj, defaultState_p)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure.i New_UI_Controls_ToggleSwitch_i_i_b(w_p.i, h_p.i, defaultState_p.b)
+  Protected *obj.UI_Controls_ToggleSwitch_Inst = AllocateStructure(UI_Controls_ToggleSwitch_Inst)
+  If *obj
+    *obj\VTable = ?UI_Controls_ToggleSwitch_VTable_Data
+    UI_Controls_ToggleSwitch_Init_i_i_b(*obj, w_p, h_p, defaultState_p)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure.i New_UI_Controls_ToggleSwitch_i_i_i_i_b(x_p.i, y_p.i, w_p.i, h_p.i, defaultState_p.b)
+  Protected *obj.UI_Controls_ToggleSwitch_Inst = AllocateStructure(UI_Controls_ToggleSwitch_Inst)
+  If *obj
+    *obj\VTable = ?UI_Controls_ToggleSwitch_VTable_Data
+    UI_Controls_ToggleSwitch_Init_i_i_i_i_b(*obj, x_p, y_p, w_p, h_p, defaultState_p)
   EndIf
   ProcedureReturn *obj
 EndProcedure
@@ -5747,7 +6266,7 @@ EndProcedure
 
 ; ============================================================================
 ; PureBasic OOP GUI Framework - CheckBox.pbo
-; Standard CheckBox wrapper
+; Standard CheckBox wrapper with Multi-Constructors
 ; Author:      MicrodevWeb
 ; ============================================================================
 
@@ -5756,7 +6275,7 @@ EndProcedure
 
 ; ============================================================================
 ; PureBasic OOP GUI Framework - ProgressBar.pbo
-; Standard ProgressBar wrapper
+; Standard ProgressBar wrapper with Multi-Constructors
 ; Author:      MicrodevWeb
 ; ============================================================================
 
@@ -5765,7 +6284,7 @@ EndProcedure
 
 ; ============================================================================
 ; PureBasic OOP GUI Framework - Slider.pbo
-; Standard TrackBar / TrackSlider wrapper
+; Standard TrackBar / TrackSlider wrapper with Multi-Constructors
 ; Author:      MicrodevWeb
 ; ============================================================================
 
@@ -5774,7 +6293,7 @@ EndProcedure
 
 ; ============================================================================
 ; PureBasic OOP GUI Framework - ComboBox.pbo
-; Standard ComboBox wrapper
+; Standard ComboBox wrapper with Multi-Constructors
 ; Author:      MicrodevWeb
 ; ============================================================================
 
@@ -5785,7 +6304,7 @@ EndProcedure
 ; Custom Controls
 ; ============================================================================
 ; PureBasic OOP GUI Framework - ToggleSwitch.pbo
-; Modern iOS/Material-style animated toggle switch CustomGadget
+; Modern iOS/Material-style animated toggle switch CustomGadget with Multi-Constructors
 ; Author:      MicrodevWeb
 ; ============================================================================
 

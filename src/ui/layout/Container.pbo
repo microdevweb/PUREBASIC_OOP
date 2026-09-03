@@ -15,8 +15,35 @@ Namespace UI::Layouts {
     Protected paddingRight.i
     Protected paddingBottom.i
 
+    ; Constructeur 1: Par défaut
     Public Method Init() {
       Super::Init()
+      This\paddingLeft = 0
+      This\paddingTop = 0
+      This\paddingRight = 0
+      This\paddingBottom = 0
+      This\horizontalAlignment = #UI_Align_Stretch
+      This\verticalAlignment = #UI_Align_VStretch
+    }
+
+    ; Constructeur 2: Dimensions
+    Public Method Init(w_p.i, h_p.i) {
+      Super::Init()
+      This\width = w_p : This\height = h_p
+      This\desiredWidth = w_p : This\desiredHeight = h_p
+      This\paddingLeft = 0
+      This\paddingTop = 0
+      This\paddingRight = 0
+      This\paddingBottom = 0
+      This\horizontalAlignment = #UI_Align_Stretch
+      This\verticalAlignment = #UI_Align_VStretch
+    }
+
+    ; Constructeur 3: Position et dimensions
+    Public Method Init(x_p.i, y_p.i, w_p.i, h_p.i) {
+      Super::Init()
+      This\x = x_p : This\y = y_p : This\width = w_p : This\height = h_p
+      This\desiredWidth = w_p : This\desiredHeight = h_p
       This\paddingLeft = 0
       This\paddingTop = 0
       This\paddingRight = 0

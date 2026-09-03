@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang='en'>
 <head>
   <meta charset='UTF-8'>
@@ -11,7 +11,7 @@
     <a href='../index.html' class='brand-container'>
       <img src='../../assets/PB_OOP_LOGO.jpeg' alt='Logo' class='brand-logo'>
       <span class='brand-title'>PureBasic OOP</span>
-      <span class='brand-version'>ALPHA 1.0</span>
+      <span class='brand-version'>v1.2 Native</span>
     </a>
     <div class='header-controls'>
       <div class='search-box'>
@@ -19,11 +19,12 @@
         <input type='text' class='search-input' id='search-input' placeholder='Search docs...'>
       </div>
       <div class='lang-switch'>
-        <a href='../../fr/ui/label.html' class='lang-btn'>FR</a>
+        <a href='../fr/ui/label.html' class='lang-btn'>FR</a>
         <a href='#' class='lang-btn active'>EN</a>
       </div>
     </div>
   </header>
+  
   <div class='layout-container'>
 <nav class='doc-sidebar'>
   <div class='nav-section'>
@@ -35,13 +36,13 @@
   <div class='nav-section'>
     <div class='nav-section-title'>OOP Keywords</div>
     <ul class='nav-list'>
-      <li class='nav-item'><a href='../keywords/class.html'><span>Class / Abstract</span><span class='badge badge-keyword'>KW</span></a></li>
-      <li class='nav-item'><a href='../keywords/method.html'><span>Method / Override</span><span class='badge badge-keyword'>KW</span></a></li>
-      <li class='nav-item'><a href='../keywords/properties.html'><span>Getter / Setter / Prop</span><span class='badge badge-keyword'>KW</span></a></li>
-      <li class='nav-item'><a href='../keywords/inheritance.html'><span>Extends / Super</span><span class='badge badge-keyword'>KW</span></a></li>
-      <li class='nav-item'><a href='../keywords/encapsulation.html'><span>Public / Protected / Private</span><span class='badge badge-keyword'>KW</span></a></li>
-      <li class='nav-item'><a href='../keywords/lifecycle.html'><span>New / Free / Init</span><span class='badge badge-keyword'>KW</span></a></li>
-      <li class='nav-item'><a href='../keywords/operators.html'><span>This / Cast / TypeOf</span><span class='badge badge-keyword'>KW</span></a></li>
+      <li class='nav-item'><a href='../keywords/class.html'><span>Class / Abstract</span><span class='badge badge-kw'>KW</span></a></li>
+      <li class='nav-item'><a href='../keywords/method.html'><span>Method / Override</span><span class='badge badge-kw'>KW</span></a></li>
+      <li class='nav-item'><a href='../keywords/properties.html'><span>Getter / Setter / Prop</span><span class='badge badge-kw'>KW</span></a></li>
+      <li class='nav-item'><a href='../keywords/inheritance.html'><span>Extends / Super</span><span class='badge badge-kw'>KW</span></a></li>
+      <li class='nav-item'><a href='../keywords/encapsulation.html'><span>Public / Protected / Private</span><span class='badge badge-kw'>KW</span></a></li>
+      <li class='nav-item'><a href='../keywords/lifecycle.html'><span>New / Free / Init</span><span class='badge badge-kw'>KW</span></a></li>
+      <li class='nav-item'><a href='../keywords/operators.html'><span>This / Cast / TypeOf</span><span class='badge badge-kw'>KW</span></a></li>
     </ul>
   </div>
   <div class='nav-section'>
@@ -54,6 +55,7 @@
       <li class='nav-item'><a href='../ui/checkbox.html'><span>CheckBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/combobox.html'><span>ComboBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item active'><a href='../ui/label.html'><span>Label</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/listicon.html'><span>ListIcon</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/progressbar.html'><span>ProgressBar</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/slider.html'><span>Slider</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/textbox.html'><span>TextBox</span><span class='badge badge-ui'>UI</span></a></li>
@@ -63,34 +65,57 @@
   <div class='nav-section'>
     <div class='nav-section-title'>Responsive Layouts (WPF)</div>
     <ul class='nav-list'>
-      <li class='nav-item'><a href='../ui/container.html'><span>Container</span><span class='badge badge-ui'>WPF</span></a></li>
-      <li class='nav-item'><a href='../ui/stackpanel.html'><span>StackPanel</span><span class='badge badge-ui'>WPF</span></a></li>
-      <li class='nav-item'><a href='../ui/dockpanel.html'><span>DockPanel</span><span class='badge badge-ui'>WPF</span></a></li>
-      <li class='nav-item'><a href='../ui/grid.html'><span>Grid</span><span class='badge badge-ui'>WPF</span></a></li>
+      <li class='nav-item'><a href='../ui/container.html'><span>Container</span><span class='badge badge-wpf'>WPF</span></a></li>
+      <li class='nav-item'><a href='../ui/stackpanel.html'><span>StackPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
+      <li class='nav-item'><a href='../ui/dockpanel.html'><span>DockPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
+      <li class='nav-item'><a href='../ui/grid.html'><span>Grid</span><span class='badge badge-wpf'>WPF</span></a></li>
     </ul>
   </div>
 </nav>
     <main class='doc-content'>
       <div class='breadcrumb'>
         <a href='../index.html'>Home</a>
+        
         <span class='breadcrumb-separator'>/</span>
         <span>UI Components</span>
         <span class='breadcrumb-separator'>/</span>
         <span style='color: var(--accent-blue);'>Label Class</span>
+        
       </div>
+      
       <div class='page-header'>
         <div class='title-row'>
           <h1 class='page-title'>Label Class</h1>
           <span class='badge badge-ui'>UI Class</span>
         </div>
-        <p class='page-lead'>Static text display.</p>
+        <p class='page-lead'>Static text label with multi-constructors and alignment options.</p>
       </div>
-<p>Static text display with customizable typography.</p>
+      
+      
+<div class='doc-section'>
+  <h2 class='section-title'>Description</h2>
+  <p>The <code>UI::Label</code> class displays static text with customizable alignments and styles.</p>
+</div>
+<div class='doc-section'>
+  <h2 class='section-title'>Overloaded Constructors</h2>
+  <div class='table-wrapper'>
+    <table>
+      <tr><th>Constructor</th><th>Description</th></tr>
+      <tr><td><code>Init(text.s)</code></td><td>Static text label (auto-sized for layouts).</td></tr>
+      <tr><td><code>Init(text.s, w.i, h.i)</code></td><td>Label with text and custom dimensions.</td></tr>
+      <tr><td><code>Init(x.i, y.i, w.i, h.i, text.s)</code></td><td>Absolute position, dimensions, and text.</td></tr>
+      <tr><td><code>Init(x.i, y.i, w.i, h.i, text.s, flags.i)</code></td><td>Full constructor with alignment flags.</td></tr>
+    </table>
+  </div>
+</div>
+
     </main>
   </div>
+  
   <footer class='doc-footer'>
     <p>&copy; 2026 PureBasic OOP Project - MicrodevWeb | Dual License GPL v3 / Fantaisie Software</p>
   </footer>
+  
   <script>
     document.getElementById('search-input').addEventListener('input', function(e) {
       let filter = e.target.value.toLowerCase();

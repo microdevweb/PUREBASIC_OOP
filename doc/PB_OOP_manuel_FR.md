@@ -1,6 +1,12 @@
+; ============================================================================
+; PureBasic OOP - Manuel de Référence (Français)
+; Documentation officielle du transpileur et du framework GUI OOP
+; Author:      MicrodevWeb
+; ============================================================================
+
 # Manuel de Référence PureBasic OOP (Français)
 
-Bienvenue dans la documentation officielle du transpileur et de la couche Orientée Objet pour PureBasic.
+Bienvenue dans la documentation officielle du transpileur et du framework Orienté Objet pour PureBasic.
 
 ---
 
@@ -84,329 +90,125 @@ EndClass
 
 ---
 
-### 2.2 Implémentation des Méthodes, `This` et `Super::`
+### 2.2 Surcharge des Constructeurs (`Init`) & Règle Explicite
 
-Chaque méthode accède à ses membres internes via l'identifiant `This`.
-Pour appeler le comportement de la classe parente (surcharge partielle), on utilise `Super::`.
-
-```oop
-; --- Implémentation de la Classe Abstraite ---
-
-Method FormeGeometrique::Init(nom_p.s, couleur_p.s)
-  This\nom = nom_p
-  This\couleur = couleur_p
-EndMethod
-
-Method FormeGeometrique::AfficherInfos()
-  PrintN("[Forme: " + This\nom + " | Couleur: " + This\couleur + "]")
-EndMethod
-
-Method FormeGeometrique::Free()
-  FreeStructure(This)
-EndMethod
-
-; --- Implémentation de la Classe Fille Rectangle ---
-
-Method Rectangle::Init(nom_p.s, couleur_p.s, l.d, h.d)
-  Super::Init(nom_p, couleur_p) ; Initialise les attributs hérités
-  This\largeur = l
-  This\hauteur = h
-EndMethod
-
-Method.d Rectangle::CalculerAire()
-  ProcedureReturn This\largeur * This\hauteur
-EndMethod
-
-Method.d Rectangle::CalculerPerimetre()
-  ProcedureReturn 2 * (This\largeur + This\hauteur)
-EndMethod
-
-Method Rectangle::Dessiner()
-  PrintN("   ==> [DESSIN] Rectangle " + StrD(This\largeur, 2) + "x" + StrD(This\hauteur, 2) + " (" + This\couleur + ")")
-EndMethod
-
-; Surcharge Partielle : appel du parent Super:: puis enrichissement
-Method Rectangle::AfficherInfos()
-  Super::AfficherInfos()
-  PrintN("       Dimensions : " + StrD(This\largeur, 2) + " x " + StrD(This\hauteur, 2) + " | Aire=" + StrD(This\CalculerAire(), 2))
-EndMethod
-
-Method Rectangle::Free()
-  Super::Free()
-EndMethod
-```
-
----
-
-### 2.3 Utilisation et Polymorphisme
+Dans PureBasic OOP, une classe peut définir **plusieurs constructeurs surchargés** pour s'adapter aux différents besoins (du cas le plus simple au cas le plus complet) :
 
 ```oop
-OpenConsole()
-
-; 1. Instanciations concrètes
-Define *rect.Rectangle = New Rectangle("MonRectangle", "Bleu", 10.0, 5.0)
-Define *cercle.Cercle = New Cercle("MonCercle", "Rouge", 4.0)
-
-; NB: L'instanciation directe d'une classe abstraite est strictement interdite :
-; Define *err.FormeGeometrique = New FormeGeometrique(...) ; -> ERREUR de transpilation !
-
-; 2. Polymorphisme dynamique via liste de type parent abstrait
-NewList *formes.FormeGeometrique()
-
-AddElement(*formes()) : *formes() = *rect
-AddElement(*formes()) : *formes() = *cercle
-AddElement(*formes()) : *formes() = New Rectangle("GrandRectangle", "Vert", 20.0, 15.0)
-
-; 3. Parcours polymorphe : dispatch automatique vers la classe concrète réelle
-ForEach *formes()
-  *formes()\AfficherInfos()
-  *formes()\Dessiner()
-  PrintN("   Aire = " + StrD(*formes()\CalculerAire(), 2))
-  PrintN("")
-Next
-
-; 4. Nettoyage mémoire polymorphe
-ForEach *formes()
-  *formes()\Free()
-Next
-ClearList(*formes())
-
-CloseConsole()
-```
-
----
-
-## 3. Espaces de Noms (Namespaces) et Projets Multi-Fichiers
-
-### 3.1 Déclaration de Namespace et Imbrication
-Les espaces de noms permettent d'organiser les classes logiquement et d'éviter tout conflit de noms :
-
-```oop
-Namespace Game::Graphics
-  Class Renderer
-    Protected width.i, height.i
-    Public Method Init(w.i, h.i)
-    Public Method Render()
-  EndClass
-EndNamespace
-```
-
-### 3.2 Utilisation, Directive `Using` et Alias
-Vous pouvez utiliser une classe soit via son nom pleinement qualifié, soit en important son namespace avec `Using`, soit en définissant un alias :
-
-```oop
-; 1. Nom pleinement qualifié
-Define *r1.Game::Graphics::Renderer = New Game::Graphics::Renderer(1920, 1080)
-
-; 2. Directive Using
-Using Game::Graphics
-Define *r2.Renderer = New Renderer(1280, 720)
-
-; 3. Alias de Namespace
-Namespace GFX = Game::Graphics
-Define *r3.GFX::Renderer = New GFX::Renderer(800, 600)
-```
-
-### 3.3 Organisation Multi-Fichiers (1 Fichier par Classe)
-Le transpileur gère nativement `IncludeFile` et `XIncludeFile` de manière récursive avec mapping de source complet :
-
-**Fichier `entities/Animal.pbo` :**
-```oop
-Namespace Game::Entities
-Abstract Class Animal
+Class Personne
   Protected nom.s
-  Public Method Init(nom_p.s)
-  Public Abstract Method Crier()
-EndClass
-EndNamespace
-```
+  Protected age.i
 
-**Fichier `entities/Dog.pbo` :**
-```oop
-Namespace Game::Entities
-Class Dog Extends Animal
-  Public Method Crier()
-    PrintN(This\nom + " aboie !")
+  ; Constructeur 1: Sans paramètre
+  Public Method Init()
+    This\nom = "Anonyme"
+    This\age = 0
+  EndMethod
+
+  ; Constructeur 2: Nom seul
+  Public Method Init(nom_p.s)
+    This\nom = nom_p
+    This\age = 0
+  EndMethod
+
+  ; Constructeur 3: Nom et Âge
+  Public Method Init(nom_p.s, age_p.i)
+    This\nom = nom_p
+    This\age = age_p
   EndMethod
 EndClass
-EndNamespace
+
+; Instanciation selon le constructeur choisi :
+Define *p1.Personne = New Personne()
+Define *p2.Personne = New Personne("Alice")
+Define *p3.Personne = New Personne("Bob", 30)
 ```
 
-**Fichier principal `main.pbo` :**
-```oop
-XIncludeFile "entities/Animal.pbo"
-XIncludeFile "entities/Dog.pbo"
-
-Using Game::Entities
-
-OpenConsole()
-Define *d.Dog = New Dog("Rex")
-*d\Crier()
-CloseConsole()
-```
+> **Règle des constructeurs explicites** :
+> Chaque classe définit explicitement ses propres constructeurs. Une classe fille n'hérite pas automatiquement des constructeurs de sa classe parente sans les déclarer ; elle appelle le constructeur parent souhaité via `Super::Init(...)`.
 
 ---
 
-## 4. Double Syntaxe : PureBasic Classique vs Style C/C# (`{ }`)
+## 3. Framework GUI Réactif & Composants (`src/ui/`)
 
-Pour combiner la **vitesse native fulgurante de PureBasic** avec une **syntaxe moderne et non verbeuse**, le transpileur prend en charge une double syntaxe complète. Vous pouvez utiliser indifféremment les mots-clés classiques ou les accolades `{ }`, et même mélanger les deux styles dans un même projet !
+Le framework GUI fournit des contrôles et des panneaux de mise en page réactifs (Responsive Layouts) permettant de concevoir des interfaces modernes sans calculs manuels de coordonnées absolues.
 
-### 4.1 Équivalence des Blocs
+### 3.1 Liste Complète des Constructeurs des Contrôles UI
 
-| Structure | Syntaxe Classique | Syntaxe C-Style `{ }` |
+| Composant | Constructeurs Disponibles (du plus simple au plus complet) | Description & Paramètres |
 | :--- | :--- | :--- |
-| **Namespace** | `Namespace MonEspace ... EndNamespace` | `Namespace MonEspace { ... }` |
-| **Classe** | `Class MaClasse ... EndClass` | `Class MaClasse { ... }` |
-| **Méthode** | `Method MaMethode() ... EndMethod` | `Method MaMethode() { ... }` |
-| **Procédure** | `Procedure Calculer(x.i) ... EndProcedure` | `Procedure Calculer(x.i) { ... }` |
-| **Condition If** | `If a > 0 ... Else ... EndIf` | `If (a > 0) { ... } Else { ... }` |
-| **Boucle For** | `For i = 0 To 10 ... Next` | `For i = 0 To 10 { ... }` |
-| **Boucle While** | `While x < 100 ... Wend` | `While x < 100 { ... }` |
-| **Boucle Repeat** | `Repeat ... Until x = 0` | `Repeat { ... } Until x = 0` |
-| **Structure** | `Structure Point ... EndStructure` | `Structure Point { ... }` |
-
-### 4.2 Exemple en Syntaxe C-Style Moderne
-
-```oop
-Namespace Game::Entities {
-
-  Class Dog Extends Animal {
-    Protected race.s
-
-    Public Method Init(nom.s, race_p.s) {
-      Super::Init(nom)
-      This\race = race_p
-    }
-
-    Public Method Crier() {
-      If (This\race = "Husky") {
-        PrintN("Aouuuu !")
-      } Else {
-        PrintN("Wouaf !")
-      }
-    }
-  }
-
-}
-
-Procedure TesterChien() {
-  Using Game::Entities
-  Define *d.Dog = New Dog("Rex", "Husky")
-  *d\Crier()
-}
-```
+| **`UI::Button`** | `Init(text.s)`<br>`Init(text.s, w.i, h.i)`<br>`Init(x.i, y.i, w.i, h.i, text.s)`<br>`Init(x.i, y.i, w.i, h.i, text.s, flags.i)` | Bouton standard cliquable. 120x30 par défaut pour les layouts automatiques. |
+| **`UI::TextBox`** | `Init()`<br>`Init(defaultText.s)`<br>`Init(defaultText.s, w.i, h.i)`<br>`Init(x.i, y.i, w.i, h.i, defaultText.s)`<br>`Init(x.i, y.i, w.i, h.i, defaultText.s, flags.i)` | Champ de saisie texte monoposte. 150x25 par défaut. |
+| **`UI::Label`** | `Init(text.s)`<br>`Init(text.s, w.i, h.i)`<br>`Init(x.i, y.i, w.i, h.i, text.s)`<br>`Init(x.i, y.i, w.i, h.i, text.s, flags.i)` | Libellé texte statique. |
+| **`UI::CheckBox`** | `Init(text.s)`<br>`Init(text.s, checked.b)`<br>`Init(text.s, w.i, h.i, checked.b)`<br>`Init(x.i, y.i, w.i, h.i, text.s, flags.i)` | Case à cocher booléenne. |
+| **`UI::ComboBox`** | `Init()`<br>`Init(w.i, h.i)`<br>`Init(x.i, y.i, w.i, h.i)`<br>`Init(x.i, y.i, w.i, h.i, flags.i)` | Liste déroulante sélectionnable. |
+| **`UI::ProgressBar`** | `Init()` *(0..100)*<br>`Init(min.i, max.i)`<br>`Init(min.i, max.i, w.i, h.i)`<br>`Init(x.i, y.i, w.i, h.i, min.i, max.i, flags.i)` | Barre de progression. |
+| **`UI::Slider`** | `Init()` *(0..100)*<br>`Init(min.i, max.i)`<br>`Init(min.i, max.i, w.i, h.i)`<br>`Init(x.i, y.i, w.i, h.i, min.i, max.i, flags.i)` | Curseur réglable TrackBar. |
+| **`UI::ListIcon`** | `Init(title.s, colWidth.i)`<br>`Init(title.s, colWidth.i, flags.i)`<br>`Init(x.i, y.i, w.i, h.i, title.s, colWidth.i)`<br>`Init(x.i, y.i, w.i, h.i, title.s, colWidth.i, flags.i)` | Table / Grille de données multi-colonnes. |
+| **`UI::Controls::ToggleSwitch`** | `Init()`<br>`Init(checked.b)`<br>`Init(w.i, h.i, checked.b)`<br>`Init(x.i, y.i, w.i, h.i, checked.b)` | Interrupteur moderne vectoriel (Canvas). |
 
 ---
 
----
+### 3.2 Panneaux de Disposition Réactive (Layouts)
 
-## 5. Framework GUI Objet PureBasic (`src/ui/UI.pbo`)
-
-Toutes les fenêtres et tous les gadgets PureBasic peuvent désormais être manipulés comme des objets natifs avec gestionnaires d'événements virtuels (`OnClick()`, `OnChange()`, `OnPaint()`, `OnClose()`, etc.), héritage de classes et création de **Custom Gadgets** personnalisés sur Canvas.
-
-### 5.1 Architecture des Classes GUI
-
-- **`UI::Component`** : Classe abstraite racine commune (propriétés `id`, `tag`, `x`, `y`, `width`, `height`, `isVisible`, `isEnabled`, `userData`).
-- **`UI::Gadget`** : Classe abstraite de base pour tous les gadgets (méthodes `SetText`, `GetText`, `SetPosition`, `SetVisible`, `SetEnabled`, `SetToolTip`, `SetColor`, `SetFont`, `SetFocus`, et callbacks virtuels `OnClick`, `OnChange`, `OnFocus`, `OnLostFocus`, `OnRightClick`, `OnCustomEvent`).
-- **`UI::Window`** : Encapsulation d'une fenêtre (`OpenWindow`, `Close`, `SetTitle`, `SetPosition`, et événements `OnClose`, `OnResize`, `OnMove`, `OnMinimize`, `OnMaximize`, `OnRestore`).
-- **`UI::Application`** : Gestionnaire global d'application et boucle d'événements centralisée (`Run()`, `Quit()`).
-- **`UI::CustomGadget`** : Gadget propriétaire moderne basé sur `CanvasGadget` avec méthode virtuelle `OnPaint(w, h)` et gestion de la souris (`OnMouseEnter`, `OnMouseDown`, `OnMouseUp`, `OnMouseMove`, `OnKeyDown`, `Redraw()`).
-
-### 5.2 Contrôles Standard Disponibles
-
-| Classe | Gadget PureBasic Sous-Jacent | Caractéristiques Principales |
+| Panneau Layout | Constructeurs Disponibles | Rôle & Comportement |
 | :--- | :--- | :--- |
-| **`UI::Button`** | `ButtonGadget` | Gestion du clic via `OnClick()` |
-| **`UI::TextBox`** | `StringGadget` | `IsReadOnly()`, `SetReadOnly()`, `OnChange()` |
-| **`UI::Label`** | `TextGadget` | Affichage de texte |
-| **`UI::CheckBox`** | `CheckBoxGadget` | `IsChecked()`, `SetChecked(state)` |
-| **`UI::ProgressBar`** | `ProgressBarGadget` | `GetValue()`, `SetValue()`, `SetRange()` |
-| **`UI::Slider`** | `TrackBarGadget` | `GetValue()`, `SetValue()` |
-| **`UI::ComboBox`** | `ComboBoxGadget` | `AddItem()`, `GetSelectedIndex()`, `GetSelectedItem()`, `Clear()` |
-| **`UI::Controls::ToggleSwitch`** | `UI::CustomGadget` *(Canvas)* | Interrupteur moderne style iOS avec animation d'état |
+| **`UI::Layouts::StackPanel`** | `Init()` *(Vertical, 5px)*<br>`Init(orientation.i)`<br>`Init(orientation.i, spacing.i)`<br>`Init(orientation.i, spacing.i, w.i, h.i)` | Empile les composants en ligne (`#UI_Orientation_Horizontal`) ou en colonne (`#UI_Orientation_Vertical`). |
+| **`UI::Layouts::DockPanel`** | `Init()` *(LastChildFill = #True)*<br>`Init(lastChildFill.b)`<br>`Init(lastChildFill.b, w.i, h.i)` | Ancre les enfants sur les bords (`#UI_Dock_Top`, `#UI_Dock_Bottom`, `#UI_Dock_Left`, `#UI_Dock_Right`) et remplit le centre. |
+| **`UI::Layouts::Grid`** | `Init()`<br>`Init(w.i, h.i)` | Grille 2D flexible avec dimensionnement en pixels, `"Auto"` ou proportionnel Star (`"*"` / `"2*"`). |
+| **`UI::Window`** | `Init(title.s)`<br>`Init(title.s, w.i, h.i)`<br>`Init(title.s, w.i, h.i, flags.i)`<br>`Init(title.s, x.i, y.i, w.i, h.i, flags.i, parentWin.i)` | Fenêtre GUI réactive intégrant automatiquement le redimensionnement. |
 
-### 5.3 Exemple d'Application GUI OOP Complète
+---
+
+## 4. Exemple d'Application Réactive Multi-Fenêtres
 
 ```oop
 XIncludeFile "ui/UI.pbo"
-
 Using UI
+Using UI::Layouts
 
-; 1. Création d'un bouton personnalisé avec logique métier
-Class MonBouton Extends UI::Button {
-  Protected *champSaisie.UI::TextBox
-
-  Public Method LierSaisie(*txt.UI::TextBox) {
-    This\*champSaisie = *txt
-  }
-
-  Public Method OnClick() {
-    If (This\*champSaisie) {
-      MessageRequester("Bonjour", "Bonjour " + This\*champSaisie\GetText() + " !")
-    }
-  }
-}
-
-; 2. Fenêtre Principale Orientée Objet
-Class MaFenetre Extends UI::Window {
-  Protected *saisie.UI::TextBox
-  Protected *btn.MonBouton
-  Protected *switch.UI::Controls::ToggleSwitch
+Class MainWindow Extends UI::Window {
+  Protected *rootDock.DockPanel
+  Protected *toolbar.StackPanel
+  Protected *btnNew.Button
+  Protected *table.ListIcon
 
   Public Method Init() {
-    Super::Init("Mon Application OOP", #PB_Ignore, #PB_Ignore, 400, 200, #PB_Window_SystemMenu | #PB_Window_ScreenCentered)
-    UI::RegisterWindow(This\id, This)
+    ; Fenêtre 800x600 centrée et redimensionnable
+    Super::Init("Gestionnaire de Contacts", 800, 600)
 
-    This\*saisie = New UI::TextBox(20, 20, 200, 25, "Alice")
-    This\*btn = New MonBouton(230, 18, 140, 28, "Valider")
-    This\*btn\LierSaisie(This\*saisie)
+    ; Panneau racine Dock
+    This\*rootDock = New DockPanel(#True)
+    This\SetRootComponent(This\*rootDock)
 
-    This\*switch = New UI::Controls::ToggleSwitch(20, 70, 50, 26, #True)
-  }
+    ; Barre d'outils en haut (Dock Top)
+    This\*toolbar = New StackPanel(#UI_Orientation_Horizontal, 8)
+    This\*btnNew = New Button("+ Nouveau Contact")
+    This\*toolbar\AddChild(This\*btnNew)
+    This\*rootDock\AddDockChild(This\*toolbar, #UI_Dock_Top)
 
-  Public Method.b OnClose() {
-    ProcedureReturn #True ; Autorise la fermeture
+    ; Table centrale (remplit tout l'espace restant)
+    This\*table = New ListIcon("Nom", 200)
+    This\*table\AddColumn(1, "Email", 250)
+    This\*rootDock\AddDockChild(This\*table, #UI_Dock_Fill)
   }
 }
 
-; 3. Point d'entrée
 Define *app.UI::Application = New UI::Application()
-Define *win.MaFenetre = New MaFenetre()
-
+Define *win.MainWindow = New MainWindow()
 *app\Run()
 ```
 
 ---
 
-## 6. Plomberie PureBasic Générée
+## 5. Guide de Compilation & Exécution
 
-Le transpileur convertit automatiquement la syntaxe haut niveau `.pbo` en code natif PureBasic `.pb` ultra-performant :
-1. **Interfaces VTable (`_vt`)** : Définition des prototypes de méthodes avec préfixage complet (ex: `Game_Graphics_Renderer_vt`).
-2. **Structures d'Instance (`_Inst`)** : Structures mémoires contenant le pointeur `*VTable` en en-tête suivi des champs de la classe.
-3. **Dispatch Interne Sécurisé (`*This_vt`)** : Les appels internes `This\Methode()` sont automatiquement résolus via le pointeur d'interface polymorphe `*This_vt`.
-4. **DataSections VTable** : Générées pour toutes les classes concrètes (les classes abstraites n'allouent pas de VTable inutile).
-5. **Constructeurs Factory (`New_<Classe>`)** : Générés pour les classes concrètes avec héritage automatique des paramètres constructeur.
-6. **Validation Sémantique & Source Mapping** :
-   - Interdiction d'instancier une classe abstraite.
-   - Obligation pour une classe fille concrète d'implémenter toutes les méthodes abstraites héritées.
-   - Fichier `.pb.map` pour remapper chaque avertissement/erreur `pbcompiler` vers le fichier et la ligne `.pbo` d'origine.
-
----
-
-## 7. Guide d'Exécution & Compilation
-
-### Transpiler un fichier `.pbo` vers `.pb` :
+### Transpiler un fichier source `.pbo` vers `.pb` :
 ```cmd
-"compiler/transpiler.exe" "src/mon_fichier.pbo" "src/mon_fichier_generated.pb"
+"compiler/transpiler.exe" "src/main.pbo" "src/main_generated.pb"
 ```
 
-### Vérifier la syntaxe en ligne de commande :
+### Compiler avec le compilateur officiel PureBasic :
 ```cmd
-"compiler/transpiler.exe" --check "src/mon_fichier.pbo"
+"C:\Program Files\PureBasic\Compilers\pbcompiler.exe" "src/main_generated.pb" /EXE "src/app.exe" /THREAD /UNICODE /XP /USER /DPIAWARE /QUIET
 ```
-
-### Compiler le code PureBasic généré :
-```cmd
-"C:\Program Files\PureBasic\Compilers\pbcompiler.exe" "src/mon_fichier_generated.pb" /EXE "src/mon_fichier.exe"
-```
-

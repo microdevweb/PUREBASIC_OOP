@@ -15,8 +15,53 @@ Namespace UI {
     Protected mouseX.i
     Protected mouseY.i
 
-    Public Method Init(x_p.i, y_p.i, w_p.i = 100, h_p.i = 30, flags_p.i = 0) {
+    ; Constructeur 1: Par défaut (Positionné par Layout 0,0, 100x30)
+    Public Method Init() {
+      Super::Init()
+      This\x = 0 : This\y = 0 : This\width = 100 : This\height = 30
+      This\desiredWidth = 100 : This\desiredHeight = 30
+      This\isVisible = #True : This\isEnabled = #True
+      This\isHovered = #False : This\isPressed = #False
+      This\id = CanvasGadget(#PB_Any, 0, 0, 100, 30, #PB_Canvas_Keyboard)
+      If (This\id) {
+        UI::RegisterGadget(This\id, This)
+        This\Redraw()
+      }
+    }
+
+    ; Constructeur 2: Dimensions personnalisées
+    Public Method Init(w_p.i, h_p.i) {
+      Super::Init()
+      This\x = 0 : This\y = 0 : This\width = w_p : This\height = h_p
+      This\desiredWidth = w_p : This\desiredHeight = h_p
+      This\isVisible = #True : This\isEnabled = #True
+      This\isHovered = #False : This\isPressed = #False
+      This\id = CanvasGadget(#PB_Any, 0, 0, w_p, h_p, #PB_Canvas_Keyboard)
+      If (This\id) {
+        UI::RegisterGadget(This\id, This)
+        This\Redraw()
+      }
+    }
+
+    ; Constructeur 3: Position et dimensions
+    Public Method Init(x_p.i, y_p.i, w_p.i, h_p.i) {
+      Super::Init()
       This\x = x_p : This\y = y_p : This\width = w_p : This\height = h_p
+      This\desiredWidth = w_p : This\desiredHeight = h_p
+      This\isVisible = #True : This\isEnabled = #True
+      This\isHovered = #False : This\isPressed = #False
+      This\id = CanvasGadget(#PB_Any, x_p, y_p, w_p, h_p, #PB_Canvas_Keyboard)
+      If (This\id) {
+        UI::RegisterGadget(This\id, This)
+        This\Redraw()
+      }
+    }
+
+    ; Constructeur 4: Complet avec flags
+    Public Method Init(x_p.i, y_p.i, w_p.i, h_p.i, flags_p.i) {
+      Super::Init()
+      This\x = x_p : This\y = y_p : This\width = w_p : This\height = h_p
+      This\desiredWidth = w_p : This\desiredHeight = h_p
       This\isVisible = #True : This\isEnabled = #True
       This\isHovered = #False : This\isPressed = #False
       This\id = CanvasGadget(#PB_Any, x_p, y_p, w_p, h_p, flags_p | #PB_Canvas_Keyboard)

@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang='fr'>
 <head>
   <meta charset='UTF-8'>
   <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-  <title>Documentation PureBasic OOP - PureBasic OOP Documentation</title>
+  <title>Vue d'ensemble - PureBasic OOP Documentation</title>
   <link rel='stylesheet' href='../css/doc_theme.css'>
 </head>
 <body>
@@ -11,7 +11,7 @@
     <a href='index.html' class='brand-container'>
       <img src='../assets/PB_OOP_LOGO.jpeg' alt='Logo' class='brand-logo'>
       <span class='brand-title'>PureBasic OOP</span>
-      <span class='brand-version'>ALPHA 1.0</span>
+      <span class='brand-version'>v1.2 Native</span>
     </a>
     <div class='header-controls'>
       <div class='search-box'>
@@ -24,6 +24,7 @@
       </div>
     </div>
   </header>
+  
   <div class='layout-container'>
 <nav class='doc-sidebar'>
   <div class='nav-section'>
@@ -33,15 +34,15 @@
     </ul>
   </div>
   <div class='nav-section'>
-    <div class='nav-section-title'>Mots-cl&eacute;s POO</div>
+    <div class='nav-section-title'>Mots-clés POO</div>
     <ul class='nav-list'>
-      <li class='nav-item'><a href='keywords/class.html'><span>Class / Abstract</span><span class='badge badge-keyword'>KW</span></a></li>
-      <li class='nav-item'><a href='keywords/method.html'><span>Method / Override</span><span class='badge badge-keyword'>KW</span></a></li>
-      <li class='nav-item'><a href='keywords/properties.html'><span>Getter / Setter / Prop</span><span class='badge badge-keyword'>KW</span></a></li>
-      <li class='nav-item'><a href='keywords/inheritance.html'><span>Extends / Super</span><span class='badge badge-keyword'>KW</span></a></li>
-      <li class='nav-item'><a href='keywords/encapsulation.html'><span>Public / Protected / Private</span><span class='badge badge-keyword'>KW</span></a></li>
-      <li class='nav-item'><a href='keywords/lifecycle.html'><span>New / Free / Init</span><span class='badge badge-keyword'>KW</span></a></li>
-      <li class='nav-item'><a href='keywords/operators.html'><span>This / Cast / TypeOf</span><span class='badge badge-keyword'>KW</span></a></li>
+      <li class='nav-item'><a href='keywords/class.html'><span>Class / Abstract</span><span class='badge badge-kw'>KW</span></a></li>
+      <li class='nav-item'><a href='keywords/method.html'><span>Method / Override</span><span class='badge badge-kw'>KW</span></a></li>
+      <li class='nav-item'><a href='keywords/properties.html'><span>Getter / Setter / Prop</span><span class='badge badge-kw'>KW</span></a></li>
+      <li class='nav-item'><a href='keywords/inheritance.html'><span>Extends / Super</span><span class='badge badge-kw'>KW</span></a></li>
+      <li class='nav-item'><a href='keywords/encapsulation.html'><span>Public / Protected / Private</span><span class='badge badge-kw'>KW</span></a></li>
+      <li class='nav-item'><a href='keywords/lifecycle.html'><span>New / Free / Init</span><span class='badge badge-kw'>KW</span></a></li>
+      <li class='nav-item'><a href='keywords/operators.html'><span>This / Cast / TypeOf</span><span class='badge badge-kw'>KW</span></a></li>
     </ul>
   </div>
   <div class='nav-section'>
@@ -54,6 +55,7 @@
       <li class='nav-item'><a href='ui/checkbox.html'><span>CheckBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='ui/combobox.html'><span>ComboBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='ui/label.html'><span>Label</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='ui/listicon.html'><span>ListIcon</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='ui/progressbar.html'><span>ProgressBar</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='ui/slider.html'><span>Slider</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='ui/textbox.html'><span>TextBox</span><span class='badge badge-ui'>UI</span></a></li>
@@ -63,30 +65,53 @@
   <div class='nav-section'>
     <div class='nav-section-title'>Layouts Responsifs (WPF)</div>
     <ul class='nav-list'>
-      <li class='nav-item'><a href='ui/container.html'><span>Container</span><span class='badge badge-ui'>WPF</span></a></li>
-      <li class='nav-item'><a href='ui/stackpanel.html'><span>StackPanel</span><span class='badge badge-ui'>WPF</span></a></li>
-      <li class='nav-item'><a href='ui/dockpanel.html'><span>DockPanel</span><span class='badge badge-ui'>WPF</span></a></li>
-      <li class='nav-item'><a href='ui/grid.html'><span>Grid</span><span class='badge badge-ui'>WPF</span></a></li>
+      <li class='nav-item'><a href='ui/container.html'><span>Container</span><span class='badge badge-wpf'>WPF</span></a></li>
+      <li class='nav-item'><a href='ui/stackpanel.html'><span>StackPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
+      <li class='nav-item'><a href='ui/dockpanel.html'><span>DockPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
+      <li class='nav-item'><a href='ui/grid.html'><span>Grid</span><span class='badge badge-wpf'>WPF</span></a></li>
     </ul>
   </div>
 </nav>
     <main class='doc-content'>
       <div class='breadcrumb'>
         <a href='index.html'>Accueil</a>
+        
       </div>
+      
       <div class='page-header'>
         <div class='title-row'>
-          <h1 class='page-title'>Documentation PureBasic OOP</h1>
-          <span class='badge badge-class'>Guide</span>
+          <h1 class='page-title'>Vue d'ensemble</h1>
+          <span class='badge badge-info'>Aperçu</span>
         </div>
-        <p class='page-lead'>Guide de r&eacute;f&eacute;rence complet pour le d&eacute;veloppement Objet et UI sous PureBasic.</p>
+        <p class='page-lead'>Documentation officielle du langage PureBasic Orienté Objet.</p>
       </div>
-<div class='doc-section'><h2 class='section-title'>Bienvenue dans PureBasic OOP</h2><p>PureBasic OOP apporte la puissance de la Programmation Orient&eacute;e Objet compl&egrave;te &agrave; PureBasic gr&acirc;ce &agrave; un transpileur optimis&eacute; et une biblioth&egrave;que UI native moderne.</p><div class='callout callout-tip'>  <div class='callout-title'>&#128640; Touche d'aide contextuelle F1</div>  <p>Dans l'IDE, placez votre curseur sur n'importe quel mot-cl&eacute; POO (<code>Class</code>, <code>Method</code>, <code>Super</code>, <code>Property</code>...) ou classe UI (<code>Window</code>, <code>Button</code>, <code>Application</code>...) et appuyez sur <strong>F1</strong> pour ouvrir directement sa fiche d'aide !</p></div></div><div class='doc-section'><h2 class='section-title'>Cat&eacute;gories de documentation</h2><div class='cards-grid'>  <a href='keywords/class.html' class='doc-card'>    <div class='doc-card-title'><span>D&eacute;claration de Classes</span><span class='badge badge-keyword'>Class</span></div>    <div class='doc-card-desc'>D&eacute;finition des classes concr&egrave;tes et abstraites, h&eacute;ritage et polymorphisme.</div>  </a>  <a href='keywords/method.html' class='doc-card'>    <div class='doc-card-title'><span>M&eacute;thodes & Surcharge</span><span class='badge badge-method'>Method</span></div>    <div class='doc-card-desc'>Constructeurs, destructeurs, m&eacute;thodes abstraites et dispatch virtuel via VTable.</div>  </a>  <a href='keywords/properties.html' class='doc-card'>    <div class='doc-card-title'><span>Propri&eacute;t&eacute;s & Accesseurs</span><span class='badge badge-keyword'>Property</span></div>    <div class='doc-card-desc'>Getters, Setters et propri&eacute;t&eacute;s encapsul&eacute;es avec auto-g&eacute;n&eacute;ration.</div>  </a>  <a href='ui/application.html' class='doc-card'>    <div class='doc-card-title'><span>Framework UI / GUI</span><span class='badge badge-ui'>UI</span></div>    <div class='doc-card-desc'>Classes d'interface : Application, Window, Button, ToggleSwitch, Slider...</div>  </a>  <a href='ui/container.html' class='doc-card'>    <div class='doc-card-title'><span>Layouts Responsifs (WPF)</span><span class='badge badge-ui'>WPF</span></div>    <div class='doc-card-desc'>Syst&egrave;me de mise en page automatique : StackPanel, DockPanel, Grid 2D...</div>  </a></div></div>
+      
+      
+<div class='doc-section'>
+  <h2 class='section-title'>Bienvenue dans PureBasic OOP</h2>
+  <p>PureBasic OOP apporte la puissance de la Programmation Orientée Objet complète à PureBasic grâce à un transpileur optimisé et une bibliothèque UI native moderne.</p>
+  <div class='callout callout-tip'>
+    <div class='callout-title'>💡 Touche d'aide contextuelle F1</div>
+    <p>Dans l'IDE, placez votre curseur sur n'importe quel mot-clé POO (<code>Class</code>, <code>Method</code>, <code>Super</code>, <code>Property</code>...) ou composant UI (<code>Window</code>, <code>Button</code>, <code>StackPanel</code>, <code>ListIcon</code>...) et appuyez sur <strong>F1</strong> pour ouvrir directement sa fiche d'aide détaillée !</p>
+  </div>
+</div>
+<div class='doc-section'>
+  <h2 class='section-title'>Fonctionnalités Principales</h2>
+  <ul>
+    <li><strong>Classes & Héritage Simple :</strong> Définition élégante avec <code>Class ... Extends</code>, surcharge de méthodes et appel parent <code>Super::</code>.</li>
+    <li><strong>Surcharge de Constructeurs :</strong> Plusieurs constructeurs <code>Init(...)</code> par classe pour s'adapter à tous les usages (layouts automatiques ou fenêtres fixes).</li>
+    <li><strong>Système de Layouts Responsifs (Style WPF) :</strong> <code>StackPanel</code>, <code>DockPanel</code>, <code>Grid</code>, <code>Container</code> avec dimensionnement Star (*), marges et alignements fluides.</li>
+    <li><strong>Cycle de Vie Sécurisé :</strong> Instanciation par <code>New</code> et libération automatique ou manuelle via <code>Free</code>.</li>
+  </ul>
+</div>
+
     </main>
   </div>
+  
   <footer class='doc-footer'>
     <p>&copy; 2026 PureBasic OOP Project - MicrodevWeb | Dual License GPL v3 / Fantaisie Software</p>
   </footer>
+  
   <script>
     document.getElementById('search-input').addEventListener('input', function(e) {
       let filter = e.target.value.toLowerCase();

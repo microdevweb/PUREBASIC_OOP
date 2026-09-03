@@ -11,6 +11,18 @@ Namespace UI {
 
   Class TextBox Extends Gadget {
 
+    ; Constructeur 0: Par défaut (vide, 0,0, 150x25)
+    Public Method Init() {
+      Super::Init()
+      This\x = 0 : This\y = 0 : This\width = 150 : This\height = 25
+      This\desiredWidth = 150 : This\desiredHeight = 25
+      This\isVisible = #True : This\isEnabled = #True
+      This\id = StringGadget(#PB_Any, 0, 0, 150, 25, "", 0)
+      If (This\id) {
+        UI::RegisterGadget(This\id, This)
+      }
+    }
+
     ; Constructeur 1: Texte par défaut uniquement (0,0, 150x25)
     Public Method Init(defaultText_p.s) {
       Super::Init()

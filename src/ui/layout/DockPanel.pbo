@@ -22,6 +22,11 @@ Namespace UI::Layouts {
       This\lastChildFill = fill
     }
 
+    Public Method Init(fill.b, w_p.i, h_p.i) {
+      Super::Init(w_p, h_p)
+      This\lastChildFill = fill
+    }
+
     Public Method SetLastChildFill(fill.b) {
       This\lastChildFill = fill
       This\UpdateLayout()

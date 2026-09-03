@@ -21,6 +21,10 @@ Namespace UI::Layouts {
       Super::Init()
     }
 
+    Public Method Init(w_p.i, h_p.i) {
+      Super::Init(w_p, h_p)
+    }
+
     ; Parse definitions: "150", "Auto", "*", "2*"
     Protected Method ParseDefinition(*outDef.UI_GridDef, defStr.s) {
       Protected trimmed.s = Trim(UCase(defStr))

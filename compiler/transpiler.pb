@@ -1604,51 +1604,10 @@ Procedure.b BuildVTables()
       EndIf
     Next
 
-    ; Inherit Init constructors if not explicitly defined in child class
-    If ListSize(*c\InitConstructors()) = 0 And *c\parentName <> ""
-      Protected curP.s = *c\fullParentName
-      While curP <> ""
-        If FindMapElement(ClassMap(), UCase(curP))
-          PushListPosition(Classes())
-          SelectElement(Classes(), ClassMap(UCase(curP)))
-          If ListSize(Classes()\InitConstructors()) > 0
-            *c\hasInit = #True
-            ForEach Classes()\InitConstructors()
-              AddElement(*c\InitConstructors())
-              *c\InitConstructors()\params = Classes()\InitConstructors()\params
-              *c\InitConstructors()\cleanParams = Classes()\InitConstructors()\cleanParams
-              *c\InitConstructors()\signature = Classes()\InitConstructors()\signature
-              *c\InitConstructors()\paramCount = Classes()\InitConstructors()\paramCount
-              *c\InitConstructors()\minParamCount = Classes()\InitConstructors()\minParamCount
-              *c\InitConstructors()\srcLineNumber = Classes()\InitConstructors()\srcLineNumber
-              *c\InitConstructors()\srcFile = Classes()\InitConstructors()\srcFile
-            Next
-            PopListPosition(Classes())
-            Break
-          EndIf
-          curP = Classes()\fullParentName
-          PopListPosition(Classes())
-        Else
-          Break
-        EndIf
-      Wend
-
-      ; Recalculate mangled constructor names for inherited constructors
-      If ListSize(*c\InitConstructors()) > 1
-        ForEach *c\InitConstructors()
-          *c\InitConstructors()\mangledName = "New_" + *c\mangledName + "_" + *c\InitConstructors()\signature
-          *c\InitConstructors()\initProcMangled = *c\mangledName + "_Init_" + *c\InitConstructors()\signature
-        Next
-      ElseIf ListSize(*c\InitConstructors()) = 1
-        FirstElement(*c\InitConstructors())
-        *c\InitConstructors()\mangledName = "New_" + *c\mangledName
-        *c\InitConstructors()\initProcMangled = *c\mangledName + "_Init"
-      EndIf
-    EndIf
 
     ; Inherit Free if not explicitly defined
     If Not *c\hasFree And *c\parentName <> ""
-      curP = *c\fullParentName
+      Protected curP.s = *c\fullParentName
       While curP <> ""
         If FindMapElement(ClassMap(), UCase(curP))
           PushListPosition(Classes())
@@ -1856,13 +1815,103 @@ Procedure.s TranspileMethodBodyLine(line.s, className.s, parentMangledName.s)
       Protected pParenOpen.i = FindString(res, "(", pSuper)
       If pParenOpen > pSuper
         Protected superMethod.s = Trim(Mid(res, pSuper + sepLen, pParenOpen - (pSuper + sepLen)))
-        Protected beforeSuper.s = Left(res, pSuper - 1)
-        Protected afterParen.s = Mid(res, pParenOpen + 1)
+        Protected pClose.i = 0
+        Protected i.i, depth.i = 1, inQuote.b = #False
+        Protected lenR.i = Len(res)
         
-        If Trim(afterParen) = ")" Or Left(Trim(afterParen), 1) = ")"
-          res = beforeSuper + parentMangledName + "_" + superMethod + "(*This" + afterParen
+        For i = pParenOpen + 1 To lenR
+          Protected ch.s = Mid(res, i, 1)
+          If ch = Chr(34)
+            inQuote = ~inQuote & 1
+          ElseIf ch = "(" And Not inQuote
+            depth + 1
+          ElseIf ch = ")" And Not inQuote
+            depth - 1
+            If depth = 0
+              pClose = i
+              Break
+            EndIf
+          EndIf
+        Next
+
+        If pClose > pParenOpen
+          Protected superArgList.s = Trim(Mid(res, pParenOpen + 1, pClose - pParenOpen - 1))
+          Protected callTarget.s = ""
+          
+          Protected foundParent.b = #False
+          PushListPosition(Classes())
+          ForEach Classes()
+            If Classes()\mangledName = parentMangledName
+              foundParent = #True
+              Break
+            EndIf
+          Next
+          
+          If foundParent
+            If UCase(superMethod) = "INIT"
+              If ListSize(Classes()\InitConstructors()) > 1
+                Protected argCount.i = 0
+                Protected callSig.s = GetCallArgSignature(superArgList, @argCount)
+                Protected bestMatch.s = ""
+                ForEach Classes()\InitConstructors()
+                  If Classes()\InitConstructors()\signature = callSig
+                    bestMatch = Classes()\InitConstructors()\initProcMangled
+                    Break
+                  ElseIf argCount >= Classes()\InitConstructors()\minParamCount And argCount <= Classes()\InitConstructors()\paramCount
+                    bestMatch = Classes()\InitConstructors()\initProcMangled
+                  EndIf
+                Next
+                If bestMatch <> ""
+                  callTarget = bestMatch
+                Else
+                  FirstElement(Classes()\InitConstructors())
+                  callTarget = Classes()\InitConstructors()\initProcMangled
+                EndIf
+              ElseIf ListSize(Classes()\InitConstructors()) = 1
+                FirstElement(Classes()\InitConstructors())
+                callTarget = Classes()\InitConstructors()\initProcMangled
+              Else
+                callTarget = parentMangledName + "_Init"
+              EndIf
+            Else
+              ; Method overloading check on parent
+              Protected mCount.i = 0
+              ForEach Classes()\Methods()
+                If UCase(Classes()\Methods()\name) = UCase(superMethod)
+                  mCount + 1
+                EndIf
+              Next
+              If mCount > 1
+                Protected mArgCount.i = 0
+                Protected mCallSig.s = GetCallArgSignature(superArgList, @mArgCount)
+                ForEach Classes()\Methods()
+                  If UCase(Classes()\Methods()\name) = UCase(superMethod) And Classes()\Methods()\signature = mCallSig
+                    callTarget = parentMangledName + "_" + Classes()\Methods()\mangledMethodName
+                    Break
+                  EndIf
+                Next
+                If callTarget = ""
+                  callTarget = parentMangledName + "_" + superMethod
+                EndIf
+              Else
+                callTarget = parentMangledName + "_" + superMethod
+              EndIf
+            EndIf
+          Else
+            callTarget = parentMangledName + "_" + superMethod
+          EndIf
+          PopListPosition(Classes())
+          
+          Protected beforeSuper.s = Left(res, pSuper - 1)
+          Protected afterClose.s = Mid(res, pClose + 1)
+          
+          If superArgList = ""
+            res = beforeSuper + callTarget + "(*This)" + afterClose
+          Else
+            res = beforeSuper + callTarget + "(*This, " + superArgList + ")" + afterClose
+          EndIf
         Else
-          res = beforeSuper + parentMangledName + "_" + superMethod + "(*This, " + afterParen
+          Break
         EndIf
       Else
         Break
@@ -1950,6 +1999,12 @@ Procedure.s ResolveNewExpressions(line.s)
           
           If pClose > pOpen
             Protected argList.s = Trim(Mid(res, pOpen + 1, pClose - pOpen - 1))
+            If Left(prefix, 4) = "New(" And FindString(prefix, ",") > 0
+              Protected pFirstComma.i = FindString(argList, ",")
+              If pFirstComma > 0
+                argList = Trim(Mid(argList, pFirstComma + 1))
+              EndIf
+            EndIf
             Protected argCount.i = 0
             Protected callSig.s = GetCallArgSignature(argList, @argCount)
             Protected chosenFactory.s = "New_" + cMangled

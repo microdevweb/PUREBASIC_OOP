@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang='fr'>
 <head>
   <meta charset='UTF-8'>
   <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-  <title>New / Free / Cycle de vie - PureBasic OOP Documentation</title>
+  <title>Cycle de Vie : New, Free & Init - PureBasic OOP Documentation</title>
   <link rel='stylesheet' href='../../css/doc_theme.css'>
 </head>
 <body>
@@ -11,7 +11,7 @@
     <a href='../index.html' class='brand-container'>
       <img src='../../assets/PB_OOP_LOGO.jpeg' alt='Logo' class='brand-logo'>
       <span class='brand-title'>PureBasic OOP</span>
-      <span class='brand-version'>ALPHA 1.0</span>
+      <span class='brand-version'>v1.2 Native</span>
     </a>
     <div class='header-controls'>
       <div class='search-box'>
@@ -20,10 +20,11 @@
       </div>
       <div class='lang-switch'>
         <a href='#' class='lang-btn active'>FR</a>
-        <a href='../../en/keywords/lifecycle.html' class='lang-btn'>EN</a>
+        <a href='../en/keywords/lifecycle.html' class='lang-btn'>EN</a>
       </div>
     </div>
   </header>
+  
   <div class='layout-container'>
 <nav class='doc-sidebar'>
   <div class='nav-section'>
@@ -33,15 +34,15 @@
     </ul>
   </div>
   <div class='nav-section'>
-    <div class='nav-section-title'>Mots-cl&eacute;s POO</div>
+    <div class='nav-section-title'>Mots-clés POO</div>
     <ul class='nav-list'>
-      <li class='nav-item'><a href='../keywords/class.html'><span>Class / Abstract</span><span class='badge badge-keyword'>KW</span></a></li>
-      <li class='nav-item'><a href='../keywords/method.html'><span>Method / Override</span><span class='badge badge-keyword'>KW</span></a></li>
-      <li class='nav-item'><a href='../keywords/properties.html'><span>Getter / Setter / Prop</span><span class='badge badge-keyword'>KW</span></a></li>
-      <li class='nav-item'><a href='../keywords/inheritance.html'><span>Extends / Super</span><span class='badge badge-keyword'>KW</span></a></li>
-      <li class='nav-item'><a href='../keywords/encapsulation.html'><span>Public / Protected / Private</span><span class='badge badge-keyword'>KW</span></a></li>
-      <li class='nav-item active'><a href='../keywords/lifecycle.html'><span>New / Free / Init</span><span class='badge badge-keyword'>KW</span></a></li>
-      <li class='nav-item'><a href='../keywords/operators.html'><span>This / Cast / TypeOf</span><span class='badge badge-keyword'>KW</span></a></li>
+      <li class='nav-item'><a href='../keywords/class.html'><span>Class / Abstract</span><span class='badge badge-kw'>KW</span></a></li>
+      <li class='nav-item'><a href='../keywords/method.html'><span>Method / Override</span><span class='badge badge-kw'>KW</span></a></li>
+      <li class='nav-item'><a href='../keywords/properties.html'><span>Getter / Setter / Prop</span><span class='badge badge-kw'>KW</span></a></li>
+      <li class='nav-item'><a href='../keywords/inheritance.html'><span>Extends / Super</span><span class='badge badge-kw'>KW</span></a></li>
+      <li class='nav-item'><a href='../keywords/encapsulation.html'><span>Public / Protected / Private</span><span class='badge badge-kw'>KW</span></a></li>
+      <li class='nav-item active'><a href='../keywords/lifecycle.html'><span>New / Free / Init</span><span class='badge badge-kw'>KW</span></a></li>
+      <li class='nav-item'><a href='../keywords/operators.html'><span>This / Cast / TypeOf</span><span class='badge badge-kw'>KW</span></a></li>
     </ul>
   </div>
   <div class='nav-section'>
@@ -54,6 +55,7 @@
       <li class='nav-item'><a href='../ui/checkbox.html'><span>CheckBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/combobox.html'><span>ComboBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/label.html'><span>Label</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/listicon.html'><span>ListIcon</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/progressbar.html'><span>ProgressBar</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/slider.html'><span>Slider</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/textbox.html'><span>TextBox</span><span class='badge badge-ui'>UI</span></a></li>
@@ -63,34 +65,49 @@
   <div class='nav-section'>
     <div class='nav-section-title'>Layouts Responsifs (WPF)</div>
     <ul class='nav-list'>
-      <li class='nav-item'><a href='../ui/container.html'><span>Container</span><span class='badge badge-ui'>WPF</span></a></li>
-      <li class='nav-item'><a href='../ui/stackpanel.html'><span>StackPanel</span><span class='badge badge-ui'>WPF</span></a></li>
-      <li class='nav-item'><a href='../ui/dockpanel.html'><span>DockPanel</span><span class='badge badge-ui'>WPF</span></a></li>
-      <li class='nav-item'><a href='../ui/grid.html'><span>Grid</span><span class='badge badge-ui'>WPF</span></a></li>
+      <li class='nav-item'><a href='../ui/container.html'><span>Container</span><span class='badge badge-wpf'>WPF</span></a></li>
+      <li class='nav-item'><a href='../ui/stackpanel.html'><span>StackPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
+      <li class='nav-item'><a href='../ui/dockpanel.html'><span>DockPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
+      <li class='nav-item'><a href='../ui/grid.html'><span>Grid</span><span class='badge badge-wpf'>WPF</span></a></li>
     </ul>
   </div>
 </nav>
     <main class='doc-content'>
       <div class='breadcrumb'>
         <a href='../index.html'>Accueil</a>
+        
         <span class='breadcrumb-separator'>/</span>
         <span>Keywords</span>
         <span class='breadcrumb-separator'>/</span>
-        <span style='color: var(--accent-blue);'>New / Free / Cycle de vie</span>
+        <span style='color: var(--accent-blue);'>Cycle de Vie : New, Free & Init</span>
+        
       </div>
+      
       <div class='page-header'>
         <div class='title-row'>
-          <h1 class='page-title'>New / Free / Cycle de vie</h1>
-          <span class='badge badge-keyword'>M&eacute;moire</span>
+          <h1 class='page-title'>Cycle de Vie : New, Free & Init</h1>
+          <span class='badge badge-keyword'>Keyword</span>
         </div>
-        <p class='page-lead'>Instanciation, initialisation et lib&eacute;ration m&eacute;moire des objets.</p>
+        <p class='page-lead'>Instanciation, initialisation et destruction sécurisée des objets.</p>
       </div>
-<div class='doc-section'><h2 class='section-title'>Gestion du Cycle de Vie des Objets</h2><p>Dans PureBasic OOP, l'instanciation et la destruction des objets s'effectuent simplement et de fa&ccedil;on s&ucirc;re en m&eacute;moire :</p><ul>  <li><code>*obj.MaClasse = NewObject(MaClasse, param1, param2)</code> ou <code>New MaClasse(...)</code> : Alloue l'objet en m&eacute;moire, initialise la VTable et appelle le constructeur <code>Init()</code>.</li>  <li><code>FreeObject(*obj)</code> ou <code>*obj\\Free()</code> : Appelle le destructeur <code>Free()</code> et lib&egrave;re la m&eacute;moire allou&eacute;e.</li></ul></div>
+      
+      
+<div class='doc-section'>
+  <h2 class='section-title'>Cycle d'un Objet</h2>
+  <ol>
+    <li><strong>Allocation & Construction :</strong> <code>*obj.MaClasse = New MaClasse(args...)</code> alloue la mémoire et exécute le constructeur <code>Init(...)</code> correspondant.</li>
+    <li><strong>Utilisation :</strong> Appel des méthodes via la flèche <code>*obj\MaMethode()</code>.</li>
+    <li><strong>Destruction :</strong> <code>*obj\Free()</code> exécute le destructeur <code>Free()</code> personnalisé et libère la mémoire.</li>
+  </ol>
+</div>
+
     </main>
   </div>
+  
   <footer class='doc-footer'>
     <p>&copy; 2026 PureBasic OOP Project - MicrodevWeb | Dual License GPL v3 / Fantaisie Software</p>
   </footer>
+  
   <script>
     document.getElementById('search-input').addEventListener('input', function(e) {
       let filter = e.target.value.toLowerCase();

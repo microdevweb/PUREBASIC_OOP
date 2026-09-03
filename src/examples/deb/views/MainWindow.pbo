@@ -1,0 +1,19 @@
+﻿
+XIncludeFile "../../../ui/ui.pbo"
+Using UI
+Using UI::Controls
+Using UI::Layouts
+
+Class MainWindow Extends UI::Window
+  Private *bt_new.UI::Button
+  Private *bt_edit.UI::Button
+  Public Method Init() 
+    Super::Init("Contact V1")
+    *bt_new = New UI::Button
+  
+  EndMethod
+EndClass
+; IDE Options = PureBasic 6.40 (Windows - x64)
+; CursorPosition = 11
+; EnableXP
+; DPIAware

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang='fr'>
 <head>
   <meta charset='UTF-8'>
@@ -11,7 +11,7 @@
     <a href='../index.html' class='brand-container'>
       <img src='../../assets/PB_OOP_LOGO.jpeg' alt='Logo' class='brand-logo'>
       <span class='brand-title'>PureBasic OOP</span>
-      <span class='brand-version'>ALPHA 1.0</span>
+      <span class='brand-version'>v1.2 Native</span>
     </a>
     <div class='header-controls'>
       <div class='search-box'>
@@ -20,10 +20,11 @@
       </div>
       <div class='lang-switch'>
         <a href='#' class='lang-btn active'>FR</a>
-        <a href='../../en/ui/application.html' class='lang-btn'>EN</a>
+        <a href='../en/ui/application.html' class='lang-btn'>EN</a>
       </div>
     </div>
   </header>
+  
   <div class='layout-container'>
 <nav class='doc-sidebar'>
   <div class='nav-section'>
@@ -33,15 +34,15 @@
     </ul>
   </div>
   <div class='nav-section'>
-    <div class='nav-section-title'>Mots-cl&eacute;s POO</div>
+    <div class='nav-section-title'>Mots-clés POO</div>
     <ul class='nav-list'>
-      <li class='nav-item'><a href='../keywords/class.html'><span>Class / Abstract</span><span class='badge badge-keyword'>KW</span></a></li>
-      <li class='nav-item'><a href='../keywords/method.html'><span>Method / Override</span><span class='badge badge-keyword'>KW</span></a></li>
-      <li class='nav-item'><a href='../keywords/properties.html'><span>Getter / Setter / Prop</span><span class='badge badge-keyword'>KW</span></a></li>
-      <li class='nav-item'><a href='../keywords/inheritance.html'><span>Extends / Super</span><span class='badge badge-keyword'>KW</span></a></li>
-      <li class='nav-item'><a href='../keywords/encapsulation.html'><span>Public / Protected / Private</span><span class='badge badge-keyword'>KW</span></a></li>
-      <li class='nav-item'><a href='../keywords/lifecycle.html'><span>New / Free / Init</span><span class='badge badge-keyword'>KW</span></a></li>
-      <li class='nav-item'><a href='../keywords/operators.html'><span>This / Cast / TypeOf</span><span class='badge badge-keyword'>KW</span></a></li>
+      <li class='nav-item'><a href='../keywords/class.html'><span>Class / Abstract</span><span class='badge badge-kw'>KW</span></a></li>
+      <li class='nav-item'><a href='../keywords/method.html'><span>Method / Override</span><span class='badge badge-kw'>KW</span></a></li>
+      <li class='nav-item'><a href='../keywords/properties.html'><span>Getter / Setter / Prop</span><span class='badge badge-kw'>KW</span></a></li>
+      <li class='nav-item'><a href='../keywords/inheritance.html'><span>Extends / Super</span><span class='badge badge-kw'>KW</span></a></li>
+      <li class='nav-item'><a href='../keywords/encapsulation.html'><span>Public / Protected / Private</span><span class='badge badge-kw'>KW</span></a></li>
+      <li class='nav-item'><a href='../keywords/lifecycle.html'><span>New / Free / Init</span><span class='badge badge-kw'>KW</span></a></li>
+      <li class='nav-item'><a href='../keywords/operators.html'><span>This / Cast / TypeOf</span><span class='badge badge-kw'>KW</span></a></li>
     </ul>
   </div>
   <div class='nav-section'>
@@ -54,34 +55,66 @@
       <li class='nav-item'><a href='../ui/checkbox.html'><span>CheckBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/combobox.html'><span>ComboBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/label.html'><span>Label</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/listicon.html'><span>ListIcon</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/progressbar.html'><span>ProgressBar</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/slider.html'><span>Slider</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/textbox.html'><span>TextBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/toggleswitch.html'><span>ToggleSwitch</span><span class='badge badge-ui'>UI</span></a></li>
     </ul>
   </div>
+  <div class='nav-section'>
+    <div class='nav-section-title'>Layouts Responsifs (WPF)</div>
+    <ul class='nav-list'>
+      <li class='nav-item'><a href='../ui/container.html'><span>Container</span><span class='badge badge-wpf'>WPF</span></a></li>
+      <li class='nav-item'><a href='../ui/stackpanel.html'><span>StackPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
+      <li class='nav-item'><a href='../ui/dockpanel.html'><span>DockPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
+      <li class='nav-item'><a href='../ui/grid.html'><span>Grid</span><span class='badge badge-wpf'>WPF</span></a></li>
+    </ul>
+  </div>
 </nav>
     <main class='doc-content'>
       <div class='breadcrumb'>
         <a href='../index.html'>Accueil</a>
+        
         <span class='breadcrumb-separator'>/</span>
-        <span>UI Components</span>
+        <span>Composants UI</span>
         <span class='breadcrumb-separator'>/</span>
         <span style='color: var(--accent-blue);'>Classe Application</span>
+        
       </div>
+      
       <div class='page-header'>
         <div class='title-row'>
           <h1 class='page-title'>Classe Application</h1>
           <span class='badge badge-ui'>UI Class</span>
         </div>
-        <p class='page-lead'>Gestionnaire global d'application et boucle d'&eacute;v&eacute;nements GUI.</p>
+        <p class='page-lead'>Boucle principale d'événements et gestion du cycle de vie de l'application.</p>
       </div>
-<div class='doc-section'><h2 class='section-title'>Description</h2><p>La classe <code>Application</code> g&egrave;re le cycle de vie principal de l'application graphique, la boucle d'&eacute;v&eacute;nements PureBasic (Event Loop) et l'enregistrement des fen&ecirc;tres.</p></div><div class='doc-section'><h2 class='section-title'>M&eacute;thodes principales</h2><div class='table-wrapper'>  <table>    <tr><th>M&eacute;thode</th><th>Description</th></tr>    <tr><td><code>Init(title.s = '')</code></td><td>Initialise le gestionnaire d'application.</td></tr>    <tr><td><code>Run()</code></td><td>Lance la boucle d'&eacute;v&eacute;nements principale et traite les messages fen&ecirc;tres.</td></tr>    <tr><td><code>Exit()</code></td><td>Termine proprement l'application et ferme toutes les fen&ecirc;tres actives.</td></tr>  </table></div></div>
+      
+      
+<div class='doc-section'>
+  <h2 class='section-title'>Description</h2>
+  <p>La classe <code>UI::Application</code> encapsule la boucle événementielle PureBasic (<code>WaitWindowEvent</code>), la gestion des fenêtres et l'arrêt propre du programme.</p>
+</div>
+<div class='doc-section'>
+  <h2 class='section-title'>M&eacute;thodes Principales</h2>
+  <div class='table-wrapper'>
+    <table>
+      <tr><th>Méthode</th><th>Description</th></tr>
+      <tr><td><code>Run()</code></td><td>Démarre la boucle principale d'événements jusqu'à la fermeture de toutes les fenêtres ou un appel à <code>Exit()</code>.</td></tr>
+      <tr><td><code>Exit(exitCode.i = 0)</code></td><td>Arrête proprement l'application et libère les ressources.</td></tr>
+      <tr><td><code>AddWindow(*win)</code></td><td>Enregistre une fenêtre dans la boucle événementielle.</td></tr>
+    </table>
+  </div>
+</div>
+
     </main>
   </div>
+  
   <footer class='doc-footer'>
     <p>&copy; 2026 PureBasic OOP Project - MicrodevWeb | Dual License GPL v3 / Fantaisie Software</p>
   </footer>
+  
   <script>
     document.getElementById('search-input').addEventListener('input', function(e) {
       let filter = e.target.value.toLowerCase();

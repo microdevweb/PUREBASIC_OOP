@@ -66,6 +66,9 @@ Procedure.s GetOOPHelpPage(Keyword.s)
     Case "textbox"
       ProcedureReturn "ui/textbox.html"
       
+    Case "listicon"
+      ProcedureReturn "ui/listicon.html"
+      
     Case "toggleswitch"
       ProcedureReturn "ui/toggleswitch.html"
       
