@@ -20,7 +20,7 @@
       </div>
       <div class='lang-switch'>
         <a href='#' class='lang-btn active'>FR</a>
-        <a href='../en/ui/container.html' class='lang-btn'>EN</a>
+        <a href='../../en/ui/container.html' class='lang-btn'>EN</a>
       </div>
     </div>
   </header>
@@ -46,11 +46,17 @@
     </ul>
   </div>
   <div class='nav-section'>
-    <div class='nav-section-title'>Composants UI</div>
+    <div class='nav-section-title'>Socle UI & Hiérarchie</div>
     <ul class='nav-list'>
-      <li class='nav-item'><a href='../ui/application.html'><span>Application</span><span class='badge badge-ui'>UI</span></a></li>
-      <li class='nav-item'><a href='../ui/window.html'><span>Window</span><span class='badge badge-ui'>UI</span></a></li>
-      <li class='nav-item'><a href='../ui/gadget.html'><span>Gadget / Component</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/component.html'><span>Component (Base UI)</span><span class='badge badge-base'>BASE</span></a></li>
+      <li class='nav-item'><a href='../ui/gadget.html'><span>Gadget (Natif)</span><span class='badge badge-base'>BASE</span></a></li>
+      <li class='nav-item'><a href='../ui/customgadget.html'><span>CustomGadget (Canvas)</span><span class='badge badge-base'>BASE</span></a></li>
+      <li class='nav-item active'><a href='../ui/container.html'><span>Container (Layout Base)</span><span class='badge badge-wpf'>WPF</span></a></li>
+    </ul>
+  </div>
+  <div class='nav-section'>
+    <div class='nav-section-title'>Composants UI (Contrôles)</div>
+    <ul class='nav-list'>
       <li class='nav-item'><a href='../ui/button.html'><span>Button</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/checkbox.html'><span>CheckBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/combobox.html'><span>ComboBox</span><span class='badge badge-ui'>UI</span></a></li>
@@ -65,60 +71,96 @@
   <div class='nav-section'>
     <div class='nav-section-title'>Layouts Responsifs (WPF)</div>
     <ul class='nav-list'>
-      <li class='nav-item active'><a href='../ui/container.html'><span>Container</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/stackpanel.html'><span>StackPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/dockpanel.html'><span>DockPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/grid.html'><span>Grid</span><span class='badge badge-wpf'>WPF</span></a></li>
+    </ul>
+  </div>
+  <div class='nav-section'>
+    <div class='nav-section-title'>Application & Fenêtres</div>
+    <ul class='nav-list'>
+      <li class='nav-item'><a href='../ui/application.html'><span>Application</span><span class='badge badge-core'>CORE</span></a></li>
+      <li class='nav-item'><a href='../ui/window.html'><span>Window</span><span class='badge badge-core'>CORE</span></a></li>
     </ul>
   </div>
 </nav>
     <main class='doc-content'>
       <div class='breadcrumb'>
         <a href='../index.html'>Accueil</a>
-        
-        <span class='breadcrumb-separator'>/</span>
-        <span>Composants UI</span>
-        <span class='breadcrumb-separator'>/</span>
-        <span style='color: var(--accent-blue);'>Classe Container</span>
-        
+        <span class='breadcrumb-separator'>/</span><span>Composants UI</span>
+        <span class='breadcrumb-separator'>/</span><span style='color: var(--accent-blue);'>Classe Container</span>
       </div>
       
       <div class='page-header'>
         <div class='title-row'>
           <h1 class='page-title'>Classe Container</h1>
-          <span class='badge badge-ui'>Layout</span>
+          <span class='badge badge-wpf'>Base Layout</span>
         </div>
-        <p class='page-lead'>Classe de base abstraite pour tous les panneaux de disposition responsive WPF.</p>
+        <p class='page-lead'>Classe abstraite de base pour tous les conteneurs de layout réactifs (WPF).</p>
       </div>
       
+      <div class='inheritance-box'>
+  <div class='inheritance-header'><span>&#128391;</span> Hiérarchie d'héritage</div>
+  <div class='inheritance-chain'>
+    <a href='../keywords/class.html' class='inheritance-node'>Core::Object</a>
+    <span class='inheritance-arrow'>&rarr;</span>
+    <a href='component.html' class='inheritance-node'>UI::Component</a>
+    <span class='inheritance-arrow'>&rarr;</span>
+    <span class='inheritance-node current'>UI::Layouts::Container</span>
+  </div>
+  <div class='derived-classes-box'>
+    <div class='derived-classes-title'>Classes dérivées (héritant de cette classe) :</div>
+    <div class='derived-classes-list'>
+      <a href='stackpanel.html' class='derived-badge'>UI::Layouts::StackPanel</a>
+      <a href='dockpanel.html' class='derived-badge'>UI::Layouts::DockPanel</a>
+      <a href='grid.html' class='derived-badge'>UI::Layouts::Grid</a>
+    </div>
+  </div>
+  <div class='inherited-members-summary'>
+    <div class='inherited-members-title'><span>Méthodes héritées de <a href='component.html' style='color: var(--accent-blue); text-decoration: underline;'>UI::Component</a></span> <span style='font-size: 0.78rem; font-weight: normal; color: var(--text-muted);'>(11 méthodes)</span></div>
+    <div class='inherited-members-tags'>
+      <a href='component.html' class='inherited-tag'>SetPosition(x, y)</a>
+      <a href='component.html' class='inherited-tag'>SetSize(w, h)</a>
+      <a href='component.html' class='inherited-tag'>SetMargin(l, t, r, b)</a>
+      <a href='component.html' class='inherited-tag'>SetMarginAll(m)</a>
+      <a href='component.html' class='inherited-tag'>SetHorizontalAlignment(align)</a>
+      <a href='component.html' class='inherited-tag'>SetVerticalAlignment(align)</a>
+      <a href='component.html' class='inherited-tag'>SetVisible(v)</a>
+      <a href='component.html' class='inherited-tag'>SetEnabled(e)</a>
+      <a href='component.html' class='inherited-tag'>Arrange(rx, ry, rw, rh)</a>
+      <a href='component.html' class='inherited-tag'>GetDesiredWidth()</a>
+      <a href='component.html' class='inherited-tag'>GetDesiredHeight()</a>
+    </div>
+  </div>
+</div>
       
+
 <div class='doc-section'>
   <h2 class='section-title'>Description</h2>
-  <p>La classe <code>UI::Layouts::Container</code> est la classe abstraite fondatrice de tout le système de disposition responsive de PureBasic OOP. Inspirée du modèle WPF / XAML de .NET, elle permet de créer des interfaces graphiques modernes qui s'adaptent automatiquement à toutes les résolutions d'écran et aux redimensionnements de fenêtres.</p>
-  <p>Elle implémente le cycle de mise en page automatique (<code>Arrange</code>) et gère les marges intérieures (<code>Padding</code>) ainsi que la collection de composants enfants.</p>
+  <p>La classe abstraite <code>UI::Layouts::Container</code> (dans <code>src/ui/layout/Container.pbo</code>) hérite de <code>UI::Component</code> et forme le socle de tous les panneaux de disposition responsive (<code>StackPanel</code>, <code>DockPanel</code>, <code>Grid</code>). Elle gère la liste dynamique des enfants et le padding interne.</p>
 </div>
 <div class='doc-section'>
   <h2 class='section-title'>Constructeurs Surchargés</h2>
   <div class='table-wrapper'>
     <table>
       <tr><th>Constructeur</th><th>Description</th></tr>
-      <tr><td><code>Init()</code></td><td>Conteneur par défaut (stretch horizontal et vertical).</td></tr>
+      <tr><td><code>Init()</code></td><td>Conteneur par défaut avec alignement Stretch.</td></tr>
       <tr><td><code>Init(w.i, h.i)</code></td><td>Conteneur avec dimensions initiales.</td></tr>
-      <tr><td><code>Init(x.i, y.i, w.i, h.i)</code></td><td>Conteneur avec position absolue et dimensions.</td></tr>
+      <tr><td><code>Init(x.i, y.i, w.i, h.i)</code></td><td>Conteneur avec coordonnées absolues et dimensions.</td></tr>
     </table>
   </div>
 </div>
 <div class='doc-section'>
-  <h2 class='section-title'>M&eacute;thodes de Container</h2>
+  <h2 class='section-title'>Méthodes de Gestion des Enfants et Padding</h2>
   <div class='table-wrapper'>
     <table>
       <tr><th>Méthode</th><th>Description</th></tr>
-      <tr><td><code>AddChild(*child)</code></td><td>Ajoute un composant enfant à la disposition.</td></tr>
-      <tr><td><code>RemoveChild(*child)</code></td><td>Retire un composant enfant.</td></tr>
-      <tr><td><code>ClearChildren()</code></td><td>Supprime tous les composants enfants.</td></tr>
-      <tr><td><code>SetPadding(l, t, r, b)</code></td><td>Définit les marges internes en pixels.</td></tr>
-      <tr><td><code>SetPaddingAll(p)</code></td><td>Définit une marge interne uniforme.</td></tr>
-      <tr><td><code>Arrange(x, y, w, h)</code></td><td>Recalcule le positionnement de tous les enfants.</td></tr>
+      <tr><td><code>AddChild(*child.UI::Component)</code></td><td>Ajoute un composant enfant (contrôle ou sous-layout) dans le conteneur.</td></tr>
+      <tr><td><code>RemoveChild(*child.UI::Component)</code></td><td>Retire un composant enfant du conteneur.</td></tr>
+      <tr><td><code>ClearChildren()</code></td><td>Vide l'ensemble des enfants du conteneur.</td></tr>
+      <tr><td><code>GetChildCount()</code></td><td>Retourne le nombre total d'enfants actuels.</td></tr>
+      <tr><td><code>SetPadding(l.i, t.i, r.i, b.i)</code></td><td>Définit le padding interne (espace entre les bords et les enfants).</td></tr>
+      <tr><td><code>SetPaddingAll(p.i)</code></td><td>Définit un padding interne identique sur les 4 côtés.</td></tr>
     </table>
   </div>
 </div>
@@ -129,19 +171,5 @@
   <footer class='doc-footer'>
     <p>&copy; 2026 PureBasic OOP Project - MicrodevWeb | Dual License GPL v3 / Fantaisie Software</p>
   </footer>
-  
-  <script>
-    document.getElementById('search-input').addEventListener('input', function(e) {
-      let filter = e.target.value.toLowerCase();
-      document.querySelectorAll('.nav-item').forEach(function(item) {
-        let text = item.innerText.toLowerCase();
-        if (text.includes(filter)) {
-          item.style.display = '';
-        } else {
-          item.style.display = 'none';
-        }
-      });
-    });
-  </script>
 </body>
 </html>

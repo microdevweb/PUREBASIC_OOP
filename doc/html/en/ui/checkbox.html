@@ -19,7 +19,7 @@
         <input type='text' class='search-input' id='search-input' placeholder='Search docs...'>
       </div>
       <div class='lang-switch'>
-        <a href='../fr/ui/checkbox.html' class='lang-btn'>FR</a>
+        <a href='../../fr/ui/checkbox.html' class='lang-btn'>FR</a>
         <a href='#' class='lang-btn active'>EN</a>
       </div>
     </div>
@@ -46,11 +46,17 @@
     </ul>
   </div>
   <div class='nav-section'>
-    <div class='nav-section-title'>UI Components</div>
+    <div class='nav-section-title'>UI Foundation & Hierarchy</div>
     <ul class='nav-list'>
-      <li class='nav-item'><a href='../ui/application.html'><span>Application</span><span class='badge badge-ui'>UI</span></a></li>
-      <li class='nav-item'><a href='../ui/window.html'><span>Window</span><span class='badge badge-ui'>UI</span></a></li>
-      <li class='nav-item'><a href='../ui/gadget.html'><span>Gadget / Component</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/component.html'><span>Component (Base UI)</span><span class='badge badge-base'>BASE</span></a></li>
+      <li class='nav-item'><a href='../ui/gadget.html'><span>Gadget (Native Base)</span><span class='badge badge-base'>BASE</span></a></li>
+      <li class='nav-item'><a href='../ui/customgadget.html'><span>CustomGadget (Canvas Base)</span><span class='badge badge-base'>BASE</span></a></li>
+      <li class='nav-item'><a href='../ui/container.html'><span>Container (Layout Base)</span><span class='badge badge-wpf'>WPF</span></a></li>
+    </ul>
+  </div>
+  <div class='nav-section'>
+    <div class='nav-section-title'>UI Components (Controls)</div>
+    <ul class='nav-list'>
       <li class='nav-item'><a href='../ui/button.html'><span>Button</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item active'><a href='../ui/checkbox.html'><span>CheckBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/combobox.html'><span>ComboBox</span><span class='badge badge-ui'>UI</span></a></li>
@@ -65,22 +71,24 @@
   <div class='nav-section'>
     <div class='nav-section-title'>Responsive Layouts (WPF)</div>
     <ul class='nav-list'>
-      <li class='nav-item'><a href='../ui/container.html'><span>Container</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/stackpanel.html'><span>StackPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/dockpanel.html'><span>DockPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/grid.html'><span>Grid</span><span class='badge badge-wpf'>WPF</span></a></li>
+    </ul>
+  </div>
+  <div class='nav-section'>
+    <div class='nav-section-title'>Application & Windows</div>
+    <ul class='nav-list'>
+      <li class='nav-item'><a href='../ui/application.html'><span>Application</span><span class='badge badge-core'>CORE</span></a></li>
+      <li class='nav-item'><a href='../ui/window.html'><span>Window</span><span class='badge badge-core'>CORE</span></a></li>
     </ul>
   </div>
 </nav>
     <main class='doc-content'>
       <div class='breadcrumb'>
         <a href='../index.html'>Home</a>
-        
-        <span class='breadcrumb-separator'>/</span>
-        <span>UI Components</span>
-        <span class='breadcrumb-separator'>/</span>
-        <span style='color: var(--accent-blue);'>CheckBox Class</span>
-        
+        <span class='breadcrumb-separator'>/</span><span>UI Components</span>
+        <span class='breadcrumb-separator'>/</span><span style='color: var(--accent-blue);'>CheckBox Class</span>
       </div>
       
       <div class='page-header'>
@@ -88,23 +96,73 @@
           <h1 class='page-title'>CheckBox Class</h1>
           <span class='badge badge-ui'>UI Class</span>
         </div>
-        <p class='page-lead'>Toggle checkbox with multi-constructors and state accessors.</p>
+        <p class='page-lead'>Two-state or three-state checkbox control with overloaded constructors.</p>
       </div>
       
+      <div class='inheritance-box'>
+  <div class='inheritance-header'><span>&#128391;</span> Inheritance Hierarchy</div>
+  <div class='inheritance-chain'>
+    <a href='../keywords/class.html' class='inheritance-node'>Core::Object</a>
+    <span class='inheritance-arrow'>&rarr;</span>
+    <a href='component.html' class='inheritance-node'>UI::Component</a>
+    <span class='inheritance-arrow'>&rarr;</span>
+    <a href='gadget.html' class='inheritance-node'>UI::Gadget</a>
+    <span class='inheritance-arrow'>&rarr;</span>
+    <span class='inheritance-node current'>UI::CheckBox</span>
+  </div>
+  <div class='inherited-members-summary'>
+    <div class='inherited-members-title'><span>Inherited Methods de <a href='gadget.html' style='color: var(--accent-blue); text-decoration: underline;'>UI::Gadget</a></span> <span style='font-size: 0.78rem; font-weight: normal; color: var(--text-muted);'>(7 méthodes)</span></div>
+    <div class='inherited-members-tags'>
+      <a href='gadget.html' class='inherited-tag'>GetID()</a>
+      <a href='gadget.html' class='inherited-tag'>GetHandle()</a>
+      <a href='gadget.html' class='inherited-tag'>SetFont()</a>
+      <a href='gadget.html' class='inherited-tag'>SetColor()</a>
+      <a href='gadget.html' class='inherited-tag'>FreeGadget()</a>
+      <a href='gadget.html' class='inherited-tag'>SetToolTip()</a>
+      <a href='gadget.html' class='inherited-tag'>SetFocus()</a>
+    </div>
+  </div>
+  <div class='inherited-members-summary'>
+    <div class='inherited-members-title'><span>Inherited Methods de <a href='component.html' style='color: var(--accent-blue); text-decoration: underline;'>UI::Component</a></span> <span style='font-size: 0.78rem; font-weight: normal; color: var(--text-muted);'>(8 méthodes)</span></div>
+    <div class='inherited-members-tags'>
+      <a href='component.html' class='inherited-tag'>SetPosition()</a>
+      <a href='component.html' class='inherited-tag'>SetSize()</a>
+      <a href='component.html' class='inherited-tag'>SetMargin()</a>
+      <a href='component.html' class='inherited-tag'>SetHorizontalAlignment()</a>
+      <a href='component.html' class='inherited-tag'>SetVerticalAlignment()</a>
+      <a href='component.html' class='inherited-tag'>SetVisible()</a>
+      <a href='component.html' class='inherited-tag'>SetEnabled()</a>
+      <a href='component.html' class='inherited-tag'>Arrange()</a>
+    </div>
+  </div>
+</div>
       
+
 <div class='doc-section'>
   <h2 class='section-title'>Description</h2>
-  <p>The <code>UI::CheckBox</code> class encapsulates a boolean toggle checkbox with checked state management.</p>
+  <p>The <code>UI::CheckBox</code> class wraps a native checkbox with boolean state management and virtual <code>OnToggle()</code> event routing.</p>
 </div>
 <div class='doc-section'>
   <h2 class='section-title'>Overloaded Constructors</h2>
   <div class='table-wrapper'>
     <table>
       <tr><th>Constructor</th><th>Description</th></tr>
-      <tr><td><code>Init(text.s)</code></td><td>Unchecked checkbox (150&times;25 default).</td></tr>
-      <tr><td><code>Init(text.s, checked.b)</code></td><td>Checkbox with text and initial state.</td></tr>
-      <tr><td><code>Init(text.s, w.i, h.i, checked.b)</code></td><td>Checkbox with text, dimensions, and initial state.</td></tr>
-      <tr><td><code>Init(x.i, y.i, w.i, h.i, text.s, flags.i)</code></td><td>Full constructor with position and flags.</td></tr>
+      <tr><td><code>Init()</code></td><td>Default checkbox without caption.</td></tr>
+      <tr><td><code>Init(text.s)</code></td><td>Checkbox with caption text.</td></tr>
+      <tr><td><code>Init(text.s, checked.b)</code></td><td>Checkbox with caption and initial check state.</td></tr>
+      <tr><td><code>Init(text.s, checked.b, w.i, h.i)</code></td><td>Checkbox with caption, state, and preferred dimensions.</td></tr>
+      <tr><td><code>Init(text.s, x.i, y.i, w.i, h.i, checked.b, flags.i)</code></td><td>Full checkbox with absolute bounds and flags.</td></tr>
+    </table>
+  </div>
+</div>
+<div class='doc-section'>
+  <h2 class='section-title'>Specific Methods</h2>
+  <div class='table-wrapper'>
+    <table>
+      <tr><th>Method</th><th>Description</th></tr>
+      <tr><td><code>IsChecked() / SetChecked(state.b)</code></td><td>Gets or sets the checked state.</td></tr>
+      <tr><td><code>GetText() / SetText(txt.s)</code></td><td>Gets or sets the caption text.</td></tr>
+      <tr><td><code>OnToggle()</code></td><td>Virtual method triggered on state change.</td></tr>
     </table>
   </div>
 </div>
@@ -115,19 +173,5 @@
   <footer class='doc-footer'>
     <p>&copy; 2026 PureBasic OOP Project - MicrodevWeb | Dual License GPL v3 / Fantaisie Software</p>
   </footer>
-  
-  <script>
-    document.getElementById('search-input').addEventListener('input', function(e) {
-      let filter = e.target.value.toLowerCase();
-      document.querySelectorAll('.nav-item').forEach(function(item) {
-        let text = item.innerText.toLowerCase();
-        if (text.includes(filter)) {
-          item.style.display = '';
-        } else {
-          item.style.display = 'none';
-        }
-      });
-    });
-  </script>
 </body>
 </html>

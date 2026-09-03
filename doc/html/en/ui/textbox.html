@@ -19,7 +19,7 @@
         <input type='text' class='search-input' id='search-input' placeholder='Search docs...'>
       </div>
       <div class='lang-switch'>
-        <a href='../fr/ui/textbox.html' class='lang-btn'>FR</a>
+        <a href='../../fr/ui/textbox.html' class='lang-btn'>FR</a>
         <a href='#' class='lang-btn active'>EN</a>
       </div>
     </div>
@@ -46,11 +46,17 @@
     </ul>
   </div>
   <div class='nav-section'>
-    <div class='nav-section-title'>UI Components</div>
+    <div class='nav-section-title'>UI Foundation & Hierarchy</div>
     <ul class='nav-list'>
-      <li class='nav-item'><a href='../ui/application.html'><span>Application</span><span class='badge badge-ui'>UI</span></a></li>
-      <li class='nav-item'><a href='../ui/window.html'><span>Window</span><span class='badge badge-ui'>UI</span></a></li>
-      <li class='nav-item'><a href='../ui/gadget.html'><span>Gadget / Component</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/component.html'><span>Component (Base UI)</span><span class='badge badge-base'>BASE</span></a></li>
+      <li class='nav-item'><a href='../ui/gadget.html'><span>Gadget (Native Base)</span><span class='badge badge-base'>BASE</span></a></li>
+      <li class='nav-item'><a href='../ui/customgadget.html'><span>CustomGadget (Canvas Base)</span><span class='badge badge-base'>BASE</span></a></li>
+      <li class='nav-item'><a href='../ui/container.html'><span>Container (Layout Base)</span><span class='badge badge-wpf'>WPF</span></a></li>
+    </ul>
+  </div>
+  <div class='nav-section'>
+    <div class='nav-section-title'>UI Components (Controls)</div>
+    <ul class='nav-list'>
       <li class='nav-item'><a href='../ui/button.html'><span>Button</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/checkbox.html'><span>CheckBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/combobox.html'><span>ComboBox</span><span class='badge badge-ui'>UI</span></a></li>
@@ -65,22 +71,24 @@
   <div class='nav-section'>
     <div class='nav-section-title'>Responsive Layouts (WPF)</div>
     <ul class='nav-list'>
-      <li class='nav-item'><a href='../ui/container.html'><span>Container</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/stackpanel.html'><span>StackPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/dockpanel.html'><span>DockPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/grid.html'><span>Grid</span><span class='badge badge-wpf'>WPF</span></a></li>
+    </ul>
+  </div>
+  <div class='nav-section'>
+    <div class='nav-section-title'>Application & Windows</div>
+    <ul class='nav-list'>
+      <li class='nav-item'><a href='../ui/application.html'><span>Application</span><span class='badge badge-core'>CORE</span></a></li>
+      <li class='nav-item'><a href='../ui/window.html'><span>Window</span><span class='badge badge-core'>CORE</span></a></li>
     </ul>
   </div>
 </nav>
     <main class='doc-content'>
       <div class='breadcrumb'>
         <a href='../index.html'>Home</a>
-        
-        <span class='breadcrumb-separator'>/</span>
-        <span>UI Components</span>
-        <span class='breadcrumb-separator'>/</span>
-        <span style='color: var(--accent-blue);'>TextBox Class</span>
-        
+        <span class='breadcrumb-separator'>/</span><span>UI Components</span>
+        <span class='breadcrumb-separator'>/</span><span style='color: var(--accent-blue);'>TextBox Class</span>
       </div>
       
       <div class='page-header'>
@@ -88,24 +96,71 @@
           <h1 class='page-title'>TextBox Class</h1>
           <span class='badge badge-ui'>UI Class</span>
         </div>
-        <p class='page-lead'>Text input field with multi-constructors and change events.</p>
+        <p class='page-lead'>Single-line or multi-line text input control with overloaded constructors.</p>
       </div>
       
+      <div class='inheritance-box'>
+  <div class='inheritance-header'><span>&#128391;</span> Inheritance Hierarchy</div>
+  <div class='inheritance-chain'>
+    <a href='../keywords/class.html' class='inheritance-node'>Core::Object</a>
+    <span class='inheritance-arrow'>&rarr;</span>
+    <a href='component.html' class='inheritance-node'>UI::Component</a>
+    <span class='inheritance-arrow'>&rarr;</span>
+    <a href='gadget.html' class='inheritance-node'>UI::Gadget</a>
+    <span class='inheritance-arrow'>&rarr;</span>
+    <span class='inheritance-node current'>UI::TextBox</span>
+  </div>
+  <div class='inherited-members-summary'>
+    <div class='inherited-members-title'><span>Inherited Methods de <a href='gadget.html' style='color: var(--accent-blue); text-decoration: underline;'>UI::Gadget</a></span> <span style='font-size: 0.78rem; font-weight: normal; color: var(--text-muted);'>(7 méthodes)</span></div>
+    <div class='inherited-members-tags'>
+      <a href='gadget.html' class='inherited-tag'>GetID()</a>
+      <a href='gadget.html' class='inherited-tag'>GetHandle()</a>
+      <a href='gadget.html' class='inherited-tag'>SetFont()</a>
+      <a href='gadget.html' class='inherited-tag'>SetColor()</a>
+      <a href='gadget.html' class='inherited-tag'>FreeGadget()</a>
+      <a href='gadget.html' class='inherited-tag'>SetToolTip()</a>
+      <a href='gadget.html' class='inherited-tag'>SetFocus()</a>
+    </div>
+  </div>
+  <div class='inherited-members-summary'>
+    <div class='inherited-members-title'><span>Inherited Methods de <a href='component.html' style='color: var(--accent-blue); text-decoration: underline;'>UI::Component</a></span> <span style='font-size: 0.78rem; font-weight: normal; color: var(--text-muted);'>(8 méthodes)</span></div>
+    <div class='inherited-members-tags'>
+      <a href='component.html' class='inherited-tag'>SetPosition()</a>
+      <a href='component.html' class='inherited-tag'>SetSize()</a>
+      <a href='component.html' class='inherited-tag'>SetMargin()</a>
+      <a href='component.html' class='inherited-tag'>SetHorizontalAlignment()</a>
+      <a href='component.html' class='inherited-tag'>SetVerticalAlignment()</a>
+      <a href='component.html' class='inherited-tag'>SetVisible()</a>
+      <a href='component.html' class='inherited-tag'>SetEnabled()</a>
+      <a href='component.html' class='inherited-tag'>Arrange()</a>
+    </div>
+  </div>
+</div>
       
+
 <div class='doc-section'>
   <h2 class='section-title'>Description</h2>
-  <p>The <code>UI::TextBox</code> class encapsulates a single-line editable text input (<code>StringGadget</code>) with <code>OnChange()</code> notification.</p>
+  <p>The <code>UI::TextBox</code> class wraps a native <code>StringGadget</code> text input with virtual <code>OnChange()</code> event routing.</p>
 </div>
 <div class='doc-section'>
   <h2 class='section-title'>Overloaded Constructors</h2>
   <div class='table-wrapper'>
     <table>
       <tr><th>Constructor</th><th>Description</th></tr>
-      <tr><td><code>Init()</code></td><td>Empty text box (150&times;25 default).</td></tr>
-      <tr><td><code>Init(defaultText.s)</code></td><td>Text box with default text.</td></tr>
-      <tr><td><code>Init(defaultText.s, w.i, h.i)</code></td><td>Text box with default text and custom dimensions.</td></tr>
-      <tr><td><code>Init(x.i, y.i, w.i, h.i, defaultText.s)</code></td><td>Absolute coordinates, dimensions, and default text.</td></tr>
-      <tr><td><code>Init(x.i, y.i, w.i, h.i, defaultText.s, flags.i)</code></td><td>Full constructor with flags (Password, Numeric, ReadOnly).</td></tr>
+      <tr><td><code>Init()</code></td><td>Default empty text box.</td></tr>
+      <tr><td><code>Init(text.s)</code></td><td>TextBox with initial string value.</td></tr>
+      <tr><td><code>Init(text.s, w.i, h.i)</code></td><td>TextBox with string and preferred dimensions.</td></tr>
+      <tr><td><code>Init(text.s, x.i, y.i, w.i, h.i, flags.i)</code></td><td>Full TextBox with absolute coordinates and flags (e.g. password mode).</td></tr>
+    </table>
+  </div>
+</div>
+<div class='doc-section'>
+  <h2 class='section-title'>Specific Methods</h2>
+  <div class='table-wrapper'>
+    <table>
+      <tr><th>Method</th><th>Description</th></tr>
+      <tr><td><code>GetText() / SetText(txt.s)</code></td><td>Gets or sets the text content.</td></tr>
+      <tr><td><code>OnChange()</code></td><td>Virtual method triggered on every keystroke or text modification.</td></tr>
     </table>
   </div>
 </div>
@@ -116,19 +171,5 @@
   <footer class='doc-footer'>
     <p>&copy; 2026 PureBasic OOP Project - MicrodevWeb | Dual License GPL v3 / Fantaisie Software</p>
   </footer>
-  
-  <script>
-    document.getElementById('search-input').addEventListener('input', function(e) {
-      let filter = e.target.value.toLowerCase();
-      document.querySelectorAll('.nav-item').forEach(function(item) {
-        let text = item.innerText.toLowerCase();
-        if (text.includes(filter)) {
-          item.style.display = '';
-        } else {
-          item.style.display = 'none';
-        }
-      });
-    });
-  </script>
 </body>
 </html>

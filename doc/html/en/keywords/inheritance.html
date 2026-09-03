@@ -3,7 +3,7 @@
 <head>
   <meta charset='UTF-8'>
   <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-  <title>Inheritance: Extends & Super - PureBasic OOP Documentation</title>
+  <title>Extends & Super Keywords - PureBasic OOP Documentation</title>
   <link rel='stylesheet' href='../../css/doc_theme.css'>
 </head>
 <body>
@@ -19,7 +19,7 @@
         <input type='text' class='search-input' id='search-input' placeholder='Search docs...'>
       </div>
       <div class='lang-switch'>
-        <a href='../fr/keywords/inheritance.html' class='lang-btn'>FR</a>
+        <a href='../../fr/keywords/inheritance.html' class='lang-btn'>FR</a>
         <a href='#' class='lang-btn active'>EN</a>
       </div>
     </div>
@@ -46,11 +46,17 @@
     </ul>
   </div>
   <div class='nav-section'>
-    <div class='nav-section-title'>UI Components</div>
+    <div class='nav-section-title'>UI Foundation & Hierarchy</div>
     <ul class='nav-list'>
-      <li class='nav-item'><a href='../ui/application.html'><span>Application</span><span class='badge badge-ui'>UI</span></a></li>
-      <li class='nav-item'><a href='../ui/window.html'><span>Window</span><span class='badge badge-ui'>UI</span></a></li>
-      <li class='nav-item'><a href='../ui/gadget.html'><span>Gadget / Component</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/component.html'><span>Component (Base UI)</span><span class='badge badge-base'>BASE</span></a></li>
+      <li class='nav-item'><a href='../ui/gadget.html'><span>Gadget (Native Base)</span><span class='badge badge-base'>BASE</span></a></li>
+      <li class='nav-item'><a href='../ui/customgadget.html'><span>CustomGadget (Canvas Base)</span><span class='badge badge-base'>BASE</span></a></li>
+      <li class='nav-item'><a href='../ui/container.html'><span>Container (Layout Base)</span><span class='badge badge-wpf'>WPF</span></a></li>
+    </ul>
+  </div>
+  <div class='nav-section'>
+    <div class='nav-section-title'>UI Components (Controls)</div>
+    <ul class='nav-list'>
       <li class='nav-item'><a href='../ui/button.html'><span>Button</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/checkbox.html'><span>CheckBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/combobox.html'><span>ComboBox</span><span class='badge badge-ui'>UI</span></a></li>
@@ -65,52 +71,59 @@
   <div class='nav-section'>
     <div class='nav-section-title'>Responsive Layouts (WPF)</div>
     <ul class='nav-list'>
-      <li class='nav-item'><a href='../ui/container.html'><span>Container</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/stackpanel.html'><span>StackPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/dockpanel.html'><span>DockPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/grid.html'><span>Grid</span><span class='badge badge-wpf'>WPF</span></a></li>
+    </ul>
+  </div>
+  <div class='nav-section'>
+    <div class='nav-section-title'>Application & Windows</div>
+    <ul class='nav-list'>
+      <li class='nav-item'><a href='../ui/application.html'><span>Application</span><span class='badge badge-core'>CORE</span></a></li>
+      <li class='nav-item'><a href='../ui/window.html'><span>Window</span><span class='badge badge-core'>CORE</span></a></li>
     </ul>
   </div>
 </nav>
     <main class='doc-content'>
       <div class='breadcrumb'>
         <a href='../index.html'>Home</a>
-        
-        <span class='breadcrumb-separator'>/</span>
-        <span>Keywords</span>
-        <span class='breadcrumb-separator'>/</span>
-        <span style='color: var(--accent-blue);'>Inheritance: Extends & Super</span>
-        
+        <span class='breadcrumb-separator'>/</span><span>OOP Keywords</span>
+        <span class='breadcrumb-separator'>/</span><span style='color: var(--accent-blue);'>Extends & Super Keywords</span>
       </div>
       
       <div class='page-header'>
         <div class='title-row'>
-          <h1 class='page-title'>Inheritance: Extends & Super</h1>
-          <span class='badge badge-keyword'>Keyword</span>
+          <h1 class='page-title'>Extends & Super Keywords</h1>
+          <span class='badge badge-kw'>KW</span>
         </div>
-        <p class='page-lead'>Class derivation and calling parent constructors/methods.</p>
+        <p class='page-lead'>Class inheritance and invoking parent implementations.</p>
       </div>
       
-      <p>Single inheritance using <code>Extends</code> and <code>Super::</code>.</p>
+      
+      
+
+<div class='doc-section'>
+  <h2 class='section-title'>Inheritance with Extends</h2>
+  <p>The <code>Extends</code> keyword allows a child class to inherit all public/protected members from a base class.</p>
+  <div class='code-container'>
+    <pre><code><span class='kw'>Class</span> Button <span class='kw'>Extends</span> UI::Gadget {
+  <span class='kw'>Public Method</span> Init(text.s) {
+    <span class='kw'>Super</span>::Init()
+    <span class='kw'>This</span>\SetText(text)
+  }
+}</code></pre>
+  </div>
+</div>
+<div class='doc-section'>
+  <h2 class='section-title'>Parent Invocation with Super</h2>
+  <p><code>Super::MethodName()</code> delegates call to the immediate base class implementation.</p>
+</div>
+
     </main>
   </div>
   
   <footer class='doc-footer'>
     <p>&copy; 2026 PureBasic OOP Project - MicrodevWeb | Dual License GPL v3 / Fantaisie Software</p>
   </footer>
-  
-  <script>
-    document.getElementById('search-input').addEventListener('input', function(e) {
-      let filter = e.target.value.toLowerCase();
-      document.querySelectorAll('.nav-item').forEach(function(item) {
-        let text = item.innerText.toLowerCase();
-        if (text.includes(filter)) {
-          item.style.display = '';
-        } else {
-          item.style.display = 'none';
-        }
-      });
-    });
-  </script>
 </body>
 </html>

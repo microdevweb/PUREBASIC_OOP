@@ -20,7 +20,7 @@
       </div>
       <div class='lang-switch'>
         <a href='#' class='lang-btn active'>FR</a>
-        <a href='../en/ui/window.html' class='lang-btn'>EN</a>
+        <a href='../../en/ui/window.html' class='lang-btn'>EN</a>
       </div>
     </div>
   </header>
@@ -46,11 +46,17 @@
     </ul>
   </div>
   <div class='nav-section'>
-    <div class='nav-section-title'>Composants UI</div>
+    <div class='nav-section-title'>Socle UI & Hiérarchie</div>
     <ul class='nav-list'>
-      <li class='nav-item'><a href='../ui/application.html'><span>Application</span><span class='badge badge-ui'>UI</span></a></li>
-      <li class='nav-item active'><a href='../ui/window.html'><span>Window</span><span class='badge badge-ui'>UI</span></a></li>
-      <li class='nav-item'><a href='../ui/gadget.html'><span>Gadget / Component</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/component.html'><span>Component (Base UI)</span><span class='badge badge-base'>BASE</span></a></li>
+      <li class='nav-item'><a href='../ui/gadget.html'><span>Gadget (Natif)</span><span class='badge badge-base'>BASE</span></a></li>
+      <li class='nav-item'><a href='../ui/customgadget.html'><span>CustomGadget (Canvas)</span><span class='badge badge-base'>BASE</span></a></li>
+      <li class='nav-item'><a href='../ui/container.html'><span>Container (Layout Base)</span><span class='badge badge-wpf'>WPF</span></a></li>
+    </ul>
+  </div>
+  <div class='nav-section'>
+    <div class='nav-section-title'>Composants UI (Contrôles)</div>
+    <ul class='nav-list'>
       <li class='nav-item'><a href='../ui/button.html'><span>Button</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/checkbox.html'><span>CheckBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/combobox.html'><span>ComboBox</span><span class='badge badge-ui'>UI</span></a></li>
@@ -65,61 +71,70 @@
   <div class='nav-section'>
     <div class='nav-section-title'>Layouts Responsifs (WPF)</div>
     <ul class='nav-list'>
-      <li class='nav-item'><a href='../ui/container.html'><span>Container</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/stackpanel.html'><span>StackPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/dockpanel.html'><span>DockPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/grid.html'><span>Grid</span><span class='badge badge-wpf'>WPF</span></a></li>
+    </ul>
+  </div>
+  <div class='nav-section'>
+    <div class='nav-section-title'>Application & Fenêtres</div>
+    <ul class='nav-list'>
+      <li class='nav-item'><a href='../ui/application.html'><span>Application</span><span class='badge badge-core'>CORE</span></a></li>
+      <li class='nav-item active'><a href='../ui/window.html'><span>Window</span><span class='badge badge-core'>CORE</span></a></li>
     </ul>
   </div>
 </nav>
     <main class='doc-content'>
       <div class='breadcrumb'>
         <a href='../index.html'>Accueil</a>
-        
-        <span class='breadcrumb-separator'>/</span>
-        <span>Composants UI</span>
-        <span class='breadcrumb-separator'>/</span>
-        <span style='color: var(--accent-blue);'>Classe Window</span>
-        
+        <span class='breadcrumb-separator'>/</span><span>Composants UI</span>
+        <span class='breadcrumb-separator'>/</span><span style='color: var(--accent-blue);'>Classe Window</span>
       </div>
       
       <div class='page-header'>
         <div class='title-row'>
           <h1 class='page-title'>Classe Window</h1>
-          <span class='badge badge-ui'>UI Class</span>
+          <span class='badge badge-ui'>Core UI</span>
         </div>
-        <p class='page-lead'>Création flexible de fenêtres avec constructeurs multiples et accesseurs dynamiques.</p>
+        <p class='page-lead'>Fenêtre native événementielle avec boucle de messages et conteneur de layout principal.</p>
       </div>
       
+      <div class='inheritance-box'>
+  <div class='inheritance-header'><span>&#128391;</span> Hiérarchie d'héritage</div>
+  <div class='inheritance-chain'>
+    <a href='../keywords/class.html' class='inheritance-node'>Core::Object</a>
+    <span class='inheritance-arrow'>&rarr;</span>
+    <span class='inheritance-node current'>UI::Window</span>
+  </div>
+</div>
       
+
 <div class='doc-section'>
   <h2 class='section-title'>Description</h2>
-  <p>La classe <code>UI::Window</code> encapsule une fenêtre graphique native PureBasic avec support complet du responsive design, fermeture propre sans erreur et multiples constructeurs.</p>
+  <p>La classe <code>UI::Window</code> encapsule une fenêtre native PureBasic (<code>OpenWindow</code>) avec gestion événementielle complète, redimensionnement automatique du layout principal et routage unifié des événements.</p>
 </div>
 <div class='doc-section'>
   <h2 class='section-title'>Constructeurs Surchargés</h2>
   <div class='table-wrapper'>
     <table>
       <tr><th>Constructeur</th><th>Description</th></tr>
-      <tr><td><code>Init(title.s)</code></td><td>Crée une fenêtre centrée 800&times;600 avec contrôles minimiser, maximiser et redimensionner.</td></tr>
-      <tr><td><code>Init(title.s, w.i, h.i)</code></td><td>Fenêtre centrée avec largeur et hauteur personnalisées.</td></tr>
-      <tr><td><code>Init(title.s, w.i, h.i, flags.i)</code></td><td>Fenêtre avec dimensions et flags PureBasic (ex: <code>#PB_Window_Tool</code>, <code>#PB_Window_BorderLess</code>).</td></tr>
-      <tr><td><code>Init(title.s, x.i, y.i, w.i, h.i)</code></td><td>Position absolue et dimensions spécifiées.</td></tr>
-      <tr><td><code>Init(title.s, x.i, y.i, w.i, h.i, flags.i)</code></td><td>Position absolue, dimensions et flags.</td></tr>
-      <tr><td><code>Init(title.s, x.i, y.i, w.i, h.i, flags.i, parent.i)</code></td><td>Fenêtre complète avec identifiant de fenêtre parente.</td></tr>
+      <tr><td><code>Init()</code></td><td>Fenêtre par défaut (800x600, centrée).</td></tr>
+      <tr><td><code>Init(title.s, w.i, h.i)</code></td><td>Fenêtre avec titre et dimensions, centrée à l'écran.</td></tr>
+      <tr><td><code>Init(title.s, x.i, y.i, w.i, h.i)</code></td><td>Fenêtre avec titre, position et dimensions.</td></tr>
+      <tr><td><code>Init(title.s, x.i, y.i, w.i, h.i, flags.i)</code></td><td>Fenêtre complète avec flags PureBasic OpenWindow.</td></tr>
     </table>
   </div>
 </div>
 <div class='doc-section'>
-  <h2 class='section-title'>M&eacute;thodes Principales</h2>
+  <h2 class='section-title'>Méthodes Principales</h2>
   <div class='table-wrapper'>
     <table>
       <tr><th>Méthode</th><th>Description</th></tr>
-      <tr><td><code>SetRootComponent(*comp)</code></td><td>Définit le layout racine (ex: <code>StackPanel</code>, <code>DockPanel</code>, <code>Grid</code>) qui se redimensionnera automatiquement.</td></tr>
-      <tr><td><code>SetTitle(t.s)</code> / <code>GetTitle()</code></td><td>Modifie ou récupère le titre de la fenêtre.</td></tr>
-      <tr><td><code>SetSize(w.i, h.i)</code></td><td>Redimensionne dynamiquement la fenêtre.</td></tr>
-      <tr><td><code>OnClose()</code></td><td>Méthode virtuelle appelée à la fermeture de la fenêtre.</td></tr>
-      <tr><td><code>OnResize()</code></td><td>Méthode virtuelle appelée lors du redimensionnement.</td></tr>
+      <tr><td><code>SetLayout(*rootLayout.UI::Layouts::Container)</code></td><td>Définit le panneau de disposition racine qui s'adapte automatiquement à la taille de la fenêtre.</td></tr>
+      <tr><td><code>AddGadget(*gadget.UI::Gadget)</code></td><td>Ajoute un contrôle graphique à la fenêtre.</td></tr>
+      <tr><td><code>Show() / Hide() / Close()</code></td><td>Affiche, masque ou ferme la fenêtre.</td></tr>
+      <tr><td><code>GetID() / GetHandle()</code></td><td>Retourne le #Window PureBasic ou le handle OS (HWND/NSWindow).</td></tr>
+      <tr><td><code>OnClose() / OnResize()</code></td><td>Méthodes virtuelles appelées lors des événements système de fermeture ou redimensionnement.</td></tr>
     </table>
   </div>
 </div>
@@ -130,19 +145,5 @@
   <footer class='doc-footer'>
     <p>&copy; 2026 PureBasic OOP Project - MicrodevWeb | Dual License GPL v3 / Fantaisie Software</p>
   </footer>
-  
-  <script>
-    document.getElementById('search-input').addEventListener('input', function(e) {
-      let filter = e.target.value.toLowerCase();
-      document.querySelectorAll('.nav-item').forEach(function(item) {
-        let text = item.innerText.toLowerCase();
-        if (text.includes(filter)) {
-          item.style.display = '';
-        } else {
-          item.style.display = 'none';
-        }
-      });
-    });
-  </script>
 </body>
 </html>

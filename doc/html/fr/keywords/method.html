@@ -20,7 +20,7 @@
       </div>
       <div class='lang-switch'>
         <a href='#' class='lang-btn active'>FR</a>
-        <a href='../en/keywords/method.html' class='lang-btn'>EN</a>
+        <a href='../../en/keywords/method.html' class='lang-btn'>EN</a>
       </div>
     </div>
   </header>
@@ -46,11 +46,17 @@
     </ul>
   </div>
   <div class='nav-section'>
-    <div class='nav-section-title'>Composants UI</div>
+    <div class='nav-section-title'>Socle UI & Hiérarchie</div>
     <ul class='nav-list'>
-      <li class='nav-item'><a href='../ui/application.html'><span>Application</span><span class='badge badge-ui'>UI</span></a></li>
-      <li class='nav-item'><a href='../ui/window.html'><span>Window</span><span class='badge badge-ui'>UI</span></a></li>
-      <li class='nav-item'><a href='../ui/gadget.html'><span>Gadget / Component</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/component.html'><span>Component (Base UI)</span><span class='badge badge-base'>BASE</span></a></li>
+      <li class='nav-item'><a href='../ui/gadget.html'><span>Gadget (Natif)</span><span class='badge badge-base'>BASE</span></a></li>
+      <li class='nav-item'><a href='../ui/customgadget.html'><span>CustomGadget (Canvas)</span><span class='badge badge-base'>BASE</span></a></li>
+      <li class='nav-item'><a href='../ui/container.html'><span>Container (Layout Base)</span><span class='badge badge-wpf'>WPF</span></a></li>
+    </ul>
+  </div>
+  <div class='nav-section'>
+    <div class='nav-section-title'>Composants UI (Contrôles)</div>
+    <ul class='nav-list'>
       <li class='nav-item'><a href='../ui/button.html'><span>Button</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/checkbox.html'><span>CheckBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/combobox.html'><span>ComboBox</span><span class='badge badge-ui'>UI</span></a></li>
@@ -65,44 +71,49 @@
   <div class='nav-section'>
     <div class='nav-section-title'>Layouts Responsifs (WPF)</div>
     <ul class='nav-list'>
-      <li class='nav-item'><a href='../ui/container.html'><span>Container</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/stackpanel.html'><span>StackPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/dockpanel.html'><span>DockPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/grid.html'><span>Grid</span><span class='badge badge-wpf'>WPF</span></a></li>
+    </ul>
+  </div>
+  <div class='nav-section'>
+    <div class='nav-section-title'>Application & Fenêtres</div>
+    <ul class='nav-list'>
+      <li class='nav-item'><a href='../ui/application.html'><span>Application</span><span class='badge badge-core'>CORE</span></a></li>
+      <li class='nav-item'><a href='../ui/window.html'><span>Window</span><span class='badge badge-core'>CORE</span></a></li>
     </ul>
   </div>
 </nav>
     <main class='doc-content'>
       <div class='breadcrumb'>
         <a href='../index.html'>Accueil</a>
-        
-        <span class='breadcrumb-separator'>/</span>
-        <span>Keywords</span>
-        <span class='breadcrumb-separator'>/</span>
-        <span style='color: var(--accent-blue);'>Mots-clés Method & Override</span>
-        
+        <span class='breadcrumb-separator'>/</span><span>Mots-clés POO</span>
+        <span class='breadcrumb-separator'>/</span><span style='color: var(--accent-blue);'>Mots-clés Method & Override</span>
       </div>
       
       <div class='page-header'>
         <div class='title-row'>
           <h1 class='page-title'>Mots-clés Method & Override</h1>
-          <span class='badge badge-keyword'>Keyword</span>
+          <span class='badge badge-kw'>KW</span>
         </div>
-        <p class='page-lead'>Déclaration et surcharge de méthodes virtuelles.</p>
+        <p class='page-lead'>Définition de méthodes d'instance, polymorphisme et surcharge.</p>
       </div>
       
       
+      
+
 <div class='doc-section'>
-  <h2 class='section-title'>Description</h2>
-  <p>Les méthodes définissent les comportements associés à une classe. En PureBasic OOP, toutes les méthodes d'instance sont virtuelles et résolues via une table de pointeurs (VTable) hautement optimisée.</p>
+  <h2 class='section-title'>Syntaxe</h2>
+  <div class='code-container'>
+    <pre><code><span class='kw'>Public Method</span>.[Type] NomDeMethode(param1.[Type], param2.[Type] = defaut) {
+  <span class='comment'>; Corps de la méthode</span>
+  <span class='kw'>ProcedureReturn</span> resultat
+}</code></pre>
+  </div>
 </div>
 <div class='doc-section'>
-  <h2 class='section-title'>Surcharge de Méthodes (Overloading)</h2>
-  <p>Une classe peut définir plusieurs méthodes portant le même nom avec des signatures différentes (nombres ou types de paramètres distincts) :</p>
-  <div class='code-container'>
-    <pre><code><span class='kw'>Public</span> <span class='kw'>Method</span> <span class='fn'>Log</span>(message.s) { ... }
-<span class='kw'>Public</span> <span class='kw'>Method</span> <span class='fn'>Log</span>(message.s, niveau.i) { ... }</code></pre>
-  </div>
+  <h2 class='section-title'>Surcharge Polymorphique (Override)</h2>
+  <p>Pour redéfinir une méthode héritée d'une classe parente, déclarez-la avec <code>Public Override Method</code> ou simplement <code>Public Method</code>.</p>
 </div>
 
     </main>
@@ -111,19 +122,5 @@
   <footer class='doc-footer'>
     <p>&copy; 2026 PureBasic OOP Project - MicrodevWeb | Dual License GPL v3 / Fantaisie Software</p>
   </footer>
-  
-  <script>
-    document.getElementById('search-input').addEventListener('input', function(e) {
-      let filter = e.target.value.toLowerCase();
-      document.querySelectorAll('.nav-item').forEach(function(item) {
-        let text = item.innerText.toLowerCase();
-        if (text.includes(filter)) {
-          item.style.display = '';
-        } else {
-          item.style.display = 'none';
-        }
-      });
-    });
-  </script>
 </body>
 </html>

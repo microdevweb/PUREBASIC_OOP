@@ -46,11 +46,17 @@
     </ul>
   </div>
   <div class='nav-section'>
-    <div class='nav-section-title'>Composants UI</div>
+    <div class='nav-section-title'>Socle UI & Hiérarchie</div>
     <ul class='nav-list'>
-      <li class='nav-item'><a href='ui/application.html'><span>Application</span><span class='badge badge-ui'>UI</span></a></li>
-      <li class='nav-item'><a href='ui/window.html'><span>Window</span><span class='badge badge-ui'>UI</span></a></li>
-      <li class='nav-item'><a href='ui/gadget.html'><span>Gadget / Component</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='ui/component.html'><span>Component (Base UI)</span><span class='badge badge-base'>BASE</span></a></li>
+      <li class='nav-item'><a href='ui/gadget.html'><span>Gadget (Natif)</span><span class='badge badge-base'>BASE</span></a></li>
+      <li class='nav-item'><a href='ui/customgadget.html'><span>CustomGadget (Canvas)</span><span class='badge badge-base'>BASE</span></a></li>
+      <li class='nav-item'><a href='ui/container.html'><span>Container (Layout Base)</span><span class='badge badge-wpf'>WPF</span></a></li>
+    </ul>
+  </div>
+  <div class='nav-section'>
+    <div class='nav-section-title'>Composants UI (Contrôles)</div>
+    <ul class='nav-list'>
       <li class='nav-item'><a href='ui/button.html'><span>Button</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='ui/checkbox.html'><span>CheckBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='ui/combobox.html'><span>ComboBox</span><span class='badge badge-ui'>UI</span></a></li>
@@ -65,10 +71,16 @@
   <div class='nav-section'>
     <div class='nav-section-title'>Layouts Responsifs (WPF)</div>
     <ul class='nav-list'>
-      <li class='nav-item'><a href='ui/container.html'><span>Container</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='ui/stackpanel.html'><span>StackPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='ui/dockpanel.html'><span>DockPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='ui/grid.html'><span>Grid</span><span class='badge badge-wpf'>WPF</span></a></li>
+    </ul>
+  </div>
+  <div class='nav-section'>
+    <div class='nav-section-title'>Application & Fenêtres</div>
+    <ul class='nav-list'>
+      <li class='nav-item'><a href='ui/application.html'><span>Application</span><span class='badge badge-core'>CORE</span></a></li>
+      <li class='nav-item'><a href='ui/window.html'><span>Window</span><span class='badge badge-core'>CORE</span></a></li>
     </ul>
   </div>
 </nav>
@@ -76,33 +88,59 @@
       <div class='breadcrumb'>
         <a href='index.html'>Accueil</a>
         
+        
       </div>
       
       <div class='page-header'>
         <div class='title-row'>
           <h1 class='page-title'>Vue d'ensemble</h1>
-          <span class='badge badge-info'>Aperçu</span>
+          <span class='badge badge-ui'>Aperçu</span>
         </div>
-        <p class='page-lead'>Documentation officielle du langage PureBasic Orienté Objet.</p>
+        <p class='page-lead'>Documentation officielle du framework PureBasic Orienté Objet.</p>
       </div>
       
       
+      
+
 <div class='doc-section'>
   <h2 class='section-title'>Bienvenue dans PureBasic OOP</h2>
   <p>PureBasic OOP apporte la puissance de la Programmation Orientée Objet complète à PureBasic grâce à un transpileur optimisé et une bibliothèque UI native moderne.</p>
   <div class='callout callout-tip'>
     <div class='callout-title'>💡 Touche d'aide contextuelle F1</div>
-    <p>Dans l'IDE, placez votre curseur sur n'importe quel mot-clé POO (<code>Class</code>, <code>Method</code>, <code>Super</code>, <code>Property</code>...) ou composant UI (<code>Window</code>, <code>Button</code>, <code>StackPanel</code>, <code>ListIcon</code>...) et appuyez sur <strong>F1</strong> pour ouvrir directement sa fiche d'aide détaillée !</p>
+    <p>Dans l'IDE, placez votre curseur sur n'importe quel mot-clé POO (<code>Class</code>, <code>Method</code>, <code>Super</code>, <code>Property</code>...) ou composant UI (<code>Window</code>, <code>Button</code>, <code>StackPanel</code>, <code>ListIcon</code>...) et appuyez sur <strong>F1</strong> pour ouvrir directement sa fiche d'aide détaillée avec son arbre d'héritage !</p>
   </div>
 </div>
+
 <div class='doc-section'>
-  <h2 class='section-title'>Fonctionnalités Principales</h2>
-  <ul>
-    <li><strong>Classes & Héritage Simple :</strong> Définition élégante avec <code>Class ... Extends</code>, surcharge de méthodes et appel parent <code>Super::</code>.</li>
-    <li><strong>Surcharge de Constructeurs :</strong> Plusieurs constructeurs <code>Init(...)</code> par classe pour s'adapter à tous les usages (layouts automatiques ou fenêtres fixes).</li>
-    <li><strong>Système de Layouts Responsifs (Style WPF) :</strong> <code>StackPanel</code>, <code>DockPanel</code>, <code>Grid</code>, <code>Container</code> avec dimensionnement Star (*), marges et alignements fluides.</li>
-    <li><strong>Cycle de Vie Sécurisé :</strong> Instanciation par <code>New</code> et libération automatique ou manuelle via <code>Free</code>.</li>
-  </ul>
+  <h2 class='section-title'>Hiérarchie Globale des Composants UI</h2>
+  <div class='inheritance-box'>
+    <div class='inheritance-header'>Arbre d'héritage UI</div>
+    <div class='table-wrapper'>
+      <table>
+        <tr><th>Classe de Base</th><th>Spécialisation</th><th>Composants Dérivés</th></tr>
+        <tr>
+          <td><a href='ui/component.html' class='inheritance-node'>UI::Component</a></td>
+          <td><a href='ui/gadget.html' class='inheritance-node'>UI::Gadget</a></td>
+          <td><a href='ui/button.html' class='derived-badge'>Button</a> <a href='ui/checkbox.html' class='derived-badge'>CheckBox</a> <a href='ui/combobox.html' class='derived-badge'>ComboBox</a> <a href='ui/label.html' class='derived-badge'>Label</a> <a href='ui/listicon.html' class='derived-badge'>ListIcon</a> <a href='ui/progressbar.html' class='derived-badge'>ProgressBar</a> <a href='ui/slider.html' class='derived-badge'>Slider</a> <a href='ui/textbox.html' class='derived-badge'>TextBox</a></td>
+        </tr>
+        <tr>
+          <td><a href='ui/gadget.html' class='inheritance-node'>UI::Gadget</a></td>
+          <td><a href='ui/customgadget.html' class='inheritance-node'>UI::CustomGadget</a></td>
+          <td><a href='ui/toggleswitch.html' class='derived-badge'>ToggleSwitch</a></td>
+        </tr>
+        <tr>
+          <td><a href='ui/component.html' class='inheritance-node'>UI::Component</a></td>
+          <td><a href='ui/container.html' class='inheritance-node'>UI::Layouts::Container</a></td>
+          <td><a href='ui/stackpanel.html' class='derived-badge'>StackPanel</a> <a href='ui/dockpanel.html' class='derived-badge'>DockPanel</a> <a href='ui/grid.html' class='derived-badge'>Grid</a></td>
+        </tr>
+        <tr>
+          <td><a href='keywords/class.html' class='inheritance-node'>Core::Object</a></td>
+          <td>-</td>
+          <td><a href='ui/window.html' class='derived-badge'>Window</a> <a href='ui/application.html' class='derived-badge'>Application</a></td>
+        </tr>
+      </table>
+    </div>
+  </div>
 </div>
 
     </main>
@@ -111,19 +149,5 @@
   <footer class='doc-footer'>
     <p>&copy; 2026 PureBasic OOP Project - MicrodevWeb | Dual License GPL v3 / Fantaisie Software</p>
   </footer>
-  
-  <script>
-    document.getElementById('search-input').addEventListener('input', function(e) {
-      let filter = e.target.value.toLowerCase();
-      document.querySelectorAll('.nav-item').forEach(function(item) {
-        let text = item.innerText.toLowerCase();
-        if (text.includes(filter)) {
-          item.style.display = '';
-        } else {
-          item.style.display = 'none';
-        }
-      });
-    });
-  </script>
 </body>
 </html>

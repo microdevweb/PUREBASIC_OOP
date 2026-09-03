@@ -19,7 +19,7 @@
         <input type='text' class='search-input' id='search-input' placeholder='Search docs...'>
       </div>
       <div class='lang-switch'>
-        <a href='../fr/ui/grid.html' class='lang-btn'>FR</a>
+        <a href='../../fr/ui/grid.html' class='lang-btn'>FR</a>
         <a href='#' class='lang-btn active'>EN</a>
       </div>
     </div>
@@ -46,11 +46,17 @@
     </ul>
   </div>
   <div class='nav-section'>
-    <div class='nav-section-title'>UI Components</div>
+    <div class='nav-section-title'>UI Foundation & Hierarchy</div>
     <ul class='nav-list'>
-      <li class='nav-item'><a href='../ui/application.html'><span>Application</span><span class='badge badge-ui'>UI</span></a></li>
-      <li class='nav-item'><a href='../ui/window.html'><span>Window</span><span class='badge badge-ui'>UI</span></a></li>
-      <li class='nav-item'><a href='../ui/gadget.html'><span>Gadget / Component</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/component.html'><span>Component (Base UI)</span><span class='badge badge-base'>BASE</span></a></li>
+      <li class='nav-item'><a href='../ui/gadget.html'><span>Gadget (Native Base)</span><span class='badge badge-base'>BASE</span></a></li>
+      <li class='nav-item'><a href='../ui/customgadget.html'><span>CustomGadget (Canvas Base)</span><span class='badge badge-base'>BASE</span></a></li>
+      <li class='nav-item'><a href='../ui/container.html'><span>Container (Layout Base)</span><span class='badge badge-wpf'>WPF</span></a></li>
+    </ul>
+  </div>
+  <div class='nav-section'>
+    <div class='nav-section-title'>UI Components (Controls)</div>
+    <ul class='nav-list'>
       <li class='nav-item'><a href='../ui/button.html'><span>Button</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/checkbox.html'><span>CheckBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/combobox.html'><span>ComboBox</span><span class='badge badge-ui'>UI</span></a></li>
@@ -65,36 +71,76 @@
   <div class='nav-section'>
     <div class='nav-section-title'>Responsive Layouts (WPF)</div>
     <ul class='nav-list'>
-      <li class='nav-item'><a href='../ui/container.html'><span>Container</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/stackpanel.html'><span>StackPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/dockpanel.html'><span>DockPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item active'><a href='../ui/grid.html'><span>Grid</span><span class='badge badge-wpf'>WPF</span></a></li>
+    </ul>
+  </div>
+  <div class='nav-section'>
+    <div class='nav-section-title'>Application & Windows</div>
+    <ul class='nav-list'>
+      <li class='nav-item'><a href='../ui/application.html'><span>Application</span><span class='badge badge-core'>CORE</span></a></li>
+      <li class='nav-item'><a href='../ui/window.html'><span>Window</span><span class='badge badge-core'>CORE</span></a></li>
     </ul>
   </div>
 </nav>
     <main class='doc-content'>
       <div class='breadcrumb'>
         <a href='../index.html'>Home</a>
-        
-        <span class='breadcrumb-separator'>/</span>
-        <span>UI Components</span>
-        <span class='breadcrumb-separator'>/</span>
-        <span style='color: var(--accent-blue);'>Grid Class</span>
-        
+        <span class='breadcrumb-separator'>/</span><span>UI Components</span>
+        <span class='breadcrumb-separator'>/</span><span style='color: var(--accent-blue);'>Grid Class</span>
       </div>
       
       <div class='page-header'>
         <div class='title-row'>
           <h1 class='page-title'>Grid Class</h1>
-          <span class='badge badge-ui'>Layout</span>
+          <span class='badge badge-wpf'>WPF Layout</span>
         </div>
-        <p class='page-lead'>Two-dimensional responsive layout grid with Star proportional sizing.</p>
+        <p class='page-lead'>Two-dimensional responsive layout grid with Star (*) proportional sizing.</p>
       </div>
       
+      <div class='inheritance-box'>
+  <div class='inheritance-header'><span>&#128391;</span> Inheritance Hierarchy</div>
+  <div class='inheritance-chain'>
+    <a href='../keywords/class.html' class='inheritance-node'>Core::Object</a>
+    <span class='inheritance-arrow'>&rarr;</span>
+    <a href='component.html' class='inheritance-node'>UI::Component</a>
+    <span class='inheritance-arrow'>&rarr;</span>
+    <a href='container.html' class='inheritance-node'>UI::Layouts::Container</a>
+    <span class='inheritance-arrow'>&rarr;</span>
+    <span class='inheritance-node current'>UI::Layouts::Grid</span>
+  </div>
+  <div class='inherited-members-summary'>
+    <div class='inherited-members-title'><span>Inherited Methods de <a href='container.html' style='color: var(--accent-blue); text-decoration: underline;'>UI::Layouts::Container</a></span> <span style='font-size: 0.78rem; font-weight: normal; color: var(--text-muted);'>(7 méthodes)</span></div>
+    <div class='inherited-members-tags'>
+      <a href='container.html' class='inherited-tag'>AddChild(*child)</a>
+      <a href='container.html' class='inherited-tag'>RemoveChild(*child)</a>
+      <a href='container.html' class='inherited-tag'>ClearChildren()</a>
+      <a href='container.html' class='inherited-tag'>GetChildCount()</a>
+      <a href='container.html' class='inherited-tag'>GetChild(index)</a>
+      <a href='container.html' class='inherited-tag'>SetPadding(l, t, r, b)</a>
+      <a href='container.html' class='inherited-tag'>SetPaddingAll(p)</a>
+    </div>
+  </div>
+  <div class='inherited-members-summary'>
+    <div class='inherited-members-title'><span>Inherited Methods de <a href='component.html' style='color: var(--accent-blue); text-decoration: underline;'>UI::Component</a></span> <span style='font-size: 0.78rem; font-weight: normal; color: var(--text-muted);'>(8 méthodes)</span></div>
+    <div class='inherited-members-tags'>
+      <a href='component.html' class='inherited-tag'>SetPosition(x, y)</a>
+      <a href='component.html' class='inherited-tag'>SetSize(w, h)</a>
+      <a href='component.html' class='inherited-tag'>SetMargin(l, t, r, b)</a>
+      <a href='component.html' class='inherited-tag'>SetHorizontalAlignment(align)</a>
+      <a href='component.html' class='inherited-tag'>SetVerticalAlignment(align)</a>
+      <a href='component.html' class='inherited-tag'>SetVisible(v)</a>
+      <a href='component.html' class='inherited-tag'>SetEnabled(e)</a>
+      <a href='component.html' class='inherited-tag'>Arrange(rx, ry, rw, rh)</a>
+    </div>
+  </div>
+</div>
       
+
 <div class='doc-section'>
   <h2 class='section-title'>Description</h2>
-  <p>The <code>UI::Layouts::Grid</code> defines a flexible 2D grid of rows and columns with fixed, <code>"Auto"</code>, and Star (<code>"*"</code>, <code>"2*"</code>) proportional sizing.</p>
+  <p>The <code>UI::Layouts::Grid</code> arranges elements in flexible 2D rows and columns with fixed pixel, <code>"Auto"</code>, and Star (<code>"*"</code>, <code>"2*"</code>) proportional sizing.</p>
 </div>
 <div class='doc-section'>
   <h2 class='section-title'>Overloaded Constructors</h2>
@@ -106,6 +152,19 @@
     </table>
   </div>
 </div>
+<div class='doc-section'>
+  <h2 class='section-title'>Grid Specific Methods</h2>
+  <div class='table-wrapper'>
+    <table>
+      <tr><th>Method</th><th>Description</th></tr>
+      <tr><td><code>AddRowDefinition(heightDef.s)</code></td><td>Adds row definition (e.g. <code>"50"</code>, <code>"Auto"</code>, <code>"*"</code>, <code>"2*"</code>).</td></tr>
+      <tr><td><code>AddColumnDefinition(widthDef.s)</code></td><td>Adds column definition (e.g. <code>"120"</code>, <code>"Auto"</code>, <code>"*"</code>).</td></tr>
+      <tr><td><code>SetRow(*child, rowIndex.i)</code></td><td>Places child on specified row index (0-based).</td></tr>
+      <tr><td><code>SetColumn(*child, colIndex.i)</code></td><td>Places child on specified column index (0-based).</td></tr>
+      <tr><td><code>SetRowSpan(*child, span.i) / SetColumnSpan(*child, span.i)</code></td><td>Spans child across multiple rows or columns.</td></tr>
+    </table>
+  </div>
+</div>
 
     </main>
   </div>
@@ -113,19 +172,5 @@
   <footer class='doc-footer'>
     <p>&copy; 2026 PureBasic OOP Project - MicrodevWeb | Dual License GPL v3 / Fantaisie Software</p>
   </footer>
-  
-  <script>
-    document.getElementById('search-input').addEventListener('input', function(e) {
-      let filter = e.target.value.toLowerCase();
-      document.querySelectorAll('.nav-item').forEach(function(item) {
-        let text = item.innerText.toLowerCase();
-        if (text.includes(filter)) {
-          item.style.display = '';
-        } else {
-          item.style.display = 'none';
-        }
-      });
-    });
-  </script>
 </body>
 </html>

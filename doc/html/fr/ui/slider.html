@@ -20,7 +20,7 @@
       </div>
       <div class='lang-switch'>
         <a href='#' class='lang-btn active'>FR</a>
-        <a href='../en/ui/slider.html' class='lang-btn'>EN</a>
+        <a href='../../en/ui/slider.html' class='lang-btn'>EN</a>
       </div>
     </div>
   </header>
@@ -46,11 +46,17 @@
     </ul>
   </div>
   <div class='nav-section'>
-    <div class='nav-section-title'>Composants UI</div>
+    <div class='nav-section-title'>Socle UI & Hiérarchie</div>
     <ul class='nav-list'>
-      <li class='nav-item'><a href='../ui/application.html'><span>Application</span><span class='badge badge-ui'>UI</span></a></li>
-      <li class='nav-item'><a href='../ui/window.html'><span>Window</span><span class='badge badge-ui'>UI</span></a></li>
-      <li class='nav-item'><a href='../ui/gadget.html'><span>Gadget / Component</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/component.html'><span>Component (Base UI)</span><span class='badge badge-base'>BASE</span></a></li>
+      <li class='nav-item'><a href='../ui/gadget.html'><span>Gadget (Natif)</span><span class='badge badge-base'>BASE</span></a></li>
+      <li class='nav-item'><a href='../ui/customgadget.html'><span>CustomGadget (Canvas)</span><span class='badge badge-base'>BASE</span></a></li>
+      <li class='nav-item'><a href='../ui/container.html'><span>Container (Layout Base)</span><span class='badge badge-wpf'>WPF</span></a></li>
+    </ul>
+  </div>
+  <div class='nav-section'>
+    <div class='nav-section-title'>Composants UI (Contrôles)</div>
+    <ul class='nav-list'>
       <li class='nav-item'><a href='../ui/button.html'><span>Button</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/checkbox.html'><span>CheckBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/combobox.html'><span>ComboBox</span><span class='badge badge-ui'>UI</span></a></li>
@@ -65,22 +71,24 @@
   <div class='nav-section'>
     <div class='nav-section-title'>Layouts Responsifs (WPF)</div>
     <ul class='nav-list'>
-      <li class='nav-item'><a href='../ui/container.html'><span>Container</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/stackpanel.html'><span>StackPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/dockpanel.html'><span>DockPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/grid.html'><span>Grid</span><span class='badge badge-wpf'>WPF</span></a></li>
+    </ul>
+  </div>
+  <div class='nav-section'>
+    <div class='nav-section-title'>Application & Fenêtres</div>
+    <ul class='nav-list'>
+      <li class='nav-item'><a href='../ui/application.html'><span>Application</span><span class='badge badge-core'>CORE</span></a></li>
+      <li class='nav-item'><a href='../ui/window.html'><span>Window</span><span class='badge badge-core'>CORE</span></a></li>
     </ul>
   </div>
 </nav>
     <main class='doc-content'>
       <div class='breadcrumb'>
         <a href='../index.html'>Accueil</a>
-        
-        <span class='breadcrumb-separator'>/</span>
-        <span>Composants UI</span>
-        <span class='breadcrumb-separator'>/</span>
-        <span style='color: var(--accent-blue);'>Classe Slider</span>
-        
+        <span class='breadcrumb-separator'>/</span><span>Composants UI</span>
+        <span class='breadcrumb-separator'>/</span><span style='color: var(--accent-blue);'>Classe Slider</span>
       </div>
       
       <div class='page-header'>
@@ -88,33 +96,69 @@
           <h1 class='page-title'>Classe Slider</h1>
           <span class='badge badge-ui'>UI Class</span>
         </div>
-        <p class='page-lead'>Curseur de réglage linéaire avec multi-constructeurs.</p>
+        <p class='page-lead'>Curseur de réglage numérique (TrackBar) avec multi-constructeurs.</p>
       </div>
       
+      <div class='inheritance-box'>
+  <div class='inheritance-header'><span>&#128391;</span> Hiérarchie d'héritage</div>
+  <div class='inheritance-chain'>
+    <a href='../keywords/class.html' class='inheritance-node'>Core::Object</a>
+    <span class='inheritance-arrow'>&rarr;</span>
+    <a href='component.html' class='inheritance-node'>UI::Component</a>
+    <span class='inheritance-arrow'>&rarr;</span>
+    <a href='gadget.html' class='inheritance-node'>UI::Gadget</a>
+    <span class='inheritance-arrow'>&rarr;</span>
+    <span class='inheritance-node current'>UI::Slider</span>
+  </div>
+  <div class='inherited-members-summary'>
+    <div class='inherited-members-title'><span>Méthodes héritées de <a href='gadget.html' style='color: var(--accent-blue); text-decoration: underline;'>UI::Gadget</a></span> <span style='font-size: 0.78rem; font-weight: normal; color: var(--text-muted);'>(5 méthodes)</span></div>
+    <div class='inherited-members-tags'>
+      <a href='gadget.html' class='inherited-tag'>GetID()</a>
+      <a href='gadget.html' class='inherited-tag'>GetHandle()</a>
+      <a href='gadget.html' class='inherited-tag'>FreeGadget()</a>
+      <a href='gadget.html' class='inherited-tag'>SetToolTip()</a>
+      <a href='gadget.html' class='inherited-tag'>SetFocus()</a>
+    </div>
+  </div>
+  <div class='inherited-members-summary'>
+    <div class='inherited-members-title'><span>Méthodes héritées de <a href='component.html' style='color: var(--accent-blue); text-decoration: underline;'>UI::Component</a></span> <span style='font-size: 0.78rem; font-weight: normal; color: var(--text-muted);'>(8 méthodes)</span></div>
+    <div class='inherited-members-tags'>
+      <a href='component.html' class='inherited-tag'>SetPosition()</a>
+      <a href='component.html' class='inherited-tag'>SetSize()</a>
+      <a href='component.html' class='inherited-tag'>SetMargin()</a>
+      <a href='component.html' class='inherited-tag'>SetHorizontalAlignment()</a>
+      <a href='component.html' class='inherited-tag'>SetVerticalAlignment()</a>
+      <a href='component.html' class='inherited-tag'>SetVisible()</a>
+      <a href='component.html' class='inherited-tag'>SetEnabled()</a>
+      <a href='component.html' class='inherited-tag'>Arrange()</a>
+    </div>
+  </div>
+</div>
       
+
 <div class='doc-section'>
   <h2 class='section-title'>Description</h2>
-  <p>La classe <code>UI::Slider</code> encapsule un curseur de réglage linéaire (<code>TrackBarGadget</code>).</p>
+  <p>La classe <code>UI::Slider</code> encapsule un curseur de réglage de valeur (<code>TrackBarGadget</code>) avec événement <code>OnChange()</code>.</p>
 </div>
 <div class='doc-section'>
   <h2 class='section-title'>Constructeurs Surchargés</h2>
   <div class='table-wrapper'>
     <table>
       <tr><th>Constructeur</th><th>Description</th></tr>
-      <tr><td><code>Init()</code></td><td>Plage par défaut 0..100 (200&times;25).</td></tr>
-      <tr><td><code>Init(min.i, max.i)</code></td><td>Plage minimale et maximale spécifiées.</td></tr>
-      <tr><td><code>Init(min.i, max.i, w.i, h.i)</code></td><td>Plage et dimensions souhaitées.</td></tr>
-      <tr><td><code>Init(x.i, y.i, w.i, h.i, min.i, max.i, flags.i)</code></td><td>Complet avec position absolue, plage et flags (<code>#PB_TrackBar_Ticks</code>, <code>#PB_TrackBar_Vertical</code>).</td></tr>
+      <tr><td><code>Init()</code></td><td>Curseur 0-100 par défaut.</td></tr>
+      <tr><td><code>Init(min.i, max.i)</code></td><td>Curseur avec plage personnalisée.</td></tr>
+      <tr><td><code>Init(min.i, max.i, w.i, h.i)</code></td><td>Curseur avec plage et dimensions souhaitées.</td></tr>
+      <tr><td><code>Init(x.i, y.i, w.i, h.i, min.i, max.i, flags.i)</code></td><td>Curseur complet avec coordonnées absolues et flags.</td></tr>
     </table>
   </div>
 </div>
 <div class='doc-section'>
-  <h2 class='section-title'>M&eacute;thodes Principales</h2>
+  <h2 class='section-title'>Méthodes Spécifiques</h2>
   <div class='table-wrapper'>
     <table>
       <tr><th>Méthode</th><th>Description</th></tr>
-      <tr><td><code>GetValue()</code></td><td>Renvoie la position actuelle du curseur.</td></tr>
-      <tr><td><code>SetValue(v.i)</code></td><td>Modifie la position du curseur.</td></tr>
+      <tr><td><code>GetValue() / SetValue(val.i)</code></td><td>Obtient ou définit la position du curseur.</td></tr>
+      <tr><td><code>OnChange()</code></td><td>Méthode virtuelle appelée lors du déplacement du curseur.</td></tr>
     </table>
   </div>
 </div>
@@ -125,19 +169,5 @@
   <footer class='doc-footer'>
     <p>&copy; 2026 PureBasic OOP Project - MicrodevWeb | Dual License GPL v3 / Fantaisie Software</p>
   </footer>
-  
-  <script>
-    document.getElementById('search-input').addEventListener('input', function(e) {
-      let filter = e.target.value.toLowerCase();
-      document.querySelectorAll('.nav-item').forEach(function(item) {
-        let text = item.innerText.toLowerCase();
-        if (text.includes(filter)) {
-          item.style.display = '';
-        } else {
-          item.style.display = 'none';
-        }
-      });
-    });
-  </script>
 </body>
 </html>

@@ -20,7 +20,7 @@
       </div>
       <div class='lang-switch'>
         <a href='#' class='lang-btn active'>FR</a>
-        <a href='../en/ui/stackpanel.html' class='lang-btn'>EN</a>
+        <a href='../../en/ui/stackpanel.html' class='lang-btn'>EN</a>
       </div>
     </div>
   </header>
@@ -46,11 +46,17 @@
     </ul>
   </div>
   <div class='nav-section'>
-    <div class='nav-section-title'>Composants UI</div>
+    <div class='nav-section-title'>Socle UI & Hiérarchie</div>
     <ul class='nav-list'>
-      <li class='nav-item'><a href='../ui/application.html'><span>Application</span><span class='badge badge-ui'>UI</span></a></li>
-      <li class='nav-item'><a href='../ui/window.html'><span>Window</span><span class='badge badge-ui'>UI</span></a></li>
-      <li class='nav-item'><a href='../ui/gadget.html'><span>Gadget / Component</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/component.html'><span>Component (Base UI)</span><span class='badge badge-base'>BASE</span></a></li>
+      <li class='nav-item'><a href='../ui/gadget.html'><span>Gadget (Natif)</span><span class='badge badge-base'>BASE</span></a></li>
+      <li class='nav-item'><a href='../ui/customgadget.html'><span>CustomGadget (Canvas)</span><span class='badge badge-base'>BASE</span></a></li>
+      <li class='nav-item'><a href='../ui/container.html'><span>Container (Layout Base)</span><span class='badge badge-wpf'>WPF</span></a></li>
+    </ul>
+  </div>
+  <div class='nav-section'>
+    <div class='nav-section-title'>Composants UI (Contrôles)</div>
+    <ul class='nav-list'>
       <li class='nav-item'><a href='../ui/button.html'><span>Button</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/checkbox.html'><span>CheckBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/combobox.html'><span>ComboBox</span><span class='badge badge-ui'>UI</span></a></li>
@@ -65,59 +71,99 @@
   <div class='nav-section'>
     <div class='nav-section-title'>Layouts Responsifs (WPF)</div>
     <ul class='nav-list'>
-      <li class='nav-item'><a href='../ui/container.html'><span>Container</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item active'><a href='../ui/stackpanel.html'><span>StackPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/dockpanel.html'><span>DockPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/grid.html'><span>Grid</span><span class='badge badge-wpf'>WPF</span></a></li>
+    </ul>
+  </div>
+  <div class='nav-section'>
+    <div class='nav-section-title'>Application & Fenêtres</div>
+    <ul class='nav-list'>
+      <li class='nav-item'><a href='../ui/application.html'><span>Application</span><span class='badge badge-core'>CORE</span></a></li>
+      <li class='nav-item'><a href='../ui/window.html'><span>Window</span><span class='badge badge-core'>CORE</span></a></li>
     </ul>
   </div>
 </nav>
     <main class='doc-content'>
       <div class='breadcrumb'>
         <a href='../index.html'>Accueil</a>
-        
-        <span class='breadcrumb-separator'>/</span>
-        <span>Composants UI</span>
-        <span class='breadcrumb-separator'>/</span>
-        <span style='color: var(--accent-blue);'>Classe StackPanel</span>
-        
+        <span class='breadcrumb-separator'>/</span><span>Composants UI</span>
+        <span class='breadcrumb-separator'>/</span><span style='color: var(--accent-blue);'>Classe StackPanel</span>
       </div>
       
       <div class='page-header'>
         <div class='title-row'>
           <h1 class='page-title'>Classe StackPanel</h1>
-          <span class='badge badge-ui'>Layout</span>
+          <span class='badge badge-wpf'>WPF Layout</span>
         </div>
-        <p class='page-lead'>Disposition linéaire automatique verticale ou horizontale avec multi-constructeurs.</p>
+        <p class='page-lead'>Panneau de disposition linéaire vertical ou horizontal avec multi-constructeurs.</p>
       </div>
       
+      <div class='inheritance-box'>
+  <div class='inheritance-header'><span>&#128391;</span> Hiérarchie d'héritage</div>
+  <div class='inheritance-chain'>
+    <a href='../keywords/class.html' class='inheritance-node'>Core::Object</a>
+    <span class='inheritance-arrow'>&rarr;</span>
+    <a href='component.html' class='inheritance-node'>UI::Component</a>
+    <span class='inheritance-arrow'>&rarr;</span>
+    <a href='container.html' class='inheritance-node'>UI::Layouts::Container</a>
+    <span class='inheritance-arrow'>&rarr;</span>
+    <span class='inheritance-node current'>UI::Layouts::StackPanel</span>
+  </div>
+  <div class='inherited-members-summary'>
+    <div class='inherited-members-title'><span>Méthodes héritées de <a href='container.html' style='color: var(--accent-blue); text-decoration: underline;'>UI::Layouts::Container</a></span> <span style='font-size: 0.78rem; font-weight: normal; color: var(--text-muted);'>(9 méthodes)</span></div>
+    <div class='inherited-members-tags'>
+      <a href='container.html' class='inherited-tag'>AddChild(*child)</a>
+      <a href='container.html' class='inherited-tag'>RemoveChild(*child)</a>
+      <a href='container.html' class='inherited-tag'>ClearChildren()</a>
+      <a href='container.html' class='inherited-tag'>GetChildCount()</a>
+      <a href='container.html' class='inherited-tag'>GetChild(index)</a>
+      <a href='container.html' class='inherited-tag'>SetPadding(l, t, r, b)</a>
+      <a href='container.html' class='inherited-tag'>SetPaddingAll(p)</a>
+      <a href='container.html' class='inherited-tag'>GetPaddingLeft()</a>
+      <a href='container.html' class='inherited-tag'>GetPaddingTop()</a>
+    </div>
+  </div>
+  <div class='inherited-members-summary'>
+    <div class='inherited-members-title'><span>Méthodes héritées de <a href='component.html' style='color: var(--accent-blue); text-decoration: underline;'>UI::Component</a></span> <span style='font-size: 0.78rem; font-weight: normal; color: var(--text-muted);'>(8 méthodes)</span></div>
+    <div class='inherited-members-tags'>
+      <a href='component.html' class='inherited-tag'>SetPosition(x, y)</a>
+      <a href='component.html' class='inherited-tag'>SetSize(w, h)</a>
+      <a href='component.html' class='inherited-tag'>SetMargin(l, t, r, b)</a>
+      <a href='component.html' class='inherited-tag'>SetHorizontalAlignment(align)</a>
+      <a href='component.html' class='inherited-tag'>SetVerticalAlignment(align)</a>
+      <a href='component.html' class='inherited-tag'>SetVisible(v)</a>
+      <a href='component.html' class='inherited-tag'>SetEnabled(e)</a>
+      <a href='component.html' class='inherited-tag'>Arrange(rx, ry, rw, rh)</a>
+    </div>
+  </div>
+</div>
       
+
 <div class='doc-section'>
   <h2 class='section-title'>Description</h2>
-  <p>La classe <code>UI::Layouts::StackPanel</code> dispose ses composants enfants sur une seule ligne séquentielle, orientée soit verticalement (de haut en bas), soit horizontalement (de gauche à droite).</p>
-  <p>Un espacement constant (<code>Spacing</code>) peut être configuré entre chaque élément consécutif.</p>
+  <p>La classe <code>UI::Layouts::StackPanel</code> dispose ses composants enfants en ligne continue, soit verticalement (de haut en bas), soit horizontalement (de gauche à droite), avec un espacement (<code>Spacing</code>) configurable entre chaque élément.</p>
 </div>
 <div class='doc-section'>
   <h2 class='section-title'>Constructeurs Surchargés</h2>
   <div class='table-wrapper'>
     <table>
       <tr><th>Constructeur</th><th>Description</th></tr>
-      <tr><td><code>Init()</code></td><td>StackPanel vertical avec espacement de 5 pixels par défaut.</td></tr>
+      <tr><td><code>Init()</code></td><td>StackPanel vertical avec espacement de 5px par défaut.</td></tr>
       <tr><td><code>Init(orientation.i)</code></td><td>StackPanel avec orientation choisie (<code>#UI_Orientation_Vertical</code> ou <code>#UI_Orientation_Horizontal</code>).</td></tr>
-      <tr><td><code>Init(orientation.i, spacing.i)</code></td><td>Orientation et espacement personnalisés.</td></tr>
-      <tr><td><code>Init(orientation.i, spacing.i, w.i, h.i)</code></td><td>Orientation, espacement et dimensions spécifiées.</td></tr>
+      <tr><td><code>Init(orientation.i, spacing.i)</code></td><td>StackPanel avec orientation et espacement personnalisés.</td></tr>
+      <tr><td><code>Init(orientation.i, spacing.i, w.i, h.i)</code></td><td>StackPanel complet avec dimensions souhaitées.</td></tr>
     </table>
   </div>
 </div>
 <div class='doc-section'>
-  <h2 class='section-title'>Exemple d'utilisation</h2>
-  <div class='code-container'>
-    <div class='code-header'><span class='code-title'>StackPanel vertical (.pbo)</span><span class='code-badge'>PBO</span></div>
-    <pre><code><span class='kw'>Define</span> *panel.<span class='tp'>StackPanel</span> = <span class='kw'>New</span> <span class='tp'>StackPanel</span>(#UI_Orientation_Vertical, <span class='num'>10</span>)
-*panel\<span class='fn'>SetPaddingAll</span>(<span class='num'>15</span>)
-*panel\<span class='fn'>AddChild</span>(<span class='kw'>New</span> <span class='tp'>Button</span>(<span class='str'>"Premier Bouton"</span>))
-*panel\<span class='fn'>AddChild</span>(<span class='kw'>New</span> <span class='tp'>Button</span>(<span class='str'>"Deuxième Bouton"</span>))
-*win\<span class='fn'>SetRootComponent</span>(*panel)</code></pre>
+  <h2 class='section-title'>Méthodes Spécifiques</h2>
+  <div class='table-wrapper'>
+    <table>
+      <tr><th>Méthode</th><th>Description</th></tr>
+      <tr><td><code>SetOrientation(orientation.i)</code></td><td>Définit l'orientation (<code>#UI_Orientation_Vertical</code> ou <code>#UI_Orientation_Horizontal</code>).</td></tr>
+      <tr><td><code>SetSpacing(spacing.i)</code></td><td>Définit l'espacement en pixels entre chaque enfant consécutif.</td></tr>
+    </table>
   </div>
 </div>
 
@@ -127,19 +173,5 @@
   <footer class='doc-footer'>
     <p>&copy; 2026 PureBasic OOP Project - MicrodevWeb | Dual License GPL v3 / Fantaisie Software</p>
   </footer>
-  
-  <script>
-    document.getElementById('search-input').addEventListener('input', function(e) {
-      let filter = e.target.value.toLowerCase();
-      document.querySelectorAll('.nav-item').forEach(function(item) {
-        let text = item.innerText.toLowerCase();
-        if (text.includes(filter)) {
-          item.style.display = '';
-        } else {
-          item.style.display = 'none';
-        }
-      });
-    });
-  </script>
 </body>
 </html>

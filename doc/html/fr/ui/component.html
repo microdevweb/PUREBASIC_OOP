@@ -3,7 +3,7 @@
 <head>
   <meta charset='UTF-8'>
   <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-  <title>Classe TextBox - PureBasic OOP Documentation</title>
+  <title>Classe Component - PureBasic OOP Documentation</title>
   <link rel='stylesheet' href='../../css/doc_theme.css'>
 </head>
 <body>
@@ -20,7 +20,7 @@
       </div>
       <div class='lang-switch'>
         <a href='#' class='lang-btn active'>FR</a>
-        <a href='../../en/ui/textbox.html' class='lang-btn'>EN</a>
+        <a href='../../en/ui/component.html' class='lang-btn'>EN</a>
       </div>
     </div>
   </header>
@@ -48,7 +48,7 @@
   <div class='nav-section'>
     <div class='nav-section-title'>Socle UI & Hiérarchie</div>
     <ul class='nav-list'>
-      <li class='nav-item'><a href='../ui/component.html'><span>Component (Base UI)</span><span class='badge badge-base'>BASE</span></a></li>
+      <li class='nav-item active'><a href='../ui/component.html'><span>Component (Base UI)</span><span class='badge badge-base'>BASE</span></a></li>
       <li class='nav-item'><a href='../ui/gadget.html'><span>Gadget (Natif)</span><span class='badge badge-base'>BASE</span></a></li>
       <li class='nav-item'><a href='../ui/customgadget.html'><span>CustomGadget (Canvas)</span><span class='badge badge-base'>BASE</span></a></li>
       <li class='nav-item'><a href='../ui/container.html'><span>Container (Layout Base)</span><span class='badge badge-wpf'>WPF</span></a></li>
@@ -64,7 +64,7 @@
       <li class='nav-item'><a href='../ui/listicon.html'><span>ListIcon</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/progressbar.html'><span>ProgressBar</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/slider.html'><span>Slider</span><span class='badge badge-ui'>UI</span></a></li>
-      <li class='nav-item active'><a href='../ui/textbox.html'><span>TextBox</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/textbox.html'><span>TextBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/toggleswitch.html'><span>ToggleSwitch</span><span class='badge badge-ui'>UI</span></a></li>
     </ul>
   </div>
@@ -88,15 +88,15 @@
       <div class='breadcrumb'>
         <a href='../index.html'>Accueil</a>
         <span class='breadcrumb-separator'>/</span><span>Composants UI</span>
-        <span class='breadcrumb-separator'>/</span><span style='color: var(--accent-blue);'>Classe TextBox</span>
+        <span class='breadcrumb-separator'>/</span><span style='color: var(--accent-blue);'>Classe Component</span>
       </div>
       
       <div class='page-header'>
         <div class='title-row'>
-          <h1 class='page-title'>Classe TextBox</h1>
-          <span class='badge badge-ui'>UI Class</span>
+          <h1 class='page-title'>Classe Component</h1>
+          <span class='badge badge-ui'>Base UI</span>
         </div>
-        <p class='page-lead'>Champ de saisie texte simple ou multiligne avec multi-constructeurs.</p>
+        <p class='page-lead'>Classe abstraite racine de tous les composants graphiques et conteneurs de layout réactifs.</p>
       </div>
       
       <div class='inheritance-box'>
@@ -104,35 +104,13 @@
   <div class='inheritance-chain'>
     <a href='../keywords/class.html' class='inheritance-node'>Core::Object</a>
     <span class='inheritance-arrow'>&rarr;</span>
-    <a href='component.html' class='inheritance-node'>UI::Component</a>
-    <span class='inheritance-arrow'>&rarr;</span>
-    <a href='gadget.html' class='inheritance-node'>UI::Gadget</a>
-    <span class='inheritance-arrow'>&rarr;</span>
-    <span class='inheritance-node current'>UI::TextBox</span>
+    <span class='inheritance-node current'>UI::Component</span>
   </div>
-  <div class='inherited-members-summary'>
-    <div class='inherited-members-title'><span>Méthodes héritées de <a href='gadget.html' style='color: var(--accent-blue); text-decoration: underline;'>UI::Gadget</a></span> <span style='font-size: 0.78rem; font-weight: normal; color: var(--text-muted);'>(7 méthodes)</span></div>
-    <div class='inherited-members-tags'>
-      <a href='gadget.html' class='inherited-tag'>GetID()</a>
-      <a href='gadget.html' class='inherited-tag'>GetHandle()</a>
-      <a href='gadget.html' class='inherited-tag'>SetFont()</a>
-      <a href='gadget.html' class='inherited-tag'>SetColor()</a>
-      <a href='gadget.html' class='inherited-tag'>FreeGadget()</a>
-      <a href='gadget.html' class='inherited-tag'>SetToolTip()</a>
-      <a href='gadget.html' class='inherited-tag'>SetFocus()</a>
-    </div>
-  </div>
-  <div class='inherited-members-summary'>
-    <div class='inherited-members-title'><span>Méthodes héritées de <a href='component.html' style='color: var(--accent-blue); text-decoration: underline;'>UI::Component</a></span> <span style='font-size: 0.78rem; font-weight: normal; color: var(--text-muted);'>(8 méthodes)</span></div>
-    <div class='inherited-members-tags'>
-      <a href='component.html' class='inherited-tag'>SetPosition()</a>
-      <a href='component.html' class='inherited-tag'>SetSize()</a>
-      <a href='component.html' class='inherited-tag'>SetMargin()</a>
-      <a href='component.html' class='inherited-tag'>SetHorizontalAlignment()</a>
-      <a href='component.html' class='inherited-tag'>SetVerticalAlignment()</a>
-      <a href='component.html' class='inherited-tag'>SetVisible()</a>
-      <a href='component.html' class='inherited-tag'>SetEnabled()</a>
-      <a href='component.html' class='inherited-tag'>Arrange()</a>
+  <div class='derived-classes-box'>
+    <div class='derived-classes-title'>Classes dérivées (héritant de cette classe) :</div>
+    <div class='derived-classes-list'>
+      <a href='gadget.html' class='derived-badge'>UI::Gadget</a>
+      <a href='container.html' class='derived-badge'>UI::Layouts::Container</a>
     </div>
   </div>
 </div>
@@ -140,27 +118,42 @@
 
 <div class='doc-section'>
   <h2 class='section-title'>Description</h2>
-  <p>La classe <code>UI::TextBox</code> encapsule un champ de saisie <code>StringGadget</code> (ou multiligne) avec événement <code>OnChange()</code>.</p>
+  <p>La classe abstraite <code>UI::Component</code> (dans <code>src/ui/Component.pbo</code>) définit le socle commun de l'ensemble des éléments d'interface graphique de PureBasic OOP. Elle fournit le modèle de boîte réactif inspiré de WPF : coordonnées calculées, marges (<code>Margin</code>), alignements horizontaux et verticaux, dimensions désirées, et cycle de disposition en 2 passes (<code>Arrange</code>).</p>
 </div>
+
 <div class='doc-section'>
-  <h2 class='section-title'>Constructeurs Surchargés</h2>
+  <h2 class='section-title'>Constantes d'Alignement</h2>
   <div class='table-wrapper'>
     <table>
-      <tr><th>Constructeur</th><th>Description</th></tr>
-      <tr><td><code>Init()</code></td><td>Champ de texte vide par défaut.</td></tr>
-      <tr><td><code>Init(text.s)</code></td><td>Champ de texte avec contenu initial.</td></tr>
-      <tr><td><code>Init(text.s, w.i, h.i)</code></td><td>Champ de texte avec contenu et dimensions souhaitées.</td></tr>
-      <tr><td><code>Init(text.s, x.i, y.i, w.i, h.i, flags.i)</code></td><td>Champ de texte complet avec coordonnées absolues et flags (ex. mot de passe).</td></tr>
+      <tr><th>Constante</th><th>Valeur</th><th>Signification</th></tr>
+      <tr><td><code>#UI_Align_Left</code></td><td>0</td><td>Alignement à gauche</td></tr>
+      <tr><td><code>#UI_Align_Center</code></td><td>1</td><td>Centrage horizontal</td></tr>
+      <tr><td><code>#UI_Align_Right</code></td><td>2</td><td>Alignement à droite</td></tr>
+      <tr><td><code>#UI_Align_Stretch</code></td><td>3</td><td>Étirer sur toute la largeur disponible (défaut)</td></tr>
+      <tr><td><code>#UI_Align_Top</code></td><td>0</td><td>Alignement en haut</td></tr>
+      <tr><td><code>#UI_Align_Middle</code></td><td>1</td><td>Centrage vertical</td></tr>
+      <tr><td><code>#UI_Align_Bottom</code></td><td>2</td><td>Alignement en bas</td></tr>
+      <tr><td><code>#UI_Align_VStretch</code></td><td>3</td><td>Étirer sur toute la hauteur disponible (défaut)</td></tr>
     </table>
   </div>
 </div>
+
 <div class='doc-section'>
-  <h2 class='section-title'>Méthodes Spécifiques</h2>
+  <h2 class='section-title'>Méthodes Principales de Component</h2>
   <div class='table-wrapper'>
     <table>
       <tr><th>Méthode</th><th>Description</th></tr>
-      <tr><td><code>GetText() / SetText(txt.s)</code></td><td>Obtient ou modifie le texte saisi.</td></tr>
-      <tr><td><code>OnChange()</code></td><td>Méthode virtuelle appelée lors de chaque frappe ou modification du texte.</td></tr>
+      <tr><td><code>SetPosition(x.i, y.i)</code></td><td>Définit manuellement la position X, Y du composant.</td></tr>
+      <tr><td><code>SetSize(w.i, h.i)</code></td><td>Définit manuellement la largeur et hauteur du composant.</td></tr>
+      <tr><td><code>SetMargin(l.i, t.i, r.i, b.i)</code></td><td>Définit les marges externes (Gauche, Haut, Droite, Bas) en pixels.</td></tr>
+      <tr><td><code>SetMarginAll(m.i)</code></td><td>Définit une marge externe identique sur les 4 côtés.</td></tr>
+      <tr><td><code>SetHorizontalAlignment(align.i)</code></td><td>Définit l'alignement horizontal (<code>#UI_Align_Left</code>, <code>#UI_Align_Center</code>, etc.).</td></tr>
+      <tr><td><code>SetVerticalAlignment(align.i)</code></td><td>Définit l'alignement vertical (<code>#UI_Align_Top</code>, <code>#UI_Align_Middle</code>, etc.).</td></tr>
+      <tr><td><code>SetDesiredSize(w.i, h.i)</code></td><td>Définit la taille souhaitée demandée par le composant aux conteneurs de layout.</td></tr>
+      <tr><td><code>GetDesiredWidth() / GetDesiredHeight()</code></td><td>Retourne les dimensions souhaitées avec marges.</td></tr>
+      <tr><td><code>SetVisible(v.b) / IsVisible()</code></td><td>Active ou désactive la visibilité du composant.</td></tr>
+      <tr><td><code>SetEnabled(e.b) / IsEnabled()</code></td><td>Active ou désactive l'interactivité utilisateur.</td></tr>
+      <tr><td><code>Arrange(targetX.i, targetY.i, targetW.i, targetH.i)</code></td><td>Exécute le calcul de placement et redimensionne l'élément selon son alignement.</td></tr>
     </table>
   </div>
 </div>

@@ -20,7 +20,7 @@
       </div>
       <div class='lang-switch'>
         <a href='#' class='lang-btn active'>FR</a>
-        <a href='../en/ui/label.html' class='lang-btn'>EN</a>
+        <a href='../../en/ui/label.html' class='lang-btn'>EN</a>
       </div>
     </div>
   </header>
@@ -46,11 +46,17 @@
     </ul>
   </div>
   <div class='nav-section'>
-    <div class='nav-section-title'>Composants UI</div>
+    <div class='nav-section-title'>Socle UI & Hiérarchie</div>
     <ul class='nav-list'>
-      <li class='nav-item'><a href='../ui/application.html'><span>Application</span><span class='badge badge-ui'>UI</span></a></li>
-      <li class='nav-item'><a href='../ui/window.html'><span>Window</span><span class='badge badge-ui'>UI</span></a></li>
-      <li class='nav-item'><a href='../ui/gadget.html'><span>Gadget / Component</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/component.html'><span>Component (Base UI)</span><span class='badge badge-base'>BASE</span></a></li>
+      <li class='nav-item'><a href='../ui/gadget.html'><span>Gadget (Natif)</span><span class='badge badge-base'>BASE</span></a></li>
+      <li class='nav-item'><a href='../ui/customgadget.html'><span>CustomGadget (Canvas)</span><span class='badge badge-base'>BASE</span></a></li>
+      <li class='nav-item'><a href='../ui/container.html'><span>Container (Layout Base)</span><span class='badge badge-wpf'>WPF</span></a></li>
+    </ul>
+  </div>
+  <div class='nav-section'>
+    <div class='nav-section-title'>Composants UI (Contrôles)</div>
+    <ul class='nav-list'>
       <li class='nav-item'><a href='../ui/button.html'><span>Button</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/checkbox.html'><span>CheckBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/combobox.html'><span>ComboBox</span><span class='badge badge-ui'>UI</span></a></li>
@@ -65,22 +71,24 @@
   <div class='nav-section'>
     <div class='nav-section-title'>Layouts Responsifs (WPF)</div>
     <ul class='nav-list'>
-      <li class='nav-item'><a href='../ui/container.html'><span>Container</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/stackpanel.html'><span>StackPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/dockpanel.html'><span>DockPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/grid.html'><span>Grid</span><span class='badge badge-wpf'>WPF</span></a></li>
+    </ul>
+  </div>
+  <div class='nav-section'>
+    <div class='nav-section-title'>Application & Fenêtres</div>
+    <ul class='nav-list'>
+      <li class='nav-item'><a href='../ui/application.html'><span>Application</span><span class='badge badge-core'>CORE</span></a></li>
+      <li class='nav-item'><a href='../ui/window.html'><span>Window</span><span class='badge badge-core'>CORE</span></a></li>
     </ul>
   </div>
 </nav>
     <main class='doc-content'>
       <div class='breadcrumb'>
         <a href='../index.html'>Accueil</a>
-        
-        <span class='breadcrumb-separator'>/</span>
-        <span>Composants UI</span>
-        <span class='breadcrumb-separator'>/</span>
-        <span style='color: var(--accent-blue);'>Classe Label</span>
-        
+        <span class='breadcrumb-separator'>/</span><span>Composants UI</span>
+        <span class='breadcrumb-separator'>/</span><span style='color: var(--accent-blue);'>Classe Label</span>
       </div>
       
       <div class='page-header'>
@@ -88,23 +96,68 @@
           <h1 class='page-title'>Classe Label</h1>
           <span class='badge badge-ui'>UI Class</span>
         </div>
-        <p class='page-lead'>Libellé texte statique avec multi-constructeurs et alignements.</p>
+        <p class='page-lead'>Contrôle d'affichage de texte statique avec multi-constructeurs.</p>
       </div>
       
+      <div class='inheritance-box'>
+  <div class='inheritance-header'><span>&#128391;</span> Hiérarchie d'héritage</div>
+  <div class='inheritance-chain'>
+    <a href='../keywords/class.html' class='inheritance-node'>Core::Object</a>
+    <span class='inheritance-arrow'>&rarr;</span>
+    <a href='component.html' class='inheritance-node'>UI::Component</a>
+    <span class='inheritance-arrow'>&rarr;</span>
+    <a href='gadget.html' class='inheritance-node'>UI::Gadget</a>
+    <span class='inheritance-arrow'>&rarr;</span>
+    <span class='inheritance-node current'>UI::Label</span>
+  </div>
+  <div class='inherited-members-summary'>
+    <div class='inherited-members-title'><span>Méthodes héritées de <a href='gadget.html' style='color: var(--accent-blue); text-decoration: underline;'>UI::Gadget</a></span> <span style='font-size: 0.78rem; font-weight: normal; color: var(--text-muted);'>(6 méthodes)</span></div>
+    <div class='inherited-members-tags'>
+      <a href='gadget.html' class='inherited-tag'>GetID()</a>
+      <a href='gadget.html' class='inherited-tag'>GetHandle()</a>
+      <a href='gadget.html' class='inherited-tag'>SetFont()</a>
+      <a href='gadget.html' class='inherited-tag'>SetColor()</a>
+      <a href='gadget.html' class='inherited-tag'>FreeGadget()</a>
+      <a href='gadget.html' class='inherited-tag'>SetToolTip()</a>
+    </div>
+  </div>
+  <div class='inherited-members-summary'>
+    <div class='inherited-members-title'><span>Méthodes héritées de <a href='component.html' style='color: var(--accent-blue); text-decoration: underline;'>UI::Component</a></span> <span style='font-size: 0.78rem; font-weight: normal; color: var(--text-muted);'>(7 méthodes)</span></div>
+    <div class='inherited-members-tags'>
+      <a href='component.html' class='inherited-tag'>SetPosition()</a>
+      <a href='component.html' class='inherited-tag'>SetSize()</a>
+      <a href='component.html' class='inherited-tag'>SetMargin()</a>
+      <a href='component.html' class='inherited-tag'>SetHorizontalAlignment()</a>
+      <a href='component.html' class='inherited-tag'>SetVerticalAlignment()</a>
+      <a href='component.html' class='inherited-tag'>SetVisible()</a>
+      <a href='component.html' class='inherited-tag'>Arrange()</a>
+    </div>
+  </div>
+</div>
       
+
 <div class='doc-section'>
   <h2 class='section-title'>Description</h2>
-  <p>La classe <code>UI::Label</code> encapsule un texte statique d'interface (<code>TextGadget</code>) avec styles et alignements.</p>
+  <p>La classe <code>UI::Label</code> encapsule un texte d'affichage statique <code>TextGadget</code> avec options d'alignement.</p>
 </div>
 <div class='doc-section'>
   <h2 class='section-title'>Constructeurs Surchargés</h2>
   <div class='table-wrapper'>
     <table>
       <tr><th>Constructeur</th><th>Description</th></tr>
-      <tr><td><code>Init(text.s)</code></td><td>Texte statique (dimensions automatiques pour layout).</td></tr>
-      <tr><td><code>Init(text.s, w.i, h.i)</code></td><td>Texte et dimensions personnalisées.</td></tr>
-      <tr><td><code>Init(x.i, y.i, w.i, h.i, text.s)</code></td><td>Positionnement absolu, dimensions et texte.</td></tr>
-      <tr><td><code>Init(x.i, y.i, w.i, h.i, text.s, flags.i)</code></td><td>Complet avec flags d'alignement (<code>#PB_Text_Center</code>, <code>#PB_Text_Right</code>, <code>#PB_Text_Border</code>).</td></tr>
+      <tr><td><code>Init()</code></td><td>Label par défaut sans texte.</td></tr>
+      <tr><td><code>Init(text.s)</code></td><td>Label avec texte initial.</td></tr>
+      <tr><td><code>Init(text.s, w.i, h.i)</code></td><td>Label avec texte et dimensions souhaitées.</td></tr>
+      <tr><td><code>Init(text.s, x.i, y.i, w.i, h.i, flags.i)</code></td><td>Label avec coordonnées absolues et flags d'alignement.</td></tr>
+    </table>
+  </div>
+</div>
+<div class='doc-section'>
+  <h2 class='section-title'>Méthodes Spécifiques</h2>
+  <div class='table-wrapper'>
+    <table>
+      <tr><th>Méthode</th><th>Description</th></tr>
+      <tr><td><code>GetText() / SetText(txt.s)</code></td><td>Obtient ou modifie le texte affiché.</td></tr>
     </table>
   </div>
 </div>
@@ -115,19 +168,5 @@
   <footer class='doc-footer'>
     <p>&copy; 2026 PureBasic OOP Project - MicrodevWeb | Dual License GPL v3 / Fantaisie Software</p>
   </footer>
-  
-  <script>
-    document.getElementById('search-input').addEventListener('input', function(e) {
-      let filter = e.target.value.toLowerCase();
-      document.querySelectorAll('.nav-item').forEach(function(item) {
-        let text = item.innerText.toLowerCase();
-        if (text.includes(filter)) {
-          item.style.display = '';
-        } else {
-          item.style.display = 'none';
-        }
-      });
-    });
-  </script>
 </body>
 </html>

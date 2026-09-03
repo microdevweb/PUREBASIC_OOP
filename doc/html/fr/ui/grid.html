@@ -20,7 +20,7 @@
       </div>
       <div class='lang-switch'>
         <a href='#' class='lang-btn active'>FR</a>
-        <a href='../en/ui/grid.html' class='lang-btn'>EN</a>
+        <a href='../../en/ui/grid.html' class='lang-btn'>EN</a>
       </div>
     </div>
   </header>
@@ -46,11 +46,17 @@
     </ul>
   </div>
   <div class='nav-section'>
-    <div class='nav-section-title'>Composants UI</div>
+    <div class='nav-section-title'>Socle UI & Hiérarchie</div>
     <ul class='nav-list'>
-      <li class='nav-item'><a href='../ui/application.html'><span>Application</span><span class='badge badge-ui'>UI</span></a></li>
-      <li class='nav-item'><a href='../ui/window.html'><span>Window</span><span class='badge badge-ui'>UI</span></a></li>
-      <li class='nav-item'><a href='../ui/gadget.html'><span>Gadget / Component</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/component.html'><span>Component (Base UI)</span><span class='badge badge-base'>BASE</span></a></li>
+      <li class='nav-item'><a href='../ui/gadget.html'><span>Gadget (Natif)</span><span class='badge badge-base'>BASE</span></a></li>
+      <li class='nav-item'><a href='../ui/customgadget.html'><span>CustomGadget (Canvas)</span><span class='badge badge-base'>BASE</span></a></li>
+      <li class='nav-item'><a href='../ui/container.html'><span>Container (Layout Base)</span><span class='badge badge-wpf'>WPF</span></a></li>
+    </ul>
+  </div>
+  <div class='nav-section'>
+    <div class='nav-section-title'>Composants UI (Contrôles)</div>
+    <ul class='nav-list'>
       <li class='nav-item'><a href='../ui/button.html'><span>Button</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/checkbox.html'><span>CheckBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/combobox.html'><span>ComboBox</span><span class='badge badge-ui'>UI</span></a></li>
@@ -65,36 +71,76 @@
   <div class='nav-section'>
     <div class='nav-section-title'>Layouts Responsifs (WPF)</div>
     <ul class='nav-list'>
-      <li class='nav-item'><a href='../ui/container.html'><span>Container</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/stackpanel.html'><span>StackPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/dockpanel.html'><span>DockPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item active'><a href='../ui/grid.html'><span>Grid</span><span class='badge badge-wpf'>WPF</span></a></li>
+    </ul>
+  </div>
+  <div class='nav-section'>
+    <div class='nav-section-title'>Application & Fenêtres</div>
+    <ul class='nav-list'>
+      <li class='nav-item'><a href='../ui/application.html'><span>Application</span><span class='badge badge-core'>CORE</span></a></li>
+      <li class='nav-item'><a href='../ui/window.html'><span>Window</span><span class='badge badge-core'>CORE</span></a></li>
     </ul>
   </div>
 </nav>
     <main class='doc-content'>
       <div class='breadcrumb'>
         <a href='../index.html'>Accueil</a>
-        
-        <span class='breadcrumb-separator'>/</span>
-        <span>Composants UI</span>
-        <span class='breadcrumb-separator'>/</span>
-        <span style='color: var(--accent-blue);'>Classe Grid</span>
-        
+        <span class='breadcrumb-separator'>/</span><span>Composants UI</span>
+        <span class='breadcrumb-separator'>/</span><span style='color: var(--accent-blue);'>Classe Grid</span>
       </div>
       
       <div class='page-header'>
         <div class='title-row'>
           <h1 class='page-title'>Classe Grid</h1>
-          <span class='badge badge-ui'>Layout</span>
+          <span class='badge badge-wpf'>WPF Layout</span>
         </div>
-        <p class='page-lead'>Grille responsive 2D avec dimensionnement en pixels, Auto et Star (*).</p>
+        <p class='page-lead'>Grille de disposition bidimensionnelle 2D avec dimensionnement proportionnel Star (*).</p>
       </div>
       
+      <div class='inheritance-box'>
+  <div class='inheritance-header'><span>&#128391;</span> Hiérarchie d'héritage</div>
+  <div class='inheritance-chain'>
+    <a href='../keywords/class.html' class='inheritance-node'>Core::Object</a>
+    <span class='inheritance-arrow'>&rarr;</span>
+    <a href='component.html' class='inheritance-node'>UI::Component</a>
+    <span class='inheritance-arrow'>&rarr;</span>
+    <a href='container.html' class='inheritance-node'>UI::Layouts::Container</a>
+    <span class='inheritance-arrow'>&rarr;</span>
+    <span class='inheritance-node current'>UI::Layouts::Grid</span>
+  </div>
+  <div class='inherited-members-summary'>
+    <div class='inherited-members-title'><span>Méthodes héritées de <a href='container.html' style='color: var(--accent-blue); text-decoration: underline;'>UI::Layouts::Container</a></span> <span style='font-size: 0.78rem; font-weight: normal; color: var(--text-muted);'>(7 méthodes)</span></div>
+    <div class='inherited-members-tags'>
+      <a href='container.html' class='inherited-tag'>AddChild(*child)</a>
+      <a href='container.html' class='inherited-tag'>RemoveChild(*child)</a>
+      <a href='container.html' class='inherited-tag'>ClearChildren()</a>
+      <a href='container.html' class='inherited-tag'>GetChildCount()</a>
+      <a href='container.html' class='inherited-tag'>GetChild(index)</a>
+      <a href='container.html' class='inherited-tag'>SetPadding(l, t, r, b)</a>
+      <a href='container.html' class='inherited-tag'>SetPaddingAll(p)</a>
+    </div>
+  </div>
+  <div class='inherited-members-summary'>
+    <div class='inherited-members-title'><span>Méthodes héritées de <a href='component.html' style='color: var(--accent-blue); text-decoration: underline;'>UI::Component</a></span> <span style='font-size: 0.78rem; font-weight: normal; color: var(--text-muted);'>(8 méthodes)</span></div>
+    <div class='inherited-members-tags'>
+      <a href='component.html' class='inherited-tag'>SetPosition(x, y)</a>
+      <a href='component.html' class='inherited-tag'>SetSize(w, h)</a>
+      <a href='component.html' class='inherited-tag'>SetMargin(l, t, r, b)</a>
+      <a href='component.html' class='inherited-tag'>SetHorizontalAlignment(align)</a>
+      <a href='component.html' class='inherited-tag'>SetVerticalAlignment(align)</a>
+      <a href='component.html' class='inherited-tag'>SetVisible(v)</a>
+      <a href='component.html' class='inherited-tag'>SetEnabled(e)</a>
+      <a href='component.html' class='inherited-tag'>Arrange(rx, ry, rw, rh)</a>
+    </div>
+  </div>
+</div>
       
+
 <div class='doc-section'>
   <h2 class='section-title'>Description</h2>
-  <p>La classe <code>UI::Layouts::Grid</code> définit une grille 2D flexible en lignes et colonnes, avec dimensionnement en pixels, <code>"Auto"</code> ou proportionnel Star (<code>"*"</code>, <code>"2*"</code>).</p>
+  <p>La classe <code>UI::Layouts::Grid</code> organise les composants dans une grille 2D flexible de lignes et de colonnes avec dimensionnement fixe en pixels, automatique (<code>"Auto"</code>) ou proportionnel Star (<code>"*"</code>, <code>"2*"</code>).</p>
 </div>
 <div class='doc-section'>
   <h2 class='section-title'>Constructeurs Surchargés</h2>
@@ -102,24 +148,21 @@
     <table>
       <tr><th>Constructeur</th><th>Description</th></tr>
       <tr><td><code>Init()</code></td><td>Grille 2D réactive par défaut.</td></tr>
-      <tr><td><code>Init(w.i, h.i)</code></td><td>Grille 2D avec dimensions initiales.</td></tr>
+      <tr><td><code>Init(w.i, h.i)</code></td><td>Grille avec dimensions initiales.</td></tr>
     </table>
   </div>
 </div>
 <div class='doc-section'>
-  <h2 class='section-title'>Exemple d'utilisation</h2>
-  <div class='code-container'>
-    <div class='code-header'><span class='code-title'>Grille avec Star Sizing (.pbo)</span><span class='code-badge'>PBO</span></div>
-    <pre><code><span class='kw'>Define</span> *grid.<span class='tp'>Grid</span> = <span class='kw'>New</span> <span class='tp'>Grid</span>()
-*grid\<span class='fn'>AddColumn</span>(<span class='str'>"200"</span>)  <span class='cm'>; Colonne 0: 200px fixe</span>
-*grid\<span class='fn'>AddColumn</span>(<span class='str'>"3*"</span>)   <span class='cm'>; Colonne 1: 75% largeur restante</span>
-*grid\<span class='fn'>AddColumn</span>(<span class='str'>"1*"</span>)   <span class='cm'>; Colonne 2: 25% largeur restante</span>
-*grid\<span class='fn'>AddRow</span>(<span class='str'>"50"</span>)      <span class='cm'>; Ligne 0: 50px en-tête</span>
-*grid\<span class='fn'>AddRow</span>(<span class='str'>"*"</span>)       <span class='cm'>; Ligne 1: Contenu fluide</span>
-
-*grid\<span class='fn'>SetCell</span>(*sidebar, <span class='num'>0</span>, <span class='num'>0</span>, <span class='num'>2</span>, <span class='num'>1</span>) <span class='cm'>; RowSpan=2</span>
-*grid\<span class='fn'>SetCell</span>(*mainView, <span class='num'>1</span>, <span class='num'>1</span>)
-*win\<span class='fn'>SetRootComponent</span>(*grid)</code></pre>
+  <h2 class='section-title'>Méthodes Spécifiques de Grid</h2>
+  <div class='table-wrapper'>
+    <table>
+      <tr><th>Méthode</th><th>Description</th></tr>
+      <tr><td><code>AddRowDefinition(heightDef.s)</code></td><td>Ajoute une ligne (ex. <code>"50"</code>, <code>"Auto"</code>, <code>"*"</code>, <code>"2*"</code>).</td></tr>
+      <tr><td><code>AddColumnDefinition(widthDef.s)</code></td><td>Ajoute une colonne (ex. <code>"120"</code>, <code>"Auto"</code>, <code>"*"</code>).</td></tr>
+      <tr><td><code>SetRow(*child, rowIndex.i)</code></td><td>Place l'élément enfant sur la ligne spécifiée (0-indexé).</td></tr>
+      <tr><td><code>SetColumn(*child, colIndex.i)</code></td><td>Place l'élément enfant sur la colonne spécifiée (0-indexé).</td></tr>
+      <tr><td><code>SetRowSpan(*child, span.i) / SetColumnSpan(*child, span.i)</code></td><td>Étend l'élément sur plusieurs lignes ou colonnes.</td></tr>
+    </table>
   </div>
 </div>
 
@@ -129,19 +172,5 @@
   <footer class='doc-footer'>
     <p>&copy; 2026 PureBasic OOP Project - MicrodevWeb | Dual License GPL v3 / Fantaisie Software</p>
   </footer>
-  
-  <script>
-    document.getElementById('search-input').addEventListener('input', function(e) {
-      let filter = e.target.value.toLowerCase();
-      document.querySelectorAll('.nav-item').forEach(function(item) {
-        let text = item.innerText.toLowerCase();
-        if (text.includes(filter)) {
-          item.style.display = '';
-        } else {
-          item.style.display = 'none';
-        }
-      });
-    });
-  </script>
 </body>
 </html>

@@ -20,7 +20,7 @@
       </div>
       <div class='lang-switch'>
         <a href='#' class='lang-btn active'>FR</a>
-        <a href='../en/ui/application.html' class='lang-btn'>EN</a>
+        <a href='../../en/ui/application.html' class='lang-btn'>EN</a>
       </div>
     </div>
   </header>
@@ -46,11 +46,17 @@
     </ul>
   </div>
   <div class='nav-section'>
-    <div class='nav-section-title'>Composants UI</div>
+    <div class='nav-section-title'>Socle UI & Hiérarchie</div>
     <ul class='nav-list'>
-      <li class='nav-item active'><a href='../ui/application.html'><span>Application</span><span class='badge badge-ui'>UI</span></a></li>
-      <li class='nav-item'><a href='../ui/window.html'><span>Window</span><span class='badge badge-ui'>UI</span></a></li>
-      <li class='nav-item'><a href='../ui/gadget.html'><span>Gadget / Component</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/component.html'><span>Component (Base UI)</span><span class='badge badge-base'>BASE</span></a></li>
+      <li class='nav-item'><a href='../ui/gadget.html'><span>Gadget (Natif)</span><span class='badge badge-base'>BASE</span></a></li>
+      <li class='nav-item'><a href='../ui/customgadget.html'><span>CustomGadget (Canvas)</span><span class='badge badge-base'>BASE</span></a></li>
+      <li class='nav-item'><a href='../ui/container.html'><span>Container (Layout Base)</span><span class='badge badge-wpf'>WPF</span></a></li>
+    </ul>
+  </div>
+  <div class='nav-section'>
+    <div class='nav-section-title'>Composants UI (Contrôles)</div>
+    <ul class='nav-list'>
       <li class='nav-item'><a href='../ui/button.html'><span>Button</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/checkbox.html'><span>CheckBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/combobox.html'><span>ComboBox</span><span class='badge badge-ui'>UI</span></a></li>
@@ -65,45 +71,57 @@
   <div class='nav-section'>
     <div class='nav-section-title'>Layouts Responsifs (WPF)</div>
     <ul class='nav-list'>
-      <li class='nav-item'><a href='../ui/container.html'><span>Container</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/stackpanel.html'><span>StackPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/dockpanel.html'><span>DockPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/grid.html'><span>Grid</span><span class='badge badge-wpf'>WPF</span></a></li>
+    </ul>
+  </div>
+  <div class='nav-section'>
+    <div class='nav-section-title'>Application & Fenêtres</div>
+    <ul class='nav-list'>
+      <li class='nav-item active'><a href='../ui/application.html'><span>Application</span><span class='badge badge-core'>CORE</span></a></li>
+      <li class='nav-item'><a href='../ui/window.html'><span>Window</span><span class='badge badge-core'>CORE</span></a></li>
     </ul>
   </div>
 </nav>
     <main class='doc-content'>
       <div class='breadcrumb'>
         <a href='../index.html'>Accueil</a>
-        
-        <span class='breadcrumb-separator'>/</span>
-        <span>Composants UI</span>
-        <span class='breadcrumb-separator'>/</span>
-        <span style='color: var(--accent-blue);'>Classe Application</span>
-        
+        <span class='breadcrumb-separator'>/</span><span>Composants UI</span>
+        <span class='breadcrumb-separator'>/</span><span style='color: var(--accent-blue);'>Classe Application</span>
       </div>
       
       <div class='page-header'>
         <div class='title-row'>
           <h1 class='page-title'>Classe Application</h1>
-          <span class='badge badge-ui'>UI Class</span>
+          <span class='badge badge-ui'>Core</span>
         </div>
-        <p class='page-lead'>Boucle principale d'événements et gestion du cycle de vie de l'application.</p>
+        <p class='page-lead'>Chef d'orchestre de l'application PureBasic, de la boucle principale et du dispatch d'événements.</p>
       </div>
       
+      <div class='inheritance-box'>
+  <div class='inheritance-header'><span>&#128391;</span> Hiérarchie d'héritage</div>
+  <div class='inheritance-chain'>
+    <a href='../keywords/class.html' class='inheritance-node'>Core::Object</a>
+    <span class='inheritance-arrow'>&rarr;</span>
+    <span class='inheritance-node current'>UI::Application</span>
+  </div>
+</div>
       
+
 <div class='doc-section'>
   <h2 class='section-title'>Description</h2>
-  <p>La classe <code>UI::Application</code> encapsule la boucle événementielle PureBasic (<code>WaitWindowEvent</code>), la gestion des fenêtres et l'arrêt propre du programme.</p>
+  <p>La classe <code>UI::Application</code> est le singleton de pilotage d'une application PureBasic OOP. Elle gère la boucle principale d'événements (<code>WaitWindowEvent</code>), la détection des gadgets et le routage automatique vers les méthodes virtuelles (<code>OnClick</code>, <code>OnChange</code>, <code>OnClose</code>, etc.).</p>
 </div>
 <div class='doc-section'>
-  <h2 class='section-title'>M&eacute;thodes Principales</h2>
+  <h2 class='section-title'>Constructeurs & Méthodes Statiques</h2>
   <div class='table-wrapper'>
     <table>
       <tr><th>Méthode</th><th>Description</th></tr>
-      <tr><td><code>Run()</code></td><td>Démarre la boucle principale d'événements jusqu'à la fermeture de toutes les fenêtres ou un appel à <code>Exit()</code>.</td></tr>
-      <tr><td><code>Exit(exitCode.i = 0)</code></td><td>Arrête proprement l'application et libère les ressources.</td></tr>
-      <tr><td><code>AddWindow(*win)</code></td><td>Enregistre une fenêtre dans la boucle événementielle.</td></tr>
+      <tr><td><code>Init(appName.s = 'PB App')</code></td><td>Initialise l'environnement applicatif et enregistre l'instance globale.</td></tr>
+      <tr><td><code>Run()</code></td><td>Lance la boucle principale bloquante d'événements jusqu'à fermeture de toutes les fenêtres.</td></tr>
+      <tr><td><code>Exit()</code></td><td>Demande l'arrêt propre de la boucle événementielle et quitte l'application.</td></tr>
+      <tr><td><code>AddWindow(*win.UI::Window)</code></td><td>Enregistre une fenêtre dans le cycle de vie de l'application.</td></tr>
     </table>
   </div>
 </div>
@@ -114,19 +132,5 @@
   <footer class='doc-footer'>
     <p>&copy; 2026 PureBasic OOP Project - MicrodevWeb | Dual License GPL v3 / Fantaisie Software</p>
   </footer>
-  
-  <script>
-    document.getElementById('search-input').addEventListener('input', function(e) {
-      let filter = e.target.value.toLowerCase();
-      document.querySelectorAll('.nav-item').forEach(function(item) {
-        let text = item.innerText.toLowerCase();
-        if (text.includes(filter)) {
-          item.style.display = '';
-        } else {
-          item.style.display = 'none';
-        }
-      });
-    });
-  </script>
 </body>
 </html>

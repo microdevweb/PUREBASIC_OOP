@@ -3,7 +3,7 @@
 <head>
   <meta charset='UTF-8'>
   <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-  <title>Getters, Setters & Propriétés - PureBasic OOP Documentation</title>
+  <title>Propriétés Getter & Setter - PureBasic OOP Documentation</title>
   <link rel='stylesheet' href='../../css/doc_theme.css'>
 </head>
 <body>
@@ -20,7 +20,7 @@
       </div>
       <div class='lang-switch'>
         <a href='#' class='lang-btn active'>FR</a>
-        <a href='../en/keywords/properties.html' class='lang-btn'>EN</a>
+        <a href='../../en/keywords/properties.html' class='lang-btn'>EN</a>
       </div>
     </div>
   </header>
@@ -46,11 +46,17 @@
     </ul>
   </div>
   <div class='nav-section'>
-    <div class='nav-section-title'>Composants UI</div>
+    <div class='nav-section-title'>Socle UI & Hiérarchie</div>
     <ul class='nav-list'>
-      <li class='nav-item'><a href='../ui/application.html'><span>Application</span><span class='badge badge-ui'>UI</span></a></li>
-      <li class='nav-item'><a href='../ui/window.html'><span>Window</span><span class='badge badge-ui'>UI</span></a></li>
-      <li class='nav-item'><a href='../ui/gadget.html'><span>Gadget / Component</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/component.html'><span>Component (Base UI)</span><span class='badge badge-base'>BASE</span></a></li>
+      <li class='nav-item'><a href='../ui/gadget.html'><span>Gadget (Natif)</span><span class='badge badge-base'>BASE</span></a></li>
+      <li class='nav-item'><a href='../ui/customgadget.html'><span>CustomGadget (Canvas)</span><span class='badge badge-base'>BASE</span></a></li>
+      <li class='nav-item'><a href='../ui/container.html'><span>Container (Layout Base)</span><span class='badge badge-wpf'>WPF</span></a></li>
+    </ul>
+  </div>
+  <div class='nav-section'>
+    <div class='nav-section-title'>Composants UI (Contrôles)</div>
+    <ul class='nav-list'>
       <li class='nav-item'><a href='../ui/button.html'><span>Button</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/checkbox.html'><span>CheckBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/combobox.html'><span>ComboBox</span><span class='badge badge-ui'>UI</span></a></li>
@@ -65,47 +71,43 @@
   <div class='nav-section'>
     <div class='nav-section-title'>Layouts Responsifs (WPF)</div>
     <ul class='nav-list'>
-      <li class='nav-item'><a href='../ui/container.html'><span>Container</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/stackpanel.html'><span>StackPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/dockpanel.html'><span>DockPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/grid.html'><span>Grid</span><span class='badge badge-wpf'>WPF</span></a></li>
+    </ul>
+  </div>
+  <div class='nav-section'>
+    <div class='nav-section-title'>Application & Fenêtres</div>
+    <ul class='nav-list'>
+      <li class='nav-item'><a href='../ui/application.html'><span>Application</span><span class='badge badge-core'>CORE</span></a></li>
+      <li class='nav-item'><a href='../ui/window.html'><span>Window</span><span class='badge badge-core'>CORE</span></a></li>
     </ul>
   </div>
 </nav>
     <main class='doc-content'>
       <div class='breadcrumb'>
         <a href='../index.html'>Accueil</a>
-        
-        <span class='breadcrumb-separator'>/</span>
-        <span>Keywords</span>
-        <span class='breadcrumb-separator'>/</span>
-        <span style='color: var(--accent-blue);'>Getters, Setters & Propriétés</span>
-        
+        <span class='breadcrumb-separator'>/</span><span>Mots-clés POO</span>
+        <span class='breadcrumb-separator'>/</span><span style='color: var(--accent-blue);'>Propriétés Getter & Setter</span>
       </div>
       
       <div class='page-header'>
         <div class='title-row'>
-          <h1 class='page-title'>Getters, Setters & Propriétés</h1>
-          <span class='badge badge-keyword'>Keyword</span>
+          <h1 class='page-title'>Propriétés Getter & Setter</h1>
+          <span class='badge badge-kw'>KW</span>
         </div>
-        <p class='page-lead'>Encapsulation élégante des données membres.</p>
+        <p class='page-lead'>Encapsulation propre des champs avec syntaxe de propriété.</p>
       </div>
       
       
-<div class='doc-section'>
-  <h2 class='section-title'>Description</h2>
-  <p>Les accesseurs <code>Get</code> et <code>Set</code> permettent de contrôler la lecture et l'écriture des champs internes tout en offrant une interface propre.</p>
-</div>
+      
+
 <div class='doc-section'>
   <h2 class='section-title'>Syntaxe</h2>
   <div class='code-container'>
-    <pre><code><span class='kw'>Class</span> CompteBancaire {
-  <span class='kw'>Private</span> solde.d
-  
-  <span class='kw'>Public</span> <span class='kw'>Property</span> Solde.d {
-    <span class='kw'>Get</span> { <span class='kw'>ProcedureReturn</span> <span class='kw'>This</span>\solde }
-    <span class='kw'>Set</span>(val.d) { <span class='kw'>If</span> val >= <span class='num'>0</span> : <span class='kw'>This</span>\solde = val : <span class='kw'>EndIf</span> }
-  }
+    <pre><code><span class='kw'>Property</span> Title.s {
+  <span class='kw'>Get</span> { <span class='kw'>ProcedureReturn</span> <span class='kw'>This</span>\title }
+  <span class='kw'>Set</span>(val.s) { <span class='kw'>This</span>\title = val }
 }</code></pre>
   </div>
 </div>
@@ -116,19 +118,5 @@
   <footer class='doc-footer'>
     <p>&copy; 2026 PureBasic OOP Project - MicrodevWeb | Dual License GPL v3 / Fantaisie Software</p>
   </footer>
-  
-  <script>
-    document.getElementById('search-input').addEventListener('input', function(e) {
-      let filter = e.target.value.toLowerCase();
-      document.querySelectorAll('.nav-item').forEach(function(item) {
-        let text = item.innerText.toLowerCase();
-        if (text.includes(filter)) {
-          item.style.display = '';
-        } else {
-          item.style.display = 'none';
-        }
-      });
-    });
-  </script>
 </body>
 </html>

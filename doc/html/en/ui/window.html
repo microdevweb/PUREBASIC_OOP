@@ -19,7 +19,7 @@
         <input type='text' class='search-input' id='search-input' placeholder='Search docs...'>
       </div>
       <div class='lang-switch'>
-        <a href='../fr/ui/window.html' class='lang-btn'>FR</a>
+        <a href='../../fr/ui/window.html' class='lang-btn'>FR</a>
         <a href='#' class='lang-btn active'>EN</a>
       </div>
     </div>
@@ -46,11 +46,17 @@
     </ul>
   </div>
   <div class='nav-section'>
-    <div class='nav-section-title'>UI Components</div>
+    <div class='nav-section-title'>UI Foundation & Hierarchy</div>
     <ul class='nav-list'>
-      <li class='nav-item'><a href='../ui/application.html'><span>Application</span><span class='badge badge-ui'>UI</span></a></li>
-      <li class='nav-item active'><a href='../ui/window.html'><span>Window</span><span class='badge badge-ui'>UI</span></a></li>
-      <li class='nav-item'><a href='../ui/gadget.html'><span>Gadget / Component</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/component.html'><span>Component (Base UI)</span><span class='badge badge-base'>BASE</span></a></li>
+      <li class='nav-item'><a href='../ui/gadget.html'><span>Gadget (Native Base)</span><span class='badge badge-base'>BASE</span></a></li>
+      <li class='nav-item'><a href='../ui/customgadget.html'><span>CustomGadget (Canvas Base)</span><span class='badge badge-base'>BASE</span></a></li>
+      <li class='nav-item'><a href='../ui/container.html'><span>Container (Layout Base)</span><span class='badge badge-wpf'>WPF</span></a></li>
+    </ul>
+  </div>
+  <div class='nav-section'>
+    <div class='nav-section-title'>UI Components (Controls)</div>
+    <ul class='nav-list'>
       <li class='nav-item'><a href='../ui/button.html'><span>Button</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/checkbox.html'><span>CheckBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/combobox.html'><span>ComboBox</span><span class='badge badge-ui'>UI</span></a></li>
@@ -65,48 +71,70 @@
   <div class='nav-section'>
     <div class='nav-section-title'>Responsive Layouts (WPF)</div>
     <ul class='nav-list'>
-      <li class='nav-item'><a href='../ui/container.html'><span>Container</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/stackpanel.html'><span>StackPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/dockpanel.html'><span>DockPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/grid.html'><span>Grid</span><span class='badge badge-wpf'>WPF</span></a></li>
+    </ul>
+  </div>
+  <div class='nav-section'>
+    <div class='nav-section-title'>Application & Windows</div>
+    <ul class='nav-list'>
+      <li class='nav-item'><a href='../ui/application.html'><span>Application</span><span class='badge badge-core'>CORE</span></a></li>
+      <li class='nav-item active'><a href='../ui/window.html'><span>Window</span><span class='badge badge-core'>CORE</span></a></li>
     </ul>
   </div>
 </nav>
     <main class='doc-content'>
       <div class='breadcrumb'>
         <a href='../index.html'>Home</a>
-        
-        <span class='breadcrumb-separator'>/</span>
-        <span>UI Components</span>
-        <span class='breadcrumb-separator'>/</span>
-        <span style='color: var(--accent-blue);'>Window Class</span>
-        
+        <span class='breadcrumb-separator'>/</span><span>UI Components</span>
+        <span class='breadcrumb-separator'>/</span><span style='color: var(--accent-blue);'>Window Class</span>
       </div>
       
       <div class='page-header'>
         <div class='title-row'>
           <h1 class='page-title'>Window Class</h1>
-          <span class='badge badge-ui'>UI Class</span>
+          <span class='badge badge-ui'>Core UI</span>
         </div>
-        <p class='page-lead'>Flexible GUI window management with multi-constructors and dynamic setters.</p>
+        <p class='page-lead'>Native event-driven window with automated root layout resizing and event loop.</p>
       </div>
       
+      <div class='inheritance-box'>
+  <div class='inheritance-header'><span>&#128391;</span> Inheritance Hierarchy</div>
+  <div class='inheritance-chain'>
+    <a href='../keywords/class.html' class='inheritance-node'>Core::Object</a>
+    <span class='inheritance-arrow'>&rarr;</span>
+    <span class='inheritance-node current'>UI::Window</span>
+  </div>
+</div>
       
+
 <div class='doc-section'>
   <h2 class='section-title'>Description</h2>
-  <p>The <code>UI::Window</code> class encapsulates a top-level native GUI window with multi-constructors, automated resizing, and clean disposal.</p>
+  <p>The <code>UI::Window</code> class encapsulates a native PureBasic window (<code>OpenWindow</code>) with automated root layout resizing, message dispatching, and unified event routing.</p>
 </div>
 <div class='doc-section'>
   <h2 class='section-title'>Overloaded Constructors</h2>
   <div class='table-wrapper'>
     <table>
       <tr><th>Constructor</th><th>Description</th></tr>
-      <tr><td><code>Init(title.s)</code></td><td>Centered 800&times;600 window with minimize, maximize, and resize controls.</td></tr>
-      <tr><td><code>Init(title.s, w.i, h.i)</code></td><td>Centered resizable window with custom width and height.</td></tr>
-      <tr><td><code>Init(title.s, w.i, h.i, flags.i)</code></td><td>Window with custom dimensions and PureBasic flags.</td></tr>
-      <tr><td><code>Init(title.s, x.i, y.i, w.i, h.i)</code></td><td>Window with absolute coordinates and dimensions.</td></tr>
-      <tr><td><code>Init(title.s, x.i, y.i, w.i, h.i, flags.i)</code></td><td>Window with absolute coordinates, dimensions, and flags.</td></tr>
-      <tr><td><code>Init(title.s, x.i, y.i, w.i, h.i, flags.i, parent.i)</code></td><td>Full window initialization with parent window ID.</td></tr>
+      <tr><td><code>Init()</code></td><td>Default window (800x600, centered).</td></tr>
+      <tr><td><code>Init(title.s, w.i, h.i)</code></td><td>Window with title and dimensions, screen-centered.</td></tr>
+      <tr><td><code>Init(title.s, x.i, y.i, w.i, h.i)</code></td><td>Window with title, position, and dimensions.</td></tr>
+      <tr><td><code>Init(title.s, x.i, y.i, w.i, h.i, flags.i)</code></td><td>Full window with PureBasic OpenWindow flags.</td></tr>
+    </table>
+  </div>
+</div>
+<div class='doc-section'>
+  <h2 class='section-title'>Core Methods</h2>
+  <div class='table-wrapper'>
+    <table>
+      <tr><th>Method</th><th>Description</th></tr>
+      <tr><td><code>SetLayout(*rootLayout.UI::Layouts::Container)</code></td><td>Attaches a root layout panel that automatically resizes with window geometry.</td></tr>
+      <tr><td><code>AddGadget(*gadget.UI::Gadget)</code></td><td>Adds a child gadget to the window.</td></tr>
+      <tr><td><code>Show() / Hide() / Close()</code></td><td>Shows, hides, or closes the window.</td></tr>
+      <tr><td><code>GetID() / GetHandle()</code></td><td>Returns PureBasic #Window number or OS handle (HWND/NSWindow).</td></tr>
+      <tr><td><code>OnClose() / OnResize()</code></td><td>Virtual callback methods triggered on window close or resize.</td></tr>
     </table>
   </div>
 </div>
@@ -117,19 +145,5 @@
   <footer class='doc-footer'>
     <p>&copy; 2026 PureBasic OOP Project - MicrodevWeb | Dual License GPL v3 / Fantaisie Software</p>
   </footer>
-  
-  <script>
-    document.getElementById('search-input').addEventListener('input', function(e) {
-      let filter = e.target.value.toLowerCase();
-      document.querySelectorAll('.nav-item').forEach(function(item) {
-        let text = item.innerText.toLowerCase();
-        if (text.includes(filter)) {
-          item.style.display = '';
-        } else {
-          item.style.display = 'none';
-        }
-      });
-    });
-  </script>
 </body>
 </html>

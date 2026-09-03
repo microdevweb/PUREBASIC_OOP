@@ -20,7 +20,7 @@
       </div>
       <div class='lang-switch'>
         <a href='#' class='lang-btn active'>FR</a>
-        <a href='../en/ui/button.html' class='lang-btn'>EN</a>
+        <a href='../../en/ui/button.html' class='lang-btn'>EN</a>
       </div>
     </div>
   </header>
@@ -46,11 +46,17 @@
     </ul>
   </div>
   <div class='nav-section'>
-    <div class='nav-section-title'>Composants UI</div>
+    <div class='nav-section-title'>Socle UI & Hiérarchie</div>
     <ul class='nav-list'>
-      <li class='nav-item'><a href='../ui/application.html'><span>Application</span><span class='badge badge-ui'>UI</span></a></li>
-      <li class='nav-item'><a href='../ui/window.html'><span>Window</span><span class='badge badge-ui'>UI</span></a></li>
-      <li class='nav-item'><a href='../ui/gadget.html'><span>Gadget / Component</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/component.html'><span>Component (Base UI)</span><span class='badge badge-base'>BASE</span></a></li>
+      <li class='nav-item'><a href='../ui/gadget.html'><span>Gadget (Natif)</span><span class='badge badge-base'>BASE</span></a></li>
+      <li class='nav-item'><a href='../ui/customgadget.html'><span>CustomGadget (Canvas)</span><span class='badge badge-base'>BASE</span></a></li>
+      <li class='nav-item'><a href='../ui/container.html'><span>Container (Layout Base)</span><span class='badge badge-wpf'>WPF</span></a></li>
+    </ul>
+  </div>
+  <div class='nav-section'>
+    <div class='nav-section-title'>Composants UI (Contrôles)</div>
+    <ul class='nav-list'>
       <li class='nav-item active'><a href='../ui/button.html'><span>Button</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/checkbox.html'><span>CheckBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/combobox.html'><span>ComboBox</span><span class='badge badge-ui'>UI</span></a></li>
@@ -65,22 +71,24 @@
   <div class='nav-section'>
     <div class='nav-section-title'>Layouts Responsifs (WPF)</div>
     <ul class='nav-list'>
-      <li class='nav-item'><a href='../ui/container.html'><span>Container</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/stackpanel.html'><span>StackPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/dockpanel.html'><span>DockPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/grid.html'><span>Grid</span><span class='badge badge-wpf'>WPF</span></a></li>
+    </ul>
+  </div>
+  <div class='nav-section'>
+    <div class='nav-section-title'>Application & Fenêtres</div>
+    <ul class='nav-list'>
+      <li class='nav-item'><a href='../ui/application.html'><span>Application</span><span class='badge badge-core'>CORE</span></a></li>
+      <li class='nav-item'><a href='../ui/window.html'><span>Window</span><span class='badge badge-core'>CORE</span></a></li>
     </ul>
   </div>
 </nav>
     <main class='doc-content'>
       <div class='breadcrumb'>
         <a href='../index.html'>Accueil</a>
-        
-        <span class='breadcrumb-separator'>/</span>
-        <span>Composants UI</span>
-        <span class='breadcrumb-separator'>/</span>
-        <span style='color: var(--accent-blue);'>Classe Button</span>
-        
+        <span class='breadcrumb-separator'>/</span><span>Composants UI</span>
+        <span class='breadcrumb-separator'>/</span><span style='color: var(--accent-blue);'>Classe Button</span>
       </div>
       
       <div class='page-header'>
@@ -91,7 +99,45 @@
         <p class='page-lead'>Contrôle bouton poussoir cliquable avec multi-constructeurs et gestion d'événements.</p>
       </div>
       
+      <div class='inheritance-box'>
+  <div class='inheritance-header'><span>&#128391;</span> Hiérarchie d'héritage</div>
+  <div class='inheritance-chain'>
+    <a href='../keywords/class.html' class='inheritance-node'>Core::Object</a>
+    <span class='inheritance-arrow'>&rarr;</span>
+    <a href='component.html' class='inheritance-node'>UI::Component</a>
+    <span class='inheritance-arrow'>&rarr;</span>
+    <a href='gadget.html' class='inheritance-node'>UI::Gadget</a>
+    <span class='inheritance-arrow'>&rarr;</span>
+    <span class='inheritance-node current'>UI::Button</span>
+  </div>
+  <div class='inherited-members-summary'>
+    <div class='inherited-members-title'><span>Méthodes héritées de <a href='gadget.html' style='color: var(--accent-blue); text-decoration: underline;'>UI::Gadget</a></span> <span style='font-size: 0.78rem; font-weight: normal; color: var(--text-muted);'>(7 méthodes)</span></div>
+    <div class='inherited-members-tags'>
+      <a href='gadget.html' class='inherited-tag'>GetID()</a>
+      <a href='gadget.html' class='inherited-tag'>GetHandle()</a>
+      <a href='gadget.html' class='inherited-tag'>SetFont(fontID)</a>
+      <a href='gadget.html' class='inherited-tag'>SetColor(type, color)</a>
+      <a href='gadget.html' class='inherited-tag'>FreeGadget()</a>
+      <a href='gadget.html' class='inherited-tag'>SetToolTip(tip)</a>
+      <a href='gadget.html' class='inherited-tag'>SetFocus()</a>
+    </div>
+  </div>
+  <div class='inherited-members-summary'>
+    <div class='inherited-members-title'><span>Méthodes héritées de <a href='component.html' style='color: var(--accent-blue); text-decoration: underline;'>UI::Component</a></span> <span style='font-size: 0.78rem; font-weight: normal; color: var(--text-muted);'>(8 méthodes)</span></div>
+    <div class='inherited-members-tags'>
+      <a href='component.html' class='inherited-tag'>SetPosition(x, y)</a>
+      <a href='component.html' class='inherited-tag'>SetSize(w, h)</a>
+      <a href='component.html' class='inherited-tag'>SetMargin(l, t, r, b)</a>
+      <a href='component.html' class='inherited-tag'>SetHorizontalAlignment(align)</a>
+      <a href='component.html' class='inherited-tag'>SetVerticalAlignment(align)</a>
+      <a href='component.html' class='inherited-tag'>SetVisible(v)</a>
+      <a href='component.html' class='inherited-tag'>SetEnabled(e)</a>
+      <a href='component.html' class='inherited-tag'>Arrange()</a>
+    </div>
+  </div>
+</div>
       
+
 <div class='doc-section'>
   <h2 class='section-title'>Description</h2>
   <p>La classe <code>UI::Button</code> encapsule un bouton poussoir cliquable PureBasic avec gestion directe de l'événement virtuel <code>OnClick()</code> et prise en charge des layouts réactifs.</p>
@@ -101,29 +147,22 @@
   <div class='table-wrapper'>
     <table>
       <tr><th>Constructeur</th><th>Description</th></tr>
-      <tr><td><code>Init(text.s)</code></td><td>Crée un bouton avec texte (taille par défaut 120&times;30 pour les layouts automatiques).</td></tr>
-      <tr><td><code>Init(text.s, w.i, h.i)</code></td><td>Crée un bouton avec texte et dimensions spécifiées.</td></tr>
-      <tr><td><code>Init(x.i, y.i, w.i, h.i, text.s)</code></td><td>Positionnement absolu avec coordonnées, dimensions et texte.</td></tr>
-      <tr><td><code>Init(x.i, y.i, w.i, h.i, text.s, flags.i)</code></td><td>Création complète avec flags PureBasic (ex: <code>#PB_Button_Default</code>, <code>#PB_Button_Toggle</code>).</td></tr>
+      <tr><td><code>Init()</code></td><td>Bouton par défaut sans texte (dimensions gérées par les layouts).</td></tr>
+      <tr><td><code>Init(text.s)</code></td><td>Bouton avec texte, dimensions calculées par les layouts.</td></tr>
+      <tr><td><code>Init(text.s, w.i, h.i)</code></td><td>Bouton avec texte et dimensions souhaitées.</td></tr>
+      <tr><td><code>Init(text.s, x.i, y.i, w.i, h.i)</code></td><td>Bouton avec texte, position absolue et dimensions.</td></tr>
+      <tr><td><code>Init(text.s, x.i, y.i, w.i, h.i, flags.i)</code></td><td>Bouton complet avec flags PureBasic ButtonGadget.</td></tr>
     </table>
   </div>
 </div>
 <div class='doc-section'>
-  <h2 class='section-title'>Exemple d'utilisation</h2>
-  <div class='code-container'>
-    <div class='code-header'><span class='code-title'>Bouton standard & personnalisé (.pbo)</span><span class='code-badge'>PBO</span></div>
-    <pre><code><span class='kw'>Using</span> <span class='tp'>UI</span>
-
-<span class='cm'>; 1. Création simple pour un layout</span>
-<span class='kw'>Define</span> *btnValider.<span class='tp'>Button</span> = <span class='kw'>New</span> <span class='tp'>Button</span>(<span class='str'>"Valider"</span>)
-*stackPanel\<span class='fn'>AddChild</span>(*btnValider)
-
-<span class='cm'>; 2. Bouton personnalisé avec logique de clic</span>
-<span class='kw'>Class</span> MonBouton <span class='kw'>Extends</span> <span class='tp'>Button</span> {
-  <span class='kw'>Public</span> <span class='kw'>Method</span> <span class='fn'>OnClick</span>() {
-    <span class='fn'>MessageRequester</span>(<span class='str'>"Info"</span>, <span class='str'>"Clic sur "</span> + <span class='kw'>This</span>\<span class='fn'>GetText</span>())
-  }
-}</code></pre>
+  <h2 class='section-title'>Méthodes Spécifiques</h2>
+  <div class='table-wrapper'>
+    <table>
+      <tr><th>Méthode</th><th>Description</th></tr>
+      <tr><td><code>GetText() / SetText(txt.s)</code></td><td>Obtient ou modifie le texte du bouton.</td></tr>
+      <tr><td><code>OnClick()</code></td><td>Méthode virtuelle appelée lors du clic utilisateur.</td></tr>
+    </table>
   </div>
 </div>
 
@@ -133,19 +172,5 @@
   <footer class='doc-footer'>
     <p>&copy; 2026 PureBasic OOP Project - MicrodevWeb | Dual License GPL v3 / Fantaisie Software</p>
   </footer>
-  
-  <script>
-    document.getElementById('search-input').addEventListener('input', function(e) {
-      let filter = e.target.value.toLowerCase();
-      document.querySelectorAll('.nav-item').forEach(function(item) {
-        let text = item.innerText.toLowerCase();
-        if (text.includes(filter)) {
-          item.style.display = '';
-        } else {
-          item.style.display = 'none';
-        }
-      });
-    });
-  </script>
 </body>
 </html>

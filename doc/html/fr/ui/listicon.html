@@ -20,7 +20,7 @@
       </div>
       <div class='lang-switch'>
         <a href='#' class='lang-btn active'>FR</a>
-        <a href='../en/ui/listicon.html' class='lang-btn'>EN</a>
+        <a href='../../en/ui/listicon.html' class='lang-btn'>EN</a>
       </div>
     </div>
   </header>
@@ -46,11 +46,17 @@
     </ul>
   </div>
   <div class='nav-section'>
-    <div class='nav-section-title'>Composants UI</div>
+    <div class='nav-section-title'>Socle UI & Hiérarchie</div>
     <ul class='nav-list'>
-      <li class='nav-item'><a href='../ui/application.html'><span>Application</span><span class='badge badge-ui'>UI</span></a></li>
-      <li class='nav-item'><a href='../ui/window.html'><span>Window</span><span class='badge badge-ui'>UI</span></a></li>
-      <li class='nav-item'><a href='../ui/gadget.html'><span>Gadget / Component</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/component.html'><span>Component (Base UI)</span><span class='badge badge-base'>BASE</span></a></li>
+      <li class='nav-item'><a href='../ui/gadget.html'><span>Gadget (Natif)</span><span class='badge badge-base'>BASE</span></a></li>
+      <li class='nav-item'><a href='../ui/customgadget.html'><span>CustomGadget (Canvas)</span><span class='badge badge-base'>BASE</span></a></li>
+      <li class='nav-item'><a href='../ui/container.html'><span>Container (Layout Base)</span><span class='badge badge-wpf'>WPF</span></a></li>
+    </ul>
+  </div>
+  <div class='nav-section'>
+    <div class='nav-section-title'>Composants UI (Contrôles)</div>
+    <ul class='nav-list'>
       <li class='nav-item'><a href='../ui/button.html'><span>Button</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/checkbox.html'><span>CheckBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/combobox.html'><span>ComboBox</span><span class='badge badge-ui'>UI</span></a></li>
@@ -65,22 +71,24 @@
   <div class='nav-section'>
     <div class='nav-section-title'>Layouts Responsifs (WPF)</div>
     <ul class='nav-list'>
-      <li class='nav-item'><a href='../ui/container.html'><span>Container</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/stackpanel.html'><span>StackPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/dockpanel.html'><span>DockPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/grid.html'><span>Grid</span><span class='badge badge-wpf'>WPF</span></a></li>
+    </ul>
+  </div>
+  <div class='nav-section'>
+    <div class='nav-section-title'>Application & Fenêtres</div>
+    <ul class='nav-list'>
+      <li class='nav-item'><a href='../ui/application.html'><span>Application</span><span class='badge badge-core'>CORE</span></a></li>
+      <li class='nav-item'><a href='../ui/window.html'><span>Window</span><span class='badge badge-core'>CORE</span></a></li>
     </ul>
   </div>
 </nav>
     <main class='doc-content'>
       <div class='breadcrumb'>
         <a href='../index.html'>Accueil</a>
-        
-        <span class='breadcrumb-separator'>/</span>
-        <span>Composants UI</span>
-        <span class='breadcrumb-separator'>/</span>
-        <span style='color: var(--accent-blue);'>Classe ListIcon</span>
-        
+        <span class='breadcrumb-separator'>/</span><span>Composants UI</span>
+        <span class='breadcrumb-separator'>/</span><span style='color: var(--accent-blue);'>Classe ListIcon</span>
       </div>
       
       <div class='page-header'>
@@ -88,39 +96,75 @@
           <h1 class='page-title'>Classe ListIcon</h1>
           <span class='badge badge-ui'>UI Class</span>
         </div>
-        <p class='page-lead'>Table et grille de données multi-colonnes avec multi-constructeurs.</p>
+        <p class='page-lead'>Tableau de données multicolonne avec multi-constructeurs et gestion d'événements.</p>
       </div>
       
+      <div class='inheritance-box'>
+  <div class='inheritance-header'><span>&#128391;</span> Hiérarchie d'héritage</div>
+  <div class='inheritance-chain'>
+    <a href='../keywords/class.html' class='inheritance-node'>Core::Object</a>
+    <span class='inheritance-arrow'>&rarr;</span>
+    <a href='component.html' class='inheritance-node'>UI::Component</a>
+    <span class='inheritance-arrow'>&rarr;</span>
+    <a href='gadget.html' class='inheritance-node'>UI::Gadget</a>
+    <span class='inheritance-arrow'>&rarr;</span>
+    <span class='inheritance-node current'>UI::ListIcon</span>
+  </div>
+  <div class='inherited-members-summary'>
+    <div class='inherited-members-title'><span>Méthodes héritées de <a href='gadget.html' style='color: var(--accent-blue); text-decoration: underline;'>UI::Gadget</a></span> <span style='font-size: 0.78rem; font-weight: normal; color: var(--text-muted);'>(7 méthodes)</span></div>
+    <div class='inherited-members-tags'>
+      <a href='gadget.html' class='inherited-tag'>GetID()</a>
+      <a href='gadget.html' class='inherited-tag'>GetHandle()</a>
+      <a href='gadget.html' class='inherited-tag'>SetFont()</a>
+      <a href='gadget.html' class='inherited-tag'>SetColor()</a>
+      <a href='gadget.html' class='inherited-tag'>FreeGadget()</a>
+      <a href='gadget.html' class='inherited-tag'>SetToolTip()</a>
+      <a href='gadget.html' class='inherited-tag'>SetFocus()</a>
+    </div>
+  </div>
+  <div class='inherited-members-summary'>
+    <div class='inherited-members-title'><span>Méthodes héritées de <a href='component.html' style='color: var(--accent-blue); text-decoration: underline;'>UI::Component</a></span> <span style='font-size: 0.78rem; font-weight: normal; color: var(--text-muted);'>(8 méthodes)</span></div>
+    <div class='inherited-members-tags'>
+      <a href='component.html' class='inherited-tag'>SetPosition()</a>
+      <a href='component.html' class='inherited-tag'>SetSize()</a>
+      <a href='component.html' class='inherited-tag'>SetMargin()</a>
+      <a href='component.html' class='inherited-tag'>SetHorizontalAlignment()</a>
+      <a href='component.html' class='inherited-tag'>SetVerticalAlignment()</a>
+      <a href='component.html' class='inherited-tag'>SetVisible()</a>
+      <a href='component.html' class='inherited-tag'>SetEnabled()</a>
+      <a href='component.html' class='inherited-tag'>Arrange()</a>
+    </div>
+  </div>
+</div>
       
+
 <div class='doc-section'>
   <h2 class='section-title'>Description</h2>
-  <p>La classe <code>UI::ListIcon</code> encapsule une table / grille de données multi-colonnes (<code>ListIconGadget</code>) avec sélection de ligne et gestion d'événements.</p>
+  <p>La classe <code>UI::ListIcon</code> encapsule un tableau multicolonne <code>ListIconGadget</code> pour la présentation de données structurées avec gestion du double-clic et de sélection.</p>
 </div>
 <div class='doc-section'>
   <h2 class='section-title'>Constructeurs Surchargés</h2>
   <div class='table-wrapper'>
     <table>
       <tr><th>Constructeur</th><th>Description</th></tr>
-      <tr><td><code>Init(title.s, colWidth.i)</code></td><td>Crée la table avec sa première colonne (pleine ligne sélectionnable par défaut).</td></tr>
-      <tr><td><code>Init(title.s, colWidth.i, flags.i)</code></td><td>Création avec flags personnalisés (<code>#PB_ListIcon_GridLines</code>, <code>#PB_ListIcon_CheckBoxes</code>, etc.).</td></tr>
-      <tr><td><code>Init(x.i, y.i, w.i, h.i, title.s, colWidth.i)</code></td><td>Positionnement absolu et dimensions.</td></tr>
-      <tr><td><code>Init(x.i, y.i, w.i, h.i, title.s, colWidth.i, flags.i)</code></td><td>Complet avec position, dimensions, titre de colonne et flags.</td></tr>
+      <tr><td><code>Init()</code></td><td>Tableau par défaut (positionné par les layouts).</td></tr>
+      <tr><td><code>Init(firstColTitle.s, firstColWidth.i)</code></td><td>Tableau avec première colonne initialisée.</td></tr>
+      <tr><td><code>Init(firstColTitle.s, firstColWidth.i, w.i, h.i)</code></td><td>Tableau avec première colonne et dimensions souhaitées.</td></tr>
+      <tr><td><code>Init(x.i, y.i, w.i, h.i, firstColTitle.s, firstColWidth.i, flags.i)</code></td><td>Tableau complet avec coordonnées absolues et flags PureBasic.</td></tr>
     </table>
   </div>
 </div>
 <div class='doc-section'>
-  <h2 class='section-title'>M&eacute;thodes Principales</h2>
+  <h2 class='section-title'>Méthodes Spécifiques</h2>
   <div class='table-wrapper'>
     <table>
       <tr><th>Méthode</th><th>Description</th></tr>
-      <tr><td><code>AddColumn(colIdx.i, title.s, width.i)</code></td><td>Ajoute une nouvelle colonne à la table.</td></tr>
-      <tr><td><code>AddItem(text.s, icon.i = 0, itemIdx.i = -1)</code></td><td>Insère une nouvelle ligne (champs séparés par <code>Chr(10)</code>).</td></tr>
-      <tr><td><code>GetSelectedIndex()</code> / <code>SetSelectedIndex(idx.i)</code></td><td>Index de la ligne active (-1 si aucune).</td></tr>
-      <tr><td><code>GetItemText(itemIdx.i, colIdx.i = 0)</code></td><td>Récupère le texte d'une cellule spécifique.</td></tr>
-      <tr><td><code>SetItemText(itemIdx.i, colIdx.i, text.s)</code></td><td>Modifie le texte d'une cellule spécifique.</td></tr>
-      <tr><td><code>GetItemCount()</code></td><td>Nombre total de lignes dans la table.</td></tr>
-      <tr><td><code>Clear()</code></td><td>Supprime toutes les lignes.</td></tr>
-      <tr><td><code>RemoveItem(idx.i)</code></td><td>Supprime une ligne spécifique.</td></tr>
+      <tr><td><code>AddColumn(colIndex.i, title.s, width.i)</code></td><td>Ajoute une colonne au tableau.</td></tr>
+      <tr><td><code>AddItem(index.i, text.s)</code></td><td>Insère une ligne de données (séparée par Chr(10)).</td></tr>
+      <tr><td><code>GetSelectedIndex() / SetSelectedIndex(idx.i)</code></td><td>Obtient ou définit la ligne sélectionnée.</td></tr>
+      <tr><td><code>GetItemText(index.i, col.i)</code></td><td>Retourne le texte d'une cellule spécifique.</td></tr>
+      <tr><td><code>Clear()</code></td><td>Efface toutes les lignes du tableau.</td></tr>
+      <tr><td><code>OnSelect() / OnDoubleClick()</code></td><td>Méthodes virtuelles appelées lors du clic ou double-clic sur une ligne.</td></tr>
     </table>
   </div>
 </div>
@@ -131,19 +175,5 @@
   <footer class='doc-footer'>
     <p>&copy; 2026 PureBasic OOP Project - MicrodevWeb | Dual License GPL v3 / Fantaisie Software</p>
   </footer>
-  
-  <script>
-    document.getElementById('search-input').addEventListener('input', function(e) {
-      let filter = e.target.value.toLowerCase();
-      document.querySelectorAll('.nav-item').forEach(function(item) {
-        let text = item.innerText.toLowerCase();
-        if (text.includes(filter)) {
-          item.style.display = '';
-        } else {
-          item.style.display = 'none';
-        }
-      });
-    });
-  </script>
 </body>
 </html>

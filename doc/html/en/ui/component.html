@@ -3,7 +3,7 @@
 <head>
   <meta charset='UTF-8'>
   <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-  <title>Public, Protected & Private Keywords - PureBasic OOP Documentation</title>
+  <title>Component Class - PureBasic OOP Documentation</title>
   <link rel='stylesheet' href='../../css/doc_theme.css'>
 </head>
 <body>
@@ -19,7 +19,7 @@
         <input type='text' class='search-input' id='search-input' placeholder='Search docs...'>
       </div>
       <div class='lang-switch'>
-        <a href='../../fr/keywords/encapsulation.html' class='lang-btn'>FR</a>
+        <a href='../../fr/ui/component.html' class='lang-btn'>FR</a>
         <a href='#' class='lang-btn active'>EN</a>
       </div>
     </div>
@@ -40,7 +40,7 @@
       <li class='nav-item'><a href='../keywords/method.html'><span>Method / Override</span><span class='badge badge-kw'>KW</span></a></li>
       <li class='nav-item'><a href='../keywords/properties.html'><span>Getter / Setter / Prop</span><span class='badge badge-kw'>KW</span></a></li>
       <li class='nav-item'><a href='../keywords/inheritance.html'><span>Extends / Super</span><span class='badge badge-kw'>KW</span></a></li>
-      <li class='nav-item active'><a href='../keywords/encapsulation.html'><span>Public / Protected / Private</span><span class='badge badge-kw'>KW</span></a></li>
+      <li class='nav-item'><a href='../keywords/encapsulation.html'><span>Public / Protected / Private</span><span class='badge badge-kw'>KW</span></a></li>
       <li class='nav-item'><a href='../keywords/lifecycle.html'><span>New / Free / Init</span><span class='badge badge-kw'>KW</span></a></li>
       <li class='nav-item'><a href='../keywords/operators.html'><span>This / Cast / TypeOf</span><span class='badge badge-kw'>KW</span></a></li>
     </ul>
@@ -48,7 +48,7 @@
   <div class='nav-section'>
     <div class='nav-section-title'>UI Foundation & Hierarchy</div>
     <ul class='nav-list'>
-      <li class='nav-item'><a href='../ui/component.html'><span>Component (Base UI)</span><span class='badge badge-base'>BASE</span></a></li>
+      <li class='nav-item active'><a href='../ui/component.html'><span>Component (Base UI)</span><span class='badge badge-base'>BASE</span></a></li>
       <li class='nav-item'><a href='../ui/gadget.html'><span>Gadget (Native Base)</span><span class='badge badge-base'>BASE</span></a></li>
       <li class='nav-item'><a href='../ui/customgadget.html'><span>CustomGadget (Canvas Base)</span><span class='badge badge-base'>BASE</span></a></li>
       <li class='nav-item'><a href='../ui/container.html'><span>Container (Layout Base)</span><span class='badge badge-wpf'>WPF</span></a></li>
@@ -87,28 +87,75 @@
     <main class='doc-content'>
       <div class='breadcrumb'>
         <a href='../index.html'>Home</a>
-        <span class='breadcrumb-separator'>/</span><span>OOP Keywords</span>
-        <span class='breadcrumb-separator'>/</span><span style='color: var(--accent-blue);'>Public, Protected & Private Keywords</span>
+        <span class='breadcrumb-separator'>/</span><span>UI Components</span>
+        <span class='breadcrumb-separator'>/</span><span style='color: var(--accent-blue);'>Component Class</span>
       </div>
       
       <div class='page-header'>
         <div class='title-row'>
-          <h1 class='page-title'>Public, Protected & Private Keywords</h1>
-          <span class='badge badge-kw'>KW</span>
+          <h1 class='page-title'>Component Class</h1>
+          <span class='badge badge-ui'>Base UI</span>
         </div>
-        <p class='page-lead'>Member access control and visibility rules.</p>
+        <p class='page-lead'>Abstract root class for all UI elements, gadgets, and responsive layout panels.</p>
       </div>
       
-      
+      <div class='inheritance-box'>
+  <div class='inheritance-header'><span>&#128391;</span> Inheritance Hierarchy</div>
+  <div class='inheritance-chain'>
+    <a href='../keywords/class.html' class='inheritance-node'>Core::Object</a>
+    <span class='inheritance-arrow'>&rarr;</span>
+    <span class='inheritance-node current'>UI::Component</span>
+  </div>
+  <div class='derived-classes-box'>
+    <div class='derived-classes-title'>Derived Classes (inheriting from this class) :</div>
+    <div class='derived-classes-list'>
+      <a href='gadget.html' class='derived-badge'>UI::Gadget</a>
+      <a href='container.html' class='derived-badge'>UI::Layouts::Container</a>
+    </div>
+  </div>
+</div>
       
 
 <div class='doc-section'>
-  <h2 class='section-title'>Visibility Levels</h2>
-  <ul>
-    <li><code>Public</code> : Accessible everywhere and by all derived classes.</li>
-    <li><code>Protected</code> : Accessible only within the class and inheriting subclasses.</li>
-    <li><code>Private</code> : Strictly accessible within the declaring class.</li>
-  </ul>
+  <h2 class='section-title'>Description</h2>
+  <p>The abstract <code>UI::Component</code> class (located in <code>src/ui/Component.pbo</code>) provides the foundational WPF-style box model for all graphical elements in PureBasic OOP: computed bounds, responsive margins, horizontal/vertical alignments, desired dimensions, and automated 2-pass layout arrangement (<code>Arrange</code>).</p>
+</div>
+
+<div class='doc-section'>
+  <h2 class='section-title'>Alignment Constants</h2>
+  <div class='table-wrapper'>
+    <table>
+      <tr><th>Constant</th><th>Value</th><th>Meaning</th></tr>
+      <tr><td><code>#UI_Align_Left</code></td><td>0</td><td>Align to left edge</td></tr>
+      <tr><td><code>#UI_Align_Center</code></td><td>1</td><td>Center horizontally</td></tr>
+      <tr><td><code>#UI_Align_Right</code></td><td>2</td><td>Align to right edge</td></tr>
+      <tr><td><code>#UI_Align_Stretch</code></td><td>3</td><td>Stretch across available width (default)</td></tr>
+      <tr><td><code>#UI_Align_Top</code></td><td>0</td><td>Align to top edge</td></tr>
+      <tr><td><code>#UI_Align_Middle</code></td><td>1</td><td>Center vertically</td></tr>
+      <tr><td><code>#UI_Align_Bottom</code></td><td>2</td><td>Align to bottom edge</td></tr>
+      <tr><td><code>#UI_Align_VStretch</code></td><td>3</td><td>Stretch across available height (default)</td></tr>
+    </table>
+  </div>
+</div>
+
+<div class='doc-section'>
+  <h2 class='section-title'>Component Core Methods</h2>
+  <div class='table-wrapper'>
+    <table>
+      <tr><th>Method</th><th>Description</th></tr>
+      <tr><td><code>SetPosition(x.i, y.i)</code></td><td>Sets manual X, Y coordinates.</td></tr>
+      <tr><td><code>SetSize(w.i, h.i)</code></td><td>Sets manual width and height.</td></tr>
+      <tr><td><code>SetMargin(l.i, t.i, r.i, b.i)</code></td><td>Sets outer margin on all 4 edges (Left, Top, Right, Bottom).</td></tr>
+      <tr><td><code>SetMarginAll(m.i)</code></td><td>Sets uniform outer margin on all 4 edges.</td></tr>
+      <tr><td><code>SetHorizontalAlignment(align.i)</code></td><td>Sets horizontal alignment policy (<code>#UI_Align_Left</code>, <code>#UI_Align_Center</code>, etc.).</td></tr>
+      <tr><td><code>SetVerticalAlignment(align.i)</code></td><td>Sets vertical alignment policy (<code>#UI_Align_Top</code>, <code>#UI_Align_Middle</code>, etc.).</td></tr>
+      <tr><td><code>SetDesiredSize(w.i, h.i)</code></td><td>Sets preferred size requested from layout panels.</td></tr>
+      <tr><td><code>GetDesiredWidth() / GetDesiredHeight()</code></td><td>Returns computed desired bounds including margins.</td></tr>
+      <tr><td><code>SetVisible(v.b) / IsVisible()</code></td><td>Gets or sets element visibility state.</td></tr>
+      <tr><td><code>SetEnabled(e.b) / IsEnabled()</code></td><td>Gets or sets interactive state.</td></tr>
+      <tr><td><code>Arrange(targetX.i, targetY.i, targetW.i, targetH.i)</code></td><td>Executes responsive layout calculation and aligns the element.</td></tr>
+    </table>
+  </div>
 </div>
 
     </main>

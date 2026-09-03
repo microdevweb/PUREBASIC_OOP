@@ -3,7 +3,7 @@
 <head>
   <meta charset='UTF-8'>
   <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-  <title>Classe Gadget & Component - PureBasic OOP Documentation</title>
+  <title>Classe Gadget - PureBasic OOP Documentation</title>
   <link rel='stylesheet' href='../../css/doc_theme.css'>
 </head>
 <body>
@@ -20,7 +20,7 @@
       </div>
       <div class='lang-switch'>
         <a href='#' class='lang-btn active'>FR</a>
-        <a href='../en/ui/gadget.html' class='lang-btn'>EN</a>
+        <a href='../../en/ui/gadget.html' class='lang-btn'>EN</a>
       </div>
     </div>
   </header>
@@ -46,11 +46,17 @@
     </ul>
   </div>
   <div class='nav-section'>
-    <div class='nav-section-title'>Composants UI</div>
+    <div class='nav-section-title'>Socle UI & Hiérarchie</div>
     <ul class='nav-list'>
-      <li class='nav-item'><a href='../ui/application.html'><span>Application</span><span class='badge badge-ui'>UI</span></a></li>
-      <li class='nav-item'><a href='../ui/window.html'><span>Window</span><span class='badge badge-ui'>UI</span></a></li>
-      <li class='nav-item active'><a href='../ui/gadget.html'><span>Gadget / Component</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/component.html'><span>Component (Base UI)</span><span class='badge badge-base'>BASE</span></a></li>
+      <li class='nav-item active'><a href='../ui/gadget.html'><span>Gadget (Natif)</span><span class='badge badge-base'>BASE</span></a></li>
+      <li class='nav-item'><a href='../ui/customgadget.html'><span>CustomGadget (Canvas)</span><span class='badge badge-base'>BASE</span></a></li>
+      <li class='nav-item'><a href='../ui/container.html'><span>Container (Layout Base)</span><span class='badge badge-wpf'>WPF</span></a></li>
+    </ul>
+  </div>
+  <div class='nav-section'>
+    <div class='nav-section-title'>Composants UI (Contrôles)</div>
+    <ul class='nav-list'>
       <li class='nav-item'><a href='../ui/button.html'><span>Button</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/checkbox.html'><span>CheckBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/combobox.html'><span>ComboBox</span><span class='badge badge-ui'>UI</span></a></li>
@@ -65,50 +71,95 @@
   <div class='nav-section'>
     <div class='nav-section-title'>Layouts Responsifs (WPF)</div>
     <ul class='nav-list'>
-      <li class='nav-item'><a href='../ui/container.html'><span>Container</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/stackpanel.html'><span>StackPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/dockpanel.html'><span>DockPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/grid.html'><span>Grid</span><span class='badge badge-wpf'>WPF</span></a></li>
+    </ul>
+  </div>
+  <div class='nav-section'>
+    <div class='nav-section-title'>Application & Fenêtres</div>
+    <ul class='nav-list'>
+      <li class='nav-item'><a href='../ui/application.html'><span>Application</span><span class='badge badge-core'>CORE</span></a></li>
+      <li class='nav-item'><a href='../ui/window.html'><span>Window</span><span class='badge badge-core'>CORE</span></a></li>
     </ul>
   </div>
 </nav>
     <main class='doc-content'>
       <div class='breadcrumb'>
         <a href='../index.html'>Accueil</a>
-        
-        <span class='breadcrumb-separator'>/</span>
-        <span>Composants UI</span>
-        <span class='breadcrumb-separator'>/</span>
-        <span style='color: var(--accent-blue);'>Classe Gadget & Component</span>
-        
+        <span class='breadcrumb-separator'>/</span><span>Composants UI</span>
+        <span class='breadcrumb-separator'>/</span><span style='color: var(--accent-blue);'>Classe Gadget</span>
       </div>
       
       <div class='page-header'>
         <div class='title-row'>
-          <h1 class='page-title'>Classe Gadget & Component</h1>
-          <span class='badge badge-ui'>UI Class</span>
+          <h1 class='page-title'>Classe Gadget</h1>
+          <span class='badge badge-ui'>Base UI</span>
         </div>
-        <p class='page-lead'>Classe de base abstraite pour tous les contrôles UI et layouts.</p>
+        <p class='page-lead'>Classe de base abstraite pour tous les contrôles natifs PureBasic.</p>
       </div>
       
+      <div class='inheritance-box'>
+  <div class='inheritance-header'><span>&#128391;</span> Hiérarchie d'héritage</div>
+  <div class='inheritance-chain'>
+    <a href='../keywords/class.html' class='inheritance-node'>Core::Object</a>
+    <span class='inheritance-arrow'>&rarr;</span>
+    <a href='component.html' class='inheritance-node'>UI::Component</a>
+    <span class='inheritance-arrow'>&rarr;</span>
+    <span class='inheritance-node current'>UI::Gadget</span>
+  </div>
+  <div class='derived-classes-box'>
+    <div class='derived-classes-title'>Classes dérivées (héritant de cette classe) :</div>
+    <div class='derived-classes-list'>
+      <a href='button.html' class='derived-badge'>UI::Button</a>
+      <a href='checkbox.html' class='derived-badge'>UI::CheckBox</a>
+      <a href='combobox.html' class='derived-badge'>UI::ComboBox</a>
+      <a href='label.html' class='derived-badge'>UI::Label</a>
+      <a href='listicon.html' class='derived-badge'>UI::ListIcon</a>
+      <a href='progressbar.html' class='derived-badge'>UI::ProgressBar</a>
+      <a href='slider.html' class='derived-badge'>UI::Slider</a>
+      <a href='textbox.html' class='derived-badge'>UI::TextBox</a>
+      <a href='customgadget.html' class='derived-badge'>UI::CustomGadget</a>
+    </div>
+  </div>
+  <div class='inherited-members-summary'>
+    <div class='inherited-members-title'><span>Méthodes héritées de <a href='component.html' style='color: var(--accent-blue); text-decoration: underline;'>UI::Component</a></span> <span style='font-size: 0.78rem; font-weight: normal; color: var(--text-muted);'>(13 méthodes)</span></div>
+    <div class='inherited-members-tags'>
+      <a href='component.html' class='inherited-tag'>SetPosition(x, y)</a>
+      <a href='component.html' class='inherited-tag'>SetSize(w, h)</a>
+      <a href='component.html' class='inherited-tag'>SetMargin(l, t, r, b)</a>
+      <a href='component.html' class='inherited-tag'>SetMarginAll(m)</a>
+      <a href='component.html' class='inherited-tag'>SetHorizontalAlignment(align)</a>
+      <a href='component.html' class='inherited-tag'>SetVerticalAlignment(align)</a>
+      <a href='component.html' class='inherited-tag'>SetVisible(v)</a>
+      <a href='component.html' class='inherited-tag'>IsVisible()</a>
+      <a href='component.html' class='inherited-tag'>SetEnabled(e)</a>
+      <a href='component.html' class='inherited-tag'>IsEnabled()</a>
+      <a href='component.html' class='inherited-tag'>Arrange(rx, ry, rw, rh)</a>
+      <a href='component.html' class='inherited-tag'>GetDesiredWidth()</a>
+      <a href='component.html' class='inherited-tag'>GetDesiredHeight()</a>
+    </div>
+  </div>
+</div>
       
+
 <div class='doc-section'>
   <h2 class='section-title'>Description</h2>
-  <p>La classe abstraite <code>UI::Component</code> et sa spécialisation <code>UI::Gadget</code> constituent le socle de tous les contrôles graphiques et panneaux de mise en page responsive.</p>
-  <p>Elles fournissent la gestion automatique des coordonnées (<code>x</code>, <code>y</code>, <code>width</code>, <code>height</code>), des dimensions minimales / maximales, des marges (<code>Margin</code>), des alignements (<code>HorizontalAlignment</code>, <code>VerticalAlignment</code>), de la visibilité, de l'état activé/désactivé, et du routage unifié des événements.</p>
+  <p>La classe abstraite <code>UI::Gadget</code> (dans <code>src/ui/Gadget.pbo</code>) hérite de <code>UI::Component</code> et encapsule un contrôle graphique natif du système d'exploitation. Elle fait le pont entre le cycle de vie PureBasic (<code>#PB_Any</code>, <code>GadgetID()</code>) et la programmation objet événementielle.</p>
 </div>
+
 <div class='doc-section'>
-  <h2 class='section-title'>M&eacute;thodes Principales</h2>
+  <h2 class='section-title'>Méthodes Principales de Gadget</h2>
   <div class='table-wrapper'>
     <table>
       <tr><th>Méthode</th><th>Description</th></tr>
-      <tr><td><code>SetMargin(l.i, t.i, r.i, b.i)</code> / <code>SetMarginAll(m.i)</code></td><td>Définit les marges externes autour du contrôle.</td></tr>
-      <tr><td><code>SetHorizontalAlignment(align.i)</code></td><td>Alignement horizontal (<code>#UI_Align_Left</code>, <code>#UI_Align_Center</code>, <code>#UI_Align_Right</code>, <code>#UI_Align_Stretch</code>).</td></tr>
-      <tr><td><code>SetVerticalAlignment(align.i)</code></td><td>Alignement vertical (<code>#UI_Align_Top</code>, <code>#UI_Align_Middle</code>, <code>#UI_Align_Bottom</code>, <code>#UI_Align_VStretch</code>).</td></tr>
-      <tr><td><code>SetVisible(v.b)</code> / <code>IsVisible()</code></td><td>Contrôle la visibilité du composant.</td></tr>
-      <tr><td><code>SetEnabled(e.b)</code> / <code>IsEnabled()</code></td><td>Active ou désactive l'interaction utilisateur.</td></tr>
-      <tr><td><code>SetToolTip(tip.s)</code></td><td>Définit l'infobulle d'aide au survol.</td></tr>
-      <tr><td><code>SetFocus()</code></td><td>Donne le focus clavier au gadget.</td></tr>
+      <tr><td><code>GetID()</code></td><td>Retourne le numéro de gadget PureBasic (#Gadget).</td></tr>
+      <tr><td><code>GetHandle()</code></td><td>Retourne le handle OS natif (<code>GadgetID(#Gadget)</code> sous Windows/Linux/Mac).</td></tr>
+      <tr><td><code>SetFont(fontID.i)</code></td><td>Applique une police PureBasic au gadget.</td></tr>
+      <tr><td><code>SetColor(colorType.i, color.i)</code></td><td>Définit la couleur de fond ou de texte du gadget.</td></tr>
+      <tr><td><code>SetToolTip(tip.s)</code></td><td>Définit le texte d'aide au survol.</td></tr>
+      <tr><td><code>SetFocus()</code></td><td>Donne le focus clavier actif au gadget.</td></tr>
+      <tr><td><code>FreeGadget()</code></td><td>Libère le contrôle natif et supprime son association OOP.</td></tr>
     </table>
   </div>
 </div>
@@ -119,19 +170,5 @@
   <footer class='doc-footer'>
     <p>&copy; 2026 PureBasic OOP Project - MicrodevWeb | Dual License GPL v3 / Fantaisie Software</p>
   </footer>
-  
-  <script>
-    document.getElementById('search-input').addEventListener('input', function(e) {
-      let filter = e.target.value.toLowerCase();
-      document.querySelectorAll('.nav-item').forEach(function(item) {
-        let text = item.innerText.toLowerCase();
-        if (text.includes(filter)) {
-          item.style.display = '';
-        } else {
-          item.style.display = 'none';
-        }
-      });
-    });
-  </script>
 </body>
 </html>

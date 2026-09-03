@@ -20,7 +20,7 @@
       </div>
       <div class='lang-switch'>
         <a href='#' class='lang-btn active'>FR</a>
-        <a href='../en/ui/dockpanel.html' class='lang-btn'>EN</a>
+        <a href='../../en/ui/dockpanel.html' class='lang-btn'>EN</a>
       </div>
     </div>
   </header>
@@ -46,11 +46,17 @@
     </ul>
   </div>
   <div class='nav-section'>
-    <div class='nav-section-title'>Composants UI</div>
+    <div class='nav-section-title'>Socle UI & Hiérarchie</div>
     <ul class='nav-list'>
-      <li class='nav-item'><a href='../ui/application.html'><span>Application</span><span class='badge badge-ui'>UI</span></a></li>
-      <li class='nav-item'><a href='../ui/window.html'><span>Window</span><span class='badge badge-ui'>UI</span></a></li>
-      <li class='nav-item'><a href='../ui/gadget.html'><span>Gadget / Component</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/component.html'><span>Component (Base UI)</span><span class='badge badge-base'>BASE</span></a></li>
+      <li class='nav-item'><a href='../ui/gadget.html'><span>Gadget (Natif)</span><span class='badge badge-base'>BASE</span></a></li>
+      <li class='nav-item'><a href='../ui/customgadget.html'><span>CustomGadget (Canvas)</span><span class='badge badge-base'>BASE</span></a></li>
+      <li class='nav-item'><a href='../ui/container.html'><span>Container (Layout Base)</span><span class='badge badge-wpf'>WPF</span></a></li>
+    </ul>
+  </div>
+  <div class='nav-section'>
+    <div class='nav-section-title'>Composants UI (Contrôles)</div>
+    <ul class='nav-list'>
       <li class='nav-item'><a href='../ui/button.html'><span>Button</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/checkbox.html'><span>CheckBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/combobox.html'><span>ComboBox</span><span class='badge badge-ui'>UI</span></a></li>
@@ -65,36 +71,76 @@
   <div class='nav-section'>
     <div class='nav-section-title'>Layouts Responsifs (WPF)</div>
     <ul class='nav-list'>
-      <li class='nav-item'><a href='../ui/container.html'><span>Container</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/stackpanel.html'><span>StackPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item active'><a href='../ui/dockpanel.html'><span>DockPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/grid.html'><span>Grid</span><span class='badge badge-wpf'>WPF</span></a></li>
+    </ul>
+  </div>
+  <div class='nav-section'>
+    <div class='nav-section-title'>Application & Fenêtres</div>
+    <ul class='nav-list'>
+      <li class='nav-item'><a href='../ui/application.html'><span>Application</span><span class='badge badge-core'>CORE</span></a></li>
+      <li class='nav-item'><a href='../ui/window.html'><span>Window</span><span class='badge badge-core'>CORE</span></a></li>
     </ul>
   </div>
 </nav>
     <main class='doc-content'>
       <div class='breadcrumb'>
         <a href='../index.html'>Accueil</a>
-        
-        <span class='breadcrumb-separator'>/</span>
-        <span>Composants UI</span>
-        <span class='breadcrumb-separator'>/</span>
-        <span style='color: var(--accent-blue);'>Classe DockPanel</span>
-        
+        <span class='breadcrumb-separator'>/</span><span>Composants UI</span>
+        <span class='breadcrumb-separator'>/</span><span style='color: var(--accent-blue);'>Classe DockPanel</span>
       </div>
       
       <div class='page-header'>
         <div class='title-row'>
           <h1 class='page-title'>Classe DockPanel</h1>
-          <span class='badge badge-ui'>Layout</span>
+          <span class='badge badge-wpf'>WPF Layout</span>
         </div>
-        <p class='page-lead'>Disposition par ancrage sur les bords et remplissage central.</p>
+        <p class='page-lead'>Panneau d'amarrage sur les 4 bords avec remplissage central automatique.</p>
       </div>
       
+      <div class='inheritance-box'>
+  <div class='inheritance-header'><span>&#128391;</span> Hiérarchie d'héritage</div>
+  <div class='inheritance-chain'>
+    <a href='../keywords/class.html' class='inheritance-node'>Core::Object</a>
+    <span class='inheritance-arrow'>&rarr;</span>
+    <a href='component.html' class='inheritance-node'>UI::Component</a>
+    <span class='inheritance-arrow'>&rarr;</span>
+    <a href='container.html' class='inheritance-node'>UI::Layouts::Container</a>
+    <span class='inheritance-arrow'>&rarr;</span>
+    <span class='inheritance-node current'>UI::Layouts::DockPanel</span>
+  </div>
+  <div class='inherited-members-summary'>
+    <div class='inherited-members-title'><span>Méthodes héritées de <a href='container.html' style='color: var(--accent-blue); text-decoration: underline;'>UI::Layouts::Container</a></span> <span style='font-size: 0.78rem; font-weight: normal; color: var(--text-muted);'>(7 méthodes)</span></div>
+    <div class='inherited-members-tags'>
+      <a href='container.html' class='inherited-tag'>AddChild(*child)</a>
+      <a href='container.html' class='inherited-tag'>RemoveChild(*child)</a>
+      <a href='container.html' class='inherited-tag'>ClearChildren()</a>
+      <a href='container.html' class='inherited-tag'>GetChildCount()</a>
+      <a href='container.html' class='inherited-tag'>GetChild(index)</a>
+      <a href='container.html' class='inherited-tag'>SetPadding(l, t, r, b)</a>
+      <a href='container.html' class='inherited-tag'>SetPaddingAll(p)</a>
+    </div>
+  </div>
+  <div class='inherited-members-summary'>
+    <div class='inherited-members-title'><span>Méthodes héritées de <a href='component.html' style='color: var(--accent-blue); text-decoration: underline;'>UI::Component</a></span> <span style='font-size: 0.78rem; font-weight: normal; color: var(--text-muted);'>(8 méthodes)</span></div>
+    <div class='inherited-members-tags'>
+      <a href='component.html' class='inherited-tag'>SetPosition(x, y)</a>
+      <a href='component.html' class='inherited-tag'>SetSize(w, h)</a>
+      <a href='component.html' class='inherited-tag'>SetMargin(l, t, r, b)</a>
+      <a href='component.html' class='inherited-tag'>SetHorizontalAlignment(align)</a>
+      <a href='component.html' class='inherited-tag'>SetVerticalAlignment(align)</a>
+      <a href='component.html' class='inherited-tag'>SetVisible(v)</a>
+      <a href='component.html' class='inherited-tag'>SetEnabled(e)</a>
+      <a href='component.html' class='inherited-tag'>Arrange(rx, ry, rw, rh)</a>
+    </div>
+  </div>
+</div>
       
+
 <div class='doc-section'>
   <h2 class='section-title'>Description</h2>
-  <p>La classe <code>UI::Layouts::DockPanel</code> ancre ses composants enfants le long de ses 4 bordures extérieures (Haut, Bas, Gauche, Droite) et attribue automatiquement tout l'espace résiduel au centre à son dernier enfant (propriété <code>LastChildFill</code>).</p>
+  <p>La classe <code>UI::Layouts::DockPanel</code> ancre ses composants enfants sur les bords extérieurs (Haut, Bas, Gauche, Droite) et étend automatiquement le dernier enfant pour remplir l'espace central restant.</p>
 </div>
 <div class='doc-section'>
   <h2 class='section-title'>Constructeurs Surchargés</h2>
@@ -102,21 +148,19 @@
     <table>
       <tr><th>Constructeur</th><th>Description</th></tr>
       <tr><td><code>Init()</code></td><td>DockPanel avec <code>LastChildFill = #True</code> par défaut.</td></tr>
-      <tr><td><code>Init(lastChildFill.b)</code></td><td>Activation ou non du remplissage central automatique pour le dernier enfant.</td></tr>
-      <tr><td><code>Init(lastChildFill.b, w.i, h.i)</code></td><td>Remplissage central et dimensions spécifiées.</td></tr>
+      <tr><td><code>Init(lastChildFill.b)</code></td><td>DockPanel avec activation/désactivation du remplissage central.</td></tr>
+      <tr><td><code>Init(lastChildFill.b, w.i, h.i)</code></td><td>DockPanel avec remplissage et dimensions souhaitées.</td></tr>
     </table>
   </div>
 </div>
 <div class='doc-section'>
-  <h2 class='section-title'>Constantes d'Ancrage</h2>
+  <h2 class='section-title'>Méthodes et Constantes d'Amarrage</h2>
   <div class='table-wrapper'>
     <table>
-      <tr><th>Constante</th><th>Description</th></tr>
-      <tr><td><code>#UI_Dock_Top</code></td><td>Ancre le composant en haut en occupant toute la largeur.</td></tr>
-      <tr><td><code>#UI_Dock_Bottom</code></td><td>Ancre le composant en bas en occupant toute la largeur.</td></tr>
-      <tr><td><code>#UI_Dock_Left</code></td><td>Ancre le composant à gauche sur la hauteur résiduelle.</td></tr>
-      <tr><td><code>#UI_Dock_Right</code></td><td>Ancre le composant à droite sur la hauteur résiduelle.</td></tr>
-      <tr><td><code>#UI_Dock_Fill</code></td><td>Occupe la totalité de l'espace central disponible.</td></tr>
+      <tr><th>Méthode / Constante</th><th>Description</th></tr>
+      <tr><td><code>#UI_Dock_Left / #UI_Dock_Top / #UI_Dock_Right / #UI_Dock_Bottom</code></td><td>Constantes d'ancrage sur les 4 côtés.</td></tr>
+      <tr><td><code>SetDock(*child.UI::Component, dockSide.i)</code></td><td>Définit le bord d'ancrage pour un composant enfant donné.</td></tr>
+      <tr><td><code>SetLastChildFill(fill.b)</code></td><td>Active ou désactive l'étirement automatique du dernier enfant dans l'espace restant.</td></tr>
     </table>
   </div>
 </div>
@@ -127,19 +171,5 @@
   <footer class='doc-footer'>
     <p>&copy; 2026 PureBasic OOP Project - MicrodevWeb | Dual License GPL v3 / Fantaisie Software</p>
   </footer>
-  
-  <script>
-    document.getElementById('search-input').addEventListener('input', function(e) {
-      let filter = e.target.value.toLowerCase();
-      document.querySelectorAll('.nav-item').forEach(function(item) {
-        let text = item.innerText.toLowerCase();
-        if (text.includes(filter)) {
-          item.style.display = '';
-        } else {
-          item.style.display = 'none';
-        }
-      });
-    });
-  </script>
 </body>
 </html>

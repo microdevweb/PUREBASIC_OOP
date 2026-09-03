@@ -3,7 +3,7 @@
 <head>
   <meta charset='UTF-8'>
   <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-  <title>Héritage : Extends & Super - PureBasic OOP Documentation</title>
+  <title>Mots-clés Extends & Super - PureBasic OOP Documentation</title>
   <link rel='stylesheet' href='../../css/doc_theme.css'>
 </head>
 <body>
@@ -20,7 +20,7 @@
       </div>
       <div class='lang-switch'>
         <a href='#' class='lang-btn active'>FR</a>
-        <a href='../en/keywords/inheritance.html' class='lang-btn'>EN</a>
+        <a href='../../en/keywords/inheritance.html' class='lang-btn'>EN</a>
       </div>
     </div>
   </header>
@@ -46,11 +46,17 @@
     </ul>
   </div>
   <div class='nav-section'>
-    <div class='nav-section-title'>Composants UI</div>
+    <div class='nav-section-title'>Socle UI & Hiérarchie</div>
     <ul class='nav-list'>
-      <li class='nav-item'><a href='../ui/application.html'><span>Application</span><span class='badge badge-ui'>UI</span></a></li>
-      <li class='nav-item'><a href='../ui/window.html'><span>Window</span><span class='badge badge-ui'>UI</span></a></li>
-      <li class='nav-item'><a href='../ui/gadget.html'><span>Gadget / Component</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/component.html'><span>Component (Base UI)</span><span class='badge badge-base'>BASE</span></a></li>
+      <li class='nav-item'><a href='../ui/gadget.html'><span>Gadget (Natif)</span><span class='badge badge-base'>BASE</span></a></li>
+      <li class='nav-item'><a href='../ui/customgadget.html'><span>CustomGadget (Canvas)</span><span class='badge badge-base'>BASE</span></a></li>
+      <li class='nav-item'><a href='../ui/container.html'><span>Container (Layout Base)</span><span class='badge badge-wpf'>WPF</span></a></li>
+    </ul>
+  </div>
+  <div class='nav-section'>
+    <div class='nav-section-title'>Composants UI (Contrôles)</div>
+    <ul class='nav-list'>
       <li class='nav-item'><a href='../ui/button.html'><span>Button</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/checkbox.html'><span>CheckBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/combobox.html'><span>ComboBox</span><span class='badge badge-ui'>UI</span></a></li>
@@ -65,47 +71,52 @@
   <div class='nav-section'>
     <div class='nav-section-title'>Layouts Responsifs (WPF)</div>
     <ul class='nav-list'>
-      <li class='nav-item'><a href='../ui/container.html'><span>Container</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/stackpanel.html'><span>StackPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/dockpanel.html'><span>DockPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/grid.html'><span>Grid</span><span class='badge badge-wpf'>WPF</span></a></li>
+    </ul>
+  </div>
+  <div class='nav-section'>
+    <div class='nav-section-title'>Application & Fenêtres</div>
+    <ul class='nav-list'>
+      <li class='nav-item'><a href='../ui/application.html'><span>Application</span><span class='badge badge-core'>CORE</span></a></li>
+      <li class='nav-item'><a href='../ui/window.html'><span>Window</span><span class='badge badge-core'>CORE</span></a></li>
     </ul>
   </div>
 </nav>
     <main class='doc-content'>
       <div class='breadcrumb'>
         <a href='../index.html'>Accueil</a>
-        
-        <span class='breadcrumb-separator'>/</span>
-        <span>Keywords</span>
-        <span class='breadcrumb-separator'>/</span>
-        <span style='color: var(--accent-blue);'>Héritage : Extends & Super</span>
-        
+        <span class='breadcrumb-separator'>/</span><span>Mots-clés POO</span>
+        <span class='breadcrumb-separator'>/</span><span style='color: var(--accent-blue);'>Mots-clés Extends & Super</span>
       </div>
       
       <div class='page-header'>
         <div class='title-row'>
-          <h1 class='page-title'>Héritage : Extends & Super</h1>
-          <span class='badge badge-keyword'>Keyword</span>
+          <h1 class='page-title'>Mots-clés Extends & Super</h1>
+          <span class='badge badge-kw'>KW</span>
         </div>
-        <p class='page-lead'>Dérivation de classes et appel aux implémentations parentes.</p>
+        <p class='page-lead'>Héritage de classes et appel des méthodes de la classe parente.</p>
       </div>
       
       
+      
+
 <div class='doc-section'>
-  <h2 class='section-title'>Description</h2>
-  <p>Le mot-clé <code>Extends</code> établit un lien d'héritage simple entre une classe dérivée et sa classe mère. Le mot-clé <code>Super::</code> permet d'invoquer un constructeur ou une méthode de la classe parente.</p>
-</div>
-<div class='doc-section'>
-  <h2 class='section-title'>Constructeurs Parents</h2>
-  <p>Depuis la version 1.2, chaque classe enfant définit ses propres constructeurs <code>Init(...)</code> et appelle explicitement le constructeur parent souhaité :</p>
+  <h2 class='section-title'>Héritage avec Extends</h2>
+  <p>Le mot-clé <code>Extends</code> permet à une classe d'hériter de tous les membres et méthodes d'une classe parente.</p>
   <div class='code-container'>
-    <pre><code><span class='kw'>Class</span> Guerrier <span class='kw'>Extends</span> Personnage {
-  <span class='kw'>Public</span> <span class='kw'>Method</span> <span class='fn'>Init</span>(nom.s) {
-    <span class='kw'>Super</span>::<span class='fn'>Init</span>(nom, <span class='num'>150</span>) <span class='cm'>; Appelle Personnage::Init(nom, pv)</span>
+    <pre><code><span class='kw'>Class</span> Button <span class='kw'>Extends</span> UI::Gadget {
+  <span class='kw'>Public Method</span> Init(text.s) {
+    <span class='kw'>Super</span>::Init()
+    <span class='kw'>This</span>\SetText(text)
   }
 }</code></pre>
   </div>
+</div>
+<div class='doc-section'>
+  <h2 class='section-title'>Accès Parent avec Super</h2>
+  <p><code>Super::NomDeMethode()</code> appelle l'implémentation de la classe parente directe.</p>
 </div>
 
     </main>
@@ -114,19 +125,5 @@
   <footer class='doc-footer'>
     <p>&copy; 2026 PureBasic OOP Project - MicrodevWeb | Dual License GPL v3 / Fantaisie Software</p>
   </footer>
-  
-  <script>
-    document.getElementById('search-input').addEventListener('input', function(e) {
-      let filter = e.target.value.toLowerCase();
-      document.querySelectorAll('.nav-item').forEach(function(item) {
-        let text = item.innerText.toLowerCase();
-        if (text.includes(filter)) {
-          item.style.display = '';
-        } else {
-          item.style.display = 'none';
-        }
-      });
-    });
-  </script>
 </body>
 </html>
