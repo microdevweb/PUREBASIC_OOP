@@ -346,6 +346,46 @@ Procedure.s InferArgType(argExpr.s)
     ProcedureReturn "s"
   EndIf
   
+  ; Check if it's a method call like *obj\GetText() or *obj\GetFirstName()
+  If Left(a, 1) = "*" And FindString(a, "\") > 0
+    Protected slashPos.i = FindString(a, "\")
+    Protected methPart.s = Trim(Mid(a, slashPos + 1))
+    Protected parenPos.i = FindString(methPart, "(")
+    If parenPos > 0
+      Protected methNameOnly.s = Trim(Left(methPart, parenPos - 1))
+      Protected pDotRet.i = FindString(methNameOnly, ".")
+      If pDotRet > 0
+        Protected explicitRet.s = LCase(Mid(methNameOnly, pDotRet + 1))
+        If explicitRet = "s" Or explicitRet = "d" Or explicitRet = "f" Or explicitRet = "i" Or explicitRet = "b"
+          ProcedureReturn explicitRet
+        EndIf
+      EndIf
+      ; Check in MethodBodies for return type
+      PushListPosition(MethodBodies())
+      ForEach MethodBodies()
+        If UCase(MethodBodies()\methodName) = UCase(methNameOnly)
+          If MethodBodies()\returnType = ".s"
+            PopListPosition(MethodBodies())
+            ProcedureReturn "s"
+          ElseIf MethodBodies()\returnType = ".d"
+            PopListPosition(MethodBodies())
+            ProcedureReturn "d"
+          ElseIf MethodBodies()\returnType = ".f"
+            PopListPosition(MethodBodies())
+            ProcedureReturn "f"
+          ElseIf MethodBodies()\returnType = ".b"
+            PopListPosition(MethodBodies())
+            ProcedureReturn "b"
+          ElseIf MethodBodies()\returnType = ".i"
+            PopListPosition(MethodBodies())
+            ProcedureReturn "i"
+          EndIf
+        EndIf
+      Next
+      PopListPosition(MethodBodies())
+    EndIf
+  EndIf
+
   ; Pointer or memory address
   If Left(a, 1) = "@" Or Left(a, 1) = "*" Or Left(a, 8) = "#Null"
     ProcedureReturn "p"
@@ -2238,7 +2278,7 @@ Procedure.b GenerateTargetPB(outputFile.s, inputPBO.s)
     If Not *c\isAbstract
       If ListSize(*c\InitConstructors()) > 0
         ForEach *c\InitConstructors()
-          Protected initArgDecl.s = *c\InitConstructors()\cleanParams
+          Protected initArgDecl.s = TranspileMainLine(*c\InitConstructors()\cleanParams)
           Protected initArgPass.s = ""
           If initArgDecl <> ""
             Protected pCount.i = CountString(initArgDecl, ",") + 1

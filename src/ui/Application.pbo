@@ -53,7 +53,7 @@ Namespace UI {
 
   Class Application {
     Protected isRunning.b
-    Protected *mainWindow.Window
+    Protected *mainWindow.UI::Window
 
     Public Method Init() {
       This\isRunning = #False
@@ -65,7 +65,7 @@ Namespace UI {
       This\*mainWindow = #Null
     }
 
-    Public Method SetMainWindow(*win_p.Window) {
+    Public Method SetMainWindow(*win_p.UI::Window) {
       This\*mainWindow = *win_p
     }
 
@@ -86,7 +86,7 @@ Namespace UI {
           Case #PB_Event_Gadget:
             evGadget = EventGadget()
             If (FindMapElement(UI_GadgetMap(), Str(evGadget))) {
-              Protected *g.Gadget = UI_GadgetMap()
+              Protected *g.UI::Gadget = UI_GadgetMap()
               If (*g) {
                 Select (evType) {
                   Case #PB_EventType_LeftClick:
@@ -108,7 +108,7 @@ Namespace UI {
           Case #PB_Event_CloseWindow:
             Protected isMainWin.b = #False
             If (FindMapElement(UI_WindowMap(), Str(evWin))) {
-              Protected *w.Window = UI_WindowMap()
+              Protected *w.UI::Window = UI_WindowMap()
               If (*w) {
                 If (This\*mainWindow And *w = This\*mainWindow)
                   isMainWin = #True
@@ -129,7 +129,7 @@ Namespace UI {
 
           Case #PB_Event_SizeWindow:
             If (FindMapElement(UI_WindowMap(), Str(evWin))) {
-              Protected *wSize.Window = UI_WindowMap()
+              Protected *wSize.UI::Window = UI_WindowMap()
               If (*wSize) {
                 *wSize\OnResize(WindowWidth(evWin), WindowHeight(evWin))
               }
@@ -137,7 +137,7 @@ Namespace UI {
 
           Case #PB_Event_MoveWindow:
             If (FindMapElement(UI_WindowMap(), Str(evWin))) {
-              Protected *wMove.Window = UI_WindowMap()
+              Protected *wMove.UI::Window = UI_WindowMap()
               If (*wMove) {
                 *wMove\OnMove(WindowX(evWin), WindowY(evWin))
               }
@@ -145,7 +145,7 @@ Namespace UI {
 
           Case #PB_Event_MinimizeWindow:
             If (FindMapElement(UI_WindowMap(), Str(evWin))) {
-              Protected *targetWinMin.Window = UI_WindowMap()
+              Protected *targetWinMin.UI::Window = UI_WindowMap()
               If (*targetWinMin) {
                 *targetWinMin\OnMinimize()
               }
@@ -153,7 +153,7 @@ Namespace UI {
 
           Case #PB_Event_MaximizeWindow:
             If (FindMapElement(UI_WindowMap(), Str(evWin))) {
-              Protected *targetWinMax.Window = UI_WindowMap()
+              Protected *targetWinMax.UI::Window = UI_WindowMap()
               If (*targetWinMax) {
                 *targetWinMax\OnMaximize()
               }
@@ -161,7 +161,7 @@ Namespace UI {
 
           Case #PB_Event_RestoreWindow:
             If (FindMapElement(UI_WindowMap(), Str(evWin))) {
-              Protected *targetWinRest.Window = UI_WindowMap()
+              Protected *targetWinRest.UI::Window = UI_WindowMap()
               If (*targetWinRest) {
                 *targetWinRest\OnRestore()
               }
@@ -170,7 +170,7 @@ Namespace UI {
       }
     }
 
-    Public Method Run(*mainWin_p.Window) {
+    Public Method Run(*mainWin_p.UI::Window) {
       If (*mainWin_p) {
         This\*mainWindow = *mainWin_p
       }
@@ -179,6 +179,10 @@ Namespace UI {
 
     Public Method Quit() {
       This\isRunning = #False
+    }
+
+    Public Method Free() {
+      This\Quit()
     }
   }
 

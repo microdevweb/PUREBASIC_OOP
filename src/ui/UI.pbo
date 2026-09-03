@@ -27,3 +27,4 @@ XIncludeFile "controls/ComboBox.pbo"
 
 ; Custom Controls
 XIncludeFile "controls/ToggleSwitch.pbo"
+XIncludeFile "controls/ListIcon.pbo"

@@ -21,7 +21,22 @@ Namespace UI {
       This\title = title_p
       This\flags = flags_p
       This\parentID = parent_p
-      This\id = OpenWindow(#PB_Any, x_p, y_p, w_p, h_p, title_p, flags_p, parent_p)
+
+      Protected pHandle.i = 0
+      If (parent_p <> 0) {
+        If (IsWindow(parent_p)) {
+          pHandle = WindowID(parent_p)
+        } Else {
+          pHandle = parent_p
+        }
+      }
+
+      If (pHandle <> 0) {
+        This\id = OpenWindow(#PB_Any, x_p, y_p, w_p, h_p, title_p, flags_p, pHandle)
+      } Else {
+        This\id = OpenWindow(#PB_Any, x_p, y_p, w_p, h_p, title_p, flags_p)
+      }
+
       If (This\id) {
         UI_RegisterWindow(This\id, This)
         This\x = WindowX(This\id)
@@ -208,6 +223,12 @@ Namespace UI {
       ProcedureReturn This\rootContent
     }
 
+    Public Method UpdateLayout() {
+      If (This\rootContent And This\id And IsWindow(This\id)) {
+        This\rootContent\Arrange(0, 0, WindowWidth(This\id), WindowHeight(This\id))
+      }
+    }
+
     ; ------------------------------------------------------------------------
     ; 3. Window Lifecycle & Event Handlers
     ; ------------------------------------------------------------------------
@@ -250,7 +271,7 @@ Namespace UI {
     Public Method OnRestore() {
     }
 
-    Public Method OnChildEvent(*child.Gadget, eventType.i) {
+    Public Method OnChildEvent(*child.UI::Gadget, eventType.i) {
     }
   }
 

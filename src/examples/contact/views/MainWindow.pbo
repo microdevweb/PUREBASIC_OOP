@@ -1,0 +1,192 @@
+; ============================================================================
+; PureBasic OOP - Contact Manager Main Window
+; Author:      MicrodevWeb
+; ============================================================================
+
+XIncludeFile "../../../ui/UI.pbo"
+XIncludeFile "../models/Contact.pbo"
+XIncludeFile "../data/ContactRepository.pbo"
+XIncludeFile "ContactDialog.pbo"
+
+Namespace ContactApp {
+
+  Class MainWindow Extends UI::Window {
+    Protected *dockRoot.UI::Layouts::DockPanel
+    Protected *topBar.UI::Layouts::StackPanel
+    Protected *toolBar.UI::Layouts::StackPanel
+    Protected *bottomBar.UI::Layouts::StackPanel
+
+    Protected *txtSearch.UI::TextBox
+    Protected *btnSearch.UI::Button
+    Protected *btnClear.UI::Button
+
+    Protected *btnAdd.UI::Button
+    Protected *btnEdit.UI::Button
+    Protected *btnDelete.UI::Button
+    Protected *btnRefresh.UI::Button
+
+    Protected *listContacts.UI::ListIcon
+    Protected *statusLabel.UI::Label
+
+    Protected *repo.ContactApp::ContactRepository
+
+    Public Method Init(*repository.ContactApp::ContactRepository) {
+      Protected defFlags.i = #PB_Window_SystemMenu | #PB_Window_ScreenCentered | #PB_Window_MinimizeGadget | #PB_Window_MaximizeGadget | #PB_Window_SizeGadget
+      This\CreateWindowInternal("PureBasic OOP - Contact Manager", #PB_Ignore, #PB_Ignore, 850, 580, defFlags, 0)
+      This\*repo = *repository
+
+      ; Root DockPanel (fills entire window with 10px outer margin)
+      This\*dockRoot = New UI::Layouts::DockPanel(#True)
+      This\*dockRoot\SetMargin(10, 10, 10, 10)
+
+      ; 1. Top Search Bar (Dock Top)
+      This\*topBar = New UI::Layouts::StackPanel(#UI_Orientation_Horizontal, 8)
+      This\*topBar\SetMargin(0, 0, 0, 4)
+
+      Protected *lblSearch.UI::Label = New UI::Label("Search:")
+      *lblSearch\SetVerticalAlignment(#UI_Align_Middle)
+      This\*topBar\AddChild(*lblSearch)
+
+      This\*txtSearch = New UI::TextBox("", 240, 28)
+      This\*topBar\AddChild(This\*txtSearch)
+
+      This\*btnSearch = New UI::Button("Search", 80, 28)
+      This\*topBar\AddChild(This\*btnSearch)
+
+      This\*btnClear = New UI::Button("Clear", 70, 28)
+      This\*topBar\AddChild(This\*btnClear)
+
+      This\*dockRoot\AddDockChild(This\*topBar, #UI_Dock_Top)
+
+      ; 2. Action Toolbar (Dock Top)
+      This\*toolBar = New UI::Layouts::StackPanel(#UI_Orientation_Horizontal, 8)
+      This\*toolBar\SetMargin(0, 4, 0, 8)
+
+      This\*btnAdd = New UI::Button("+ New Contact", 120, 32)
+      This\*toolBar\AddChild(This\*btnAdd)
+
+      This\*btnEdit = New UI::Button("Edit", 90, 32)
+      This\*toolBar\AddChild(This\*btnEdit)
+
+      This\*btnDelete = New UI::Button("Delete", 90, 32)
+      This\*toolBar\AddChild(This\*btnDelete)
+
+      This\*btnRefresh = New UI::Button("Refresh", 90, 32)
+      This\*toolBar\AddChild(This\*btnRefresh)
+
+      This\*dockRoot\AddDockChild(This\*toolBar, #UI_Dock_Top)
+
+      ; 3. Bottom Status Bar (Dock Bottom)
+      This\*bottomBar = New UI::Layouts::StackPanel(#UI_Orientation_Horizontal, 8)
+      This\*bottomBar\SetMargin(0, 6, 0, 0)
+
+      This\*statusLabel = New UI::Label("Ready.")
+      This\*bottomBar\AddChild(This\*statusLabel)
+
+      This\*dockRoot\AddDockChild(This\*bottomBar, #UI_Dock_Bottom)
+
+      ; 4. Center Contact ListIcon (Dock Fill)
+      This\*listContacts = New UI::ListIcon("ID", 50)
+      This\*listContacts\AddColumn(1, "Full Name", 180)
+      This\*listContacts\AddColumn(2, "Email", 190)
+      This\*listContacts\AddColumn(3, "Phone", 130)
+      This\*listContacts\AddColumn(4, "Company", 140)
+      This\*listContacts\AddColumn(5, "Notes", 220)
+
+      This\*dockRoot\AddDockChild(This\*listContacts, #UI_Dock_Fill)
+
+      This\SetContent(This\*dockRoot)
+      This\UpdateLayout()
+      This\ReloadContacts("")
+    }
+
+    Public Method ReloadContacts(searchQuery.s) {
+      If (Not This\*repo) : ProcedureReturn : EndIf
+
+      This\*listContacts\Clear()
+      searchQuery = Trim(searchQuery)
+
+      Protected sql.s = "SELECT id, first_name, last_name, email, phone, company, notes FROM contacts"
+      If (searchQuery <> "")
+        Protected q.s = ReplaceString(searchQuery, "'", "''")
+        sql + " WHERE first_name LIKE '%" + q + "%' OR last_name LIKE '%" + q + "%' OR email LIKE '%" + q + "%' OR company LIKE '%" + q + "%' OR phone LIKE '%" + q + "%'"
+      EndIf
+      sql + " ORDER BY id DESC;"
+
+      Protected count.i = 0
+      Protected db = This\*repo\GetDbHandle()
+      If (db And DatabaseQuery(db, sql))
+        While NextDatabaseRow(db)
+          Protected cid.i = GetDatabaseLong(db, 0)
+          Protected fn.s = GetDatabaseString(db, 1)
+          Protected ln.s = GetDatabaseString(db, 2)
+          Protected em.s = GetDatabaseString(db, 3)
+          Protected ph.s = GetDatabaseString(db, 4)
+          Protected co.s = GetDatabaseString(db, 5)
+          Protected nt.s = GetDatabaseString(db, 6)
+
+          Protected fullName.s = fn
+          If (ln <> "") : fullName + " " + ln : EndIf
+
+          Protected rowText.s = Str(cid) + Chr(10) + fullName + Chr(10) + em + Chr(10) + ph + Chr(10) + co + Chr(10) + nt
+          This\*listContacts\AddItem(-1, rowText, 0)
+          This\*listContacts\SetItemData(count, cid)
+          count + 1
+        Wend
+        FinishDatabaseQuery(db)
+      EndIf
+
+      If (searchQuery <> "")
+        This\*statusLabel\SetText("Found " + Str(count) + " contact(s) matching '" + searchQuery + "'.")
+      Else
+        This\*statusLabel\SetText("Ready. Total: " + Str(count) + " contact(s).")
+      EndIf
+    }
+
+    Public Method.i GetSelectedContactId() {
+      Protected idx.i = This\*listContacts\GetSelectedIndex()
+      If (idx >= 0)
+        ProcedureReturn Val(This\*listContacts\GetItemText(idx, 0))
+      EndIf
+      ProcedureReturn 0
+    }
+
+    Public Method.b IsAddClicked(gadgetId.i) {
+      ProcedureReturn Bool(This\*btnAdd And gadgetId = This\*btnAdd\GetId())
+    }
+
+    Public Method.b IsEditClicked(gadgetId.i) {
+      ProcedureReturn Bool(This\*btnEdit And gadgetId = This\*btnEdit\GetId())
+    }
+
+    Public Method.b IsDeleteClicked(gadgetId.i) {
+      ProcedureReturn Bool(This\*btnDelete And gadgetId = This\*btnDelete\GetId())
+    }
+
+    Public Method.b IsRefreshClicked(gadgetId.i) {
+      ProcedureReturn Bool(This\*btnRefresh And gadgetId = This\*btnRefresh\GetId())
+    }
+
+    Public Method.b IsSearchClicked(gadgetId.i) {
+      ProcedureReturn Bool(This\*btnSearch And gadgetId = This\*btnSearch\GetId())
+    }
+
+    Public Method.b IsClearClicked(gadgetId.i) {
+      ProcedureReturn Bool(This\*btnClear And gadgetId = This\*btnClear\GetId())
+    }
+
+    Public Method.s GetSearchText() {
+      ProcedureReturn This\*txtSearch\GetText()
+    }
+
+    Public Method ClearSearch() {
+      This\*txtSearch\SetText("")
+      This\ReloadContacts("")
+    }
+
+    Public Method.i GetListGadgetId() {
+      ProcedureReturn This\*listContacts\GetId()
+    }
+  }
+
+}
