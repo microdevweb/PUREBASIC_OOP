@@ -3,7 +3,7 @@
 ; Author:      MicrodevWeb
 ; ============================================================================
 
-XIncludeFile "../models/Contact.pb"
+XIncludeFile "../models/Contact.pbi"
 
 Namespace ContactApp {
 

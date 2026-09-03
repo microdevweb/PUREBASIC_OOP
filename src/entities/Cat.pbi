@@ -1,7 +1,7 @@
-﻿; File: src/entities/Cat.pb
+﻿; File: src/entities/Cat.pbi
 ; Cat class inheriting from Animal inside Namespace Myname::Entities
 
-XIncludeFile "Animal.pb"
+XIncludeFile "Animal.pbi"
 
 Namespace Myname::Entities
 

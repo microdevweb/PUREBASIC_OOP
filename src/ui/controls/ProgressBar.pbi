@@ -1,11 +1,11 @@
 ﻿; ============================================================================
-; PureBasic OOP GUI Framework - ProgressBar.pb
+; PureBasic OOP GUI Framework - ProgressBar.pbi
 ; Standard ProgressBar wrapper with Multi-Constructors
 ; Author:      MicrodevWeb
 ; ============================================================================
 
-XIncludeFile "../Gadget.pb"
-XIncludeFile "../Application.pb"
+XIncludeFile "../Gadget.pbi"
+XIncludeFile "../Application.pbi"
 
 Namespace UI {
 

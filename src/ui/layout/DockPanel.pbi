@@ -1,10 +1,10 @@
 ﻿; ============================================================================
-; PureBasic OOP GUI Framework - DockPanel.pb
+; PureBasic OOP GUI Framework - DockPanel.pbi
 ; Edge-docking layout panel with center-filling area (WPF DockPanel style)
 ; Author:      MicrodevWeb
 ; ============================================================================
 
-XIncludeFile "Container.pb"
+XIncludeFile "Container.pbi"
 
 Namespace UI::Layouts {
 

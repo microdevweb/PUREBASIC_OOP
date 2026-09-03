@@ -2,7 +2,7 @@
 ; Test: Window Multi-Constructors & Getters/Setters
 ; ============================================================================
 
-XIncludeFile "ui/UI.pb"
+XIncludeFile "ui/UI.pbi"
 
 Using UI
 

@@ -4,9 +4,9 @@
 ; Fichier principal : src/test_multifile_project.pb
 ; ============================================================================
 
-XIncludeFile "entities/Animal.pb"
-XIncludeFile "entities/Dog.pb"
-XIncludeFile "entities/Cat.pb"
+XIncludeFile "entities/Animal.pbi"
+XIncludeFile "entities/Dog.pbi"
+XIncludeFile "entities/Cat.pbi"
 
 ; Import direct du namespace
 Using Myname::Entities

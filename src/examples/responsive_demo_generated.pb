@@ -4584,13 +4584,13 @@ EndProcedure
 ; ============================================================================
 
 ; ============================================================================
-; PureBasic OOP GUI Framework - UI.pb (Master Header)
+; PureBasic OOP GUI Framework - UI.pbi (Master Header)
 ; Include this file to access the entire OOP UI subsystem
 ; Author:      MicrodevWeb
 ; ============================================================================
 
 ; ============================================================================
-; PureBasic OOP GUI Framework - Component.pb
+; PureBasic OOP GUI Framework - Component.pbi
 ; Base abstract class for all PureBasic UI elements & Layouts
 ; Author:      MicrodevWeb
 ; ============================================================================
@@ -4606,7 +4606,7 @@ EndProcedure
 
 
 ; ============================================================================
-; PureBasic OOP GUI Framework - Gadget.pb
+; PureBasic OOP GUI Framework - Gadget.pbi
 ; Base abstract class for all PureBasic UI Controls and Gadgets
 ; Author:      MicrodevWeb
 ; ============================================================================
@@ -4615,7 +4615,7 @@ EndProcedure
 
 
 ; ============================================================================
-; PureBasic OOP GUI Framework - Window.pb
+; PureBasic OOP GUI Framework - Window.pbi
 ; Standard GUI Window Wrapper with Multi-Constructors & Dynamic Accessors
 ; Author:      MicrodevWeb
 ; ============================================================================
@@ -4624,7 +4624,7 @@ EndProcedure
 
 
 ; ============================================================================
-; PureBasic OOP GUI Framework - Application.pb
+; PureBasic OOP GUI Framework - Application.pbi
 ; Application Manager & Central Event Dispatcher
 ; Author:      MicrodevWeb
 ; ============================================================================
@@ -4649,7 +4649,7 @@ EndProcedure
 
 
 ; ============================================================================
-; PureBasic OOP GUI Framework - CustomGadget.pb
+; PureBasic OOP GUI Framework - CustomGadget.pbi
 ; Base class for 2D Vector-rendered / Canvas Custom Gadgets
 ; Author:      MicrodevWeb
 ; ============================================================================
@@ -4660,7 +4660,7 @@ EndProcedure
 
 ; Responsive Layouts (WPF-Style)
 ; ============================================================================
-; PureBasic OOP GUI Framework - Container.pb
+; PureBasic OOP GUI Framework - Container.pbi
 ; Base abstract class for all responsive layout panels
 ; Author:      MicrodevWeb
 ; ============================================================================
@@ -4669,7 +4669,7 @@ EndProcedure
 
 
 ; ============================================================================
-; PureBasic OOP GUI Framework - StackPanel.pb
+; PureBasic OOP GUI Framework - StackPanel.pbi
 ; Linear layout panel arranging child components sequentially (Vertical or Horizontal)
 ; Author:      MicrodevWeb
 ; ============================================================================
@@ -4678,7 +4678,7 @@ EndProcedure
 
 
 ; ============================================================================
-; PureBasic OOP GUI Framework - DockPanel.pb
+; PureBasic OOP GUI Framework - DockPanel.pbi
 ; Edge-docking layout panel with center-filling area (WPF DockPanel style)
 ; Author:      MicrodevWeb
 ; ============================================================================
@@ -4687,7 +4687,7 @@ EndProcedure
 
 
 ; ============================================================================
-; PureBasic OOP GUI Framework - Grid.pb
+; PureBasic OOP GUI Framework - Grid.pbi
 ; 2D Flexible Grid layout panel with star sizing and row/column span
 ; Author:      MicrodevWeb
 ; ============================================================================
@@ -4699,7 +4699,7 @@ EndProcedure
 
 ; Standard Controls
 ; ============================================================================
-; PureBasic OOP GUI Framework - Button.pb
+; PureBasic OOP GUI Framework - Button.pbi
 ; Standard Button and ImageButton wrapper with Multi-Constructors
 ; Author:      MicrodevWeb
 ; ============================================================================
@@ -4708,7 +4708,7 @@ EndProcedure
 
 
 ; ============================================================================
-; PureBasic OOP GUI Framework - TextBox.pb
+; PureBasic OOP GUI Framework - TextBox.pbi
 ; Standard Text Input / StringGadget wrapper with Multi-Constructors
 ; Author:      MicrodevWeb
 ; ============================================================================
@@ -4717,7 +4717,7 @@ EndProcedure
 
 
 ; ============================================================================
-; PureBasic OOP GUI Framework - Label.pb
+; PureBasic OOP GUI Framework - Label.pbi
 ; Standard Label / TextGadget wrapper with Multi-Constructors
 ; Author:      MicrodevWeb
 ; ============================================================================
@@ -4726,7 +4726,7 @@ EndProcedure
 
 
 ; ============================================================================
-; PureBasic OOP GUI Framework - CheckBox.pb
+; PureBasic OOP GUI Framework - CheckBox.pbi
 ; Standard CheckBox wrapper with Multi-Constructors
 ; Author:      MicrodevWeb
 ; ============================================================================
@@ -4735,7 +4735,7 @@ EndProcedure
 
 
 ; ============================================================================
-; PureBasic OOP GUI Framework - ProgressBar.pb
+; PureBasic OOP GUI Framework - ProgressBar.pbi
 ; Standard ProgressBar wrapper with Multi-Constructors
 ; Author:      MicrodevWeb
 ; ============================================================================
@@ -4744,7 +4744,7 @@ EndProcedure
 
 
 ; ============================================================================
-; PureBasic OOP GUI Framework - Slider.pb
+; PureBasic OOP GUI Framework - Slider.pbi
 ; Standard TrackBar / TrackSlider wrapper with Multi-Constructors
 ; Author:      MicrodevWeb
 ; ============================================================================
@@ -4753,7 +4753,7 @@ EndProcedure
 
 
 ; ============================================================================
-; PureBasic OOP GUI Framework - ComboBox.pb
+; PureBasic OOP GUI Framework - ComboBox.pbi
 ; Standard ComboBox wrapper with Multi-Constructors
 ; Author:      MicrodevWeb
 ; ============================================================================
@@ -4764,7 +4764,7 @@ EndProcedure
 
 ; Custom Controls
 ; ============================================================================
-; PureBasic OOP GUI Framework - ToggleSwitch.pb
+; PureBasic OOP GUI Framework - ToggleSwitch.pbi
 ; Modern iOS/Material-style animated toggle switch CustomGadget with Multi-Constructors
 ; Author:      MicrodevWeb
 ; ============================================================================
@@ -4773,7 +4773,7 @@ EndProcedure
 
 
 ; ============================================================================
-; PureBasic OOP GUI Framework - ListIcon.pb
+; PureBasic OOP GUI Framework - ListIcon.pbi
 ; Standard ListIconGadget wrapper for tables and data grids
 ; Author:      MicrodevWeb
 ; ============================================================================

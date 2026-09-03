@@ -4,7 +4,7 @@
 ; Author:      MicrodevWeb
 ; ============================================================================
 
-XIncludeFile "../ui/UI.pb"
+XIncludeFile "../ui/UI.pbi"
 
 Using UI
 Using UI::Layouts

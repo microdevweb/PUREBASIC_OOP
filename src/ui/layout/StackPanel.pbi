@@ -1,10 +1,10 @@
 ﻿; ============================================================================
-; PureBasic OOP GUI Framework - StackPanel.pb
+; PureBasic OOP GUI Framework - StackPanel.pbi
 ; Linear layout panel arranging child components sequentially (Vertical or Horizontal)
 ; Author:      MicrodevWeb
 ; ============================================================================
 
-XIncludeFile "Container.pb"
+XIncludeFile "Container.pbi"
 
 Namespace UI::Layouts {
 

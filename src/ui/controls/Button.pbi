@@ -1,23 +1,23 @@
 ﻿; ============================================================================
-; PureBasic OOP GUI Framework - Label.pb
-; Standard Label / TextGadget wrapper with Multi-Constructors
+; PureBasic OOP GUI Framework - Button.pbi
+; Standard Button and ImageButton wrapper with Multi-Constructors
 ; Author:      MicrodevWeb
 ; ============================================================================
 
-XIncludeFile "../Gadget.pb"
-XIncludeFile "../Application.pb"
+XIncludeFile "../Gadget.pbi"
+XIncludeFile "../Application.pbi"
 
 Namespace UI {
 
-  Class Label Extends Gadget {
+  Class Button Extends Gadget {
 
-    ; Constructeur 1: Texte uniquement (positionné par Layout 0,0, 150x20)
+    ; Constructeur 1: Texte seul (Positionné par Layout 0,0, 120x30)
     Public Method Init(text_p.s) {
       Super::Init()
-      This\x = 0 : This\y = 0 : This\width = 150 : This\height = 20
-      This\desiredWidth = 150 : This\desiredHeight = 20
+      This\x = 0 : This\y = 0 : This\width = 120 : This\height = 30
+      This\desiredWidth = 120 : This\desiredHeight = 30
       This\isVisible = #True : This\isEnabled = #True
-      This\id = TextGadget(#PB_Any, 0, 0, 150, 20, text_p, 0)
+      This\id = ButtonGadget(#PB_Any, 0, 0, 120, 30, text_p, 0)
       If (This\id) {
         UI::RegisterGadget(This\id, This)
       }
@@ -29,7 +29,7 @@ Namespace UI {
       This\x = 0 : This\y = 0 : This\width = w_p : This\height = h_p
       This\desiredWidth = w_p : This\desiredHeight = h_p
       This\isVisible = #True : This\isEnabled = #True
-      This\id = TextGadget(#PB_Any, 0, 0, w_p, h_p, text_p, 0)
+      This\id = ButtonGadget(#PB_Any, 0, 0, w_p, h_p, text_p, 0)
       If (This\id) {
         UI::RegisterGadget(This\id, This)
       }
@@ -41,7 +41,7 @@ Namespace UI {
       This\x = x_p : This\y = y_p : This\width = w_p : This\height = h_p
       This\desiredWidth = w_p : This\desiredHeight = h_p
       This\isVisible = #True : This\isEnabled = #True
-      This\id = TextGadget(#PB_Any, x_p, y_p, w_p, h_p, text_p, 0)
+      This\id = ButtonGadget(#PB_Any, x_p, y_p, w_p, h_p, text_p, 0)
       If (This\id) {
         UI::RegisterGadget(This\id, This)
       }
@@ -53,7 +53,7 @@ Namespace UI {
       This\x = x_p : This\y = y_p : This\width = w_p : This\height = h_p
       This\desiredWidth = w_p : This\desiredHeight = h_p
       This\isVisible = #True : This\isEnabled = #True
-      This\id = TextGadget(#PB_Any, x_p, y_p, w_p, h_p, text_p, flags_p)
+      This\id = ButtonGadget(#PB_Any, x_p, y_p, w_p, h_p, text_p, flags_p)
       If (This\id) {
         UI::RegisterGadget(This\id, This)
       }

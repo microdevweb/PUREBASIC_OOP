@@ -2,7 +2,7 @@
 ; Test Suite: Responsive UI Layouts (StackPanel, DockPanel, Grid)
 ; ============================================================================
 
-XIncludeFile "ui/UI.pb"
+XIncludeFile "ui/UI.pbi"
 
 Using UI
 Using UI::Layouts

@@ -1,11 +1,11 @@
 ﻿; ============================================================================
-; PureBasic OOP GUI Framework - CustomGadget.pb
+; PureBasic OOP GUI Framework - CustomGadget.pbi
 ; Base class for 2D Vector-rendered / Canvas Custom Gadgets
 ; Author:      MicrodevWeb
 ; ============================================================================
 
-XIncludeFile "Gadget.pb"
-XIncludeFile "Application.pb"
+XIncludeFile "Gadget.pbi"
+XIncludeFile "Application.pbi"
 
 Namespace UI {
 

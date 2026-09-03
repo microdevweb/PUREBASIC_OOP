@@ -1,10 +1,10 @@
 ﻿; ============================================================================
-; PureBasic OOP GUI Framework - Container.pb
+; PureBasic OOP GUI Framework - Container.pbi
 ; Base abstract class for all responsive layout panels
 ; Author:      MicrodevWeb
 ; ============================================================================
 
-XIncludeFile "../Component.pb"
+XIncludeFile "../Component.pbi"
 
 Namespace UI::Layouts {
 

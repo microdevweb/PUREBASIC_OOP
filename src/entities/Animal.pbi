@@ -1,4 +1,4 @@
-﻿; File: src/entities/Animal.pb
+﻿; File: src/entities/Animal.pbi
 ; Single class file inside Namespace Myname::Entities
 
 Namespace Myname::Entities

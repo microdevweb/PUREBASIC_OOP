@@ -1,11 +1,11 @@
 ﻿; ============================================================================
-; PureBasic OOP GUI Framework - Slider.pb
+; PureBasic OOP GUI Framework - Slider.pbi
 ; Standard TrackBar / TrackSlider wrapper with Multi-Constructors
 ; Author:      MicrodevWeb
 ; ============================================================================
 
-XIncludeFile "../Gadget.pb"
-XIncludeFile "../Application.pb"
+XIncludeFile "../Gadget.pbi"
+XIncludeFile "../Application.pbi"
 
 Namespace UI {
 

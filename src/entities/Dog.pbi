@@ -1,7 +1,7 @@
-﻿; File: src/entities/Dog.pb
+﻿; File: src/entities/Dog.pbi
 ; Dog class inheriting from Animal inside Namespace Myname::Entities
 
-XIncludeFile "Animal.pb"
+XIncludeFile "Animal.pbi"
 
 Namespace Myname::Entities
 

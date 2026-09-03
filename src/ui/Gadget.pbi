@@ -1,10 +1,10 @@
 ﻿; ============================================================================
-; PureBasic OOP GUI Framework - Gadget.pb
+; PureBasic OOP GUI Framework - Gadget.pbi
 ; Base abstract class for all PureBasic UI Controls and Gadgets
 ; Author:      MicrodevWeb
 ; ============================================================================
 
-XIncludeFile "Component.pb"
+XIncludeFile "Component.pbi"
 
 Namespace UI {
 

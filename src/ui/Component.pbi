@@ -1,5 +1,5 @@
 ﻿; ============================================================================
-; PureBasic OOP GUI Framework - Component.pb
+; PureBasic OOP GUI Framework - Component.pbi
 ; Base abstract class for all PureBasic UI elements & Layouts
 ; Author:      MicrodevWeb
 ; ============================================================================

@@ -1,11 +1,11 @@
 ﻿; ============================================================================
-; PureBasic OOP GUI Framework - ListIcon.pb
+; PureBasic OOP GUI Framework - ListIcon.pbi
 ; Standard ListIconGadget wrapper for tables and data grids
 ; Author:      MicrodevWeb
 ; ============================================================================
 
-XIncludeFile "../Gadget.pb"
-XIncludeFile "../Application.pb"
+XIncludeFile "../Gadget.pbi"
+XIncludeFile "../Application.pbi"
 
 Namespace UI {
 

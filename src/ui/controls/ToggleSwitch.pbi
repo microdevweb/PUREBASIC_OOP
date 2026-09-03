@@ -1,10 +1,10 @@
 ﻿; ============================================================================
-; PureBasic OOP GUI Framework - ToggleSwitch.pb
+; PureBasic OOP GUI Framework - ToggleSwitch.pbi
 ; Modern iOS/Material-style animated toggle switch CustomGadget with Multi-Constructors
 ; Author:      MicrodevWeb
 ; ============================================================================
 
-XIncludeFile "../CustomGadget.pb"
+XIncludeFile "../CustomGadget.pbi"
 
 Namespace UI::Controls {
 

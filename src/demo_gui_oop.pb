@@ -3,7 +3,7 @@
 ; Fichier : src/demo_gui_oop.pb
 ; ============================================================================
 
-XIncludeFile "ui/UI.pb"
+XIncludeFile "ui/UI.pbi"
 
 Using UI
 Using UI::Controls

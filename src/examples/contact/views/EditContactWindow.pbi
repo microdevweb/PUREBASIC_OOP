@@ -1,14 +1,15 @@
 ﻿; ============================================================================
-; PureBasic OOP - Contact Add/Edit Dialog
+; PureBasic OOP - Edit Contact Window
+; Dedicated Window for Editing Existing Contacts
 ; Author:      MicrodevWeb
 ; ============================================================================
 
-XIncludeFile "../../../ui/UI.pb"
-XIncludeFile "../models/Contact.pb"
+XIncludeFile "../../../ui/UI.pbi"
+XIncludeFile "../models/Contact.pbi"
 
 Namespace ContactApp {
 
-  Class ContactDialog Extends UI::Window {
+  Class EditContactWindow Extends UI::Window {
     Protected *rootPanel.UI::Layouts::StackPanel
     Protected *headerLabel.UI::Label
 
@@ -22,96 +23,85 @@ Namespace ContactApp {
     Protected *btnSave.UI::Button
     Protected *btnCancel.UI::Button
 
-    Protected contactId.i
-    Protected isSaved.b
+    Protected currentContactId.i
 
-    Public Method Init(parentWinId.i = 0, titleText.s = "Contact Details") {
-      This\CreateWindowInternal(titleText, #PB_Ignore, #PB_Ignore, 480, 520, #PB_Window_SystemMenu | #PB_Window_ScreenCentered, parentWinId)
-      This\contactId = 0
-      This\isSaved = #False
+    Public Method Init(parentWinId.i = 0) {
+      Protected winFlags.i = #PB_Window_SystemMenu | #PB_Window_ScreenCentered | #PB_Window_MinimizeGadget
+      This\CreateWindowInternal("Edit Contact", #PB_Ignore, #PB_Ignore, 460, 520, winFlags, parentWinId)
+      This\currentContactId = 0
 
-      ; Main Vertical StackPanel (with 15px margin around the dialog)
-      This\*rootPanel = New UI::Layouts::StackPanel(#UI_Orientation_Vertical, 10)
-      This\*rootPanel\SetMargin(15, 15, 15, 15)
+      ; Root vertical panel
+      This\*rootPanel = New UI::Layouts::StackPanel(#UI_Orientation_Vertical, 8)
+      This\*rootPanel\SetMargin(16, 16, 16, 16)
 
       ; Header Title
-      This\*headerLabel = New UI::Label(titleText)
+      This\*headerLabel = New UI::Label("Edit Contact Details")
       This\*rootPanel\AddChild(This\*headerLabel)
 
-      ; Fields
+      ; Form Fields
       This\*rootPanel\AddChild(New UI::Label("First Name:"))
-      This\*txtFirstName = New UI::TextBox("", 440, 26)
+      This\*txtFirstName = New UI::TextBox("", 420, 26)
       This\*rootPanel\AddChild(This\*txtFirstName)
 
       This\*rootPanel\AddChild(New UI::Label("Last Name:"))
-      This\*txtLastName = New UI::TextBox("", 440, 26)
+      This\*txtLastName = New UI::TextBox("", 420, 26)
       This\*rootPanel\AddChild(This\*txtLastName)
 
       This\*rootPanel\AddChild(New UI::Label("Email Address:"))
-      This\*txtEmail = New UI::TextBox("", 440, 26)
+      This\*txtEmail = New UI::TextBox("", 420, 26)
       This\*rootPanel\AddChild(This\*txtEmail)
 
       This\*rootPanel\AddChild(New UI::Label("Phone Number:"))
-      This\*txtPhone = New UI::TextBox("", 440, 26)
+      This\*txtPhone = New UI::TextBox("", 420, 26)
       This\*rootPanel\AddChild(This\*txtPhone)
 
       This\*rootPanel\AddChild(New UI::Label("Company:"))
-      This\*txtCompany = New UI::TextBox("", 440, 26)
+      This\*txtCompany = New UI::TextBox("", 420, 26)
       This\*rootPanel\AddChild(This\*txtCompany)
 
       This\*rootPanel\AddChild(New UI::Label("Notes:"))
-      This\*txtNotes = New UI::TextBox("", 440, 26)
+      This\*txtNotes = New UI::TextBox("", 420, 26)
       This\*rootPanel\AddChild(This\*txtNotes)
 
       ; Button Bar (Horizontal StackPanel)
-      Protected *btnPanel.UI::Layouts::StackPanel = New UI::Layouts::StackPanel(#UI_Orientation_Horizontal, 12)
-      *btnPanel\SetHorizontalAlignment(#UI_Align_Right)
-      *btnPanel\SetMargin(0, 10, 0, 0)
+      Protected *btnBar.UI::Layouts::StackPanel = New UI::Layouts::StackPanel(#UI_Orientation_Horizontal, 10)
+      *btnBar\SetHorizontalAlignment(#UI_Align_Right)
+      *btnBar\SetMargin(0, 10, 0, 0)
 
-      This\*btnCancel = New UI::Button("Cancel", 100, 32)
-      *btnPanel\AddChild(This\*btnCancel)
+      This\*btnCancel = New UI::Button("Cancel", 90, 32)
+      *btnBar\AddChild(This\*btnCancel)
 
-      This\*btnSave = New UI::Button("Save Contact", 120, 32)
-      *btnPanel\AddChild(This\*btnSave)
+      This\*btnSave = New UI::Button("Update Contact", 130, 32)
+      *btnBar\AddChild(This\*btnSave)
 
-      This\*rootPanel\AddChild(*btnPanel)
+      This\*rootPanel\AddChild(*btnBar)
 
       This\SetContent(This\*rootPanel)
       This\UpdateLayout()
     }
 
-    Public Method SetContactData(id_p.i, fn_p.s, ln_p.s, em_p.s, ph_p.s, co_p.s, nt_p.s) {
-      This\contactId = id_p
-      This\*txtFirstName\SetText(fn_p)
-      This\*txtLastName\SetText(ln_p)
-      This\*txtEmail\SetText(em_p)
-      This\*txtPhone\SetText(ph_p)
-      This\*txtCompany\SetText(co_p)
-      This\*txtNotes\SetText(nt_p)
-
-      If (id_p > 0)
-        This\*headerLabel\SetText("Edit Contact #" + Str(id_p))
-      Else
-        This\*headerLabel\SetText("Add New Contact")
-      EndIf
-    }
-
-    Public Method.b IsSaveClicked(gadgetId.i) {
-      If (This\*btnSave And gadgetId = This\*btnSave\GetId())
-        ProcedureReturn #True
-      EndIf
-      ProcedureReturn #False
-    }
-
-    Public Method.b IsCancelClicked(gadgetId.i) {
-      If (This\*btnCancel And gadgetId = This\*btnCancel\GetId())
-        ProcedureReturn #True
-      EndIf
-      ProcedureReturn #False
+    Public Method LoadContact(*c.ContactApp::Contact) {
+      If (Not *c) : ProcedureReturn : EndIf
+      This\currentContactId = *c\GetId()
+      This\*headerLabel\SetText("Edit Contact #" + Str(*c\GetId()))
+      This\*txtFirstName\SetText(*c\GetFirstName())
+      This\*txtLastName\SetText(*c\GetLastName())
+      This\*txtEmail\SetText(*c\GetEmail())
+      This\*txtPhone\SetText(*c\GetPhone())
+      This\*txtCompany\SetText(*c\GetCompany())
+      This\*txtNotes\SetText(*c\GetNotes())
     }
 
     Public Method.i GetContactId() {
-      ProcedureReturn This\contactId
+      ProcedureReturn This\currentContactId
+    }
+
+    Public Method.b IsSaveClicked(gadgetId.i) {
+      ProcedureReturn Bool(This\*btnSave And gadgetId = This\*btnSave\GetId())
+    }
+
+    Public Method.b IsCancelClicked(gadgetId.i) {
+      ProcedureReturn Bool(This\*btnCancel And gadgetId = This\*btnCancel\GetId())
     }
 
     Public Method.s GetFirstName() {

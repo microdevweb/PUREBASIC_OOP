@@ -7,12 +7,12 @@
 EnableExplicit
 
 ; Include OOP UI Framework and Modules
-XIncludeFile "../../ui/UI.pb"
-XIncludeFile "models/Contact.pb"
-XIncludeFile "data/ContactRepository.pb"
-XIncludeFile "views/MainWindow.pb"
-XIncludeFile "views/AddContactWindow.pb"
-XIncludeFile "views/EditContactWindow.pb"
+XIncludeFile "../../ui/UI.pbi"
+XIncludeFile "models/Contact.pbi"
+XIncludeFile "data/ContactRepository.pbi"
+XIncludeFile "views/MainWindow.pbi"
+XIncludeFile "views/AddContactWindow.pbi"
+XIncludeFile "views/EditContactWindow.pbi"
 
 Global *app.UI::Application
 Global *repo.ContactApp::ContactRepository

@@ -1,15 +1,15 @@
 ﻿; ============================================================================
-; PureBasic OOP - Edit Contact Window
-; Dedicated Window for Editing Existing Contacts
+; PureBasic OOP - Add Contact Window
+; Dedicated Window for Creating New Contacts
 ; Author:      MicrodevWeb
 ; ============================================================================
 
-XIncludeFile "../../../ui/UI.pb"
-XIncludeFile "../models/Contact.pb"
+XIncludeFile "../../../ui/UI.pbi"
+XIncludeFile "../models/Contact.pbi"
 
 Namespace ContactApp {
 
-  Class EditContactWindow Extends UI::Window {
+  Class AddContactWindow Extends UI::Window {
     Protected *rootPanel.UI::Layouts::StackPanel
     Protected *headerLabel.UI::Label
 
@@ -23,19 +23,16 @@ Namespace ContactApp {
     Protected *btnSave.UI::Button
     Protected *btnCancel.UI::Button
 
-    Protected currentContactId.i
-
     Public Method Init(parentWinId.i = 0) {
       Protected winFlags.i = #PB_Window_SystemMenu | #PB_Window_ScreenCentered | #PB_Window_MinimizeGadget
-      This\CreateWindowInternal("Edit Contact", #PB_Ignore, #PB_Ignore, 460, 520, winFlags, parentWinId)
-      This\currentContactId = 0
+      This\CreateWindowInternal("Add New Contact", #PB_Ignore, #PB_Ignore, 460, 520, winFlags, parentWinId)
 
       ; Root vertical panel
       This\*rootPanel = New UI::Layouts::StackPanel(#UI_Orientation_Vertical, 8)
       This\*rootPanel\SetMargin(16, 16, 16, 16)
 
       ; Header Title
-      This\*headerLabel = New UI::Label("Edit Contact Details")
+      This\*headerLabel = New UI::Label("Create New Contact")
       This\*rootPanel\AddChild(This\*headerLabel)
 
       ; Form Fields
@@ -71,7 +68,7 @@ Namespace ContactApp {
       This\*btnCancel = New UI::Button("Cancel", 90, 32)
       *btnBar\AddChild(This\*btnCancel)
 
-      This\*btnSave = New UI::Button("Update Contact", 130, 32)
+      This\*btnSave = New UI::Button("Save Contact", 120, 32)
       *btnBar\AddChild(This\*btnSave)
 
       This\*rootPanel\AddChild(*btnBar)
@@ -80,20 +77,13 @@ Namespace ContactApp {
       This\UpdateLayout()
     }
 
-    Public Method LoadContact(*c.ContactApp::Contact) {
-      If (Not *c) : ProcedureReturn : EndIf
-      This\currentContactId = *c\GetId()
-      This\*headerLabel\SetText("Edit Contact #" + Str(*c\GetId()))
-      This\*txtFirstName\SetText(*c\GetFirstName())
-      This\*txtLastName\SetText(*c\GetLastName())
-      This\*txtEmail\SetText(*c\GetEmail())
-      This\*txtPhone\SetText(*c\GetPhone())
-      This\*txtCompany\SetText(*c\GetCompany())
-      This\*txtNotes\SetText(*c\GetNotes())
-    }
-
-    Public Method.i GetContactId() {
-      ProcedureReturn This\currentContactId
+    Public Method ResetFields() {
+      This\*txtFirstName\SetText("")
+      This\*txtLastName\SetText("")
+      This\*txtEmail\SetText("")
+      This\*txtPhone\SetText("")
+      This\*txtCompany\SetText("")
+      This\*txtNotes\SetText("")
     }
 
     Public Method.b IsSaveClicked(gadgetId.i) {

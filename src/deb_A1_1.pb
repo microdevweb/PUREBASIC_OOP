@@ -1,5 +1,5 @@
 ﻿
-XIncludeFile "ui/UI.pb"
+XIncludeFile "ui/UI.pbi"
 
 Using UI
 Using UI::Controls

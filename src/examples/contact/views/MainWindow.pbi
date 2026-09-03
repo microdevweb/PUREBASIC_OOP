@@ -3,10 +3,10 @@
 ; Author:      MicrodevWeb
 ; ============================================================================
 
-XIncludeFile "../../../ui/UI.pb"
-XIncludeFile "../models/Contact.pb"
-XIncludeFile "../data/ContactRepository.pb"
-XIncludeFile "ContactDialog.pb"
+XIncludeFile "../../../ui/UI.pbi"
+XIncludeFile "../models/Contact.pbi"
+XIncludeFile "../data/ContactRepository.pbi"
+XIncludeFile "ContactDialog.pbi"
 
 Namespace ContactApp {
 

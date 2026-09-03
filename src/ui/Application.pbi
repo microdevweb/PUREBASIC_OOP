@@ -1,11 +1,11 @@
 ﻿; ============================================================================
-; PureBasic OOP GUI Framework - Application.pb
+; PureBasic OOP GUI Framework - Application.pbi
 ; Application Manager & Central Event Dispatcher
 ; Author:      MicrodevWeb
 ; ============================================================================
 
-XIncludeFile "Window.pb"
-XIncludeFile "Gadget.pb"
+XIncludeFile "Window.pbi"
+XIncludeFile "Gadget.pbi"
 
 Global NewMap UI_GadgetMap.i()
 Global NewMap UI_WindowMap.i()

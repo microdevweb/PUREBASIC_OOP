@@ -1,10 +1,10 @@
 ﻿; ============================================================================
-; PureBasic OOP GUI Framework - Grid.pb
+; PureBasic OOP GUI Framework - Grid.pbi
 ; 2D Flexible Grid layout panel with star sizing and row/column span
 ; Author:      MicrodevWeb
 ; ============================================================================
 
-XIncludeFile "Container.pb"
+XIncludeFile "Container.pbi"
 
 #UI_GridUnit_Pixel = 0
 #UI_GridUnit_Auto  = 1

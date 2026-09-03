@@ -4266,12 +4266,21 @@ CompilerIf #CompileWindows | #CompileLinux | #CompileMac
     EndIf
 
     ; Locate transpiler executable
-    Protected transpilerExe$ = "c:\PB\PUREBASIC_OOP_WORKSPACE\compiler\transpiler.exe"
+    Protected transpilerExe$ = "c:\PB\PB_PROJECT\PB_OOP_WORKSPACE\PUREBASIC_OOP_WORKSPACE\compiler\transpiler.exe"
+    If FileSize(transpilerExe$) <= 0
+      transpilerExe$ = GetPathPart(ProgramFilename()) + "..\..\compiler\transpiler.exe"
+    EndIf
+    If FileSize(transpilerExe$) <= 0
+      transpilerExe$ = GetCurrentDirectory() + "..\..\compiler\transpiler.exe"
+    EndIf
     If FileSize(transpilerExe$) <= 0
       transpilerExe$ = GetPathPart(ProgramFilename()) + "compiler\transpiler.exe"
     EndIf
     If FileSize(transpilerExe$) <= 0
       transpilerExe$ = GetCurrentDirectory() + "compiler\transpiler.exe"
+    EndIf
+    If FileSize(transpilerExe$) <= 0
+      transpilerExe$ = "c:\PB\PUREBASIC_OOP_WORKSPACE\compiler\transpiler.exe"
     EndIf
     If FileSize(transpilerExe$) <= 0
       ProcedureReturn

@@ -1,11 +1,11 @@
 ﻿; ============================================================================
-; PureBasic OOP GUI Framework - Window.pb
+; PureBasic OOP GUI Framework - Window.pbi
 ; Standard GUI Window Wrapper with Multi-Constructors & Dynamic Accessors
 ; Author:      MicrodevWeb
 ; ============================================================================
 
-XIncludeFile "Component.pb"
-XIncludeFile "Gadget.pb"
+XIncludeFile "Component.pbi"
+XIncludeFile "Gadget.pbi"
 
 Namespace UI {
 
