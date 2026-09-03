@@ -1,5 +1,5 @@
 ﻿
-XIncludeFile "../../../ui/ui.pbo"
+XIncludeFile "../../../ui/UI.pbo"
 Using UI
 Using UI::Controls
 Using UI::Layouts
@@ -19,14 +19,18 @@ Class MainWindow Extends UI::Window
     *bt_edit = New UI::Button("edit")
     *bt_edit = New UI::Button("delete")
     ; Instanciate layouts
-    *main_layout = New UI::Layouts::DockPanel
+    ; = button layout
     *button_layout = New UI::Layouts::StackPanel
-    *button_layout
+    *button_layout\SetOrientation(#UI_Orientation_Horizontal)
     *button_layout\AddChild(*bt_new)
     *button_layout\AddChild(*bt_edit)
+    *button_layout\AddChild(*bt_delete)
+    ; = main layout
+    *main_layout = New UI::Layouts::DockPanel
+    *main_layout\SetDock(*button_layout,#UI_Dock_Top)
   EndMethod
 EndClass
 ; IDE Options = PureBasic 6.40 (Windows - x64)
-; CursorPosition = 23
+; CursorPosition = 1
 ; EnableXP
 ; DPIAware
