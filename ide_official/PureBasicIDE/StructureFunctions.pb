@@ -1218,16 +1218,16 @@ Procedure FindClassInterface(Name$, List Output.s(), IncludePrivate = #True, Rec
   EndIf
   
   ; Check other open files
-  Protected Current = ListIndex(FileList())
+  PushListPosition(FileList())
   ForEach FileList()
     If @FileList() <> *ProjectInfo And @FileList() <> *ActiveSource
       If FindClassInterfaceFromSource(@FileList(), Name$, Output(), IncludePrivate, Recursion)
-        SelectElement(FileList(), Current)
+        PopListPosition(FileList())
         ProcedureReturn #True
       EndIf
     EndIf
   Next FileList()
-  SelectElement(FileList(), Current)
+  PopListPosition(FileList())
   
   ; Scan included files from *ActiveSource
   If *ActiveSource

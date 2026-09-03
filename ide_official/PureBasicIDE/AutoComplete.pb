@@ -599,6 +599,7 @@ EndProcedure
 ; AutoCompleteStack() contains any sub-structures that we are in
 ;
 Procedure AutoComplete_FillStructured(WordStart$, StructName$, *BaseItem.SourceItem, BaseItemLine)
+  Protected NewList localDummyList.s()
   
   If *BaseItem And StructName$ = ""  ; normal structure mode
                                      ; Only accept BaseItems that can be a structure
@@ -708,7 +709,7 @@ Procedure AutoComplete_FillStructured(WordStart$, StructName$, *BaseItem.SourceI
                 Else
                   AutoComplete_AddEntry(Entry$ + "(")
                 EndIf
-              ElseIf FindStructure(EntryType$, DummyList()) Or FindInterface(EntryType$, DummyList())
+              ElseIf FindStructure(EntryType$, localDummyList()) Or FindInterface(EntryType$, localDummyList())
                 AutoComplete_AddEntry(Entry$ + "\")
               Else
                 AutoComplete_AddEntry(Entry$)
