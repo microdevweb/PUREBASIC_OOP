@@ -1,0 +1,111 @@
+﻿<!DOCTYPE html>
+<html lang='fr'>
+<head>
+  <meta charset='UTF-8'>
+  <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+  <title>Class / Abstract Class - PureBasic OOP Documentation</title>
+  <link rel='stylesheet' href='../../css/doc_theme.css'>
+</head>
+<body>
+  <header class='doc-header'>
+    <a href='../index.html' class='brand-container'>
+      <img src='../../assets/PB_OOP_LOGO.jpeg' alt='Logo' class='brand-logo'>
+      <span class='brand-title'>PureBasic OOP</span>
+      <span class='brand-version'>ALPHA 1.0</span>
+    </a>
+    <div class='header-controls'>
+      <div class='search-box'>
+        <span class='search-icon'>&#128269;</span>
+        <input type='text' class='search-input' id='search-input' placeholder='Rechercher...'>
+      </div>
+      <div class='lang-switch'>
+        <a href='#' class='lang-btn active'>FR</a>
+        <a href='../../en/keywords/class.html' class='lang-btn'>EN</a>
+      </div>
+    </div>
+  </header>
+  <div class='layout-container'>
+<nav class='doc-sidebar'>
+  <div class='nav-section'>
+    <div class='nav-section-title'>Introduction</div>
+    <ul class='nav-list'>
+      <li class='nav-item'><a href='../index.html'><span>Vue d'ensemble</span></a></li>
+    </ul>
+  </div>
+  <div class='nav-section'>
+    <div class='nav-section-title'>Mots-cl&eacute;s POO</div>
+    <ul class='nav-list'>
+      <li class='nav-item active'><a href='../keywords/class.html'><span>Class / Abstract</span><span class='badge badge-keyword'>KW</span></a></li>
+      <li class='nav-item'><a href='../keywords/method.html'><span>Method / Override</span><span class='badge badge-keyword'>KW</span></a></li>
+      <li class='nav-item'><a href='../keywords/properties.html'><span>Getter / Setter / Prop</span><span class='badge badge-keyword'>KW</span></a></li>
+      <li class='nav-item'><a href='../keywords/inheritance.html'><span>Extends / Super</span><span class='badge badge-keyword'>KW</span></a></li>
+      <li class='nav-item'><a href='../keywords/encapsulation.html'><span>Public / Protected / Private</span><span class='badge badge-keyword'>KW</span></a></li>
+      <li class='nav-item'><a href='../keywords/lifecycle.html'><span>New / Free / Init</span><span class='badge badge-keyword'>KW</span></a></li>
+      <li class='nav-item'><a href='../keywords/operators.html'><span>This / Cast / TypeOf</span><span class='badge badge-keyword'>KW</span></a></li>
+    </ul>
+  </div>
+  <div class='nav-section'>
+    <div class='nav-section-title'>Composants UI</div>
+    <ul class='nav-list'>
+      <li class='nav-item'><a href='../ui/application.html'><span>Application</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/window.html'><span>Window</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/gadget.html'><span>Gadget / Component</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/button.html'><span>Button</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/checkbox.html'><span>CheckBox</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/combobox.html'><span>ComboBox</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/label.html'><span>Label</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/progressbar.html'><span>ProgressBar</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/slider.html'><span>Slider</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/textbox.html'><span>TextBox</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/toggleswitch.html'><span>ToggleSwitch</span><span class='badge badge-ui'>UI</span></a></li>
+    </ul>
+  </div>
+</nav>
+    <main class='doc-content'>
+      <div class='breadcrumb'>
+        <a href='../index.html'>Accueil</a>
+        <span class='breadcrumb-separator'>/</span>
+        <span>Keywords</span>
+        <span class='breadcrumb-separator'>/</span>
+        <span style='color: var(--accent-blue);'>Class / Abstract Class</span>
+      </div>
+      <div class='page-header'>
+        <div class='title-row'>
+          <h1 class='page-title'>Class / Abstract Class</h1>
+          <span class='badge badge-keyword'>Mot-cl&eacute;</span>
+        </div>
+        <p class='page-lead'>D&eacute;claration de classes, encapsulation et mod&eacute;lisation orient&eacute;e objet.</p>
+      </div>
+<div class='doc-section'><h2 class='section-title'>Description</h2><p>Le mot-cl&eacute; <code>Class</code> d&eacute;clare une nouvelle classe d'objets. Une classe regroupe des champs prot&eacute;g&eacute;s/priv&eacute;s et des m&eacute;thodes publiques pour manipuler ses donn&eacute;es.</p><p>Une classe peut &ecirc;tre d&eacute;clar&eacute;e <code>Abstract Class</code> pour servir de mod&egrave;le g&eacute;n&eacute;rique non instanciable directement.</p></div><div class='doc-section'><h2 class='section-title'>Syntaxe</h2><div class='code-container'>  <div class='code-header'><span class='code-title'>Exemple : D&eacute;claration de classe (.pbo)</span><span class='code-badge'>PBO</span></div>  <pre><code><span class='kw'>Class</span> <span class='tp'>Personne</span>
+  <span class='kw'>Protected</span> nom.<span class='tp'>s</span>
+  <span class='kw'>Protected</span> age.<span class='tp'>i</span>
+
+  <span class='kw'>Public</span> <span class='kw'>Method</span> <span class='fn'>Init</span>(nom_p.<span class='tp'>s</span>, age_p.<span class='tp'>i</span>)
+    <span class='kw'>This</span>\\nom = nom_p
+    <span class='kw'>This</span>\\age = age_p
+  <span class='kw'>EndMethod</span>
+
+  <span class='kw'>Public</span> <span class='kw'>Method</span>.<span class='tp'>s</span> <span class='fn'>GetNom</span>()
+    <span class='kw'>ProcedureReturn</span> <span class='kw'>This</span>\\nom
+  <span class='kw'>EndMethod</span>
+<span class='kw'>EndClass</span></code></pre></div></div><div class='doc-section'><h2 class='section-title'>Mots-cl&eacute;s associ&eacute;s</h2><ul>  <li><code>EndClass</code> : Cl&ocirc;ture le bloc de d&eacute;claration de la classe.</li>  <li><code>Abstract Class</code> : D&eacute;finit une classe abstraite imposant des contrats aux classes filles.</li>  <li><code>Extends</code> : Sp&eacute;cifie la classe parente dont h&eacute;rite la classe courante.</li></ul></div>
+    </main>
+  </div>
+  <footer class='doc-footer'>
+    <p>&copy; 2026 PureBasic OOP Project - MicrodevWeb | Dual License GPL v3 / Fantaisie Software</p>
+  </footer>
+  <script>
+    document.getElementById('search-input').addEventListener('input', function(e) {
+      let filter = e.target.value.toLowerCase();
+      document.querySelectorAll('.nav-item').forEach(function(item) {
+        let text = item.innerText.toLowerCase();
+        if (text.includes(filter)) {
+          item.style.display = '';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

@@ -35,6 +35,8 @@ Declare OOP_Linter_ClearErrors(*Source.SourceFile)
 Declare OOP_Linter_SetError(*Source.SourceFile, lineNum.i, message.s)
 Declare OOP_GenerateConstructor(IncludeSuper.b)
 Declare.s AutoComplete_FindEnclosingClass(Line)
+Declare.s GetOOPHelpPage(Keyword$)
+Declare.i OpenOOPHelp(PageSubPath$)
 
 ;- HelpViewer.pb
 ;- WindowsHelp.pb
