@@ -1180,19 +1180,23 @@ Procedure.s AutoComplete_FindEnclosingClass(Line)
     
     If Left(Upper$, 8) = "ENDCLASS"
       Depth + 1
-    ElseIf Left(Upper$, 6) = "CLASS " Or Left(Upper$, 6) = "CLASS	"
-      If Depth = 0
-        ClassName$ = OOP_StripBracesAndComments(Trim(Mid(LineText$, 7)))
-        ExtendsPos = FindString(UCase(ClassName$), "EXTENDS ")
-        If ExtendsPos = 0
-          ExtendsPos = FindString(UCase(ClassName$), "EXTENDS	")
+    Else
+      Protected pCls = FindString(Upper$, "CLASS ")
+      If pCls = 0 : pCls = FindString(Upper$, "CLASS	") : EndIf
+      If pCls > 0 And Left(Upper$, 8) <> "ENDCLASS"
+        If Depth = 0
+          ClassName$ = OOP_StripBracesAndComments(Trim(Mid(LineText$, pCls + 6)))
+          ExtendsPos = FindString(UCase(ClassName$), "EXTENDS ")
+          If ExtendsPos = 0
+            ExtendsPos = FindString(UCase(ClassName$), "EXTENDS	")
+          EndIf
+          If ExtendsPos > 0
+            ClassName$ = OOP_StripBracesAndComments(Trim(Left(ClassName$, ExtendsPos - 1)))
+          EndIf
+          ProcedureReturn ClassName$
+        Else
+          Depth - 1
         EndIf
-        If ExtendsPos > 0
-          ClassName$ = OOP_StripBracesAndComments(Trim(Left(ClassName$, ExtendsPos - 1)))
-        EndIf
-        ProcedureReturn ClassName$
-      Else
-        Depth - 1
       EndIf
     EndIf
   Next l

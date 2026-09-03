@@ -873,9 +873,11 @@ Procedure FindClassInterfaceFromSource(*Source.SourceFile, Name$, List Output.s(
       Continue
     EndIf
     
-    ; Check start of Class
-    If Not InsideTargetClass And (Left(Upper$, 6) = "CLASS " Or Left(Upper$, 6) = "CLASS	")
-      Protected CurrentClassName$ = Trim(Mid(LineText$, 7))
+    ; Check start of Class (including 'Abstract Class')
+    Protected pClassPos = FindString(Upper$, "CLASS ")
+    If pClassPos = 0 : pClassPos = FindString(Upper$, "CLASS	") : EndIf
+    If Not InsideTargetClass And pClassPos > 0 And Left(Upper$, 8) <> "ENDCLASS"
+      Protected CurrentClassName$ = Trim(Mid(LineText$, pClassPos + 6))
       Protected ExtendsPos = FindString(UCase(CurrentClassName$), "EXTENDS ")
       If ExtendsPos = 0
         ExtendsPos = FindString(UCase(CurrentClassName$), "EXTENDS	")
@@ -1055,9 +1057,11 @@ Procedure FindClassInterfaceFromFile(FilePath$, Name$, List Output.s(), IncludeP
       Continue
     EndIf
     
-    ; Check Class start
-    If Not InsideTargetClass And (Left(Upper$, 6) = "CLASS " Or Left(Upper$, 6) = "CLASS	")
-      Protected CurrentClassName$ = Trim(Mid(LineText$, 7))
+    ; Check Class start (including 'Abstract Class')
+    Protected pClassPos = FindString(Upper$, "CLASS ")
+    If pClassPos = 0 : pClassPos = FindString(Upper$, "CLASS	") : EndIf
+    If Not InsideTargetClass And pClassPos > 0 And Left(Upper$, 8) <> "ENDCLASS"
+      Protected CurrentClassName$ = Trim(Mid(LineText$, pClassPos + 6))
       Protected ExtendsPos = FindString(UCase(CurrentClassName$), "EXTENDS ")
       If ExtendsPos = 0
         ExtendsPos = FindString(UCase(CurrentClassName$), "EXTENDS	")
