@@ -20,6 +20,10 @@ Namespace UI {
       ProcedureReturn This\id
     }
 
+    Public Method.i GetHandle() {
+      ProcedureReturn This\id
+    }
+
     Public Method.s GetTag() {
       ProcedureReturn This\tag
     }
@@ -32,24 +36,73 @@ Namespace UI {
       ProcedureReturn This\x
     }
 
+    Public Method SetX(nx.i) {
+      This\x = nx
+    }
+
     Public Method.i GetY() {
       ProcedureReturn This\y
+    }
+
+    Public Method SetY(ny.i) {
+      This\y = ny
     }
 
     Public Method.i GetWidth() {
       ProcedureReturn This\width
     }
 
+    Public Method SetWidth(nw.i) {
+      This\width = nw
+    }
+
     Public Method.i GetHeight() {
       ProcedureReturn This\height
+    }
+
+    Public Method SetHeight(nh.i) {
+      This\height = nh
+    }
+
+    Public Method SetLocation(nx.i, ny.i) {
+      This\x = nx
+      This\y = ny
+    }
+
+    Public Method SetSize(nw.i, nh.i) {
+      This\width = nw
+      This\height = nh
+    }
+
+    Public Method SetPosition(nx.i, ny.i, nw.i, nh.i) {
+      This\x = nx
+      This\y = ny
+      This\width = nw
+      This\height = nh
     }
 
     Public Method.b IsVisible() {
       ProcedureReturn This\isVisible
     }
 
+    Public Method.b GetVisible() {
+      ProcedureReturn This\isVisible
+    }
+
+    Public Method SetVisible(v.b) {
+      This\isVisible = v
+    }
+
     Public Method.b IsEnabled() {
       ProcedureReturn This\isEnabled
+    }
+
+    Public Method.b GetEnabled() {
+      ProcedureReturn This\isEnabled
+    }
+
+    Public Method SetEnabled(e.b) {
+      This\isEnabled = e
     }
 
     Public Method.i GetUserData() {

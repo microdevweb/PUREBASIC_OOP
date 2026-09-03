@@ -427,27 +427,72 @@ Define fr_application.s = "<div class='doc-section'>" +
   "</div>" +
   "</div>"
 
-SaveHTML(BaseDocDir + "fr\ui\application.html", BuildPage("fr", "application", "ui/application.html", "Classe Application", "Gestionnaire global d'application et boucle d'&eacute;v&eacute;nements GUI.", "badge-ui", "UI Class", fr_application))
-
 ; FR UI: Window
 Define fr_window.s = "<div class='doc-section'>" +
   "<h2 class='section-title'>Description</h2>" +
-  "<p>La classe <code>Window</code> repr&eacute;sente une fen&ecirc;tre graphique syst&egrave;me. Elle permet d'ajouter des gadgets, de configurer les dimensions, le titre, et de g&eacute;rer les &eacute;v&eacute;nements de fermeture ou de redimensionnement.</p>" +
+  "<p>La classe <code>UI::Window</code> encapsule une fen&ecirc;tre graphique native PureBasic. H&eacute;ritant de <code>Component</code>, elle offre un contr&ocirc;le total sur ses dimensions, sa position, sa visibilit&eacute;, ainsi que des m&eacute;thodes virtuelles pour intercepter les &eacute;v&eacute;nements syst&egrave;me (fermeture, redimensionnement, d&eacute;placement).</p>" +
+  "<p>Gr&acirc;ce &agrave; la <strong>surcharge de m&eacute;thodes</strong>, vous disposez de <strong>5 constructeurs diff&eacute;rents</strong> pour instancier une fen&ecirc;tre de mani&egrave;re concise ou d&eacute;taill&eacute;e selon vos besoins.</p>" +
   "</div>" +
   "<div class='doc-section'>" +
-  "<h2 class='section-title'>M&eacute;thodes principales</h2>" +
+  "<h2 class='section-title'>Constructeurs Disponibles (Surcharge Init)</h2>" +
   "<div class='table-wrapper'>" +
   "  <table>" +
-  "    <tr><th>M&eacute;thode</th><th>Description</th></tr>" +
-  "    <tr><td><code>Init(x, y, width, height, title.s, flags)</code></td><td>Cr&eacute;e et initialise la fen&ecirc;tre.</td></tr>" +
-  "    <tr><td><code>AddGadget(*gadget)</code></td><td>Attache un contr&ocirc;le ou gadget enfant &agrave; la fen&ecirc;tre.</td></tr>" +
-  "    <tr><td><code>Show() / Hide()</code></td><td>Affiche ou masque la fen&ecirc;tre.</td></tr>" +
-  "    <tr><td><code>Close()</code></td><td>Ferme et lib&egrave;re la fen&ecirc;tre.</td></tr>" +
+  "    <tr><th>Constructeur</th><th>Description & Comportement par d&eacute;faut</th></tr>" +
+  "    <tr><td><code>New Window(title.s)</code></td><td><strong>Constructeur Rapide :</strong> Ouvre une fen&ecirc;tre de <strong>800 &times; 600</strong> pixels, automatiquement <strong>centr&eacute;e &agrave; l'&eacute;cran</strong> avec le menu syst&egrave;me et le bouton r&eacute;duire.</td></tr>" +
+  "    <tr><td><code>New Window(title.s, w.i, h.i)</code></td><td><strong>Constructeur Dimensions :</strong> Ouvre une fen&ecirc;tre aux dimensions <code>w &times; h</code>, <strong>centr&eacute;e &agrave; l'&eacute;cran</strong> avec les drapeaux par d&eacute;faut.</td></tr>" +
+  "    <tr><td><code>New Window(title.s, w.i, h.i, flags.i)</code></td><td><strong>Constructeur avec Flags :</strong> Ouvre une fen&ecirc;tre <code>w &times; h</code> avec les drapeaux PureBasic sp&eacute;cifi&eacute;s (ex: <code>#PB_Window_Tool</code>, <code>#PB_Window_BorderLess</code>...).</td></tr>" +
+  "    <tr><td><code>New Window(title.s, x.i, y.i, w.i, h.i)</code></td><td><strong>Constructeur Positionn&eacute; :</strong> Ouvre une fen&ecirc;tre aux coordonn&eacute;es absolues <code>(x, y)</code> et dimensions <code>w &times; h</code>.</td></tr>" +
+  "    <tr><td><code>New Window(title.s, x.i, y.i, w.i, h.i, flags.i, parentID.i = 0)</code></td><td><strong>Constructeur Complet :</strong> Permet de configurer tous les param&egrave;tres, y compris la fen&ecirc;tre parente (pour les fen&ecirc;tres modales ou secondaires).</td></tr>" +
   "  </table>" +
+  "</div>" +
+  "</div>" +
+  "<div class='doc-section'>" +
+  "<h2 class='section-title'>Accesseurs (Getters & Setters)</h2>" +
+  "<p>Toutes les propri&eacute;t&eacute;s de la fen&ecirc;tre sont modifiables et consultables &agrave; tout moment avec synchronisation temps-r&eacute;el vers l'API PureBasic :</p>" +
+  "<div class='table-wrapper'>" +
+  "  <table>" +
+  "    <tr><th>Propri&eacute;t&eacute;</th><th>Setter</th><th>Getter</th><th>Description</th></tr>" +
+  "    <tr><td><strong>Titre</strong></td><td><code>SetTitle(t.s)</code></td><td><code>GetTitle()</code></td><td>Modifie ou r&eacute;cup&egrave;re le texte de la barre de titre (<code>SetWindowTitle</code>).</td></tr>" +
+  "    <tr><td><strong>Position X</strong></td><td><code>SetX(nx.i)</code></td><td><code>GetX()</code></td><td>Position horizontale &agrave; l'&eacute;cran (<code>WindowX</code> / <code>ResizeWindow</code>).</td></tr>" +
+  "    <tr><td><strong>Position Y</strong></td><td><code>SetY(ny.i)</code></td><td><code>GetY()</code></td><td>Position verticale &agrave; l'&eacute;cran (<code>WindowY</code> / <code>ResizeWindow</code>).</td></tr>" +
+  "    <tr><td><strong>Largeur</strong></td><td><code>SetWidth(nw.i)</code></td><td><code>GetWidth()</code></td><td>Largeur de la zone cliente en pixels (<code>WindowWidth</code>).</td></tr>" +
+  "    <tr><td><strong>Hauteur</strong></td><td><code>SetHeight(nh.i)</code></td><td><code>GetHeight()</code></td><td>Hauteur de la zone cliente en pixels (<code>WindowHeight</code>).</td></tr>" +
+  "    <tr><td><strong>Position (X, Y)</strong></td><td><code>SetLocation(x.i, y.i)</code></td><td>&mdash;</td><td>D&eacute;place la fen&ecirc;tre aux coordonn&eacute;es <code>(x, y)</code> sans modifier ses dimensions.</td></tr>" +
+  "    <tr><td><strong>Taille (W, H)</strong></td><td><code>SetSize(w.i, h.i)</code></td><td>&mdash;</td><td>Redimensionne la zone cliente &agrave; <code>w &times; h</code>.</td></tr>" +
+  "    <tr><td><strong>Zone compl&egrave;te</strong></td><td><code>SetPosition(x, y, w, h)</code></td><td>&mdash;</td><td>Met &agrave; jour position et dimensions en un seul appel.</td></tr>" +
+  "    <tr><td><strong>Visibilit&eacute;</strong></td><td><code>SetVisible(v.b)</code></td><td><code>IsVisible()</code>, <code>GetVisible()</code></td><td>Affiche (<code>#True</code>) ou masque (<code>#False</code>) la fen&ecirc;tre (<code>HideWindow</code>).</td></tr>" +
+  "    <tr><td><strong>Activation</strong></td><td><code>SetEnabled(e.b)</code></td><td><code>IsEnabled()</code>, <code>GetEnabled()</code></td><td>Active ou d&eacute;sactive les interactions utilisateur (<code>DisableWindow</code>).</td></tr>" +
+  "    <tr><td><strong>Drapeaux</strong></td><td><code>SetFlags(flags.i)</code></td><td><code>GetFlags()</code></td><td>Drapeaux de style appliqu&eacute;s &agrave; la cr&eacute;ation.</td></tr>" +
+  "    <tr><td><strong>Parent</strong></td><td><code>SetParentID(id.i)</code></td><td><code>GetParentID()</code></td><td>Identifiant de la fen&ecirc;tre parente.</td></tr>" +
+  "    <tr><td><strong>Donn&eacute;es / Tag</strong></td><td><code>SetTag(s.s)</code> / <code>SetUserData(v.i)</code></td><td><code>GetTag()</code> / <code>GetUserData()</code></td><td>Informations ou pointeurs personnalis&eacute;s attach&eacute;s au composant.</td></tr>" +
+  "    <tr><td><strong>Handle PB</strong></td><td>&mdash;</td><td><code>GetID()</code>, <code>GetHandle()</code></td><td>Num&eacute;ro d'identification natif PureBasic de la fen&ecirc;tre.</td></tr>" +
+  "  </table>" +
+  "</div>" +
+  "</div>" +
+  "<div class='doc-section'>" +
+  "<h2 class='section-title'>Exemple Complet : Cr&eacute;ation et Manipulation</h2>" +
+  "<div class='code-container'>" +
+  "  <div class='code-header'><span class='code-title'>Exemple : Utilisation des constructeurs et setters (.pbo)</span><span class='code-badge'>PBO</span></div>" +
+  "  <pre><code><span class='kw'>XIncludeFile</span> <span class='str'>'ui/UI.pbo'</span>" + #CRLF$ +
+  "<span class='kw'>Using</span> <span class='tp'>UI</span>" + #CRLF$ +
+  #CRLF$ +
+  "<span class='cm'>; 1. Cr&eacute;ation ultra-rapide (800x600 centr&eacute;e)</span>" + #CRLF$ +
+  "<span class='kw'>Define</span> *maFenetre.<span class='tp'>Window</span> = <span class='kw'>New</span> <span class='tp'>Window</span>(<span class='str'>'Mon Application'</span>)" + #CRLF$ +
+  #CRLF$ +
+  "<span class='cm'>; 2. Personnalisation dynamique avec les setters</span>" + #CRLF$ +
+  "*maFenetre\\<span class='fn'>SetTitle</span>(<span class='str'>'Tableau de bord - Session active'</span>)" + #CRLF$ +
+  "*maFenetre\\<span class='fn'>SetSize</span>(<span class='num'>1024</span>, <span class='num'>768</span>)" + #CRLF$ +
+  #CRLF$ +
+  "<span class='cm'>; 3. V&eacute;rification avec les getters</span>" + #CRLF$ +
+  "<span class='fn'>Debug</span> <span class='str'>'Largeur actuelle : '</span> + <span class='fn'>Str</span>(*maFenetre\\<span class='fn'>GetWidth</span>())" + #CRLF$ +
+  "<span class='fn'>Debug</span> <span class='str'>'Hauteur actuelle : '</span> + <span class='fn'>Str</span>(*maFenetre\\<span class='fn'>GetHeight</span>())" + #CRLF$ +
+  #CRLF$ +
+  "<span class='cm'>; 4. Fermeture et lib&eacute;ration</span>" + #CRLF$ +
+  "*maFenetre\\<span class='fn'>Free</span>()</code></pre>" +
   "</div>" +
   "</div>"
 
-SaveHTML(BaseDocDir + "fr\ui\window.html", BuildPage("fr", "window", "ui/window.html", "Classe Window", "Cr&eacute;ation et gestion des fen&ecirc;tres graphiques natives.", "badge-ui", "UI Class", fr_window))
+SaveHTML(BaseDocDir + "fr\ui\window.html", BuildPage("fr", "window", "ui/window.html", "Classe Window", "Cr&eacute;ation flexible de fen&ecirc;tres avec constructeurs multiples et accesseurs dynamiques.", "badge-ui", "UI Class", fr_window))
 
 ; FR UI: Gadget / Component
 Define fr_gadget.s = "<div class='doc-section'>" +
@@ -554,11 +599,12 @@ SaveHTML(BaseDocDir + "en\keywords\class.html", BuildPage("en", "class", "keywor
 Define en_method.s = "<div class='doc-section'>" +
   "<h2 class='section-title'>Description</h2>" +
   "<p>The <code>Method</code> keyword declares a member function or procedure attached to a class. Methods can take parameters, return typed values, and access fields through <code>This</code>.</p>" +
+  "<p>PureBasic OOP also supports <strong>Method Overloading</strong> and <strong>Multiple Constructors</strong> with different parameter types and arity.</p>" +
   "</div>" +
   "<div class='doc-section'>" +
   "<h2 class='section-title'>Constructors & Destructors</h2>" +
   "<ul>" +
-  "  <li><code>Public Method Init(...)</code>: Constructor invoked automatically when instantiated with <code>New</code>.</li>" +
+  "  <li><code>Public Method Init(...)</code>: Constructor invoked automatically when instantiated with <code>New</code>. Multiple overloaded constructors are supported.</li>" +
   "  <li><code>Public Method Free()</code>: Destructor called upon object disposal with <code>FreeObject</code>.</li>" +
   "  <li><code>Public Abstract Method</code>: Method signature in an abstract class that must be implemented by concrete subclasses.</li>" +
   "</ul>" +
@@ -575,7 +621,72 @@ SaveHTML(BaseDocDir + "en\keywords\operators.html", BuildPage("en", "operators",
 
 ; EN UI Components
 SaveHTML(BaseDocDir + "en\ui\application.html", BuildPage("en", "application", "ui/application.html", "Application Class", "Global application manager and GUI event loop.", "badge-ui", "UI Class", "<p>Manages the application lifecycle and message dispatch with <code>Run()</code> and <code>Exit()</code>.</p>"))
-SaveHTML(BaseDocDir + "en\ui\window.html", BuildPage("en", "window", "ui/window.html", "Window Class", "Native GUI window management.", "badge-ui", "UI Class", "<p>Create and control native GUI windows, add gadgets, and handle resize/close events.</p>"))
+
+; EN UI: Window
+Define en_window.s = "<div class='doc-section'>" +
+  "<h2 class='section-title'>Description</h2>" +
+  "<p>The <code>UI::Window</code> class encapsulates a native PureBasic GUI window. Inheriting from <code>Component</code>, it provides comprehensive control over window coordinates, visibility, title, and virtual event handlers (close, resize, move).</p>" +
+  "<p>Through <strong>Method Overloading</strong>, <strong>5 distinct constructors</strong> are available to instantiate windows quickly or with fine-grained configuration.</p>" +
+  "</div>" +
+  "<div class='doc-section'>" +
+  "<h2 class='section-title'>Available Constructors (Overloaded Init)</h2>" +
+  "<div class='table-wrapper'>" +
+  "  <table>" +
+  "    <tr><th>Constructor</th><th>Description & Default Behavior</th></tr>" +
+  "    <tr><td><code>New Window(title.s)</code></td><td><strong>Quick Constructor:</strong> Creates an <strong>800 &times; 600</strong> window, <strong>centered on screen</strong> with standard system menu and minimize button.</td></tr>" +
+  "    <tr><td><code>New Window(title.s, w.i, h.i)</code></td><td><strong>Sized Constructor:</strong> Creates a window of size <code>w &times; h</code>, <strong>centered on screen</strong>.</td></tr>" +
+  "    <tr><td><code>New Window(title.s, w.i, h.i, flags.i)</code></td><td><strong>Custom Flags Constructor:</strong> Creates a centered <code>w &times; h</code> window with custom PureBasic window flags.</td></tr>" +
+  "    <tr><td><code>New Window(title.s, x.i, y.i, w.i, h.i)</code></td><td><strong>Positioned Constructor:</strong> Creates a window positioned at absolute screen coordinates <code>(x, y)</code> with dimensions <code>w &times; h</code>.</td></tr>" +
+  "    <tr><td><code>New Window(title.s, x.i, y.i, w.i, h.i, flags.i, parentID.i = 0)</code></td><td><strong>Full Constructor:</strong> Allows full control over all parameters including parent window ID for modal/child windows.</td></tr>" +
+  "  </table>" +
+  "</div>" +
+  "</div>" +
+  "<div class='doc-section'>" +
+  "<h2 class='section-title'>Properties, Getters & Setters</h2>" +
+  "<div class='table-wrapper'>" +
+  "  <table>" +
+  "    <tr><th>Property</th><th>Setter</th><th>Getter</th><th>Description</th></tr>" +
+  "    <tr><td><strong>Title</strong></td><td><code>SetTitle(t.s)</code></td><td><code>GetTitle()</code></td><td>Updates or retrieves window title bar caption (<code>SetWindowTitle</code>).</td></tr>" +
+  "    <tr><td><strong>X Position</strong></td><td><code>SetX(nx.i)</code></td><td><code>GetX()</code></td><td>Horizontal screen position in pixels (<code>WindowX</code> / <code>ResizeWindow</code>).</td></tr>" +
+  "    <tr><td><strong>Y Position</strong></td><td><code>SetY(ny.i)</code></td><td><code>GetY()</code></td><td>Vertical screen position in pixels (<code>WindowY</code> / <code>ResizeWindow</code>).</td></tr>" +
+  "    <tr><td><strong>Width</strong></td><td><code>SetWidth(nw.i)</code></td><td><code>GetWidth()</code></td><td>Client area width in pixels (<code>WindowWidth</code>).</td></tr>" +
+  "    <tr><td><strong>Height</strong></td><td><code>SetHeight(nh.i)</code></td><td><code>GetHeight()</code></td><td>Client area height in pixels (<code>WindowHeight</code>).</td></tr>" +
+  "    <tr><td><strong>Location (X, Y)</strong></td><td><code>SetLocation(x.i, y.i)</code></td><td>—</td><td>Moves the window to <code>(x, y)</code> without changing its size.</td></tr>" +
+  "    <tr><td><strong>Size (W, H)</strong></td><td><code>SetSize(w.i, h.i)</code></td><td>—</td><td>Resizes client area to <code>w &times; h</code>.</td></tr>" +
+  "    <tr><td><strong>Full Bounds</strong></td><td><code>SetPosition(x, y, w, h)</code></td><td>—</td><td>Updates position and dimensions in a single call.</td></tr>" +
+  "    <tr><td><strong>Visibility</strong></td><td><code>SetVisible(v.b)</code></td><td><code>IsVisible()</code>, <code>GetVisible()</code></td><td>Shows (<code>#True</code>) or hides (<code>#False</code>) the window (<code>HideWindow</code>).</td></tr>" +
+  "    <tr><td><strong>Enabled</strong></td><td><code>SetEnabled(e.b)</code></td><td><code>IsEnabled()</code>, <code>GetEnabled()</code></td><td>Enables or disables user interaction (<code>DisableWindow</code>).</td></tr>" +
+  "    <tr><td><strong>Flags</strong></td><td><code>SetFlags(flags.i)</code></td><td><code>GetFlags()</code></td><td>PureBasic window creation flags.</td></tr>" +
+  "    <tr><td><strong>Parent ID</strong></td><td><code>SetParentID(id.i)</code></td><td><code>GetParentID()</code></td><td>Parent window identifier.</td></tr>" +
+  "    <tr><td><strong>Custom Tag / Data</strong></td><td><code>SetTag(s.s)</code> / <code>SetUserData(v.i)</code></td><td><code>GetTag()</code> / <code>GetUserData()</code></td><td>Custom metadata or user data pointer.</td></tr>" +
+  "    <tr><td><strong>Native Handle</strong></td><td>—</td><td><code>GetID()</code>, <code>GetHandle()</code></td><td>Native PureBasic window ID integer.</td></tr>" +
+  "  </table>" +
+  "</div>" +
+  "</div>" +
+  "<div class='doc-section'>" +
+  "<h2 class='section-title'>Complete Code Example</h2>" +
+  "<div class='code-container'>" +
+  "  <div class='code-header'><span class='code-title'>Example: Window creation and dynamic setters (.pbo)</span><span class='code-badge'>PBO</span></div>" +
+  "  <pre><code><span class='kw'>XIncludeFile</span> <span class='str'>'ui/UI.pbo'</span>" + #CRLF$ +
+  "<span class='kw'>Using</span> <span class='tp'>UI</span>" + #CRLF$ +
+  #CRLF$ +
+  "<span class='cm'>; 1. Fast instantiation (800x600 centered)</span>" + #CRLF$ +
+  "<span class='kw'>Define</span> *myWin.<span class='tp'>Window</span> = <span class='kw'>New</span> <span class='tp'>Window</span>(<span class='str'>'My Application'</span>)" + #CRLF$ +
+  #CRLF$ +
+  "<span class='cm'>; 2. Dynamic customization using setters</span>" + #CRLF$ +
+  "*myWin\\<span class='fn'>SetTitle</span>(<span class='str'>'Dashboard - Active Session'</span>)" + #CRLF$ +
+  "*myWin\\<span class='fn'>SetSize</span>(<span class='num'>1024</span>, <span class='num'>768</span>)" + #CRLF$ +
+  #CRLF$ +
+  "<span class='cm'>; 3. Inspection via getters</span>" + #CRLF$ +
+  "<span class='fn'>Debug</span> <span class='str'>'Current Width : '</span> + <span class='fn'>Str</span>(*myWin\\<span class='fn'>GetWidth</span>())" + #CRLF$ +
+  "<span class='fn'>Debug</span> <span class='str'>'Current Height: '</span> + <span class='fn'>Str</span>(*myWin\\<span class='fn'>GetHeight</span>())" + #CRLF$ +
+  #CRLF$ +
+  "<span class='cm'>; 4. Cleanup and disposal</span>" + #CRLF$ +
+  "*myWin\\<span class='fn'>Free</span>()</code></pre>" +
+  "</div>" +
+  "</div>"
+
+SaveHTML(BaseDocDir + "en\ui\window.html", BuildPage("en", "window", "ui/window.html", "Window Class", "Flexible GUI window management with multi-constructors and dynamic setters.", "badge-ui", "UI Class", en_window))
 SaveHTML(BaseDocDir + "en\ui\gadget.html", BuildPage("en", "gadget", "ui/gadget.html", "Gadget & Component Classes", "Abstract base class for all UI controls.", "badge-ui", "UI Class", "<p>Unified base control handling coordinates (x, y, w, h), visibility, and event routing.</p>"))
 SaveHTML(BaseDocDir + "en\ui\button.html", BuildPage("en", "button", "ui/button.html", "Button Class", "Clickable button control with event handling.", "badge-ui", "UI Class", "<p>Standard push button with text, dimensions, and <code>OnClick</code> callbacks.</p>"))
 SaveHTML(BaseDocDir + "en\ui\checkbox.html", BuildPage("en", "checkbox", "ui/checkbox.html", "CheckBox Class", "Checkable toggle box.", "badge-ui", "UI Class", "<p>Toggle checkable box with <code>SetState()</code> and <code>GetState()</code>.</p>"))

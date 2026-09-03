@@ -13,7 +13,7 @@ Namespace UI::Controls {
     Protected inactiveColor.i
 
     Public Method Init(x_p.i, y_p.i, w_p.i = 50, h_p.i = 26, defaultState_p.b = #False) {
-      Super::Init(x_p, y_p, w_p, h_p)
+      Super::Init(x_p, y_p, w_p, h_p, 0)
       This\isChecked = defaultState_p
       This\activeColor = RGB(52, 199, 89)      ; iOS Green
       This\inactiveColor = RGB(200, 200, 205)  ; Light Gray
