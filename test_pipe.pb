@@ -1,5 +1,5 @@
-OpenConsole()
-prg = RunProgram("compiler\transpiler.exe", "--check src\test_endcla.pbo", "", #PB_Program_Open | #PB_Program_Read | #PB_Program_Hide)
+﻿OpenConsole()
+prg = RunProgram("compiler\transpiler.exe", "--check src\test_endcla.pb", "", #PB_Program_Open | #PB_Program_Read | #PB_Program_Hide)
 If prg
   While ProgramRunning(prg)
     While AvailableProgramOutput(prg)

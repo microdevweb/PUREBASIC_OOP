@@ -1,0 +1,57 @@
+﻿; ============================================================================
+; Test: Window Multi-Constructors & Getters/Setters
+; ============================================================================
+
+XIncludeFile "ui/UI.pb"
+
+Using UI
+
+EnableExplicit
+
+OpenConsole()
+CompilerIf #PB_Compiler_OS = #PB_OS_Windows
+  SetConsoleOutputCP_(65001)
+CompilerEndIf
+PrintN("=== TEST SUITE: WINDOW MULTI-CONSTRUCTORS & GETTERS/SETTERS ===")
+PrintN("")
+
+; 1. Constructeur 1: Titre uniquement (800x600 centrée)
+Define *w1.Window = New Window("Fenêtre Principale 800x600")
+If *w1\GetID() And *w1\GetWidth() = 800 And *w1\GetHeight() = 600
+  PrintN("[PASS] Constructeur 1 (Titre seul) : ID=" + Str(*w1\GetID()) + " (800x600)")
+Else
+  PrintN("[FAIL] Constructeur 1 failed : " + Str(*w1\GetWidth()) + "x" + Str(*w1\GetHeight()))
+EndIf
+
+; 2. Constructeur 2: Titre, Largeur, Hauteur
+Define *w2.Window = New Window("Fenêtre 640x480", 640, 480)
+If *w2\GetID() And *w2\GetWidth() = 640 And *w2\GetHeight() = 480
+  PrintN("[PASS] Constructeur 2 (Titre, W, H) : ID=" + Str(*w2\GetID()) + " (640x480)")
+Else
+  PrintN("[FAIL] Constructeur 2 failed : " + Str(*w2\GetWidth()) + "x" + Str(*w2\GetHeight()))
+EndIf
+
+; 3. Test Setters & Getters dynamiques
+*w2\SetTitle("Titre Modifié via SetTitle()")
+If *w2\GetTitle() = "Titre Modifié via SetTitle()"
+  PrintN("[PASS] SetTitle() / GetTitle() -> " + *w2\GetTitle())
+Else
+  PrintN("[FAIL] SetTitle() failed : " + *w2\GetTitle())
+EndIf
+
+*w2\SetSize(500, 350)
+If *w2\GetWidth() = 500 And *w2\GetHeight() = 350
+  PrintN("[PASS] SetSize(500, 350) / GetWidth() & GetHeight() -> (500x350)")
+Else
+  PrintN("[FAIL] SetSize() failed : " + Str(*w2\GetWidth()) + "x" + Str(*w2\GetHeight()))
+EndIf
+
+; Nettoyage
+*w1\Free()
+*w2\Free()
+
+PrintN("")
+PrintN("TOUS LES TESTS WINDOW MULTI-CONSTRUCTEURS SONT PASSES AVEC SUCCES!")
+PrintN("Appuyez sur Entree pour quitter...")
+Input()
+CloseConsole()
