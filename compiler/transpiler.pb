@@ -2487,19 +2487,17 @@ EndProcedure
 
 ; ----------------------------------------------------------------------------
 ; Main Entry Point (CLI)
-; ----------------------------------------------------------------------------
-
 Procedure.i Main()
   OpenConsole()
 
   Protected argCount.i = CountProgramParameters()
-  Protected i.i
+  Protected i.i = 0
   Protected checkMode.b = #False
   Protected checkFile.s = ""
   Protected inputPBO.s = ""
   Protected outputPB.s = ""
-
-  For i = 0 To argCount - 1
+  
+  While i < argCount
     Protected param.s = ProgramParameter(i)
     If UCase(param) = "--BASE-DIR" Or UCase(param) = "-B"
       i + 1
@@ -2522,7 +2520,8 @@ Procedure.i Main()
         outputPB = param
       EndIf
     EndIf
-  Next
+    i + 1
+  Wend
 
   If checkMode
     If checkFile = "" : checkFile = inputPBO : EndIf

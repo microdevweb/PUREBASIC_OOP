@@ -2408,6 +2408,8 @@ Procedure Compiler_CompileRun(SourceFileName$, *Source.SourceFile, CheckSyntax)
   Protected actualBaseDir$ = ""
   If *Source And *Source\FileName$ <> ""
     actualBaseDir$ = GetPathPart(*Source\FileName$)
+  ElseIf *ActiveSource And *ActiveSource\FileName$ <> ""
+    actualBaseDir$ = GetPathPart(*ActiveSource\FileName$)
   EndIf
   Protected ActualSourceFile$ = TranspileOOPFile(SourceFileName$, actualBaseDir$)
   
@@ -2651,9 +2653,15 @@ Procedure Compiler_BuildTarget(SourceFileName$, TargetFileName$, *Target.Compile
   CompilerEndIf
   
   ; Transpile OOP source (.pbo / Class keywords) before passing to pbcompiler
-  Protected actualBaseDir$ = GetPathPart(SourceFileName$)
+  Protected actualBaseDir$ = ""
   If *Target And *Target\MainFile$ <> ""
     actualBaseDir$ = GetPathPart(*Target\MainFile$)
+  ElseIf *Target And *Target\FileName$ <> ""
+    actualBaseDir$ = GetPathPart(*Target\FileName$)
+  ElseIf *ActiveSource And *ActiveSource\FileName$ <> ""
+    actualBaseDir$ = GetPathPart(*ActiveSource\FileName$)
+  Else
+    actualBaseDir$ = GetPathPart(SourceFileName$)
   EndIf
   Protected ActualSourceFile$ = TranspileOOPFile(SourceFileName$, actualBaseDir$)
   
