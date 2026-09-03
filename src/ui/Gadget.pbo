@@ -11,6 +11,10 @@ Namespace UI {
     Protected tooltip.s
     Protected fontID.i
 
+    Public Method Init() {
+      Super::Init()
+    }
+
     Public Method.s GetText() {
       If (This\id And IsGadget(This\id)) {
         ProcedureReturn GetGadgetText(This\id)
@@ -36,6 +40,8 @@ Namespace UI {
     }
 
     Public Method SetPosition(nx.i, ny.i, nw.i, nh.i) {
+      If nw < 0 : nw = 0 : EndIf
+      If nh < 0 : nh = 0 : EndIf
       This\x = nx : This\y = ny : This\width = nw : This\height = nh
       If (This\id And IsGadget(This\id)) {
         ResizeGadget(This\id, nx, ny, nw, nh)

@@ -44,6 +44,11 @@ Namespace UI {
       This\*mainWindow = #Null
     }
 
+    Public Method Init(appName_p.s) {
+      This\isRunning = #False
+      This\*mainWindow = #Null
+    }
+
     Public Method SetMainWindow(*win_p.Window) {
       This\*mainWindow = *win_p
     }
@@ -52,10 +57,7 @@ Namespace UI {
       ProcedureReturn This\*mainWindow
     }
 
-    Public Method Run(*mainWin_p.Window = 0) {
-      If (*mainWin_p) {
-        This\*mainWindow = *mainWin_p
-      }
+    Public Method Run() {
       This\isRunning = #True
       Protected ev.i, evGadget.i, evWin.i, evType.i
 
@@ -68,48 +70,51 @@ Namespace UI {
           Case #PB_Event_Gadget:
             evGadget = EventGadget()
             If (FindMapElement(UI_GadgetMap(), Str(evGadget))) {
-              Protected *targetGadget.Gadget = UI_GadgetMap()
-              If (*targetGadget) {
+              Protected *g.Gadget = UI_GadgetMap()
+              If (*g) {
                 Select (evType) {
-                  Case #PB_EventType_LeftClick:   *targetGadget\OnClick()
-                  Case #PB_EventType_Change:      *targetGadget\OnChange()
-                  Case #PB_EventType_Focus:       *targetGadget\OnFocus()
-                  Case #PB_EventType_LostFocus:   *targetGadget\OnLostFocus()
-                  Case #PB_EventType_RightClick:  *targetGadget\OnRightClick()
-                  Default:                        *targetGadget\OnCustomEvent(evType)
+                  Case #PB_EventType_LeftClick:
+                    *g\OnClick()
+                  Case #PB_EventType_Change:
+                    *g\OnChange()
+                  Case #PB_EventType_Focus:
+                    *g\OnFocus()
+                  Case #PB_EventType_LostFocus:
+                    *g\OnLostFocus()
+                  Case #PB_EventType_RightClick:
+                    *g\OnRightClick()
+                  Default:
+                    *g\OnCustomEvent(evType)
                 }
               }
             }
 
           Case #PB_Event_CloseWindow:
             If (FindMapElement(UI_WindowMap(), Str(evWin))) {
-              Protected *targetWin.Window = UI_WindowMap()
-              If (*targetWin) {
-                If (*targetWin\OnClose()) {
-                  *targetWin\Close()
-                  UI_UnregisterWindow(evWin)
-                  If (*targetWin = This\*mainWindow Or MapSize(UI_WindowMap()) = 0) {
-                    This\isRunning = #False
+              Protected *w.Window = UI_WindowMap()
+              If (*w) {
+                If (*w\OnClose()) {
+                  *w\Close()
+                  If (This\*mainWindow And *w = This\*mainWindow) {
+                    This\Quit()
                   }
                 }
               }
-            } Else {
-              CloseWindow(evWin)
             }
 
           Case #PB_Event_SizeWindow:
             If (FindMapElement(UI_WindowMap(), Str(evWin))) {
-              Protected *targetWinSize.Window = UI_WindowMap()
-              If (*targetWinSize) {
-                *targetWinSize\OnResize(WindowWidth(evWin), WindowHeight(evWin))
+              Protected *wSize.Window = UI_WindowMap()
+              If (*wSize) {
+                *wSize\OnResize(WindowWidth(evWin), WindowHeight(evWin))
               }
             }
 
           Case #PB_Event_MoveWindow:
             If (FindMapElement(UI_WindowMap(), Str(evWin))) {
-              Protected *targetWinMove.Window = UI_WindowMap()
-              If (*targetWinMove) {
-                *targetWinMove\OnMove(WindowX(evWin), WindowY(evWin))
+              Protected *wMove.Window = UI_WindowMap()
+              If (*wMove) {
+                *wMove\OnMove(WindowX(evWin), WindowY(evWin))
               }
             }
 
@@ -138,6 +143,13 @@ Namespace UI {
             }
         }
       }
+    }
+
+    Public Method Run(*mainWin_p.Window) {
+      If (*mainWin_p) {
+        This\*mainWindow = *mainWin_p
+      }
+      This\Run()
     }
 
     Public Method Quit() {

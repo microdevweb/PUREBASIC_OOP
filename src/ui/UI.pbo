@@ -9,6 +9,12 @@ XIncludeFile "Window.pbo"
 XIncludeFile "Application.pbo"
 XIncludeFile "CustomGadget.pbo"
 
+; Responsive Layouts (WPF-Style)
+XIncludeFile "layout/Container.pbo"
+XIncludeFile "layout/StackPanel.pbo"
+XIncludeFile "layout/DockPanel.pbo"
+XIncludeFile "layout/Grid.pbo"
+
 ; Standard Controls
 XIncludeFile "controls/Button.pbo"
 XIncludeFile "controls/TextBox.pbo"

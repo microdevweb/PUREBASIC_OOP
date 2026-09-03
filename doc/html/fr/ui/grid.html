@@ -1,0 +1,117 @@
+﻿<!DOCTYPE html>
+<html lang='fr'>
+<head>
+  <meta charset='UTF-8'>
+  <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+  <title>Classe Grid - PureBasic OOP Documentation</title>
+  <link rel='stylesheet' href='../../css/doc_theme.css'>
+</head>
+<body>
+  <header class='doc-header'>
+    <a href='../index.html' class='brand-container'>
+      <img src='../../assets/PB_OOP_LOGO.jpeg' alt='Logo' class='brand-logo'>
+      <span class='brand-title'>PureBasic OOP</span>
+      <span class='brand-version'>ALPHA 1.0</span>
+    </a>
+    <div class='header-controls'>
+      <div class='search-box'>
+        <span class='search-icon'>&#128269;</span>
+        <input type='text' class='search-input' id='search-input' placeholder='Rechercher...'>
+      </div>
+      <div class='lang-switch'>
+        <a href='#' class='lang-btn active'>FR</a>
+        <a href='../../en/ui/grid.html' class='lang-btn'>EN</a>
+      </div>
+    </div>
+  </header>
+  <div class='layout-container'>
+<nav class='doc-sidebar'>
+  <div class='nav-section'>
+    <div class='nav-section-title'>Introduction</div>
+    <ul class='nav-list'>
+      <li class='nav-item'><a href='../index.html'><span>Vue d'ensemble</span></a></li>
+    </ul>
+  </div>
+  <div class='nav-section'>
+    <div class='nav-section-title'>Mots-cl&eacute;s POO</div>
+    <ul class='nav-list'>
+      <li class='nav-item'><a href='../keywords/class.html'><span>Class / Abstract</span><span class='badge badge-keyword'>KW</span></a></li>
+      <li class='nav-item'><a href='../keywords/method.html'><span>Method / Override</span><span class='badge badge-keyword'>KW</span></a></li>
+      <li class='nav-item'><a href='../keywords/properties.html'><span>Getter / Setter / Prop</span><span class='badge badge-keyword'>KW</span></a></li>
+      <li class='nav-item'><a href='../keywords/inheritance.html'><span>Extends / Super</span><span class='badge badge-keyword'>KW</span></a></li>
+      <li class='nav-item'><a href='../keywords/encapsulation.html'><span>Public / Protected / Private</span><span class='badge badge-keyword'>KW</span></a></li>
+      <li class='nav-item'><a href='../keywords/lifecycle.html'><span>New / Free / Init</span><span class='badge badge-keyword'>KW</span></a></li>
+      <li class='nav-item'><a href='../keywords/operators.html'><span>This / Cast / TypeOf</span><span class='badge badge-keyword'>KW</span></a></li>
+    </ul>
+  </div>
+  <div class='nav-section'>
+    <div class='nav-section-title'>Composants UI</div>
+    <ul class='nav-list'>
+      <li class='nav-item'><a href='../ui/application.html'><span>Application</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/window.html'><span>Window</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/gadget.html'><span>Gadget / Component</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/button.html'><span>Button</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/checkbox.html'><span>CheckBox</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/combobox.html'><span>ComboBox</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/label.html'><span>Label</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/progressbar.html'><span>ProgressBar</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/slider.html'><span>Slider</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/textbox.html'><span>TextBox</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/toggleswitch.html'><span>ToggleSwitch</span><span class='badge badge-ui'>UI</span></a></li>
+    </ul>
+  </div>
+  <div class='nav-section'>
+    <div class='nav-section-title'>Layouts Responsifs (WPF)</div>
+    <ul class='nav-list'>
+      <li class='nav-item'><a href='../ui/container.html'><span>Container</span><span class='badge badge-ui'>WPF</span></a></li>
+      <li class='nav-item'><a href='../ui/stackpanel.html'><span>StackPanel</span><span class='badge badge-ui'>WPF</span></a></li>
+      <li class='nav-item'><a href='../ui/dockpanel.html'><span>DockPanel</span><span class='badge badge-ui'>WPF</span></a></li>
+      <li class='nav-item active'><a href='../ui/grid.html'><span>Grid</span><span class='badge badge-ui'>WPF</span></a></li>
+    </ul>
+  </div>
+</nav>
+    <main class='doc-content'>
+      <div class='breadcrumb'>
+        <a href='../index.html'>Accueil</a>
+        <span class='breadcrumb-separator'>/</span>
+        <span>UI Components</span>
+        <span class='breadcrumb-separator'>/</span>
+        <span style='color: var(--accent-blue);'>Classe Grid</span>
+      </div>
+      <div class='page-header'>
+        <div class='title-row'>
+          <h1 class='page-title'>Classe Grid</h1>
+          <span class='badge badge-ui'>Layout</span>
+        </div>
+        <p class='page-lead'>Grille bidimensionnelle responsive avec unit&eacute;s fixes, Auto et proportionnelles (*).</p>
+      </div>
+<div class='doc-section'><h2 class='section-title'>Description</h2><p>La classe <code>UI::Layouts::Grid</code> d&eacute;finit une grille flexible &agrave; 2 dimensions compos&eacute;e de lignes et de colonnes. Inspir&eacute;e de WPF, elle supporte 3 modes de dimensionnement puissants :</p><ul>  <li><strong>Pixels fixes :</strong> <code>'150'</code> ou <code>'200px'</code>.</li>  <li><strong>Automatique :</strong> <code>'Auto'</code> (s'adapte au contenu d&eacute;sir&eacute;).</li>  <li><strong>Proportionnel (Star Sizing) :</strong> <code>'*'</code>, <code>'2*'</code>, <code>'3*'</code> (partage dynamique et fluide de l'espace r&eacute;siduel).</li></ul><p>Elle supporte &eacute;galement la fusion de cellules sur plusieurs lignes et colonnes via <code>SetCellSpan(child, rowSpan, colSpan)</code>.</p></div><div class='doc-section'><h2 class='section-title'>Exemple de Grille Responsive</h2><div class='code-container'>  <div class='code-header'><span class='code-title'>Grille avec Star Sizing (.pbo)</span><span class='code-badge'>PBO</span></div>  <pre><code><span class='kw'>Define</span> *grid.<span class='tp'>Grid</span> = <span class='kw'>New</span> <span class='tp'>Grid</span>()
+*grid\\<span class='fn'>AddColumn</span>(<span class='str'>'200'</span>)  <span class='cm'>; Colonne 0 : 200px fixe</span>
+*grid\\<span class='fn'>AddColumn</span>(<span class='str'>'3*'</span>)   <span class='cm'>; Colonne 1 : 75% du reste</span>
+*grid\\<span class='fn'>AddColumn</span>(<span class='str'>'1*'</span>)   <span class='cm'>; Colonne 2 : 25% du reste</span>
+*grid\\<span class='fn'>AddRow</span>(<span class='str'>'50'</span>)      <span class='cm'>; Ligne 0 : 50px fixe</span>
+*grid\\<span class='fn'>AddRow</span>(<span class='str'>'*'</span>)       <span class='cm'>; Ligne 1 : Hauteur fluide</span>
+
+*grid\\<span class='fn'>SetCell</span>(*sidebar, <span class='num'>0</span>, <span class='num'>0</span>, <span class='num'>2</span>, <span class='num'>1</span>) <span class='cm'>; RowSpan=2</span>
+*grid\\<span class='fn'>SetCell</span>(*mainView, <span class='num'>1</span>, <span class='num'>1</span>)
+*win\\<span class='fn'>SetContent</span>(*grid)</code></pre></div></div>
+    </main>
+  </div>
+  <footer class='doc-footer'>
+    <p>&copy; 2026 PureBasic OOP Project - MicrodevWeb | Dual License GPL v3 / Fantaisie Software</p>
+  </footer>
+  <script>
+    document.getElementById('search-input').addEventListener('input', function(e) {
+      let filter = e.target.value.toLowerCase();
+      document.querySelectorAll('.nav-item').forEach(function(item) {
+        let text = item.innerText.toLowerCase();
+        if (text.includes(filter)) {
+          item.style.display = '';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

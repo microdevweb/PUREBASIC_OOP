@@ -125,6 +125,7 @@ Global NewList Classes.OOP_Class()
 Global NewMap ClassMap.i()          ; Map FullName & MangledName to ListIndex
 Global NewList MethodBodies.OOP_MethodBody()
 Global NewList MainLines.OOP_SourceLine()
+Global NewList TypeDeclarations.OOP_SourceLine()
 Global NewList HeaderDeclarations.OOP_SourceLine()
 Global NewList FileSourceLines.OOP_SourceLine()
 Global NewList GeneratedLines.OOP_GeneratedLine()
@@ -1407,15 +1408,20 @@ Procedure.b ParsePBO(inputFile.s)
           inTopMacro = #True
         EndIf
 
-        If inTopEnum Or inTopStruct Or inTopMacro Or Left(trimmedUpper, 7) = "GLOBAL " Or Left(trimmedUpper, 7) = "NEWMAP " Or Left(trimmedUpper, 8) = "NEWLIST " Or Left(trimmedUpper, 4) = "DIM " Or Left(trimmedUpper, 9) = "THREADED " Or Left(trimmedUpper, 7) = "SHARED " Or Left(trimmedUpper, 8) = "DECLARE " Or Left(trimmedUpper, 8) = "DECLARE."
-          AddElement(HeaderDeclarations())
-          HeaderDeclarations()\content = rawLine
-          HeaderDeclarations()\srcLineNumber = currentLineNum
-          HeaderDeclarations()\srcFile = currentFile
+        If inTopEnum Or inTopStruct Or inTopMacro Or Left(trimmedUpper, 1) = "#"
+          AddElement(TypeDeclarations())
+          TypeDeclarations()\content = rawLine
+          TypeDeclarations()\srcLineNumber = currentLineNum
+          TypeDeclarations()\srcFile = currentFile
 
           If trimmedUpper = "ENDENUMERATION" : inTopEnum = #False : EndIf
           If trimmedUpper = "ENDSTRUCTURE" : inTopStruct = #False : EndIf
           If trimmedUpper = "ENDMACRO" : inTopMacro = #False : EndIf
+        ElseIf Left(trimmedUpper, 7) = "GLOBAL " Or Left(trimmedUpper, 7) = "NEWMAP " Or Left(trimmedUpper, 8) = "NEWLIST " Or Left(trimmedUpper, 4) = "DIM " Or Left(trimmedUpper, 9) = "THREADED " Or Left(trimmedUpper, 7) = "SHARED " Or Left(trimmedUpper, 8) = "DECLARE " Or Left(trimmedUpper, 8) = "DECLARE."
+          AddElement(HeaderDeclarations())
+          HeaderDeclarations()\content = rawLine
+          HeaderDeclarations()\srcLineNumber = currentLineNum
+          HeaderDeclarations()\srcFile = currentFile
         Else
           AddElement(MainLines())
           MainLines()\content = rawLine
@@ -2047,6 +2053,16 @@ Procedure.b GenerateTargetPB(outputFile.s, inputPBO.s)
   EmitLine("EnableExplicit")
   EmitLine("")
 
+  ; 0.5 Generate Top-Level Type Declarations (Structures, Enums, Constants, Macros)
+  EmitLine("; " + RSet("", 76, "-"))
+  EmitLine("; 0.5 GLOBAL TYPE DECLARATIONS, STRUCTURES & CONSTANTS")
+  EmitLine("; " + RSet("", 76, "-"))
+  EmitLine("")
+  ForEach TypeDeclarations()
+    EmitLine(TranspileMainLine(TypeDeclarations()\content), TypeDeclarations()\srcLineNumber, TypeDeclarations()\srcFile)
+  Next
+  EmitLine("")
+
   ; 1. Generate Interfaces
   EmitLine("; " + RSet("", 76, "-"))
   EmitLine("; 1. PUREBASIC INTERFACES (VTABLE PROTOTYPES)")
@@ -2105,9 +2121,9 @@ Procedure.b GenerateTargetPB(outputFile.s, inputPBO.s)
     EmitLine("")
   Next
 
-  ; 2.5 Generate Top-Level Declarations
+  ; 2.5 Generate Global Variables, Maps, Lists & Declarations
   EmitLine("; " + RSet("", 76, "-"))
-  EmitLine("; 2.5 GLOBAL DECLARATIONS & CONSTANTS")
+  EmitLine("; 2.5 GLOBAL VARIABLES, MAPS, LISTS & FORWARD DECLARATIONS")
   EmitLine("; " + RSet("", 76, "-"))
   EmitLine("")
   ForEach HeaderDeclarations()

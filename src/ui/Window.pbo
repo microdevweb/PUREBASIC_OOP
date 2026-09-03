@@ -59,8 +59,13 @@ Namespace UI {
       This\CreateWindowInternal(title_p, x_p, y_p, w_p, h_p, defFlags, 0)
     }
 
-    ; Constructeur 5: Complet (Titre, X, Y, Largeur, Hauteur, Flags, ParentID)
-    Public Method Init(title_p.s, x_p.i, y_p.i, w_p.i, h_p.i, flags_p.i, parent_p.i = 0) {
+    ; Constructeur 5: Titre, X, Y, Largeur, Hauteur, Flags
+    Public Method Init(title_p.s, x_p.i, y_p.i, w_p.i, h_p.i, flags_p.i) {
+      This\CreateWindowInternal(title_p, x_p, y_p, w_p, h_p, flags_p, 0)
+    }
+
+    ; Constructeur 6: Complet (Titre, X, Y, Largeur, Hauteur, Flags, ParentID)
+    Public Method Init(title_p.s, x_p.i, y_p.i, w_p.i, h_p.i, flags_p.i, parent_p.i) {
       This\CreateWindowInternal(title_p, x_p, y_p, w_p, h_p, flags_p, parent_p)
     }
 
@@ -189,6 +194,19 @@ Namespace UI {
       }
     }
 
+    Protected *rootContent.UI::Component
+
+    Public Method SetContent(*content.UI::Component) {
+      This\rootContent = *content
+      If (*content And This\id And IsWindow(This\id)) {
+        *content\Arrange(0, 0, WindowWidth(This\id), WindowHeight(This\id))
+      }
+    }
+
+    Public Method.i GetContent() {
+      ProcedureReturn This\rootContent
+    }
+
     ; ------------------------------------------------------------------------
     ; 3. Window Lifecycle & Event Handlers
     ; ------------------------------------------------------------------------
@@ -212,6 +230,9 @@ Namespace UI {
     Public Method OnResize(newW.i, newH.i) {
       This\width = newW
       This\height = newH
+      If (This\rootContent) {
+        This\rootContent\Arrange(0, 0, newW, newH)
+      }
     }
 
     Public Method OnMove(newX.i, newY.i) {
