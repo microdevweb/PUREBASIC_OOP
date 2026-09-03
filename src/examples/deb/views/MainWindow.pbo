@@ -16,21 +16,23 @@ Class MainWindow Extends UI::Window
     Super::Init("Contact V1")
     ; Instanciate buttons
     This\*bt_new = New UI::Button("add")
+    
     This\*bt_edit = New UI::Button("edit")
-    This\*bt_edit = New UI::Button("delete")
+    This\*bt_delete = New UI::Button("delete")
     ; Instanciate layouts
     ; = button layout
-    This\*button_layout = New UI::Layouts::StackPanel
+    This\*button_layout = New UI::Layouts::StackPanel()
     This\*button_layout\SetOrientation(#UI_Orientation_Horizontal)
-    This\*button_layout\AddChild(*bt_new)
-    This\*button_layout\AddChild(*bt_edit)
-    This\*button_layout\AddChild(*bt_delete)
+    This\*button_layout\AddChild(This\*bt_new)
+    This\*button_layout\AddChild(This\*bt_edit)
+    This\*button_layout\AddChild(This\*bt_delete)
     ; = main layout
     This\*main_layout = New UI::Layouts::DockPanel
-    This\*main_layout\SetDock(*button_layout,#UI_Dock_Top)
+    This\*main_layout\SetDock(This\*button_layout,#UI_Dock_Top)
+    This\SetContent(This\*main_layout)
   EndMethod
 EndClass
 ; IDE Options = PureBasic 6.40 (Windows - x64)
-; CursorPosition = 29
+; CursorPosition = 18
 ; EnableXP
 ; DPIAware

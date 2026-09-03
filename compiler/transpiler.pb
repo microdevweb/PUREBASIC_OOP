@@ -2037,42 +2037,6 @@ Procedure.s ResolveNewExpressions(line.s)
         pNew = FindString(res, prefix, pNew + Len(prefix))
       Wend
     Next
-    
-    ; Also support parameterless instantiation without parentheses: 'New ClassName'
-    Protected NewList noParenPrefixes.s()
-    AddElement(noParenPrefixes()) : noParenPrefixes() = "New " + cFull
-    AddElement(noParenPrefixes()) : noParenPrefixes() = "New  " + cFull
-    If cShort <> cFull
-      AddElement(noParenPrefixes()) : noParenPrefixes() = "New " + cShort
-      AddElement(noParenPrefixes()) : noParenPrefixes() = "New  " + cShort
-    EndIf
-    
-    ForEach noParenPrefixes()
-      Protected npPrefix.s = noParenPrefixes()
-      Protected pNP.i = FindString(res, npPrefix)
-      While pNP > 0
-        Protected afterNP.i = pNP + Len(npPrefix)
-        Protected nextCh.s = Mid(res, afterNP, 1)
-        ; Check that it's not followed by '(', alphanumeric, underscore, or ':' (which would mean a longer identifier or namespace)
-        If nextCh <> "(" And nextCh <> ":" And nextCh <> "_" And Not ((Asc(nextCh) >= 'a' And Asc(nextCh) <= 'z') Or (Asc(nextCh) >= 'A' And Asc(nextCh) <= 'Z') Or (Asc(nextCh) >= '0' And Asc(nextCh) <= '9'))
-          Protected chosenFactoryNP.s = "New_" + cMangled
-          If isMultiInit
-            ForEach Classes()\InitConstructors()
-              If Classes()\InitConstructors()\minParamCount = 0
-                chosenFactoryNP = Classes()\InitConstructors()\mangledName
-                Break
-              EndIf
-            Next
-          EndIf
-          Protected beforeNP.s = Left(res, pNP - 1)
-          Protected afterNPStr.s = Mid(res, afterNP)
-          res = beforeNP + chosenFactoryNP + "()" + afterNPStr
-          pNP = FindString(res, npPrefix, pNP + Len(chosenFactoryNP) + 2)
-          Continue
-        EndIf
-        pNP = FindString(res, npPrefix, pNP + Len(npPrefix))
-      Wend
-    Next
   Next
   PopListPosition(Classes())
   

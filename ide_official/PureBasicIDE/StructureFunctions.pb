@@ -1254,7 +1254,7 @@ EndProcedure
 Procedure FindStructure(Name$, List Output.s())
   If FindStructureInterface(Name$, #ITEM_Structure, Output(), 0)
     ProcedureReturn #True
-  ElseIf FindClassInterface(Name$, Output(), #False)
+  ElseIf FindClassInterface(Name$, Output(), #True)
     ProcedureReturn #True
   EndIf
   ProcedureReturn #False
@@ -1263,7 +1263,7 @@ EndProcedure
 Procedure FindInterface(Name$, List Output.s())
   If FindStructureInterface(Name$, #ITEM_Interface, Output(), 0)
     ProcedureReturn #True
-  ElseIf FindClassInterface(Name$, Output(), #False)
+  ElseIf FindClassInterface(Name$, Output(), #True)
     ProcedureReturn #True
   EndIf
   ProcedureReturn #False
@@ -1297,7 +1297,6 @@ Procedure.s StructureFieldName(Entry$)
   EndIf
   
   Entry$ = RemoveString(Entry$, " ")   ; now cut whitespace
-  Entry$ = RemoveString(Entry$, "*")   ; * is not present when accessing pointer structure items!
   Entry$ = StringField(Entry$, 1, "[") ; cut array stuff
   Entry$ = StringField(Entry$, 1, "(") ; cut dynamic array stuff
   Entry$ = StringField(Entry$, 1, "{") ; cut fixed string stuff

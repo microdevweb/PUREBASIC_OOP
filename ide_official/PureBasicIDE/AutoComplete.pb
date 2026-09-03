@@ -1182,13 +1182,13 @@ Procedure.s AutoComplete_FindEnclosingClass(Line)
       Depth + 1
     ElseIf Left(Upper$, 6) = "CLASS " Or Left(Upper$, 6) = "CLASS	"
       If Depth = 0
-        ClassName$ = Trim(Mid(LineText$, 7))
+        ClassName$ = OOP_StripBracesAndComments(Trim(Mid(LineText$, 7)))
         ExtendsPos = FindString(UCase(ClassName$), "EXTENDS ")
         If ExtendsPos = 0
           ExtendsPos = FindString(UCase(ClassName$), "EXTENDS	")
         EndIf
         If ExtendsPos > 0
-          ClassName$ = Trim(Left(ClassName$, ExtendsPos - 1))
+          ClassName$ = OOP_StripBracesAndComments(Trim(Left(ClassName$, ExtendsPos - 1)))
         EndIf
         ProcedureReturn ClassName$
       Else
