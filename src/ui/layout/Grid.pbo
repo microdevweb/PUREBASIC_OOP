@@ -1,6 +1,7 @@
 ; ============================================================================
 ; PureBasic OOP GUI Framework - Grid.pbo
-; Flexible 2D Grid layout panel with Fixed, Auto, and Proportional (Star *) sizing
+; 2D Flexible Grid layout panel with star sizing and row/column span
+; Author:      MicrodevWeb
 ; ============================================================================
 
 XIncludeFile "Container.pbo"

@@ -1,6 +1,7 @@
 ; ============================================================================
 ; PureBasic OOP GUI Framework - Gadget.pbo
 ; Base abstract class for all PureBasic UI Controls and Gadgets
+; Author:      MicrodevWeb
 ; ============================================================================
 
 XIncludeFile "Component.pbo"

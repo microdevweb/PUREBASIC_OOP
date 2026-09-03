@@ -1,6 +1,7 @@
 ; ============================================================================
 ; PureBasic OOP GUI Framework - StackPanel.pbo
 ; Linear layout panel arranging child components sequentially (Vertical or Horizontal)
+; Author:      MicrodevWeb
 ; ============================================================================
 
 XIncludeFile "Container.pbo"

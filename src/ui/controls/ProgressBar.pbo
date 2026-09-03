@@ -1,6 +1,7 @@
 ; ============================================================================
 ; PureBasic OOP GUI Framework - ProgressBar.pbo
 ; Standard ProgressBar wrapper
+; Author:      MicrodevWeb
 ; ============================================================================
 
 XIncludeFile "../Gadget.pbo"

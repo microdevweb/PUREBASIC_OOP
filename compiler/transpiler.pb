@@ -8,7 +8,7 @@
 ;              inline / out-of-class method bodies, Syntax/Semantic Checking,
 ;              Source Line Mapping (.pb.map), Hierarchical Namespaces,
 ;              'Using' directives, Namespace Aliases, and Multi-File Includes.
-; Author:      MicrodevWeb & AI Assistant
+; Author:      MicrodevWeb
 ; Version:     ALPHA 1.2 (Method Overloading & Multi-Constructors)
 ; ============================================================================
 

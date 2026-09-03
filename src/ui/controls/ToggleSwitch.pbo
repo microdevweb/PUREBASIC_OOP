@@ -1,6 +1,7 @@
 ; ============================================================================
 ; PureBasic OOP GUI Framework - ToggleSwitch.pbo
-; Custom iOS-Style Toggle Switch Widget extending UI::CustomGadget
+; Modern iOS/Material-style animated toggle switch CustomGadget
+; Author:      MicrodevWeb
 ; ============================================================================
 
 XIncludeFile "../CustomGadget.pbo"

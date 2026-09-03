@@ -1,6 +1,7 @@
 ; ============================================================================
 ; PureBasic OOP GUI Framework - Button.pbo
 ; Standard Button and ImageButton wrapper with Multi-Constructors
+; Author:      MicrodevWeb
 ; ============================================================================
 
 XIncludeFile "../Gadget.pbo"

@@ -1,6 +1,7 @@
 ; ============================================================================
 ; PureBasic OOP GUI Framework - DockPanel.pbo
-; Layout panel docking child components along edges (Top, Bottom, Left, Right, Fill)
+; Edge-docking layout panel with center-filling area (WPF DockPanel style)
+; Author:      MicrodevWeb
 ; ============================================================================
 
 XIncludeFile "Container.pbo"

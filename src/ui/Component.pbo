@@ -1,6 +1,7 @@
 ; ============================================================================
 ; PureBasic OOP GUI Framework - Component.pbo
-; Base abstract class for all UI Windows, Gadgets and Layout Containers
+; Base abstract class for all PureBasic UI elements & Layouts
+; Author:      MicrodevWeb
 ; ============================================================================
 
 #UI_Align_Left = 0

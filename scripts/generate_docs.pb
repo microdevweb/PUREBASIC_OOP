@@ -2,6 +2,7 @@
 ; PureBasic OOP Documentation Generator
 ; Generates complete, modern HTML documentation (FR & EN) with syntax highlighting
 ; Fixed accent and UTF-8 encoding support with BOM and HTML entities
+; Author:      MicrodevWeb
 ; ============================================================================
 
 EnableExplicit

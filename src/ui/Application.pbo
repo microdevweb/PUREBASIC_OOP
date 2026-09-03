@@ -1,6 +1,7 @@
 ; ============================================================================
 ; PureBasic OOP GUI Framework - Application.pbo
 ; Application Manager & Central Event Dispatcher
+; Author:      MicrodevWeb
 ; ============================================================================
 
 XIncludeFile "Window.pbo"

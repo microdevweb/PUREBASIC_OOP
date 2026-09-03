@@ -1,6 +1,7 @@
 ; ============================================================================
 ; PureBasic OOP GUI Framework - Slider.pbo
-; Standard TrackBar / Slider wrapper
+; Standard TrackBar / TrackSlider wrapper
+; Author:      MicrodevWeb
 ; ============================================================================
 
 XIncludeFile "../Gadget.pbo"

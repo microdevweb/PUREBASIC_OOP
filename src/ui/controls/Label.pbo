@@ -1,6 +1,7 @@
 ; ============================================================================
 ; PureBasic OOP GUI Framework - Label.pbo
-; Standard Text / Label wrapper
+; Standard Label / TextGadget wrapper
+; Author:      MicrodevWeb
 ; ============================================================================
 
 XIncludeFile "../Gadget.pbo"

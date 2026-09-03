@@ -1,6 +1,7 @@
 ; ============================================================================
 ; PureBasic OOP GUI Framework - Window.pbo
-; Window component encapsulating PureBasic Windows with Multi-Constructors
+; Standard GUI Window Wrapper with Multi-Constructors & Dynamic Accessors
+; Author:      MicrodevWeb
 ; ============================================================================
 
 XIncludeFile "Component.pbo"

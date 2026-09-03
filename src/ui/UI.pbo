@@ -1,6 +1,7 @@
 ; ============================================================================
 ; PureBasic OOP GUI Framework - UI.pbo (Master Header)
 ; Include this file to access the entire OOP UI subsystem
+; Author:      MicrodevWeb
 ; ============================================================================
 
 XIncludeFile "Component.pbo"
