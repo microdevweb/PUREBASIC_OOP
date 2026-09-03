@@ -36,6 +36,6 @@ Class MainWindow Extends UI::Window
   EndMethod
 EndClass
 ; IDE Options = PureBasic 6.40 (Windows - x64)
-; CursorPosition = 22
+; CursorPosition = 3
 ; EnableXP
 ; DPIAware

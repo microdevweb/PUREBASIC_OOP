@@ -2244,17 +2244,17 @@ Procedure.s TranspileOOPFile(SourceFileName$, BaseDir$ = "")
   OOP_TranspilerErrorLine = 0
   OOP_TranspilerErrorFile$ = ""
 
-  ; Check if file is .pbo or contains OOP keywords like "Class "
+  ; Check if file is .pbo or contains OOP keywords or includes
   Protected isOOP.b = #False
   If LCase(GetExtensionPart(SourceFileName$)) = "pbo"
     isOOP = #True
   Else
-    ; Scan first lines of source file to detect OOP Class
     Protected f = ReadFile(#PB_Any, SourceFileName$)
     If f
       While Not Eof(f)
-        Protected l.s = Trim(UCase(ReadString(f)))
-        If Left(l, 6) = "CLASS " Or Left(l, 7) = "METHOD " Or Left(l, 15) = "ABSTRACT CLASS "
+        Protected rawLine.s = ReadString(f)
+        Protected l.s = Trim(UCase(rawLine))
+        If Left(l, 6) = "CLASS " Or Left(l, 7) = "METHOD " Or Left(l, 15) = "ABSTRACT CLASS " Or Left(l, 10) = "NAMESPACE " Or Left(l, 6) = "USING " Or FindString(l, "NEW ") > 0 Or FindString(l, "THIS\") > 0 Or FindString(l, "SUPER::") > 0 Or FindString(l, "XINCLUDEFILE") > 0 Or FindString(l, "INCLUDEFILE") > 0
           isOOP = #True
           Break
         EndIf

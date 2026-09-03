@@ -1,4 +1,4 @@
-﻿
+
 XIncludeFile "views/MainWindow.pbi"
 XIncludeFile "../../ui/UI.pbi"
 

@@ -7,21 +7,21 @@
   <section name="data">
     <explorer view="" pattern="0"/>
     <log show="1"/>
-    <lastopen date="2026-09-03 13:22" user="u237685" host="CSL0111"/>
+    <lastopen date="2026-09-03 13:29" user="u237685" host="CSL0111"/>
   </section>
   <section name="files">
-    <file name="views\MainWindow.pbi">
-      <config load="0" scan="1" panel="1" warn="1" lastopen="0" sortindex="0" panelstate="++"/>
-      <fingerprint md5="df3e8a2f7ec4cd560e6cb8ac46a3f68c"/>
-    </file>
     <file name="Main.pb">
-      <config load="0" scan="1" panel="1" warn="1" lastopen="0" sortindex="0" panelstate="+"/>
-      <fingerprint md5="52ab23e672b1ab41a6fb51a36a63dc1d"/>
+      <config load="0" scan="1" panel="1" warn="1" lastopen="1" sortindex="1" panelstate="+"/>
+      <fingerprint md5="28ba5acaeebbaac1f749b044843cd406"/>
+    </file>
+    <file name="views\MainWindow.pbi">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="1" sortindex="2" panelstate="++"/>
+      <fingerprint md5="8c14d3b84544b007a19e95b00ca79e6c"/>
     </file>
   </section>
   <section name="targets">
     <target name="Cible par défaut" enabled="1" default="1">
-      <inputfile value=""/>
+      <inputfile value="Main.pb"/>
       <outputfile value=""/>
       <options xpskin="1" dpiaware="1" debug="1" optimizer="0"/>
     </target>
