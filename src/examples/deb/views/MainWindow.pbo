@@ -16,7 +16,7 @@ Class MainWindow Extends UI::Window
     Super::Init("Contact V1")
     ; Instanciate buttons
     This\*bt_new = New UI::Button("add")
-    
+    This\*bt_new\se
     This\*bt_edit = New UI::Button("edit")
     This\*bt_delete = New UI::Button("delete")
     ; Instanciate layouts
