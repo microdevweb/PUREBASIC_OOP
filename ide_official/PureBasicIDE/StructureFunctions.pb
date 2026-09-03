@@ -992,7 +992,6 @@ Procedure FindClassInterfaceFromSource(*Source.SourceFile, Name$, List Output.s(
   Next line
   
   If Success And ExtendsClass$ <> ""
-    ClearMap(OOP_VisitedFilesMap())
     FindClassInterface(ExtendsClass$, Output(), #False, Recursion + 1)
   EndIf
   
@@ -1177,7 +1176,6 @@ Procedure FindClassInterfaceFromFile(FilePath$, Name$, List Output.s(), IncludeP
   
   ; If target was found and extends another class, resolve the parent
   If Success And ExtendsClass$ <> ""
-    ClearMap(OOP_VisitedFilesMap())
     Protected FoundParent = #False
     ForEach IncludedFiles()
       If FindClassInterfaceFromFile(IncludedFiles(), ExtendsClass$, Output(), #False, Recursion + 1)
@@ -1208,7 +1206,9 @@ Procedure FindClassInterface(Name$, List Output.s(), IncludePrivate = #True, Rec
     ProcedureReturn #False
   EndIf
   
-  ClearMap(OOP_VisitedFilesMap())
+  If Recursion = 0
+    ClearMap(OOP_VisitedFilesMap())
+  EndIf
   
   ; Check active source first
   If *ActiveSource
