@@ -1148,7 +1148,16 @@ Procedure FindClassInterfaceFromFile(FilePath$, Name$, List Output.s(), IncludeP
   
   ; If target was found and extends another class, resolve the parent
   If Success And ExtendsClass$ <> ""
-    FindClassInterface(ExtendsClass$, Output(), #False, Recursion + 1)
+    Protected FoundParent = #False
+    ForEach IncludedFiles()
+      If FindClassInterfaceFromFile(IncludedFiles(), ExtendsClass$, Output(), #False, Recursion + 1)
+        FoundParent = #True
+        Break
+      EndIf
+    Next IncludedFiles()
+    If Not FoundParent
+      FindClassInterface(ExtendsClass$, Output(), #False, Recursion + 1)
+    EndIf
   EndIf
   
   ; If not found in this file, search included files recursively
@@ -1169,9 +1178,7 @@ Procedure FindClassInterface(Name$, List Output.s(), IncludePrivate = #True, Rec
     ProcedureReturn #False
   EndIf
   
-  If Recursion = 0
-    ClearMap(OOP_VisitedFilesMap())
-  EndIf
+  ClearMap(OOP_VisitedFilesMap())
   
   ; Check active source first
   If *ActiveSource
@@ -1223,7 +1230,7 @@ EndProcedure
 Procedure FindStructure(Name$, List Output.s())
   If FindStructureInterface(Name$, #ITEM_Structure, Output(), 0)
     ProcedureReturn #True
-  ElseIf FindClassInterface(Name$, Output(), #True)
+  ElseIf FindClassInterface(Name$, Output(), #False)
     ProcedureReturn #True
   EndIf
   ProcedureReturn #False
