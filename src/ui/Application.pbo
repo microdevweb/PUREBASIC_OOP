@@ -91,15 +91,24 @@ Namespace UI {
             }
 
           Case #PB_Event_CloseWindow:
+            Protected isMainWin.b = #False
             If (FindMapElement(UI_WindowMap(), Str(evWin))) {
               Protected *w.Window = UI_WindowMap()
               If (*w) {
+                If (This\*mainWindow And *w = This\*mainWindow)
+                  isMainWin = #True
+                EndIf
                 If (*w\OnClose()) {
                   *w\Close()
-                  If (This\*mainWindow And *w = This\*mainWindow) {
+                  If (isMainWin Or MapSize(UI_WindowMap()) = 0) {
                     This\Quit()
                   }
                 }
+              }
+            } Else {
+              CloseWindow(evWin)
+              If (MapSize(UI_WindowMap()) = 0) {
+                This\Quit()
               }
             }
 

@@ -1,6 +1,7 @@
 ; ============================================================================
 ; PureBasic OOP GUI Framework - Responsive Demo Application
 ; Demonstrates WPF-style automatic responsive layouts (DockPanel, StackPanel, Grid)
+; Author:      MicrodevWeb
 ; ============================================================================
 
 XIncludeFile "../ui/UI.pbo"

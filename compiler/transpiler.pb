@@ -2322,23 +2322,25 @@ Procedure.b GenerateTargetPB(outputFile.s, inputPBO.s)
     SetOOPError(1, "Cannot create output file: " + outputFile)
     ProcedureReturn #False
   EndIf
+  WriteStringFormat(outFile, #PB_UTF8)
 
   ; Write .map file
   Protected mapFile.s = outputFile + ".map"
   Protected fMap = CreateFile(#PB_Any, mapFile)
   If fMap
-    WriteStringN(fMap, "# PBO_SOURCEMAP_V1")
-    WriteStringN(fMap, "SOURCE:" + inputPBO)
-    WriteStringN(fMap, "TARGET:" + outputFile)
-    WriteStringN(fMap, "MAP:")
+    WriteStringFormat(fMap, #PB_UTF8)
+    WriteStringN(fMap, "# PBO_SOURCEMAP_V1", #PB_UTF8)
+    WriteStringN(fMap, "SOURCE:" + inputPBO, #PB_UTF8)
+    WriteStringN(fMap, "TARGET:" + outputFile, #PB_UTF8)
+    WriteStringN(fMap, "MAP:", #PB_UTF8)
   EndIf
 
   Protected genLineNum.i = 0
   ForEach GeneratedLines()
     genLineNum + 1
-    WriteStringN(outFile, GeneratedLines()\content)
+    WriteStringN(outFile, GeneratedLines()\content, #PB_UTF8)
     If fMap And GeneratedLines()\srcLineNumber > 0
-      WriteStringN(fMap, Str(genLineNum) + ":" + Str(GeneratedLines()\srcLineNumber))
+      WriteStringN(fMap, Str(genLineNum) + ":" + Str(GeneratedLines()\srcLineNumber), #PB_UTF8)
     EndIf
   Next
 
