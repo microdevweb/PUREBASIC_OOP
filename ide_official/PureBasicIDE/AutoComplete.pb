@@ -314,6 +314,11 @@ Procedure AutoComplete_OOP_AddConstantsFromActiveSource(WordStart$)
     ProcedureReturn
   EndIf
   
+  ; Only scan OOP include headers if prefix starts with # or is empty
+  If WordStart$ <> "" And Left(WordStart$, 1) <> "#"
+    ProcedureReturn
+  EndIf
+  
   ClearMap(OOP_ConstVisitedFilesMap())
   
   Protected BaseDir$ = GetPathPart(*ActiveSource\FileName$)

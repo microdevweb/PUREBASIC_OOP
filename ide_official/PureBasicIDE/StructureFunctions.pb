@@ -803,6 +803,7 @@ Procedure FindStructureInterface(Name$, Type, List Output.s(), Recursion)
 EndProcedure
 
 Global NewMap OOP_VisitedFilesMap.b()
+Global NewMap OOP_VisitedClassesMap.b()
 
 Procedure.s OOP_NormalizePath(Path$)
   Path$ = ReplaceString(Path$, "/", "\")
@@ -840,7 +841,7 @@ EndProcedure
 Declare FindClassInterface(Name$, List Output.s(), IncludePrivate = #True, Recursion = 0)
 
 Procedure FindClassInterfaceFromSource(*Source.SourceFile, Name$, List Output.s(), IncludePrivate, Recursion = 0)
-  If Recursion > 10 Or *Source = 0 Or Name$ = ""
+  If Recursion > 15 Or *Source = 0 Or Name$ = ""
     ProcedureReturn #False
   EndIf
   
@@ -999,7 +1000,7 @@ Procedure FindClassInterfaceFromSource(*Source.SourceFile, Name$, List Output.s(
 EndProcedure
 
 Procedure FindClassInterfaceFromFile(FilePath$, Name$, List Output.s(), IncludePrivate, Recursion = 0)
-  If Recursion > 10 Or Name$ = "" Or FilePath$ = ""
+  If Recursion > 15 Or Name$ = "" Or FilePath$ = ""
     ProcedureReturn #False
   EndIf
   
@@ -1193,37 +1194,66 @@ Procedure FindClassInterfaceFromFile(FilePath$, Name$, List Output.s(), IncludeP
 EndProcedure
 
 Procedure FindClassInterface(Name$, List Output.s(), IncludePrivate = #True, Recursion = 0)
-  If Recursion > 10 Or Name$ = ""
+  If Recursion > 15 Or Name$ = ""
     ProcedureReturn #False
   EndIf
   
-  ClearMap(OOP_VisitedFilesMap())
+  Protected ClassKey$ = LCase(OOP_GetShortName(Name$))
+  If ClassKey$ = ""
+    ProcedureReturn #False
+  EndIf
   
-  ; Check active source first
+  ; Fast bailout for standard primitive types
+  Select ClassKey$
+    Case "i", "s", "l", "b", "w", "q", "f", "d", "c", "u", "a", "ascii", "unicode", "string", "integer", "long", "byte", "word", "quad", "float", "double"
+      ProcedureReturn #False
+  EndSelect
+  
+  If Recursion = 0
+    ClearMap(OOP_VisitedFilesMap())
+    ClearMap(OOP_VisitedClassesMap())
+  EndIf
+  
+  ; Prevent circular inheritance recursion on the same class
+  If FindMapElement(OOP_VisitedClassesMap(), ClassKey$)
+    ProcedureReturn #False
+  EndIf
+  OOP_VisitedClassesMap(ClassKey$) = #True
+  
+  ; 1. Check active source first
   If *ActiveSource
     If FindClassInterfaceFromSource(*ActiveSource, Name$, Output(), IncludePrivate, Recursion)
       ProcedureReturn #True
     EndIf
   EndIf
   
-  ; Check other open files
+  ; 2. Check other open files (using snapshot to avoid list position corruption)
+  Protected NewList OpenSources.i()
   PushListPosition(FileList())
   ForEach FileList()
     If @FileList() <> *ProjectInfo And @FileList() <> *ActiveSource
-      If FindClassInterfaceFromSource(@FileList(), Name$, Output(), IncludePrivate, Recursion)
-        PopListPosition(FileList())
-        ProcedureReturn #True
-      EndIf
+      AddElement(OpenSources())
+      OpenSources() = @FileList()
     EndIf
   Next FileList()
   PopListPosition(FileList())
   
-  ; Scan included files from *ActiveSource
+  ForEach OpenSources()
+    Protected *Src.SourceFile = OpenSources()
+    If *Src
+      If FindClassInterfaceFromSource(*Src, Name$, Output(), IncludePrivate, Recursion)
+        ProcedureReturn #True
+      EndIf
+    EndIf
+  Next OpenSources()
+  
+  ; 3. Scan included files from *ActiveSource
   If *ActiveSource
     Protected BaseDir$ = GetPathPart(*ActiveSource\FileName$)
     If BaseDir$ = "" : BaseDir$ = GetCurrentDirectory() : EndIf
     Protected LineCount = ScintillaSendMessage(*ActiveSource\EditorGadget, #SCI_GETLINECOUNT, 0, 0)
     Protected scanLine.i
+    Protected NewList ActiveIncFiles.s()
     For scanLine = 0 To LineCount - 1
       Protected LineText$ = Trim(GetLine(scanLine, *ActiveSource))
       Protected Upper$ = UCase(LineText$)
@@ -1233,14 +1263,18 @@ Procedure FindClassInterface(Name$, List Output.s(), IncludePrivate = #True, Rec
           Protected pQuote2 = FindString(LineText$, Chr(34), pQuote1 + 1)
           If pQuote2 > pQuote1
             Protected Inc$ = Mid(LineText$, pQuote1 + 1, pQuote2 - pQuote1 - 1)
-            Protected FullInc$ = BaseDir$ + Inc$
-            If FindClassInterfaceFromFile(FullInc$, Name$, Output(), IncludePrivate, Recursion + 1)
-              ProcedureReturn #True
-            EndIf
+            AddElement(ActiveIncFiles())
+            ActiveIncFiles() = BaseDir$ + Inc$
           EndIf
         EndIf
       EndIf
     Next scanLine
+    
+    ForEach ActiveIncFiles()
+      If FindClassInterfaceFromFile(ActiveIncFiles(), Name$, Output(), IncludePrivate, Recursion + 1)
+        ProcedureReturn #True
+      EndIf
+    Next ActiveIncFiles()
   EndIf
   
   ProcedureReturn #False
