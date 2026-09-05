@@ -1,214 +1,306 @@
 ; ============================================================================
-; PureBasic OOP - Manuel de Référence (Français)
-; Documentation officielle du transpileur et du framework GUI OOP
+; PureBasic OOP - Manuel de Reference (Francais)
+; Documentation officielle du transpileur, du framework GUI et du moteur MVVM
 ; Author:      MicrodevWeb
 ; ============================================================================
 
-# Manuel de Référence PureBasic OOP (Français)
+# Manuel de Reference PureBasic OOP (Francais)
 
-Bienvenue dans la documentation officielle du transpileur et du framework Orienté Objet pour PureBasic.
-
----
-
-## 1. Les Fondements de la Programmation Orientée Objet (POO)
-
-La Programmation Orientée Objet (POO) est un paradigme de programmation qui structure une application autour de **données** et de **traitements associés**, regroupés en entités cohérentes appelées **Objets**.
-
-Elle repose sur 5 piliers fondamentaux :
-
-### 1.1 Les Classes et les Objets
-- **La Classe** : C'est le plan de construction (ou moule) qui définit la structure (attributs / champs) et le comportement (méthodes).
-- **L'Objet (ou Instance)** : C'est une occurrence concrète créée en mémoire à partir d'une classe (par exemple, la classe `Chien` permet de créer l'objet `Médor`).
-
-### 1.2 L'Encapsulation
-L'encapsulation permet de regrouper les données et les fonctions qui les manipulent, tout en protégeant les données internes contre les accès extérieurs non autorisés :
-- **`Public`** : Accessible depuis n'importe où (à l'intérieur et à l'extérieur de l'objet).
-- **`Protected`** : Accessible uniquement par la classe qui le déclare et par ses classes filles (héritières).
-- **`Private`** : Strictement réservé à la classe qui le déclare.
-
-### 1.3 L'Héritage (`Extends`)
-L'héritage permet à une classe dérivée (fille) de réutiliser et d'étendre les attributs et les méthodes d'une classe de base (parente). Cela favorise la réutilisation du code et l'organisation hiérarchique.
-
-### 1.4 Le Polymorphisme (Dispatch Dynamique via VTable)
-Le polymorphisme permet de manipuler différents types d'objets dérivés à travers une référence commune vers leur classe parente. Lors de l'appel d'une méthode, le programme exécute dynamiquement la version spécifique à la classe réelle de l'objet grâce à la table des méthodes virtuelles (*VTable*).
-
-### 1.5 L'Abstraction (Classes et Méthodes Abstraites)
-L'abstraction permet de définir un concept général sans en fournir toute l'implémentation :
-- **Classe Abstraite** (`Abstract Class`) : Une classe incomplète servant de modèle ou de contrat. Elle **ne peut pas être instanciée directement**.
-- **Méthode Abstraite** (`Abstract Method`) : Un prototype de méthode sans corps d'implémentation. Toute classe fille concrète a **l'obligation** d'implémenter cette méthode.
-- **Méthode Concrète / Par Défaut** : Une classe abstraite peut aussi contenir des méthodes avec un code par défaut, que la classe fille peut conserver, surcharger totalement ou surcharger partiellement via `Super::`.
+Bienvenue dans la documentation officielle du transpileur Objet PureBasic, du framework d'interface graphique responsive et du moteur MVVM (Model-View-ViewModel).
 
 ---
 
-## 2. Syntaxe & Grammaire Objet PureBasic (.pbo)
+## 1. Les Fondements de la Programmation Oriente Objet (POO)
 
-### 2.1 Déclaration des Classes Abstraites et Concrètes
+La Programmation Oriente Objet (POO) structure une application autour de **donnees** et de leurs **traitements associes**, regroupes dans des entites appelees **Objets**.
 
+### 1.1 Classes et Objets
+- **Classe** : Le modele ou plan definissant les attributs (champs) et les comportements (methodes).
+- **Objet (Instance)** : Une entite concrete instanciee en memoire avec `New NomClasse(...)`.
+
+### 1.2 Encapsulation et Visibilite
+- **`Public`** : Accessible partout (a l'interieur et a l'exterieur de l'objet).
+- **`Protected`** : Accessible uniquement par la classe qui le declare et ses classes filles.
+- **`Private`** : Strictement reserve a la classe qui le declare.
+
+### 1.3 Heritage (`Extends`)
+L'heritage permet a une classe fille de reutiliser et d'etendre les attributs et methodes d'une classe parente :
 ```oop
-; ----------------------------------------------------------------------------
-; 1. CLASSE ABSTRAITE (Modèle de base / Contrat)
-; ----------------------------------------------------------------------------
-Abstract Class FormeGeometrique
-  Protected nom.s
-  Protected couleur.s
-
-  ; Constructeur
-  Public Method Init(nom_p.s, couleur_p.s)
-
-  ; Méthodes Abstraites (Obligatoires dans les classes filles concrètes)
-  Public Abstract Method.d CalculerAire()
-  Public Abstract Method.d CalculerPerimetre()
-  Public Abstract Method Dessiner()
-
-  ; Méthode concrète avec implémentation par défaut dans la classe abstraite
-  Public Method AfficherInfos()
-  
-  ; Destructeur
-  Public Method Free()
-EndClass
-
-; ----------------------------------------------------------------------------
-; 2. CLASSE CONCRÈTE (Hérite de la classe abstraite)
-; ----------------------------------------------------------------------------
-Class Rectangle Extends FormeGeometrique
-  Protected largeur.d
-  Protected hauteur.d
-
-  Public Method Init(nom_p.s, couleur_p.s, l.d, h.d)
-  
-  ; Implémentation obligatoire des méthodes abstraites du parent
-  Public Method.d CalculerAire()
-  Public Method.d CalculerPerimetre()
-  Public Method Dessiner()
-  
-  ; Surcharge de la méthode concrète
-  Public Method AfficherInfos()
-  
-  Public Method Free()
-EndClass
+Class Chien Extends Animal {
+  Public Method Aboyer() {
+    MessageRequester("Chien", "Wouf !")
+  }
+}
 ```
 
+### 1.4 Polymorphisme (Dispatch Dynamique par VTable)
+Les objets derives peuvent etre manipules de maniere uniforme a travers une reference vers leur classe parente. L'appel de methode s'execute dynamiquement selon le type reel de l'objet via sa table de methodes virtuelles (*VTable*).
+
+### 1.5 Abstraction (Classes et Methodes Abstraites)
+- **`Abstract Class`** : Une classe de base qui ne peut pas etre instanciee directement.
+- **`Public Abstract Method`** : Un prototype que toute sous-classe concrete **doit** obligatoirement implementer.
+
 ---
 
-### 2.2 Surcharge des Constructeurs (`Init`) & Règle Explicite
+## 2. Syntaxe et Grammaire PureBasic OOP
 
-Dans PureBasic OOP, une classe peut définir **plusieurs constructeurs surchargés** pour s'adapter aux différents besoins (du cas le plus simple au cas le plus complet) :
-
+### 2.1 Declaration d'une Classe
 ```oop
-Class Personne
+Namespace App::Models {
+
+  Abstract Class Forme {
+    Protected nom.s
+    Protected couleur.s
+
+    Public Method Init(nom_p.s, couleur_p.s) {
+      This\nom = nom_p
+      This\couleur = couleur_p
+    }
+
+    Public Abstract Method.d CalculerAire()
+    
+    Public Method AfficherInfos() {
+      Debug "Forme: " + This\nom + " | Couleur: " + This\couleur
+    }
+
+    Public Method Free() {
+    }
+  }
+
+  Class Rectangle Extends Forme {
+    Protected largeur.d
+    Protected hauteur.d
+
+    Public Method Init(nom_p.s, couleur_p.s, l.d, h.d) {
+      Super::Init(nom_p, couleur_p)
+      This\largeur = l
+      This\hauteur = h
+    }
+
+    Public Method.d CalculerAire() {
+      ProcedureReturn This\largeur * This\hauteur
+    }
+  }
+
+}
+```
+
+### 2.2 Surcharge des Constructeurs (`Init`)
+Une meme classe peut definir plusieurs constructeurs avec des signatures de parametres differentes :
+```oop
+Class Personne {
   Protected nom.s
   Protected age.i
 
-  ; Constructeur 1: Sans paramètre
-  Public Method Init()
-    This\nom = "Anonyme"
-    This\age = 0
-  EndMethod
-
-  ; Constructeur 2: Nom seul
-  Public Method Init(nom_p.s)
-    This\nom = nom_p
-    This\age = 0
-  EndMethod
-
-  ; Constructeur 3: Nom et Âge
-  Public Method Init(nom_p.s, age_p.i)
-    This\nom = nom_p
-    This\age = age_p
-  EndMethod
-EndClass
-
-; Instanciation selon le constructeur choisi :
-Define *p1.Personne = New Personne()
-Define *p2.Personne = New Personne("Alice")
-Define *p3.Personne = New Personne("Bob", 30)
-```
-
-> **Règle des constructeurs explicites** :
-> Chaque classe définit explicitement ses propres constructeurs. Une classe fille n'hérite pas automatiquement des constructeurs de sa classe parente sans les déclarer ; elle appelle le constructeur parent souhaité via `Super::Init(...)`.
-
----
-
-## 3. Framework GUI Réactif & Composants (`src/ui/`)
-
-Le framework GUI fournit des contrôles et des panneaux de mise en page réactifs (Responsive Layouts) permettant de concevoir des interfaces modernes sans calculs manuels de coordonnées absolues.
-
-### 3.1 Liste Complète des Constructeurs des Contrôles UI
-
-| Composant | Constructeurs Disponibles (du plus simple au plus complet) | Description & Paramètres |
-| :--- | :--- | :--- |
-| **`UI::Button`** | `Init(text.s)`<br>`Init(text.s, w.i, h.i)`<br>`Init(x.i, y.i, w.i, h.i, text.s)`<br>`Init(x.i, y.i, w.i, h.i, text.s, flags.i)` | Bouton standard cliquable. 120x30 par défaut pour les layouts automatiques. |
-| **`UI::TextBox`** | `Init()`<br>`Init(defaultText.s)`<br>`Init(defaultText.s, w.i, h.i)`<br>`Init(x.i, y.i, w.i, h.i, defaultText.s)`<br>`Init(x.i, y.i, w.i, h.i, defaultText.s, flags.i)` | Champ de saisie texte monoposte. 150x25 par défaut. |
-| **`UI::Label`** | `Init(text.s)`<br>`Init(text.s, w.i, h.i)`<br>`Init(x.i, y.i, w.i, h.i, text.s)`<br>`Init(x.i, y.i, w.i, h.i, text.s, flags.i)` | Libellé texte statique. |
-| **`UI::CheckBox`** | `Init(text.s)`<br>`Init(text.s, checked.b)`<br>`Init(text.s, w.i, h.i, checked.b)`<br>`Init(x.i, y.i, w.i, h.i, text.s, flags.i)` | Case à cocher booléenne. |
-| **`UI::ComboBox`** | `Init()`<br>`Init(w.i, h.i)`<br>`Init(x.i, y.i, w.i, h.i)`<br>`Init(x.i, y.i, w.i, h.i, flags.i)` | Liste déroulante sélectionnable. |
-| **`UI::ProgressBar`** | `Init()` *(0..100)*<br>`Init(min.i, max.i)`<br>`Init(min.i, max.i, w.i, h.i)`<br>`Init(x.i, y.i, w.i, h.i, min.i, max.i, flags.i)` | Barre de progression. |
-| **`UI::Slider`** | `Init()` *(0..100)*<br>`Init(min.i, max.i)`<br>`Init(min.i, max.i, w.i, h.i)`<br>`Init(x.i, y.i, w.i, h.i, min.i, max.i, flags.i)` | Curseur réglable TrackBar. |
-| **`UI::ListIcon`** | `Init(title.s, colWidth.i)`<br>`Init(title.s, colWidth.i, flags.i)`<br>`Init(x.i, y.i, w.i, h.i, title.s, colWidth.i)`<br>`Init(x.i, y.i, w.i, h.i, title.s, colWidth.i, flags.i)` | Table / Grille de données multi-colonnes. |
-| **`UI::Controls::ToggleSwitch`** | `Init()`<br>`Init(checked.b)`<br>`Init(w.i, h.i, checked.b)`<br>`Init(x.i, y.i, w.i, h.i, checked.b)` | Interrupteur moderne vectoriel (Canvas). |
-
----
-
-### 3.2 Panneaux de Disposition Réactive (Layouts)
-
-| Panneau Layout | Constructeurs Disponibles | Rôle & Comportement |
-| :--- | :--- | :--- |
-| **`UI::Layouts::StackPanel`** | `Init()` *(Vertical, 5px)*<br>`Init(orientation.i)`<br>`Init(orientation.i, spacing.i)`<br>`Init(orientation.i, spacing.i, w.i, h.i)` | Empile les composants en ligne (`#UI_Orientation_Horizontal`) ou en colonne (`#UI_Orientation_Vertical`). |
-| **`UI::Layouts::DockPanel`** | `Init()` *(LastChildFill = #True)*<br>`Init(lastChildFill.b)`<br>`Init(lastChildFill.b, w.i, h.i)` | Ancre les enfants sur les bords (`#UI_Dock_Top`, `#UI_Dock_Bottom`, `#UI_Dock_Left`, `#UI_Dock_Right`) et remplit le centre. |
-| **`UI::Layouts::Grid`** | `Init()`<br>`Init(w.i, h.i)` | Grille 2D flexible avec dimensionnement en pixels, `"Auto"` ou proportionnel Star (`"*"` / `"2*"`). |
-| **`UI::Window`** | `Init(title.s)`<br>`Init(title.s, w.i, h.i)`<br>`Init(title.s, w.i, h.i, flags.i)`<br>`Init(title.s, x.i, y.i, w.i, h.i, flags.i, parentWin.i)` | Fenêtre GUI réactive intégrant automatiquement le redimensionnement. |
-
----
-
-## 4. Exemple d'Application Réactive Multi-Fenêtres
-
-```oop
-XIncludeFile "ui/UI.pbo"
-Using UI
-Using UI::Layouts
-
-Class MainWindow Extends UI::Window {
-  Protected *rootDock.DockPanel
-  Protected *toolbar.StackPanel
-  Protected *btnNew.Button
-  Protected *table.ListIcon
-
   Public Method Init() {
-    ; Fenêtre 800x600 centrée et redimensionnable
-    Super::Init("Gestionnaire de Contacts", 800, 600)
+    This\nom = "Anonyme" : This\age = 0
+  }
 
-    ; Panneau racine Dock
-    This\*rootDock = New DockPanel(#True)
-    This\SetRootComponent(This\*rootDock)
+  Public Method Init(nom_p.s) {
+    This\nom = nom_p : This\age = 0
+  }
 
-    ; Barre d'outils en haut (Dock Top)
-    This\*toolbar = New StackPanel(#UI_Orientation_Horizontal, 8)
-    This\*btnNew = New Button("+ Nouveau Contact")
-    This\*toolbar\AddChild(This\*btnNew)
-    This\*rootDock\AddDockChild(This\*toolbar, #UI_Dock_Top)
-
-    ; Table centrale (remplit tout l'espace restant)
-    This\*table = New ListIcon("Nom", 200)
-    This\*table\AddColumn(1, "Email", 250)
-    This\*rootDock\AddDockChild(This\*table, #UI_Dock_Fill)
+  Public Method Init(nom_p.s, age_p.i) {
+    This\nom = nom_p : This\age = age_p
   }
 }
+```
 
-Define *app.UI::Application = New UI::Application()
-Define *win.MainWindow = New MainWindow()
+---
+
+## 3. Framework GUI Responsive (`src/ui/`)
+
+Le framework GUI de PureBasic OOP permet de construire des interfaces graphiques automatiques sans aucun calcul manuel de coordonnees (X, Y).
+
+### 3.1 Tableau des Controles Graphiques
+
+| Composant | Constructeurs Courants | Description |
+| :--- | :--- | :--- |
+| **`UI::Button`** | `Init(text.s)`<br>`Init(text.s, w.i, h.i)` | Bouton poussoir standard cliquable. 120x30 par defaut. |
+| **`UI::TextBox`** | `Init()`<br>`Init(defaultText.s)`<br>`Init(defaultText.s, w.i, h.i)` | Champ de saisie de texte mono-ligne. |
+| **`UI::Label`** | `Init(text.s)`<br>`Init(text.s, w.i, h.i)` | Texte statique d'affichage. |
+| **`UI::CheckBox`** | `Init(text.s)`<br>`Init(text.s, checked.b)` | Case a cocher avec etat booleen. |
+| **`UI::ComboBox`** | `Init()`<br>`Init(w.i, h.i)` | Liste deroulante de selection. |
+| **`UI::ProgressBar`** | `Init()` *(0..100)*<br>`Init(min.i, max.i)` | Barre de progression visuelle. |
+| **`UI::Slider`** | `Init()` *(0..100)*<br>`Init(min.i, max.i)` | Curseur coulissant (TrackBar). |
+| **`UI::ListIcon`** | `Init(title.s, colWidth.i)` | Tableau multi-colonnes / grille de donnees. |
+| **`UI::ToggleSwitch`** | `Init()`<br>`Init(checked.b)` | Interrupteur moderne rendu en vectoriel (Canvas). |
+
+### 3.2 Panneaux de Disposition (Layout Panels)
+
+| Panneau | Constructeurs | Comportement |
+| :--- | :--- | :--- |
+| **`UI::StackPanel`** | `Init()`<br>`Init(orientation.i, spacing.i)` | Alignement lineaire horizontal ou vertical. |
+| **`UI::DockPanel`** | `Init(lastChildFill.b = #True)` | Ancrage sur les bords (`#UI_Dock_Top`, `#UI_Dock_Bottom`, `#UI_Dock_Left`, `#UI_Dock_Right`, `#UI_Dock_Fill`). |
+| **`UI::Grid`** | `Init()` | Grille flexible en 2D avec tailles fixes, Auto ou etoilees (`*`, `2*`). |
+| **`UI::Window`** | `Init(title.s, w.i, h.i)` | Fenetre principale responsive avec redimensionnement automatique. |
+
+---
+
+## 4. Moteur Declaratif XML / XAML
+
+Les interfaces peuvent etre decrites de maniere declarative dans des fichiers XML ou directement en memoire sous forme de chaines.
+
+### 4.1 Methodes de Chargement
+- **Depuis un fichier** : `This\LoadView(cheminFichier.s, *dataContext = 0)`
+- **Depuis la memoire (Chaine)** : `This\LoadViewFromString(xmlString.s, *dataContext = 0)`
+
+### 4.2 Exemple de Syntaxe XML
+```xml
+<Window Title="Mon Application" Width="600" Height="400">
+  <DockPanel LastChildFill="true">
+    <StackPanel Dock="Top" Orientation="Horizontal" Margin="10,5" Spacing="8">
+      <Button Text="Actualiser" Click="RefreshCmd" Width="100" Height="30"/>
+    </StackPanel>
+    <StackPanel Dock="Fill" Orientation="Vertical" Margin="15" Spacing="10">
+      <Label Text="Nom d'utilisateur :" Height="20"/>
+      <TextBox Text="{Binding UserName}" Height="28"/>
+      <Label Text="{Binding StatusMessage}" Height="20"/>
+    </StackPanel>
+  </DockPanel>
+</Window>
+```
+
+---
+
+## 5. Le Pattern Architectural MVVM
+
+Le pattern **MVVM (Model-View-ViewModel)** separe rigoureusement la logique metier et l'affichage :
+- **Model** : Les donnees et la logique metier pure.
+- **ViewModel** : Gere l'etat et les commandes. **Ne fait jamais reference aux fenetres ou gadgets directement**.
+- **View** : La presentation visuelle observant le ViewModel via son `DataContext` et les expressions `{Binding ...}`.
+
+### 5.1 Proprietes Observables Fortement Typees (`src/ui/mvvm/Property.pbi`)
+
+| Classe de Propriete | Methodes | Notification |
+| :--- | :--- | :--- |
+| **`StringProperty`** | `Get()`, `Set(val.s)`, `ToString()` | Automatique sur `Set()` |
+| **`IntProperty`** | `Get()`, `Set(val.i)`, `Increment()`, `Decrement()`, `GetString()`, `ToString()` | Automatique sur `Set()`, `Increment()`, `Decrement()` |
+| **`BoolProperty`** | `Get()`, `Set(val.b)`, `Toggle()`, `GetString()`, `ToString()` | Automatique sur `Set()`, `Toggle()` |
+| **`DoubleProperty`** | `Get()`, `Set(val.d)`, `GetString()`, `ToString(decimals.i)` | Automatique sur `Set()` |
+
+### 5.2 Methodes d'Aide dans le ViewModel
+Dans toute classe heritant de `UI::MVVM::ViewModelBase` :
+- `This\BindString(nom.s, defaut.s = "")`
+- `This\BindInt(nom.s, defaut.i = 0)`
+- `This\BindBool(nom.s, defaut.b = #False)`
+- `This\BindDouble(nom.s, defaut.d = 0.0)`
+
+### 5.3 Gestion des Commandes
+Un clic sur un bouton avec `Click="NomCommande"` declenche automatiquement la methode virtuelle `OnCommand(cmd.s, *param = 0)` dans le ViewModel :
+```purebasic
+Public Method.b OnCommand(cmd.s, *param = 0) {
+  Select cmd
+    Case "MonAction"
+      This\*MaPropriete\Set("Mis a jour !")
+      ProcedureReturn #True
+  EndSelect
+  ProcedureReturn #False
+}
+```
+
+---
+
+## 6. Exemple Complet MVVM Pas a Pas
+
+### 1. `SimpleConstants.pbi` (Contrat Partage)
+```purebasic
+#PROP_MESSAGE = "Message"
+#PROP_COUNT   = "Count"
+#CMD_CLICK    = "ClickCmd"
+#CMD_RESET    = "ResetCmd"
+```
+
+### 2. `SimpleViewModel.pbi` (Etat et Logique)
+```purebasic
+XIncludeFile "ui/UI.pbi"
+XIncludeFile "SimpleConstants.pbi"
+
+Namespace Demo {
+
+  Class SimpleViewModel Extends UI::MVVM::ViewModelBase {
+    Public *Message.UI::MVVM::StringProperty
+    Public *Count.UI::MVVM::IntProperty
+
+    Public Method Init() {
+      Super::Init()
+      This\*Message = This\BindString(#PROP_MESSAGE, "Cliquez sur le bouton")
+      This\*Count   = This\BindInt(#PROP_COUNT, 0)
+    }
+
+    Public Method.b OnCommand(cmd.s, *param = 0) {
+      Select cmd
+        Case #CMD_CLICK
+          This\*Count\Increment()
+          This\*Message\Set("Nombre de clics: " + This\*Count\GetString())
+          ProcedureReturn #True
+
+        Case #CMD_RESET
+          This\*Count\Set(0)
+          This\*Message\Set("Reinitialise a 0")
+          ProcedureReturn #True
+      EndSelect
+      ProcedureReturn #False
+    }
+  }
+
+}
+```
+
+### 3. `SimpleView.pbi` (Vue Declarative)
+```purebasic
+XIncludeFile "ui/UI.pbi"
+XIncludeFile "SimpleConstants.pbi"
+XIncludeFile "SimpleViewModel.pbi"
+
+Namespace Demo {
+
+  Class SimpleView Extends UI::Window {
+
+    Public Method Init(*vm.Demo::SimpleViewModel) {
+      Super::Init()
+
+      Protected xml.s
+      xml + "<Window Title='Exemple MVVM' Width='450' Height='250'>"
+      xml + "  <StackPanel Orientation='Vertical' Margin='20' Spacing='12'>"
+      xml + "    <Label Text='Demo PureBasic OOP MVVM' Height='24'/>"
+      xml + "    <TextBox Text='{Binding " + #PROP_MESSAGE + "}' Height='28'/>"
+      xml + "    <StackPanel Orientation='Horizontal' Spacing='10' Height='34'>"
+      xml + "      <Button Text='Cliquez ici' Click='" + #CMD_CLICK + "' Width='110' Height='32'/>"
+      xml + "      <Button Text='Reset'      Click='" + #CMD_RESET + "' Width='90'  Height='32'/>"
+      xml + "    </StackPanel>"
+      xml + "  </StackPanel>"
+      xml + "</Window>"
+
+      This\LoadViewFromString(xml, *vm)
+    }
+  }
+
+}
+```
+
+### 4. `Main.pb` (Point d'Entree)
+```purebasic
+XIncludeFile "SimpleView.pbi"
+
+Define *app.UI::Application = New UI::Application("PureBasic OOP MVVM")
+Define *vm.Demo::SimpleViewModel = New Demo::SimpleViewModel()
+Define *view.Demo::SimpleView = New Demo::SimpleView(*vm)
+
+*app\SetMainWindow(*view)
 *app\Run()
 ```
 
 ---
 
-## 5. Guide de Compilation & Exécution
+## 7. Guide de Compilation et Build
 
-### Transpiler un fichier source `.pbo` vers `.pb` :
+### Etape 1 : Transpilation du fichier `.pb` avec le Transpileur Natif
 ```cmd
-"compiler/transpiler.exe" "src/main.pbo" "src/main_generated.pb"
+compiler\transpiler.exe "src/examples/simple_mvvm/Main.pb" "src/examples/simple_mvvm/Main_transpiled.pb" --base-dir "src/examples/simple_mvvm"
 ```
 
-### Compiler avec le compilateur officiel PureBasic :
+### Etape 2 : Compilation Binaire avec le Compilateur PureBasic
 ```cmd
-"C:\Program Files\PureBasic\Compilers\pbcompiler.exe" "src/main_generated.pb" /EXE "src/app.exe" /THREAD /UNICODE /XP /USER /DPIAWARE /QUIET
+"C:\Program Files\PureBasic\Compilers\pbcompiler.exe" "src/examples/simple_mvvm/Main_transpiled.pb" /CONSOLE /DEBUGGER /EXE "src/examples/simple_mvvm/simple_mvvm.exe" /THREAD /UNICODE /XP /USER /DPIAWARE
 ```

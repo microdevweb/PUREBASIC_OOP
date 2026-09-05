@@ -1,214 +1,306 @@
 ; ============================================================================
 ; PureBasic OOP - Reference Manual (English)
-; Official documentation for the transpiler and the OOP GUI framework
+; Official documentation for the transpiler, GUI framework, and MVVM engine
 ; Author:      MicrodevWeb
 ; ============================================================================
 
 # PureBasic OOP Reference Manual (English)
 
-Welcome to the official documentation for the PureBasic Object-Oriented transpiler and language layer.
+Welcome to the official documentation for the PureBasic Object-Oriented transpiler, responsive GUI framework, and MVVM (Model-View-ViewModel) reactive architecture.
 
 ---
 
 ## 1. Foundations of Object-Oriented Programming (OOP)
 
-Object-Oriented Programming (OOP) is a programming paradigm organized around **data** and their **associated operations**, packaged into self-contained units called **Objects**.
-
-It is built on 5 fundamental pillars:
+Object-Oriented Programming (OOP) organizes software design around **data** and their **associated operations**, packaged into self-contained units called **Objects**.
 
 ### 1.1 Classes and Objects
-- **Class**: The blueprint defining the structure (fields/attributes) and behavior (methods).
-- **Object (Instance)**: A concrete entity instantiated in memory based on a class (e.g., class `Dog` instantiates the object `Buddy`).
+- **Class**: The blueprint defining data fields (attributes) and behaviors (methods).
+- **Object (Instance)**: A concrete entity instantiated in memory via `New ClassName(...)`.
 
-### 1.2 Encapsulation
-Encapsulation bundles data and the functions that manipulate them, restricting unauthorized external access:
-- **`Public`**: Accessible anywhere (both inside and outside the object).
-- **`Protected`**: Accessible only within the declaring class and its derived (child) subclasses.
+### 1.2 Encapsulation & Visibility
+- **`Public`**: Accessible anywhere (inside and outside the object).
+- **`Protected`**: Accessible only within the declaring class and its derived subclasses.
 - **`Private`**: Accessible strictly inside the declaring class.
 
 ### 1.3 Inheritance (`Extends`)
-Inheritance enables a derived (child) class to reuse and extend fields and methods from a base (parent) class, promoting code reuse and clear hierarchies.
-
-### 1.4 Polymorphism (Dynamic VTable Dispatch)
-Polymorphism allows manipulating various derived objects uniformly via a reference to their common base class. Method calls dynamically resolve at runtime to the real object's implementation through the Virtual Method Table (*VTable*).
-
-### 1.5 Abstraction (Abstract Classes & Abstract Methods)
-Abstraction defines a generalized contract without supplying all implementation details:
-- **Abstract Class** (`Abstract Class`): An incomplete class serving as a blueprint/contract. It **cannot be instantiated directly**.
-- **Abstract Method** (`Abstract Method`): A method prototype without a body. Any concrete child class **must** implement this method.
-- **Concrete / Default Method**: An abstract class can also provide methods with default implementation, which child classes can inherit as-is, override completely, or override partially using `Super::`.
-
----
-
-## 2. PureBasic OOP Syntax & Grammar (.pbo)
-
-### 2.1 Declaring Abstract and Concrete Classes
-
+Inheritance allows a child class to inherit fields and methods from a parent class, promoting code reuse:
 ```oop
-; ----------------------------------------------------------------------------
-; 1. ABSTRACT CLASS (Base contract / blueprint)
-; ----------------------------------------------------------------------------
-Abstract Class Shape
-  Protected name.s
-  Protected color.s
-
-  ; Constructor
-  Public Method Init(name_p.s, color_p.s)
-
-  ; Abstract Methods (Contract: mandatory in concrete child classes)
-  Public Abstract Method.d CalculateArea()
-  Public Abstract Method.d CalculatePerimeter()
-  Public Abstract Method Draw()
-
-  ; Concrete Method with default implementation in abstract class
-  Public Method DisplayInfo()
-  
-  ; Destructor
-  Public Method Free()
-EndClass
-
-; ----------------------------------------------------------------------------
-; 2. CONCRETE CLASS (Inherits from Abstract Class)
-; ----------------------------------------------------------------------------
-Class Rectangle Extends Shape
-  Protected width.d
-  Protected height.d
-
-  Public Method Init(name_p.s, color_p.s, w.d, h.d)
-  
-  ; Mandatory implementations of abstract methods
-  Public Method.d CalculateArea()
-  Public Method.d CalculatePerimeter()
-  Public Method Draw()
-  
-  ; Overriding the default method
-  Public Method DisplayInfo()
-  
-  Public Method Free()
-EndClass
+Class Dog Extends Animal {
+  Public Method Speak() {
+    MessageRequester("Dog", "Woof!")
+  }
+}
 ```
 
+### 1.4 Polymorphism (Dynamic VTable Dispatch)
+Derived objects can be treated uniformly through their base class pointer. Method invocations dynamically dispatch at runtime through the Virtual Method Table (*VTable*).
+
+### 1.5 Abstraction (Abstract Classes & Abstract Methods)
+- **`Abstract Class`**: A base class that cannot be directly instantiated.
+- **`Public Abstract Method`**: A prototype that concrete subclasses **must** implement.
+
 ---
 
-### 2.2 Constructor Overloading (`Init`) & Explicit Rule
+## 2. PureBasic OOP Syntax & Grammar
 
-In PureBasic OOP, a class can define **multiple overloaded constructors** to fit various use cases (from minimal default sizing for auto-layouts to full coordinates and flags) :
-
+### 2.1 Class Declaration
 ```oop
-Class Person
+Namespace App::Models {
+
+  Abstract Class Shape {
+    Protected name.s
+    Protected color.s
+
+    Public Method Init(name_p.s, color_p.s) {
+      This\name = name_p
+      This\color = color_p
+    }
+
+    Public Abstract Method.d CalculateArea()
+    
+    Public Method DisplayInfo() {
+      Debug "Shape: " + This\name + " | Color: " + This\color
+    }
+
+    Public Method Free() {
+    }
+  }
+
+  Class Rectangle Extends Shape {
+    Protected width.d
+    Protected height.d
+
+    Public Method Init(name_p.s, color_p.s, w.d, h.d) {
+      Super::Init(name_p, color_p)
+      This\width = w
+      This\height = h
+    }
+
+    Public Method.d CalculateArea() {
+      ProcedureReturn This\width * This\height
+    }
+  }
+
+}
+```
+
+### 2.2 Constructor Overloading (`Init`)
+A class can define multiple constructors with different parameter signatures:
+```oop
+Class Person {
   Protected name.s
   Protected age.i
 
-  ; Constructor 1: No parameter
-  Public Method Init()
-    This\name = "Anonymous"
-    This\age = 0
-  EndMethod
+  Public Method Init() {
+    This\name = "Anonymous" : This\age = 0
+  }
 
-  ; Constructor 2: Name only
-  Public Method Init(name_p.s)
-    This\name = name_p
-    This\age = 0
-  EndMethod
+  Public Method Init(name_p.s) {
+    This\name = name_p : This\age = 0
+  }
 
-  ; Constructor 3: Name and Age
-  Public Method Init(name_p.s, age_p.i)
-    This\name = name_p
-    This\age = age_p
-  EndMethod
-EndClass
-
-; Instantiation matching the desired constructor:
-Define *p1.Person = New Person()
-Define *p2.Person = New Person("Alice")
-Define *p3.Person = New Person("Bob", 30)
+  Public Method Init(name_p.s, age_p.i) {
+    This\name = name_p : This\age = age_p
+  }
+}
 ```
-
-> **Explicit Constructors Rule**:
-> Each class explicitly defines its own constructors. Subclasses do not implicitly inherit parent constructor signatures without declaring them; a subclass constructor calls the desired base constructor using `Super::Init(...)`.
 
 ---
 
-## 3. Responsive GUI Framework & Components (`src/ui/`)
+## 3. Responsive GUI Framework (`src/ui/`)
 
-The GUI framework provides responsive layout containers and standard controls, enabling modern application design without manual coordinate calculations.
+The PureBasic OOP GUI framework provides automatic layout management and standard UI controls without manual coordinate calculations.
 
 ### 3.1 UI Controls Constructor Reference
 
-| Component | Available Constructors (from simplest to most complete) | Description & Parameters |
+| Component | Common Constructors | Description |
 | :--- | :--- | :--- |
-| **`UI::Button`** | `Init(text.s)`<br>`Init(text.s, w.i, h.i)`<br>`Init(x.i, y.i, w.i, h.i, text.s)`<br>`Init(x.i, y.i, w.i, h.i, text.s, flags.i)` | Standard clickable push button. Auto 120x30 default. |
-| **`UI::TextBox`** | `Init()`<br>`Init(defaultText.s)`<br>`Init(defaultText.s, w.i, h.i)`<br>`Init(x.i, y.i, w.i, h.i, defaultText.s)`<br>`Init(x.i, y.i, w.i, h.i, defaultText.s, flags.i)` | Single-line editable text box. Auto 150x25 default. |
-| **`UI::Label`** | `Init(text.s)`<br>`Init(text.s, w.i, h.i)`<br>`Init(x.i, y.i, w.i, h.i, text.s)`<br>`Init(x.i, y.i, w.i, h.i, text.s, flags.i)` | Static text label. |
-| **`UI::CheckBox`** | `Init(text.s)`<br>`Init(text.s, checked.b)`<br>`Init(text.s, w.i, h.i, checked.b)`<br>`Init(x.i, y.i, w.i, h.i, text.s, flags.i)` | Checkbox toggle with boolean state. |
-| **`UI::ComboBox`** | `Init()`<br>`Init(w.i, h.i)`<br>`Init(x.i, y.i, w.i, h.i)`<br>`Init(x.i, y.i, w.i, h.i, flags.i)` | Dropdown select box. |
-| **`UI::ProgressBar`** | `Init()` *(0..100)*<br>`Init(min.i, max.i)`<br>`Init(min.i, max.i, w.i, h.i)`<br>`Init(x.i, y.i, w.i, h.i, min.i, max.i, flags.i)` | Progress indicator bar. |
-| **`UI::Slider`** | `Init()` *(0..100)*<br>`Init(min.i, max.i)`<br>`Init(min.i, max.i, w.i, h.i)`<br>`Init(x.i, y.i, w.i, h.i, min.i, max.i, flags.i)` | TrackBar slider. |
-| **`UI::ListIcon`** | `Init(title.s, colWidth.i)`<br>`Init(title.s, colWidth.i, flags.i)`<br>`Init(x.i, y.i, w.i, h.i, title.s, colWidth.i)`<br>`Init(x.i, y.i, w.i, h.i, title.s, colWidth.i, flags.i)` | Multi-column table / data grid. |
-| **`UI::Controls::ToggleSwitch`** | `Init()`<br>`Init(checked.b)`<br>`Init(w.i, h.i, checked.b)`<br>`Init(x.i, y.i, w.i, h.i, checked.b)` | Vector-rendered modern toggle switch (Canvas). |
-
----
+| **`UI::Button`** | `Init(text.s)`<br>`Init(text.s, w.i, h.i)` | Standard clickable push button. Auto 120x30 default. |
+| **`UI::TextBox`** | `Init()`<br>`Init(defaultText.s)`<br>`Init(defaultText.s, w.i, h.i)` | Single-line editable text input. |
+| **`UI::Label`** | `Init(text.s)`<br>`Init(text.s, w.i, h.i)` | Static text label. |
+| **`UI::CheckBox`** | `Init(text.s)`<br>`Init(text.s, checked.b)` | Checkbox toggle with boolean state. |
+| **`UI::ComboBox`** | `Init()`<br>`Init(w.i, h.i)` | Dropdown selection control. |
+| **`UI::ProgressBar`** | `Init()` *(0..100)*<br>`Init(min.i, max.i)` | Visual progress bar indicator. |
+| **`UI::Slider`** | `Init()` *(0..100)*<br>`Init(min.i, max.i)` | TrackBar slider control. |
+| **`UI::ListIcon`** | `Init(title.s, colWidth.i)` | Multi-column table / data grid. |
+| **`UI::ToggleSwitch`** | `Init()`<br>`Init(checked.b)` | Modern vector toggle switch (Canvas). |
 
 ### 3.2 Responsive Layout Panels
 
-| Layout Panel | Available Constructors | Behavior & Features |
+| Layout Panel | Constructors | Behavior |
 | :--- | :--- | :--- |
-| **`UI::Layouts::StackPanel`** | `Init()` *(Vertical, 5px)*<br>`Init(orientation.i)`<br>`Init(orientation.i, spacing.i)`<br>`Init(orientation.i, spacing.i, w.i, h.i)` | Linear flow arranging children horizontally (`#UI_Orientation_Horizontal`) or vertically (`#UI_Orientation_Vertical`). |
-| **`UI::Layouts::DockPanel`** | `Init()` *(LastChildFill = #True)*<br>`Init(lastChildFill.b)`<br>`Init(lastChildFill.b, w.i, h.i)` | Edge-docking layout (`#UI_Dock_Top`, `#UI_Dock_Bottom`, `#UI_Dock_Left`, `#UI_Dock_Right`) with center fill. |
-| **`UI::Layouts::Grid`** | `Init()`<br>`Init(w.i, h.i)` | 2D flexible grid supporting fixed pixels, `"Auto"` content sizing, and weighted Star sizing (`"*"` / `"2*"`). |
-| **`UI::Window`** | `Init(title.s)`<br>`Init(title.s, w.i, h.i)`<br>`Init(title.s, w.i, h.i, flags.i)`<br>`Init(title.s, x.i, y.i, w.i, h.i, flags.i, parentWin.i)` | Top-level responsive window with automated resize handling. |
+| **`UI::StackPanel`** | `Init()`<br>`Init(orientation.i, spacing.i)` | Linear layout arranging children horizontally or vertically. |
+| **`UI::DockPanel`** | `Init(lastChildFill.b = #True)` | Edge docking (`#UI_Dock_Top`, `#UI_Dock_Bottom`, `#UI_Dock_Left`, `#UI_Dock_Right`, `#UI_Dock_Fill`). |
+| **`UI::Grid`** | `Init()` | 2D flexible grid supporting fixed pixels, Auto, and Star (`*`, `2*`) sizing. |
+| **`UI::Window`** | `Init(title.s, w.i, h.i)` | Top-level window with automated resize handling. |
 
 ---
 
-## 4. Multi-Window Responsive Example
+## 4. Declarative XML / XAML UI Engine
 
-```oop
-XIncludeFile "ui/UI.pbo"
-Using UI
-Using UI::Layouts
+Layouts can be defined declaratively in XML files or directly in-memory as strings.
 
-Class MainWindow Extends UI::Window {
-  Protected *rootDock.DockPanel
-  Protected *toolbar.StackPanel
-  Protected *btnNew.Button
-  Protected *table.ListIcon
+### 4.1 Loading Methods
+- **From File**: `This\LoadView(filePath.s, *dataContext = 0)`
+- **From String (In-Memory)**: `This\LoadViewFromString(xmlString.s, *dataContext = 0)`
 
-  Public Method Init() {
-    ; Centered, resizable 800x600 window
-    Super::Init("Contact Manager", 800, 600)
+### 4.2 XML Syntax Reference
+```xml
+<Window Title="Application" Width="600" Height="400">
+  <DockPanel LastChildFill="true">
+    <StackPanel Dock="Top" Orientation="Horizontal" Margin="10,5" Spacing="8">
+      <Button Text="Refresh" Click="RefreshCmd" Width="90" Height="30"/>
+    </StackPanel>
+    <StackPanel Dock="Fill" Orientation="Vertical" Margin="15" Spacing="10">
+      <Label Text="User Details:" Height="20"/>
+      <TextBox Text="{Binding UserName}" Height="28"/>
+      <Label Text="{Binding StatusMessage}" Height="20"/>
+    </StackPanel>
+  </DockPanel>
+</Window>
+```
 
-    ; Root DockPanel
-    This\*rootDock = New DockPanel(#True)
-    This\SetRootComponent(This\*rootDock)
+---
 
-    ; Top Toolbar (Dock Top)
-    This\*toolbar = New StackPanel(#UI_Orientation_Horizontal, 8)
-    This\*btnNew = New Button("+ New Contact")
-    This\*toolbar\AddChild(This\*btnNew)
-    This\*rootDock\AddDockChild(This\*toolbar, #UI_Dock_Top)
+## 5. Modern MVVM Architectural Pattern
 
-    ; Central Table (Fills remaining area)
-    This\*table = New ListIcon("Name", 200)
-    This\*table\AddColumn(1, "Email", 250)
-    This\*rootDock\AddDockChild(This\*table, #UI_Dock_Fill)
-  }
+The **MVVM (Model-View-ViewModel)** pattern provides clean separation of concerns and reactive data-binding:
+- **Model**: Business entities and data storage.
+- **ViewModel**: Manages state and logic. **Never references UI gadgets or windows directly**.
+- **View**: Visual presentation observing the ViewModel via `DataContext` and DataBinding expressions.
+
+### 5.1 Strongly-Typed Observable Properties (`src/ui/mvvm/Property.pbi`)
+
+| Property Class | Accessors | Notification |
+| :--- | :--- | :--- |
+| **`StringProperty`** | `Get()`, `Set(val.s)`, `ToString()` | Automatic on `Set()` |
+| **`IntProperty`** | `Get()`, `Set(val.i)`, `Increment()`, `Decrement()`, `GetString()`, `ToString()` | Automatic on `Set()`, `Increment()`, `Decrement()` |
+| **`BoolProperty`** | `Get()`, `Set(val.b)`, `Toggle()`, `GetString()`, `ToString()` | Automatic on `Set()`, `Toggle()` |
+| **`DoubleProperty`** | `Get()`, `Set(val.d)`, `GetString()`, `ToString(decimals.i)` | Automatic on `Set()` |
+
+### 5.2 ViewModel Creation Helpers
+Within any class extending `UI::MVVM::ViewModelBase`:
+- `This\BindString(name.s, defaultVal.s = "")`
+- `This\BindInt(name.s, defaultVal.i = 0)`
+- `This\BindBool(name.s, defaultVal.b = #False)`
+- `This\BindDouble(name.s, defaultVal.d = 0.0)`
+
+### 5.3 Command Dispatching
+Buttons with `Click="CommandName"` or `Command="CommandName"` trigger the virtual `OnCommand(cmd.s, *param = 0)` method in the ViewModel:
+```purebasic
+Public Method.b OnCommand(cmd.s, *param = 0) {
+  Select cmd
+    Case "MyAction"
+      This\*MyProperty\Set("Updated!")
+      ProcedureReturn #True
+  EndSelect
+  ProcedureReturn #False
 }
+```
 
-Define *app.UI::Application = New UI::Application()
-Define *win.MainWindow = New MainWindow()
+---
+
+## 6. Complete MVVM Step-by-Step Example
+
+### File 1: `SimpleConstants.pbi` (Shared Contract)
+```purebasic
+#PROP_MESSAGE = "Message"
+#PROP_COUNT   = "Count"
+#CMD_CLICK    = "ClickCmd"
+#CMD_RESET    = "ResetCmd"
+```
+
+### File 2: `SimpleViewModel.pbi` (State & Logic)
+```purebasic
+XIncludeFile "ui/UI.pbi"
+XIncludeFile "SimpleConstants.pbi"
+
+Namespace Demo {
+
+  Class SimpleViewModel Extends UI::MVVM::ViewModelBase {
+    Public *Message.UI::MVVM::StringProperty
+    Public *Count.UI::MVVM::IntProperty
+
+    Public Method Init() {
+      Super::Init()
+      This\*Message = This\BindString(#PROP_MESSAGE, "Click the button below")
+      This\*Count   = This\BindInt(#PROP_COUNT, 0)
+    }
+
+    Public Method.b OnCommand(cmd.s, *param = 0) {
+      Select cmd
+        Case #CMD_CLICK
+          This\*Count\Increment()
+          This\*Message\Set("Total Clicks: " + This\*Count\GetString())
+          ProcedureReturn #True
+
+        Case #CMD_RESET
+          This\*Count\Set(0)
+          This\*Message\Set("Reset to 0")
+          ProcedureReturn #True
+      EndSelect
+      ProcedureReturn #False
+    }
+  }
+
+}
+```
+
+### File 3: `SimpleView.pbi` (Declarative View)
+```purebasic
+XIncludeFile "ui/UI.pbi"
+XIncludeFile "SimpleConstants.pbi"
+XIncludeFile "SimpleViewModel.pbi"
+
+Namespace Demo {
+
+  Class SimpleView Extends UI::Window {
+
+    Public Method Init(*vm.Demo::SimpleViewModel) {
+      Super::Init()
+
+      Protected xml.s
+      xml + "<Window Title='MVVM Example' Width='450' Height='250'>"
+      xml + "  <StackPanel Orientation='Vertical' Margin='20' Spacing='12'>"
+      xml + "    <Label Text='PureBasic OOP MVVM Demo' Height='24'/>"
+      xml + "    <TextBox Text='{Binding " + #PROP_MESSAGE + "}' Height='28'/>"
+      xml + "    <StackPanel Orientation='Horizontal' Spacing='10' Height='34'>"
+      xml + "      <Button Text='Click Me' Click='" + #CMD_CLICK + "' Width='110' Height='32'/>"
+      xml + "      <Button Text='Reset'    Click='" + #CMD_RESET + "' Width='90'  Height='32'/>"
+      xml + "    </StackPanel>"
+      xml + "  </StackPanel>"
+      xml + "</Window>"
+
+      This\LoadViewFromString(xml, *vm)
+    }
+  }
+
+}
+```
+
+### File 4: `Main.pb` (Application Entry Point)
+```purebasic
+XIncludeFile "SimpleView.pbi"
+
+Define *app.UI::Application = New UI::Application("PureBasic OOP MVVM")
+Define *vm.Demo::SimpleViewModel = New Demo::SimpleViewModel()
+Define *view.Demo::SimpleView = New Demo::SimpleView(*vm)
+
+*app\SetMainWindow(*view)
 *app\Run()
 ```
 
 ---
 
-## 5. Compilation & Build Guide
+## 7. Compilation & Build Guide
 
-### Transpile `.pbo` source to native `.pb`:
+### Step 1: Transpile `.pbo` / `.pb` using Native Transpiler
 ```cmd
-"compiler/transpiler.exe" "src/main.pbo" "src/main_generated.pb"
+compiler\transpiler.exe "src/examples/simple_mvvm/Main.pb" "src/examples/simple_mvvm/Main_transpiled.pb" --base-dir "src/examples/simple_mvvm"
 ```
 
-### Compile to Standalone Binary using PureBasic Compiler:
+### Step 2: Compile with PureBasic Compiler
 ```cmd
-"C:\Program Files\PureBasic\Compilers\pbcompiler.exe" "src/main_generated.pb" /EXE "src/app.exe" /THREAD /UNICODE /XP /USER /DPIAWARE /QUIET
+"C:\Program Files\PureBasic\Compilers\pbcompiler.exe" "src/examples/simple_mvvm/Main_transpiled.pb" /CONSOLE /DEBUGGER /EXE "src/examples/simple_mvvm/simple_mvvm.exe" /THREAD /UNICODE /XP /USER /DPIAWARE
 ```

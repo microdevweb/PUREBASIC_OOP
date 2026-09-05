@@ -613,7 +613,7 @@ Namespace UI {
         ProcedureReturn #False
       EndIf
 
-      Protected xmlHandle.i = CatchXML(#PB_Any, @xmlContent, StringByteLength(xmlContent, #PB_UTF8), 0, #PB_UTF8)
+      Protected xmlHandle.i = ParseXML(#PB_Any, xmlContent)
       If Not xmlHandle Or XMLStatus(xmlHandle) <> #PB_XML_Success
         If xmlHandle : FreeXML(xmlHandle) : EndIf
         ProcedureReturn #False

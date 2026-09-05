@@ -7,7 +7,7 @@
   <section name="data">
     <explorer view="src\examples\mvvm_demo\viewmodels\" pattern="0"/>
     <log show="1"/>
-    <lastopen date="2026-09-05 10:50" user="u237685" host="CSL0111"/>
+    <lastopen date="2026-09-05 11:04" user="u237685" host="CSL0111"/>
   </section>
   <section name="files">
     <file name="src\examples\mvvm_demo\Main.pb">
@@ -16,7 +16,7 @@
     </file>
     <file name="src\examples\mvvm_demo\views\TaskView.pbi">
       <config load="0" scan="1" panel="1" warn="1" lastopen="1" sortindex="2" panelstate="+++++"/>
-      <fingerprint md5="7bf54b5d6bde0e87eb35a3bf0fc38b4b"/>
+      <fingerprint md5="ade4545c685c1e576a7c3838aba2edff"/>
     </file>
     <file name="src\examples\mvvm_demo\viewmodels\TaskViewModel.pbi">
       <config load="0" scan="1" panel="1" warn="1" lastopen="1" sortindex="3" panelstate="+++++"/>

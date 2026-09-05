@@ -55,6 +55,29 @@ Namespace UI::MVVM {
       ProcedureReturn This\OnCommand(name_p, *param)
     }
 
+    ; ------------------------------------------------------------------------
+    ; Strongly-Typed Observable Property Helpers
+    ; ------------------------------------------------------------------------
+    Public Method.i BindString(name_p.s, initialVal.s = "") {
+      Protected *p.UI::MVVM::StringProperty = New UI::MVVM::StringProperty(This, name_p, initialVal)
+      ProcedureReturn *p
+    }
+
+    Public Method.i BindInt(name_p.s, initialVal.i = 0) {
+      Protected *p.UI::MVVM::IntProperty = New UI::MVVM::IntProperty(This, name_p, initialVal)
+      ProcedureReturn *p
+    }
+
+    Public Method.i BindBool(name_p.s, initialVal.b = #False) {
+      Protected *p.UI::MVVM::BoolProperty = New UI::MVVM::BoolProperty(This, name_p, initialVal)
+      ProcedureReturn *p
+    }
+
+    Public Method.i BindDouble(name_p.s, initialVal.d = 0.0) {
+      Protected *p.UI::MVVM::DoubleProperty = New UI::MVVM::DoubleProperty(This, name_p, initialVal)
+      ProcedureReturn *p
+    }
+
     Public Method.b OnCommand(name_p.s, *param = 0) {
       ProcedureReturn #False
     }

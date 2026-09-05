@@ -1,24 +1,27 @@
-<Window Title="PureBasic OOP - Simple MVVM Test" Width="560" Height="400">
+<Window Title="PureBasic OOP - Simple MVVM Test" Width="520" Height="340">
   <DockPanel LastChildFill="true">
-    <StackPanel Dock="Top" Orientation="Vertical" Margin="15,10,15,5">
-      <Label Text="MVVM DataBinding and Hover Test" Height="24"/>
+    <StackPanel Dock="Top" Orientation="Vertical" Margin="15,12,15,5">
+      <Label Text="PureBasic OOP - MVVM DataBinding Test" Height="24"/>
     </StackPanel>
+    
     <StackPanel Dock="Bottom" Orientation="Horizontal" Margin="15,5" Height="26">
-      <Label Text="{Binding StatusText}" Width="500" Height="20"/>
+      <Label Text="{Binding StatusText}" Width="480" Height="20"/>
     </StackPanel>
-    <StackPanel Dock="Fill" Orientation="Vertical" Spacing="8" Margin="15,10">
-      <Label Text="Actions (Click or Hover):" Height="20"/>
+    
+    <StackPanel Dock="Fill" Orientation="Vertical" Spacing="10" Margin="15,10">
+      <Label Text="Click any button to trigger a ViewModel command:" Height="20"/>
       <StackPanel Orientation="Horizontal" Spacing="10" Height="36">
-        <Button Name="btn1" Text="Button 1" Click="ClickBtn1" Width="100" Height="32"/>
-        <Button Name="btn2" Text="Button 2" Click="ClickBtn2" Width="100" Height="32"/>
-        <Button Name="btn3" Text="Button 3" Click="ClickBtn3" Width="100" Height="32"/>
-        <Button Name="btnReset" Text="Reset" Click="Reset" Width="90" Height="32"/>
+        <Button Text="Button 1" Click="ClickBtn1" Width="100" Height="32"/>
+        <Button Text="Button 2" Click="ClickBtn2" Width="100" Height="32"/>
+        <Button Text="Button 3" Click="ClickBtn3" Width="100" Height="32"/>
+        <Button Text="Reset"    Click="Reset"     Width="80"  Height="32"/>
       </StackPanel>
-      <Label Text="Click Notification:" Margin="0,5,0,0" Height="20"/>
-      <TextBox Name="txtClick" Text="{Binding ClickMessage}" Height="28"/>
-      <Label Text="Hover Notification:" Margin="0,5,0,0" Height="20"/>
-      <TextBox Name="txtHover" Text="{Binding HoverMessage}" Height="28"/>
+      
+      <Label Text="ViewModel Output (OneWay DataBinding):" Margin="0,5,0,0" Height="20"/>
+      <TextBox Text="{Binding ClickMessage}" Height="28"/>
+      
       <Label Text="{Binding TotalClicksText}" Margin="0,5,0,0" Height="22"/>
     </StackPanel>
   </DockPanel>
 </Window>
+

@@ -5,6 +5,7 @@
 ; ============================================================================
 
 XIncludeFile "ObservableObject.pbi"
+XIncludeFile "Property.pbi"
 XIncludeFile "RelayCommand.pbi"
 XIncludeFile "ViewModelBase.pbi"
 XIncludeFile "ObservableCollection.pbi"
