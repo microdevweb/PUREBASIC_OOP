@@ -25,6 +25,12 @@ Namespace UI {
 
   Class XMLLoader {
 
+    Public Method Init() {
+    }
+
+    Public Method Free() {
+    }
+
     ; ------------------------------------------------------------------------
     ; Helper: Parse margin or padding strings ("10", "10,5", "10,5,10,5")
     ; ------------------------------------------------------------------------

@@ -247,13 +247,23 @@ Namespace UI {
     }
 
     Public Method.b LoadView(xmlPath.s) {
-      Protected loader.UI::XMLLoader
-      ProcedureReturn loader\LoadFromFile(xmlPath, This)
+      Protected *loader.UI::XMLLoader = New UI::XMLLoader()
+      Protected res.b = #False
+      If (*loader) {
+        res = *loader\LoadFromFile(xmlPath, This)
+        *loader\Free()
+      }
+      ProcedureReturn res
     }
 
     Public Method.b LoadViewFromString(xmlContent.s) {
-      Protected loader.UI::XMLLoader
-      ProcedureReturn loader\LoadFromString(xmlContent, This)
+      Protected *loader.UI::XMLLoader = New UI::XMLLoader()
+      Protected res.b = #False
+      If (*loader) {
+        res = *loader\LoadFromString(xmlContent, This)
+        *loader\Free()
+      }
+      ProcedureReturn res
     }
 
     ; ------------------------------------------------------------------------

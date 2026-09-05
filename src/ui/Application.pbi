@@ -1,4 +1,4 @@
-﻿; ============================================================================
+; ============================================================================
 ; PureBasic OOP GUI Framework - Application.pbi
 ; Application Manager & Central Event Dispatcher
 ; Author:      MicrodevWeb
@@ -74,10 +74,13 @@ Namespace UI {
     }
 
     Public Method Run() {
+      If (MapSize(UI_WindowMap()) = 0)
+        ProcedureReturn
+      EndIf
       This\isRunning = #True
       Protected ev.i, evGadget.i, evWin.i, evType.i
 
-      While (This\isRunning) {
+      While (This\isRunning And MapSize(UI_WindowMap()) > 0) {
         ev = WaitWindowEvent()
         evWin = EventWindow()
         evType = EventType()
