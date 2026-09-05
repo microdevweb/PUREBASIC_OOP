@@ -448,33 +448,31 @@ MonProjetMVVM/
 └── main.pb                      &lt;-- Point d'entrée principal exécutable
   </div>
 
-  <h2>2.1. Les deux options d'inclusion du Framework</h2>
-  <p>Selon vos besoins, vous disposez de deux points d'entrée simples et sécurisés avec <code>XIncludeFile</code> :</p>
+  <h2>2.1. Zéro Inclusion de Framework requise (Bibliothèque Standard)</h2>
+  <p>Le transpileur intègre <strong>automatiquement</strong> le Framework <code>UI</code> et <code>MVVM</code> en tâche de fond dès qu'il détecte des composants visuels ou des ViewModels. Vous n'avez aucun chemin relatif ou fichier externe à inclure !</p>
+  <p>Les deux espaces de noms principaux sont immédiatement accessibles :</p>
   <ul>
-    <li><strong><code>XIncludeFile "src/ui/UI.pbi"</code> (Recommandé pour les applications graphiques)</strong> : Inclut tout le framework en une seule ligne (Noyau Core, 18 Contrôles UI, Layouts réactifs WPF, Sous-système MVVM et Moteur XMLLoader).</li>
-    <li><strong><code>XIncludeFile "src/ui/mvvm/MVVM.pbi"</code> (Pour modules ou tests headless)</strong> : Inclut uniquement le moteur MVVM (ObservableObject, ViewModelBase, Propriétés typées, RelayCommand, BindingEngine) sans charger les gadgets graphiques.</li>
+    <li><strong><code>UI::</code></strong> : Contrôles graphiques (<code>UI::Button</code>, <code>UI::TextBox</code>...), Layouts (<code>UI::Layouts::StackPanel</code>...), Fenêtres et Application (<code>UI::Window</code>, <code>UI::Application</code>).</li>
+    <li><strong><code>MVVM::</code></strong> : Architecture réactive (<code>MVVM::ViewModelBase</code>, <code>MVVM::StringProperty</code>, <code>MVVM::IntProperty</code>, <code>MVVM::RelayCommand</code>, <code>MVVM::BindingEngine</code>).</li>
   </ul>
 
-  <h2>2.2. L'ordre d'inclusion obligatoire dans votre <code>main.pb</code></h2>
-  <p>Pour garantir que le compilateur et le transpileur résolvent tous les types sans avertissement, respectez toujours cet ordre avec <code>XIncludeFile</code> :</p>
+  <h2>2.2. L'ordre d'inclusion des fichiers propres à votre projet</h2>
+  <p>Dans vos fichiers, vous n'incluez que <strong>vos propres sources</strong> avec <code>XIncludeFile</code> :</p>
 
   <div class="code-container">
     <div class="code-header">
-      <span class="code-title">Ordre standard des Includes</span>
-      <span class="code-badge">Bonne Pratique</span>
+      <span class="code-title">Structure des Includes propres au projet</span>
+      <span class="code-badge">main.pb</span>
     </div>
     <pre><code><span class="kw">EnableExplicit</span>
 
-<span class="comment">; 1. TOUJOURS EN PREMIER : Le framework UI & MVVM (ou src/ui/mvvm/MVVM.pbi)</span>
-<span class="kw">XIncludeFile</span> <span class="str">"src/ui/UI.pbi"</span>
-
-<span class="comment">; 2. EN SECOND : Les constantes partagées de Bindings et de Commandes</span>
+<span class="comment">; 1. Constantes contractuelles partagées (Bindings et Commandes)</span>
 <span class="kw">XIncludeFile</span> <span class="str">"constants/AppConstants.pbi"</span>
 
-<span class="comment">; 3. EN TROISIÈME : Les Modèles de données (si existants)</span>
+<span class="comment">; 2. Modèles de données métier (si existants)</span>
 <span class="comment">; XIncludeFile "models/TaskModel.pbi"</span>
 
-<span class="comment">; 4. EN QUATRIÈME : Les classes ViewModels (.pbo transpilées)</span>
+<span class="comment">; 3. Classes ViewModels (.pbo)</span>
 <span class="kw">XIncludeFile</span> <span class="str">"viewmodels/TaskViewModel.pbo"</span></code></pre>
   </div>
 
@@ -498,31 +496,27 @@ MonProjetMVVM/
 
   <ul>
     <li><strong>Model (Modèle)</strong> : Représente la donnée brute (fichiers, structures, base de données).</li>
-    <li><strong>ViewModel (Modèle de Vue)</strong> : C'est le « cerveau ». Il hérite de <code>MVVM::ViewModelBase</code> et expose des <strong>Propriétés Observables</strong> (<code>StringProperty</code>, <code>IntProperty</code>). Dès qu'une valeur change, il notifie les abonnés.</li>
-    <li><strong>View (Vue)</strong> : C'est l'interface visuelle déclarée en XML ou construite avec les classes UI. Elle se lie aux propriétés via la syntaxe <code>{Binding NomPropriete}</code>.</li>
+    <li><strong>ViewModel (Modèle de Vue)</strong> : C'est le « cerveau ». Il hérite de <code>MVVM::ViewModelBase</code> et expose des <strong>Propriétés Observables</strong> (<code>MVVM::StringProperty</code>, <code>MVVM::IntProperty</code>). Dès qu'une valeur change, il notifie les abonnés.</li>
+    <li><strong>View (Vue)</strong> : C'est l'interface visuelle déclarée en XML ou construite avec les classes <code>UI</code>. Elle se lie aux propriétés via la syntaxe <code>{Binding NomPropriete}</code>.</li>
     <li><strong>BindingEngine (Moteur de Liaison)</strong> : Il assure la liaison bidirectionnelle (<em>TwoWay</em>). Lorsque l'utilisateur tape du texte, le ViewModel est mis à jour. Lorsque le ViewModel modifie une variable, le contrôle graphique change tout seul !</li>
   </ul>
 
   <!-- MODULE 4 -->
-  <h1><span>1️⃣</span> Module 4 : Étape 1 — Les Constantes Partagées</h1>
+  <h1><span>1️⃣</span> Module 4 : Étape 1 — Définir les Constantes de Liaison</h1>
   
-  <p>Pour éviter toute faute de frappe entre le fichier XML et le code du ViewModel, nous plaçons les constantes dans <code>constants/AppConstants.pbi</code> :</p>
+  <p>Le contrat d'échange entre la Vue et le ViewModel est formalisé par des chaînes constantes partagées dans <code>constants/AppConstants.pbi</code> :</p>
 
   <div class="code-container">
     <div class="code-header">
       <span class="code-title">constants/AppConstants.pbi</span>
-      <span class="code-badge">Constantes Partagées</span>
+      <span class="code-badge">Constantes de Liaison</span>
     </div>
-    <pre><code><span class="comment">; ============================================================================</span>
-<span class="comment">; AppConstants.pbi - Identifiants déclaratifs pour les Bindings & Commandes</span>
-<span class="comment">; ============================================================================</span>
-
-<span class="comment">; Noms des Propriétés Observables (Bindées à l'UI)</span>
+    <pre><code><span class="comment">; --- Propriétés Observables (Bindings de Données) ---</span>
 <span class="kw">#PROP_TASK_TITLE</span>  = <span class="str">"TaskTitle"</span>
 <span class="kw">#PROP_TASK_COUNT</span>  = <span class="str">"TaskCount"</span>
 <span class="kw">#PROP_STATUS_MSG</span>  = <span class="str">"StatusMessage"</span>
 
-<span class="comment">; Noms des Commandes (Déclenchées par les Boutons)</span>
+<span class="comment">; --- Commandes (Boutons et Actions Utilisateur) ---</span>
 <span class="kw">#CMD_ADD_TASK</span>     = <span class="str">"AddTaskCommand"</span>
 <span class="kw">#CMD_CLEAR_ALL</span>    = <span class="str">"ClearAllCommand"</span></code></pre>
   </div>
@@ -540,7 +534,6 @@ MonProjetMVVM/
     <pre><code><span class="comment">; ============================================================================</span>
 <span class="comment">; TaskViewModel.pbo - ViewModel de gestion des tâches</span>
 <span class="comment">; ============================================================================</span>
-<span class="kw">XIncludeFile</span> <span class="str">"../src/ui/UI.pbi"</span>        <span class="comment">; ou "../src/ui/mvvm/MVVM.pbi"</span>
 <span class="kw">XIncludeFile</span> <span class="str">"../constants/AppConstants.pbi"</span>
 
 <span class="kw">Class</span> TaskViewModel <span class="kw">Extends</span> MVVM::ViewModelBase {
@@ -559,7 +552,7 @@ MonProjetMVVM/
   }
 
   <span class="comment">; --- Gestionnaire des Commandes UI ---</span>
-  <span class="kw">Public Override Method</span> OnCommand(cmdName.s) {
+  <span class="kw">Public Method</span> OnCommand(cmdName.s) {
     <span class="kw">Select</span> cmdName
       <span class="kw">Case</span> <span class="kw">#CMD_ADD_TASK</span>
         <span class="kw">Protected</span> title.s = Trim(<span class="kw">This</span>\*TaskTitle\GetValue())
@@ -637,7 +630,6 @@ MonProjetMVVM/
 <span class="comment">; ============================================================================</span>
 <span class="kw">EnableExplicit</span>
 
-<span class="kw">XIncludeFile</span> <span class="str">"src/ui/UI.pbi"</span>
 <span class="kw">XIncludeFile</span> <span class="str">"constants/AppConstants.pbi"</span>
 <span class="kw">XIncludeFile</span> <span class="str">"viewmodels/TaskViewModel.pbo"</span>
 
@@ -652,7 +644,7 @@ MonProjetMVVM/
 <span class="kw">If</span> ReadFile(<span class="num">0</span>, <span class="str">"views/MainView.xml"</span>)
   xmlContent = ReadString(<span class="num">0</span>, <span class="kw">#PB_File_IgnoreEOL</span> | <span class="kw">#PB_UTF8</span>)
   CloseFile(<span class="num">0</span>)
-<span class="kw">EndIf</span>
+<span class="EndIf</span>
 
 <span class="kw">Protected</span> *window.UI::Window = UI::XMLLoader::LoadAndBindXML(xmlContent, *vm)
 

@@ -25,34 +25,17 @@ The app lets users type task descriptions, click an Add button, and see live cou
 
 ---
 
-## 📁 Module 2: Project Directory Layout & Include Strategy
+## 📁 Module 2: Project Directory Layout & Zero-Include Framework
 
 A professional MVVM architecture relies on a clean separation of concerns in your project tree. Here is the recommended directory structure:
 
 ```text
 MyMVVMProject/
-│
-├── src/                          <-- PureBasic OOP Framework (or shared path)
-│   ├── core/                    <-- Object, List, Vector, Memory, Exceptions
-│   └── ui/
-│       ├── UI.pbi               <-- MASTER ENTRY POINT (Core + UI + MVVM + XMLLoader)
-│       ├── Component.pbo        <-- WPF Base (Alignments, Margins, Arrange)
-│       ├── Gadget.pbo           <-- Encapsulation of all 18 native gadgets
-│       ├── controls/            <-- Editor, ListView, TreeView, DatePicker...
-│       ├── layouts/             <-- StackPanel, DockPanel, Grid
-│       ├── mvvm/
-│       │   ├── MVVM.pbi         <-- STANDALONE MVVM ENTRY POINT (Headless / Models)
-│       │   ├── ObservableObject.pbi
-│       │   ├── ViewModelBase.pbi
-│       │   ├── Property.pbi
-│       │   └── BindingEngine.pbi
-│       └── XMLLoader.pbi        <-- XML View Parser and Binder
-│
 ├── constants/
 │   └── AppConstants.pbi         <-- Shared Property & Command Identifiers
 │
 ├── models/
-│   └── TaskModel.pbi            <-- Data structures & pure business logic
+│   └── TaskModel.pbi            <-- Data structures & pure business logic (optional)
 │
 ├── viewmodels/
 │   └── TaskViewModel.pbo        <-- ViewModel class inheriting MVVM::ViewModelBase
@@ -63,27 +46,22 @@ MyMVVMProject/
 └── main.pb                      <-- Main Application Entry Point
 ```
 
-### 2.1. Two Framework Inclusion Strategies
-Depending on your architecture needs, you have two safe entry points using `XIncludeFile`:
-- **`XIncludeFile "src/ui/UI.pbi"` (Recommended for GUI apps)**: Includes the entire framework in a single line (Core OOP, 18 UI Controls, WPF responsive layouts, complete MVVM subsystem, and XMLLoader engine).
-- **`XIncludeFile "src/ui/mvvm/MVVM.pbi"` (For Headless / Testing / Non-GUI models)**: Includes only the MVVM subsystem (ObservableObject, ViewModelBase, typed properties, RelayCommand, BindingEngine) without loading GUI controls.
+### 2.1. Zero-Include Framework Architecture
+Thanks to the intelligent PBO Transpiler, **you no longer need to manually write framework includes**. As soon as the transpiler encounters `UI::`, `MVVM::`, or XML view declarations, it automatically injects the framework into memory.
 
 ### 2.2. Standard Include Order in `main.pb`
-To ensure compiler and transpiler resolve all types and identifiers cleanly, always follow this order with `XIncludeFile`:
+You only need to include your own project files:
 
 ```purebasic
 EnableExplicit
 
-; 1. ALWAYS FIRST: UI & MVVM Framework Engine (or src/ui/mvvm/MVVM.pbi)
-XIncludeFile "src/ui/UI.pbi"
-
-; 2. SECOND: Shared Property and Command Constants
+; 1. Shared Property and Command Constants
 XIncludeFile "constants/AppConstants.pbi"
 
-; 3. THIRD: Data Models (if any)
+; 2. Data Models (if any)
 ; XIncludeFile "models/TaskModel.pbi"
 
-; 4. FOURTH: ViewModel Classes (.pbo transpiled)
+; 3. ViewModel Classes (.pbo transpiled)
 XIncludeFile "viewmodels/TaskViewModel.pbo"
 ```
 
@@ -97,7 +75,7 @@ The **MVVM** architecture neatly divides your application into three distinct re
 ┌─────────────────────────┐         ┌─────────────────────────┐
 │       VIEW (UI)         │         │   VIEWMODEL (Engine)    │
 │  MainView.xml or OOP UI │ ◄─────► │  Observable Properties  │
-│   TextBox, Button, List │ Binding │  StringProperty, Int... │
+│   TextBox, Button, List │ Binding │  MVVM::StringProperty...│
 └─────────────────────────┘         └────────────┬────────────┘
                                                  │ Logic
                                     ┌────────────▼────────────┐
@@ -107,7 +85,7 @@ The **MVVM** architecture neatly divides your application into three distinct re
 ```
 
 - **Model**: Raw business entities, database records, and file storage.
-- **ViewModel**: The reactive brain. Inherits from `MVVM::ViewModelBase` and manages **Observable Properties** (`StringProperty`, `IntProperty`). It automatically notifies listeners when values change.
+- **ViewModel**: The reactive brain. Inherits from `MVVM::ViewModelBase` and manages **Observable Properties** (`MVVM::StringProperty`, `MVVM::IntProperty`). It automatically notifies listeners when values change.
 - **View**: Declarative user interface written in XML or constructed using OOP controls. Controls bind to ViewModel properties using `{Binding PropertyName}`.
 - **BindingEngine**: The synchronizer. Handles two-way binding (*TwoWay*): user keystrokes update the ViewModel, and ViewModel modifications automatically refresh the UI!
 
@@ -142,7 +120,6 @@ The ViewModel manages state and processes user commands. It has **zero coupling*
 ; ============================================================================
 ; TaskViewModel.pbo - Reactive Task Manager ViewModel
 ; ============================================================================
-XIncludeFile "../src/ui/UI.pbi"        ; or "../src/ui/mvvm/MVVM.pbi"
 XIncludeFile "../constants/AppConstants.pbi"
 
 Class TaskViewModel Extends MVVM::ViewModelBase {
@@ -161,7 +138,7 @@ Class TaskViewModel Extends MVVM::ViewModelBase {
   }
 
   ; --- UI Command Dispatcher ---
-  Public Override Method OnCommand(cmdName.s) {
+  Public Method OnCommand(cmdName.s) {
     Select cmdName
       Case #CMD_ADD_TASK
         Protected title.s = Trim(This\*TaskTitle\GetValue())
@@ -233,30 +210,28 @@ Bootstrapping the app in `main.pb` takes only a few lines:
 ; ============================================================================
 EnableExplicit
 
-XIncludeFile "src/ui/UI.pbi"
 XIncludeFile "constants/AppConstants.pbi"
 XIncludeFile "viewmodels/TaskViewModel.pbo"
 
 ; 1. Create Core Application
 Protected *app.UI::Application = NewObject(UI::Application)
 
-; 2. Instantiate ViewModel
+; 2. Instantiate and initialize ViewModel
 Protected *vm.TaskViewModel = NewObject(TaskViewModel)
+*vm\Init()
 
 ; 3. Load XML View and bind to ViewModel
-Protected xmlContent.s = ""
-If ReadFile(0, "views/MainView.xml")
-  xmlContent = ReadString(0, #PB_File_IgnoreEOL | #PB_UTF8)
-  CloseFile(0)
-EndIf
-
-Protected *window.UI::Window = UI::XMLLoader::LoadAndBindXML(xmlContent, *vm)
+Protected *window.UI::Window = UI::XMLLoader::LoadView("views/MainView.xml", *vm)
 
 If *window
   ; 4. Show Window and Run Event Loop
   *window\Show()
   *app\Run()
+  *window\Free()
 EndIf
+
+*vm\Free()
+*app\Free()
 ```
 
 > **🎉 Live Reactive Behavior!**  

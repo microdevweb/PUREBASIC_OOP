@@ -42,17 +42,14 @@ Comprehensive guides and manuals are available in the `doc/` folder:
 ## Quick Example: Minimal Reactive MVVM Application
 
 ```purebasic
-; 0. Include Framework / MVVM Subsystem
-XIncludeFile "src/ui/UI.pbi"
-
 ; 1. Shared Contract Constants
 #PROP_MSG = "Msg"
 #CMD_BTN  = "BtnCmd"
 
 ; 2. ViewModel
-Class CounterViewModel Extends UI::MVVM::ViewModelBase {
-  Public *Msg.UI::MVVM::StringProperty
-  Public *Count.UI::MVVM::IntProperty
+Class CounterViewModel Extends MVVM::ViewModelBase {
+  Public *Msg.MVVM::StringProperty
+  Public *Count.MVVM::IntProperty
 
   Public Method Init() {
     Super\Init()
@@ -60,37 +57,38 @@ Class CounterViewModel Extends UI::MVVM::ViewModelBase {
     This\*Count = This\BindInt("Count", 0)
   }
 
-  Public Method.b OnCommand(cmd.s, *param = 0) {
+  Public Method OnCommand(cmd.s) {
     If cmd = #CMD_BTN
-      This\*Count\Increment()
-      This\*Msg\Set("Click count: " + This\*Count\GetString())
-      ProcedureReturn #True
+      Protected newCount.i = This\*Count\GetValue() + 1
+      This\*Count\SetValue(newCount)
+      This\*Msg\SetValue("Click count: " + Str(newCount))
     EndIf
-    ProcedureReturn #False
   }
 }
 
-; 3. View (Inline XML)
-Class CounterView Extends UI::Window {
-  Public Method Init(*vm.CounterViewModel) {
-    Super\Init()
-    Protected xml.s
-    xml + "<Window Title='MVVM Demo' Width='400' Height='200'>"
-    xml + "  <StackPanel Orientation='Vertical' Margin='20' Spacing='10'>"
-    xml + "    <TextBox Text='{Binding " + #PROP_MSG + "}' Height='28'/>"
-    xml + "    <Button Text='Click Me' Click='" + #CMD_BTN + "' Height='32'/>"
-    xml + "  </StackPanel>"
-    xml + "</Window>"
-    This\LoadViewFromString(xml, *vm)
-  }
-}
+; 3. Main Entry Point
+EnableExplicit
 
-; 4. Main Entry Point
-Define *app.UI::Application = New UI::Application("PureBasic OOP")
-Define *vm.CounterViewModel  = New CounterViewModel()
-Define *view.CounterView     = New CounterView(*vm)
-*app\SetMainWindow(*view)
-*app\Run()
+Protected *app.UI::Application = NewObject(UI::Application)
+Protected *vm.CounterViewModel  = NewObject(CounterViewModel)
+*vm\Init()
+
+Protected xml.s = "<Window Title='MVVM Demo' Width='400' Height='200'>" +
+                  "  <StackPanel Orientation='Vertical' Margin='20' Spacing='10'>" +
+                  "    <TextBox Text='{Binding Msg}' Height='28'/>" +
+                  "    <Button Text='Click Me' Command='BtnCmd' Height='32'/>" +
+                  "  </StackPanel>" +
+                  "</Window>"
+
+Protected *win.UI::Window = UI::XMLLoader::LoadAndBindXML(xml, *vm)
+If *win
+  *win\Show()
+  *app\Run()
+  *win\Free()
+EndIf
+
+*vm\Free()
+*app\Free()
 ```
 
 ---
@@ -98,8 +96,8 @@ Define *view.CounterView     = New CounterView(*vm)
 ## Compiling & Running
 
 ```cmd
-compiler\transpiler.exe "src/examples/simple_mvvm/Main.pb" "src/examples/simple_mvvm/Main_transpiled.pb" --base-dir "src/examples/simple_mvvm"
-"C:\Program Files\PureBasic\Compilers\pbcompiler.exe" "src/examples/simple_mvvm/Main_transpiled.pb" /CONSOLE /DEBUGGER /EXE "src/examples/simple_mvvm/simple_mvvm.exe" /THREAD /UNICODE /XP /USER /DPIAWARE
+compiler\transpiler.exe "examples/03_simple_mvvm/Main.pb" "examples/03_simple_mvvm/Main_transpiled.pb" --base-dir "examples/03_simple_mvvm"
+"C:\Program Files\PureBasic\Compilers\pbcompiler.exe" "examples/03_simple_mvvm/Main_transpiled.pb" /CONSOLE /DEBUGGER /EXE "examples/03_simple_mvvm/simple_mvvm.exe" /THREAD /UNICODE /XP /USER /DPIAWARE
 ```
 
 ---

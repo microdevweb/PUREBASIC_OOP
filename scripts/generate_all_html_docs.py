@@ -678,7 +678,7 @@ save_page("en", "index.html", "Overview", "Official documentation for the PureBa
 save_page("fr", "ui/component.html", "Classe Component", "Classe abstraite racine de tous les composants graphiques et conteneurs de layout réactifs.", "badge-ui", "Base UI", """
 <div class='doc-section'>
   <h2 class='section-title'>Description</h2>
-  <p>La classe abstraite <code>UI::Component</code> (dans <code>src/ui/Component.pbo</code>) définit le socle commun de l'ensemble des éléments d'interface graphique de PureBasic OOP. Elle fournit le modèle de boîte réactif inspiré de WPF : coordonnées calculées, marges (<code>Margin</code>), alignements horizontaux et verticaux, dimensions désirées, et cycle de disposition en 2 passes (<code>Arrange</code>).</p>
+  <p>La classe abstraite <code>UI::Component</code> (dans <code>framework/Component.pbo</code>) définit le socle commun de l'ensemble des éléments d'interface graphique de PureBasic OOP. Elle fournit le modèle de boîte réactif inspiré de WPF : coordonnées calculées, marges (<code>Margin</code>), alignements horizontaux et verticaux, dimensions désirées, et cycle de disposition en 2 passes (<code>Arrange</code>).</p>
 </div>
 
 <div class='doc-section'>
@@ -722,7 +722,7 @@ save_page("fr", "ui/component.html", "Classe Component", "Classe abstraite racin
 save_page("en", "ui/component.html", "Component Class", "Abstract root class for all UI elements, gadgets, and responsive layout panels.", "badge-ui", "Base UI", """
 <div class='doc-section'>
   <h2 class='section-title'>Description</h2>
-  <p>The abstract <code>UI::Component</code> class (located in <code>src/ui/Component.pbo</code>) provides the foundational WPF-style box model for all graphical elements in PureBasic OOP: computed bounds, responsive margins, horizontal/vertical alignments, desired dimensions, and automated 2-pass layout arrangement (<code>Arrange</code>).</p>
+  <p>The abstract <code>UI::Component</code> class (located in <code>framework/Component.pbo</code>) provides the foundational WPF-style box model for all graphical elements in PureBasic OOP: computed bounds, responsive margins, horizontal/vertical alignments, desired dimensions, and automated 2-pass layout arrangement (<code>Arrange</code>).</p>
 </div>
 
 <div class='doc-section'>
@@ -975,7 +975,7 @@ save_page("en", "ui/combobox.html", "ComboBox Class", "Drop-down selection list 
 save_page("fr", "ui/datepicker.html", "Classe DatePicker", "Sélecteur de date et calendrier natif avec formatage personnalisable.", "badge-ui", "UI Class", """
 <div class='doc-section'>
   <h2 class='section-title'>Description</h2>
-  <p>La classe <code>UI::DatePicker</code> (dans <code>src/ui/controls/DatePicker.pbi</code>) encapsule le contrôle <code>DateGadget</code> de PureBasic. Elle permet à l'utilisateur de choisir une date via un calendrier déroulant interactif avec masque de format personnalisable.</p>
+  <p>La classe <code>UI::DatePicker</code> (dans <code>framework/controls/DatePicker.pbi</code>) encapsule le contrôle <code>DateGadget</code> de PureBasic. Elle permet à l'utilisateur de choisir une date via un calendrier déroulant interactif avec masque de format personnalisable.</p>
 </div>
 
 <div class='doc-section'>
@@ -1007,7 +1007,7 @@ save_page("fr", "ui/datepicker.html", "Classe DatePicker", "Sélecteur de date e
 save_page("en", "ui/datepicker.html", "DatePicker Class", "Native date picker and calendar dropdown with customizable mask format.", "badge-ui", "UI Class", """
 <div class='doc-section'>
   <h2 class='section-title'>Description</h2>
-  <p>The <code>UI::DatePicker</code> class (in <code>src/ui/controls/DatePicker.pbi</code>) wraps PureBasic's <code>DateGadget</code>. It provides an interactive date selection box with calendar dropdown and formatting mask support.</p>
+  <p>The <code>UI::DatePicker</code> class (in <code>framework/controls/DatePicker.pbi</code>) wraps PureBasic's <code>DateGadget</code>. It provides an interactive date selection box with calendar dropdown and formatting mask support.</p>
 </div>
 
 <div class='doc-section'>
@@ -1042,7 +1042,7 @@ save_page("en", "ui/datepicker.html", "DatePicker Class", "Native date picker an
 save_page("fr", "ui/editor.html", "Classe Editor", "Zone d'édition multiligne de texte riche ou brut avec gestion d'événements.", "badge-ui", "UI Class", """
 <div class='doc-section'>
   <h2 class='section-title'>Description</h2>
-  <p>La classe <code>UI::Editor</code> (dans <code>src/ui/controls/Editor.pbi</code>) encapsule le contrôle natif <code>EditorGadget</code> de PureBasic. Elle fournit une zone d'édition multiligne pour la saisie de texte long, de code ou de logs avec mode lecture seule et retour à la ligne.</p>
+  <p>La classe <code>UI::Editor</code> (dans <code>framework/controls/Editor.pbi</code>) encapsule le contrôle natif <code>EditorGadget</code> de PureBasic. Elle fournit une zone d'édition multiligne pour la saisie de texte long, de code ou de logs avec mode lecture seule et retour à la ligne.</p>
 </div>
 
 <div class='doc-section'>
@@ -1077,7 +1077,7 @@ save_page("fr", "ui/editor.html", "Classe Editor", "Zone d'édition multiligne d
 save_page("en", "ui/editor.html", "Editor Class", "Multiline text editor control for rich/plain text input and log viewers.", "badge-ui", "UI Class", """
 <div class='doc-section'>
   <h2 class='section-title'>Description</h2>
-  <p>The <code>UI::Editor</code> class (located in <code>src/ui/controls/Editor.pbi</code>) wraps PureBasic's <code>EditorGadget</code>. It provides a full multiline text editing area suitable for code editors, logs, and long text inputs with read-only and word-wrapping support.</p>
+  <p>The <code>UI::Editor</code> class (located in <code>framework/controls/Editor.pbi</code>) wraps PureBasic's <code>EditorGadget</code>. It provides a full multiline text editing area suitable for code editors, logs, and long text inputs with read-only and word-wrapping support.</p>
 </div>
 
 <div class='doc-section'>
@@ -1115,7 +1115,7 @@ save_page("en", "ui/editor.html", "Editor Class", "Multiline text editor control
 save_page("fr", "ui/groupbox.html", "Classe GroupBox", "Cadre de regroupement visuel avec titre pour organiser les formulaires.", "badge-ui", "UI Class", """
 <div class='doc-section'>
   <h2 class='section-title'>Description</h2>
-  <p>La classe <code>UI::GroupBox</code> (dans <code>src/ui/controls/GroupBox.pbi</code>) encapsule le contrôle <code>FrameGadget</code> de PureBasic. Elle dessine un cadre décoratif avec un titre permettant de regrouper visuellement des contrôles connexes.</p>
+  <p>La classe <code>UI::GroupBox</code> (dans <code>framework/controls/GroupBox.pbi</code>) encapsule le contrôle <code>FrameGadget</code> de PureBasic. Elle dessine un cadre décoratif avec un titre permettant de regrouper visuellement des contrôles connexes.</p>
 </div>
 
 <div class='doc-section'>
@@ -1135,7 +1135,7 @@ save_page("fr", "ui/groupbox.html", "Classe GroupBox", "Cadre de regroupement vi
 save_page("en", "ui/groupbox.html", "GroupBox Class", "Visual grouping frame with title banner for organizing UI forms.", "badge-ui", "UI Class", """
 <div class='doc-section'>
   <h2 class='section-title'>Description</h2>
-  <p>The <code>UI::GroupBox</code> class (in <code>src/ui/controls/GroupBox.pbi</code>) encapsulates PureBasic's <code>FrameGadget</code>. It provides a visual framed border with a title caption to organize related controls.</p>
+  <p>The <code>UI::GroupBox</code> class (in <code>framework/controls/GroupBox.pbi</code>) encapsulates PureBasic's <code>FrameGadget</code>. It provides a visual framed border with a title caption to organize related controls.</p>
 </div>
 
 <div class='doc-section'>
@@ -1246,7 +1246,7 @@ save_page("en", "ui/listicon.html", "ListIcon Class", "Multi-column data grid vi
 save_page("fr", "ui/listview.html", "Classe ListView", "Liste verticale d'éléments textuels avec sélection simple et événements.", "badge-ui", "UI Class", """
 <div class='doc-section'>
   <h2 class='section-title'>Description</h2>
-  <p>La classe <code>UI::ListView</code> (dans <code>src/ui/controls/ListView.pbi</code>) encapsule le contrôle <code>ListViewGadget</code> de PureBasic. Elle fournit une liste simple et efficace d'éléments textuels défilables avec détection de changement de sélection.</p>
+  <p>La classe <code>UI::ListView</code> (dans <code>framework/controls/ListView.pbi</code>) encapsule le contrôle <code>ListViewGadget</code> de PureBasic. Elle fournit une liste simple et efficace d'éléments textuels défilables avec détection de changement de sélection.</p>
 </div>
 
 <div class='doc-section'>
@@ -1283,7 +1283,7 @@ save_page("fr", "ui/listview.html", "Classe ListView", "Liste verticale d'élém
 save_page("en", "ui/listview.html", "ListView Class", "Vertical listbox control for displaying and selecting items.", "badge-ui", "UI Class", """
 <div class='doc-section'>
   <h2 class='section-title'>Description</h2>
-  <p>The <code>UI::ListView</code> class (located in <code>src/ui/controls/ListView.pbi</code>) wraps PureBasic's <code>ListViewGadget</code>. It provides a simple scrollable list of text items with selection tracking and event dispatching.</p>
+  <p>The <code>UI::ListView</code> class (located in <code>framework/controls/ListView.pbi</code>) wraps PureBasic's <code>ListViewGadget</code>. It provides a simple scrollable list of text items with selection tracking and event dispatching.</p>
 </div>
 
 <div class='doc-section'>
@@ -1364,7 +1364,7 @@ save_page("en", "ui/progressbar.html", "ProgressBar Class", "Visual progress ind
 save_page("fr", "ui/radiobutton.html", "Classe RadioButton", "Bouton d'option radio pour choix exclusif au sein d'un groupe.", "badge-ui", "UI Class", """
 <div class='doc-section'>
   <h2 class='section-title'>Description</h2>
-  <p>La classe <code>UI::RadioButton</code> (dans <code>src/ui/controls/RadioButton.pbi</code>) encapsule le contrôle <code>OptionGadget</code> de PureBasic. Elle permet de proposer à l'utilisateur un choix exclusif parmi un groupe d'options.</p>
+  <p>La classe <code>UI::RadioButton</code> (dans <code>framework/controls/RadioButton.pbi</code>) encapsule le contrôle <code>OptionGadget</code> de PureBasic. Elle permet de proposer à l'utilisateur un choix exclusif parmi un groupe d'options.</p>
 </div>
 
 <div class='doc-section'>
@@ -1396,7 +1396,7 @@ save_page("fr", "ui/radiobutton.html", "Classe RadioButton", "Bouton d'option ra
 save_page("en", "ui/radiobutton.html", "RadioButton Class", "Radio option button for mutually exclusive choices in a group.", "badge-ui", "UI Class", """
 <div class='doc-section'>
   <h2 class='section-title'>Description</h2>
-  <p>The <code>UI::RadioButton</code> class (located in <code>src/ui/controls/RadioButton.pbi</code>) encapsulates PureBasic's <code>OptionGadget</code>. It provides mutually exclusive option selection within grouped controls.</p>
+  <p>The <code>UI::RadioButton</code> class (located in <code>framework/controls/RadioButton.pbi</code>) encapsulates PureBasic's <code>OptionGadget</code>. It provides mutually exclusive option selection within grouped controls.</p>
 </div>
 
 <div class='doc-section'>
@@ -1474,7 +1474,7 @@ save_page("en", "ui/slider.html", "Slider Class", "Interactive trackbar slider c
 save_page("fr", "ui/spinbox.html", "Classe SpinBox", "Boîte de saisie numérique avec boutons d'incrémentation/décrémentation.", "badge-ui", "UI Class", """
 <div class='doc-section'>
   <h2 class='section-title'>Description</h2>
-  <p>La classe <code>UI::SpinBox</code> (dans <code>src/ui/controls/SpinBox.pbi</code>) encapsule le contrôle <code>SpinGadget</code> de PureBasic. Elle combine un champ de saisie textuel et deux boutons fléchés pour ajuster une valeur numérique avec précision.</p>
+  <p>La classe <code>UI::SpinBox</code> (dans <code>framework/controls/SpinBox.pbi</code>) encapsule le contrôle <code>SpinGadget</code> de PureBasic. Elle combine un champ de saisie textuel et deux boutons fléchés pour ajuster une valeur numérique avec précision.</p>
 </div>
 
 <div class='doc-section'>
@@ -1506,7 +1506,7 @@ save_page("fr", "ui/spinbox.html", "Classe SpinBox", "Boîte de saisie numériqu
 save_page("en", "ui/spinbox.html", "SpinBox Class", "Numerical input box with integrated up/down increment buttons.", "badge-ui", "UI Class", """
 <div class='doc-section'>
   <h2 class='section-title'>Description</h2>
-  <p>The <code>UI::SpinBox</code> class (located in <code>src/ui/controls/SpinBox.pbi</code>) wraps PureBasic's <code>SpinGadget</code>. It combines a direct numerical text entry field with stepper buttons.</p>
+  <p>The <code>UI::SpinBox</code> class (located in <code>framework/controls/SpinBox.pbi</code>) wraps PureBasic's <code>SpinGadget</code>. It combines a direct numerical text entry field with stepper buttons.</p>
 </div>
 
 <div class='doc-section'>
@@ -1541,7 +1541,7 @@ save_page("en", "ui/spinbox.html", "SpinBox Class", "Numerical input box with in
 save_page("fr", "ui/tabcontrol.html", "Classe TabControl", "Conteneur à onglets multiples pour interfaces modulaires.", "badge-ui", "UI Class", """
 <div class='doc-section'>
   <h2 class='section-title'>Description</h2>
-  <p>La classe <code>UI::TabControl</code> (dans <code>src/ui/controls/TabControl.pbi</code>) encapsule le contrôle <code>PanelGadget</code> de PureBasic. Elle permet de structurer les interfaces complexes en sous-panneaux accessibles par onglets avec icônes optionnelles.</p>
+  <p>La classe <code>UI::TabControl</code> (dans <code>framework/controls/TabControl.pbi</code>) encapsule le contrôle <code>PanelGadget</code> de PureBasic. Elle permet de structurer les interfaces complexes en sous-panneaux accessibles par onglets avec icônes optionnelles.</p>
 </div>
 
 <div class='doc-section'>
@@ -1579,7 +1579,7 @@ save_page("fr", "ui/tabcontrol.html", "Classe TabControl", "Conteneur à onglets
 save_page("en", "ui/tabcontrol.html", "TabControl Class", "Multi-tab panel container for modular page and view navigation.", "badge-ui", "UI Class", """
 <div class='doc-section'>
   <h2 class='section-title'>Description</h2>
-  <p>The <code>UI::TabControl</code> class (located in <code>src/ui/controls/TabControl.pbi</code>) wraps PureBasic's <code>PanelGadget</code>. It organizes complex user interfaces into switchable tabbed panels with optional icons.</p>
+  <p>The <code>UI::TabControl</code> class (located in <code>framework/controls/TabControl.pbi</code>) wraps PureBasic's <code>PanelGadget</code>. It organizes complex user interfaces into switchable tabbed panels with optional icons.</p>
 </div>
 
 <div class='doc-section'>
@@ -1708,7 +1708,7 @@ save_page("en", "ui/toggleswitch.html", "ToggleSwitch Class", "Modern custom can
 save_page("fr", "ui/treeview.html", "Classe TreeView", "Arborescence hiérarchique avec sous-niveaux, expansion et sélection.", "badge-ui", "UI Class", """
 <div class='doc-section'>
   <h2 class='section-title'>Description</h2>
-  <p>La classe <code>UI::TreeView</code> (dans <code>src/ui/controls/TreeView.pbi</code>) encapsule le contrôle <code>TreeGadget</code> de PureBasic. Elle permet d'afficher des structures hiérarchiques de données (dossiers, nœuds, catégories) avec gestion des sous-niveaux d'indentation.</p>
+  <p>La classe <code>UI::TreeView</code> (dans <code>framework/controls/TreeView.pbi</code>) encapsule le contrôle <code>TreeGadget</code> de PureBasic. Elle permet d'afficher des structures hiérarchiques de données (dossiers, nœuds, catégories) avec gestion des sous-niveaux d'indentation.</p>
 </div>
 
 <div class='doc-section'>
@@ -1747,7 +1747,7 @@ save_page("fr", "ui/treeview.html", "Classe TreeView", "Arborescence hiérarchiq
 save_page("en", "ui/treeview.html", "TreeView Class", "Hierarchical tree view with expandable nodes, sublevels, and selection.", "badge-ui", "UI Class", """
 <div class='doc-section'>
   <h2 class='section-title'>Description</h2>
-  <p>The <code>UI::TreeView</code> class (located in <code>src/ui/controls/TreeView.pbi</code>) wraps PureBasic's <code>TreeGadget</code>. It provides structured hierarchical data navigation (folders, taxonomies, node trees) with indentation levels and collapse/expand controls.</p>
+  <p>The <code>UI::TreeView</code> class (located in <code>framework/controls/TreeView.pbi</code>) wraps PureBasic's <code>TreeGadget</code>. It provides structured hierarchical data navigation (folders, taxonomies, node trees) with indentation levels and collapse/expand controls.</p>
 </div>
 
 <div class='doc-section'>
@@ -1967,27 +1967,25 @@ save_page("fr", "ui/mvvm.html", "Architecture MVVM & DataBinding", "Pattern Mode
     <pre><code>MonProjetMVVM/
 ├── src/
 │   └── ui/
-│       └── UI.pbi               ; POINT D'ENTRÉE UNIQUE (Core + UI + MVVM + XMLLoader)
 ├── constants/
 │   └── AppConstants.pbi         ; Identifiants partagés (#PROP_..., #CMD_...)
 ├── models/
-│   └── TaskModel.pbi            ; Données et structures pures
+│   └── TaskModel.pbi            ; Données et structures pures (optionnel)
 ├── viewmodels/
 │   └── TaskViewModel.pbo        ; Classe ViewModel héritant de MVVM::ViewModelBase
 ├── views/
 │   └── MainView.xml             ; Définition déclarative XML de la vue
 └── main.pb                      ; Point d'entrée principal de l'exécutable</code></pre>
   </div>
-  <p><strong>Ordre standard d'inclusion dans votre <code>main.pb</code> :</strong></p>
+  <p><strong>Zéro-Include Framework :</strong> Grâce au transpilateur PBO intelligent, l'inclusion du framework (<code>framework/UI.pbi</code>) est automatique dès qu'un élément <code>UI::</code> ou <code>MVVM::</code> est détecté. Vous n'avez plus besoin d'inclure manuellement le framework !</p>
+  <p><strong>Ordre d'inclusion dans votre <code>main.pb</code> :</strong></p>
   <div class='code-container'>
     <pre><code><span class='kw'>EnableExplicit</span>
-<span class='comment'>; 1. Le Framework UI & MVVM (ou XIncludeFile "src/ui/mvvm/MVVM.pbi" pour MVVM seul)</span>
-<span class='kw'>XIncludeFile</span> <span class='str'>"src/ui/UI.pbi"</span>
-<span class='comment'>; 2. Constantes partagées</span>
+<span class='comment'>; 1. Constantes partagées</span>
 <span class='kw'>XIncludeFile</span> <span class='str'>"constants/AppConstants.pbi"</span>
-<span class='comment'>; 3. Modèles de données (si existants)</span>
+<span class='comment'>; 2. Modèles de données (si existants)</span>
 <span class='comment'>; XIncludeFile "models/TaskModel.pbi"</span>
-<span class='comment'>; 4. ViewModels transpilés</span>
+<span class='comment'>; 3. ViewModels transpilés</span>
 <span class='kw'>XIncludeFile</span> <span class='str'>"viewmodels/TaskViewModel.pbo"</span></code></pre>
   </div>
 </div>
@@ -1997,10 +1995,10 @@ save_page("fr", "ui/mvvm.html", "Architecture MVVM & DataBinding", "Pattern Mode
   <div class='table-wrapper'>
     <table>
       <tr><th>Classe</th><th>Type PureBasic</th><th>Méthodes Clés</th></tr>
-      <tr><td><code>StringProperty</code></td><td><code>.s</code> (Chaîne)</td><td><code>GetValue()</code>, <code>SetValue(val.s)</code>, <code>GetStringValue()</code></td></tr>
-      <tr><td><code>IntProperty</code></td><td><code>.i</code> (Entier)</td><td><code>GetValue()</code>, <code>SetValue(val.i)</code>, <code>GetStringValue()</code> (avec conversion automatique en texte)</td></tr>
-      <tr><td><code>BoolProperty</code></td><td><code>.b</code> (Booléen)</td><td><code>GetValue()</code>, <code>SetValue(val.b)</code>, <code>GetStringValue()</code></td></tr>
-      <tr><td><code>DoubleProperty</code></td><td><code>.d</code> (Flottant)</td><td><code>GetValue()</code>, <code>SetValue(val.d)</code>, <code>GetStringValue()</code></td></tr>
+      <tr><td><code>MVVM::StringProperty</code></td><td><code>.s</code> (Chaîne)</td><td><code>GetValue()</code>, <code>SetValue(val.s)</code>, <code>GetStringValue()</code></td></tr>
+      <tr><td><code>MVVM::IntProperty</code></td><td><code>.i</code> (Entier)</td><td><code>GetValue()</code>, <code>SetValue(val.i)</code>, <code>GetStringValue()</code> (avec conversion automatique en texte)</td></tr>
+      <tr><td><code>MVVM::BoolProperty</code></td><td><code>.b</code> (Booléen)</td><td><code>GetValue()</code>, <code>SetValue(val.b)</code>, <code>GetStringValue()</code></td></tr>
+      <tr><td><code>MVVM::DoubleProperty</code></td><td><code>.d</code> (Flottant)</td><td><code>GetValue()</code>, <code>SetValue(val.d)</code>, <code>GetStringValue()</code></td></tr>
     </table>
   </div>
 </div>
@@ -2017,8 +2015,7 @@ save_page("fr", "ui/mvvm.html", "Architecture MVVM & DataBinding", "Pattern Mode
 
   <div class='code-container'>
     <div class='code-header'><span class='code-title'>2. Le ViewModel (viewmodels/MainViewModel.pbo)</span><span class='code-badge'>PBO</span></div>
-    <pre><code>XIncludeFile "../src/ui/UI.pbi" ; ou XIncludeFile "../src/ui/mvvm/MVVM.pbi"
-XIncludeFile "../constants/AppConstants.pbi"
+    <pre><code>XIncludeFile "../constants/AppConstants.pbi"
 
 Class MainViewModel Extends MVVM::ViewModelBase {
   Public *ClickMessage.MVVM::StringProperty
@@ -2053,16 +2050,24 @@ Class MainViewModel Extends MVVM::ViewModelBase {
 
   <div class='code-container'>
     <div class='code-header'><span class='code-title'>4. Le Point d'Entrée (main.pb)</span><span class='code-badge'>PB</span></div>
-    <pre><code>XIncludeFile "src/ui/UI.pbi"
+    <pre><code>EnableExplicit
+
 XIncludeFile "constants/AppConstants.pbi"
 XIncludeFile "viewmodels/MainViewModel.pbo"
 
 Protected *app.UI::Application = NewObject(UI::Application)
 Protected *vm.MainViewModel    = NewObject(MainViewModel)
-Protected *win.UI::Window      = UI::XMLLoader::LoadAndBindXML(xmlString$, *vm)
+*vm\\Init()
 
-*win\\Show()
-*app\\Run()</code></pre>
+Protected *win.UI::Window = UI::XMLLoader::LoadView("views/MainView.xml", *vm)
+If *win
+  *win\\Show()
+  *app\\Run()
+  *win\\Free()
+EndIf
+
+*vm\\Free()
+*app\\Free()</code></pre>
   </div>
 </div>
 """, "mvvm")
@@ -2073,43 +2078,37 @@ save_page("en", "ui/mvvm.html", "MVVM Architecture & DataBinding", "Complete Mod
   <p>PureBasic OOP incorporates a comprehensive <strong>MVVM (Model-View-ViewModel)</strong> subsystem inspired by modern WPF and .NET MAUI standards. It decouples core business logic from graphical user interfaces using reactive <strong>DataBinding</strong>.</p>
   <ul>
     <li><strong>Model</strong> : Application state, domain rules, and data structures.</li>
-    <li><strong>ViewModel</strong> : Exposes typed observable properties (<code>StringProperty</code>, <code>IntProperty</code>...) inheriting from <code>ViewModelBase</code>.</li>
+    <li><strong>ViewModel</strong> : Exposes typed observable properties (<code>MVVM::StringProperty</code>, <code>MVVM::IntProperty</code>...) inheriting from <code>MVVM::ViewModelBase</code>.</li>
     <li><strong>View</strong> : Declarative layout definition (via XML or OOP code) with <code>{Binding PropertyName, Mode=TwoWay}</code> markup expressions.</li>
     <li><strong>BindingEngine</strong> : Automatically synchronizes UI controls and ViewModel properties bidirectionally.</li>
   </ul>
 </div>
 
 <div class='doc-section'>
-  <h2 class='section-title'>Directory Organization & Include Strategy</h2>
+  <h2 class='section-title'>Directory Organization & Zero-Include Framework</h2>
   <p>Standardized, decoupled project tree structure for your MVVM applications:</p>
   <div class='code-container'>
     <div class='code-header'><span class='code-title'>Recommended Layout</span><span class='code-badge'>Project Tree</span></div>
     <pre><code>MyMVVMProject/
-├── src/
-│   └── ui/
-│       ├── UI.pbi               ; MASTER ENTRY POINT (Core + UI + MVVM + XMLLoader)
-│       └── mvvm/
-│           └── MVVM.pbi         ; Standalone MVVM Subsystem Entry Point
 ├── constants/
 │   └── AppConstants.pbi         ; Shared Property & Command Identifiers
 ├── models/
-│   └── TaskModel.pbi            ; Data entities & pure domain logic
+│   └── TaskModel.pbi            ; Data entities & pure domain logic (optional)
 ├── viewmodels/
 │   └── TaskViewModel.pbo        ; ViewModel class inheriting MVVM::ViewModelBase
 ├── views/
 │   └── MainView.xml             ; Declarative XML View
 └── main.pb                      ; Main executable entry point</code></pre>
   </div>
+  <p><strong>Zero-Include Framework:</strong> With the PBO Transpiler, the framework (<code>framework/UI.pbi</code>) is automatically detected and injected into memory whenever <code>UI::</code> or <code>MVVM::</code> namespaces are used. You no longer need to write manual framework includes!</p>
   <p><strong>Standard Include Order in your <code>main.pb</code>:</strong></p>
   <div class='code-container'>
     <pre><code><span class='kw'>EnableExplicit</span>
-<span class='comment'>; 1. Framework UI & MVVM Engine (or XIncludeFile "src/ui/mvvm/MVVM.pbi" for MVVM only)</span>
-<span class='kw'>XIncludeFile</span> <span class='str'>"src/ui/UI.pbi"</span>
-<span class='comment'>; 2. Shared Constants</span>
+<span class='comment'>; 1. Shared Constants</span>
 <span class='kw'>XIncludeFile</span> <span class='str'>"constants/AppConstants.pbi"</span>
-<span class='comment'>; 3. Data Models (if any)</span>
+<span class='comment'>; 2. Data Models (if any)</span>
 <span class='comment'>; XIncludeFile "models/TaskModel.pbi"</span>
-<span class='comment'>; 4. Transpiled ViewModels</span>
+<span class='comment'>; 3. Transpiled ViewModels</span>
 <span class='kw'>XIncludeFile</span> <span class='str'>"viewmodels/TaskViewModel.pbo"</span></code></pre>
   </div>
 </div>
@@ -2119,10 +2118,10 @@ save_page("en", "ui/mvvm.html", "MVVM Architecture & DataBinding", "Complete Mod
   <div class='table-wrapper'>
     <table>
       <tr><th>Class</th><th>PureBasic Type</th><th>Key Methods</th></tr>
-      <tr><td><code>StringProperty</code></td><td><code>.s</code> (String)</td><td><code>GetValue()</code>, <code>SetValue(val.s)</code>, <code>GetStringValue()</code></td></tr>
-      <tr><td><code>IntProperty</code></td><td><code>.i</code> (Integer)</td><td><code>GetValue()</code>, <code>SetValue(val.i)</code>, <code>GetStringValue()</code> (with automated formatting)</td></tr>
-      <tr><td><code>BoolProperty</code></td><td><code>.b</code> (Boolean)</td><td><code>GetValue()</code>, <code>SetValue(val.b)</code>, <code>GetStringValue()</code></td></tr>
-      <tr><td><code>DoubleProperty</code></td><td><code>.d</code> (Float)</td><td><code>GetValue()</code>, <code>SetValue(val.d)</code>, <code>GetStringValue()</code></td></tr>
+      <tr><td><code>MVVM::StringProperty</code></td><td><code>.s</code> (String)</td><td><code>GetValue()</code>, <code>SetValue(val.s)</code>, <code>GetStringValue()</code></td></tr>
+      <tr><td><code>MVVM::IntProperty</code></td><td><code>.i</code> (Integer)</td><td><code>GetValue()</code>, <code>SetValue(val.i)</code>, <code>GetStringValue()</code> (with automated formatting)</td></tr>
+      <tr><td><code>MVVM::BoolProperty</code></td><td><code>.b</code> (Boolean)</td><td><code>GetValue()</code>, <code>SetValue(val.b)</code>, <code>GetStringValue()</code></td></tr>
+      <tr><td><code>MVVM::DoubleProperty</code></td><td><code>.d</code> (Float)</td><td><code>GetValue()</code>, <code>SetValue(val.d)</code>, <code>GetStringValue()</code></td></tr>
     </table>
   </div>
 </div>
@@ -2139,8 +2138,7 @@ save_page("en", "ui/mvvm.html", "MVVM Architecture & DataBinding", "Complete Mod
 
   <div class='code-container'>
     <div class='code-header'><span class='code-title'>2. The ViewModel (viewmodels/MainViewModel.pbo)</span><span class='code-badge'>PBO</span></div>
-    <pre><code>XIncludeFile "../src/ui/UI.pbi" ; or XIncludeFile "../src/ui/mvvm/MVVM.pbi"
-XIncludeFile "../constants/AppConstants.pbi"
+    <pre><code>XIncludeFile "../constants/AppConstants.pbi"
 
 Class MainViewModel Extends MVVM::ViewModelBase {
   Public *ClickMessage.MVVM::StringProperty
@@ -2151,16 +2149,6 @@ Class MainViewModel Extends MVVM::ViewModelBase {
     This\\*ClickMessage = This\\BindString(#PROP_CLICK_MESSAGE, "Welcome!")
     This\\*ClickCount   = This\\BindInt(#PROP_CLICK_COUNT, 0)
   }
-  
-  Public Method OnCommand(cmdName.s) {
-    If cmdName = #CMD_INCREMENT
-      Protected count.i = This\\*ClickCount\\GetValue() + 1
-      This\\*ClickCount\\SetValue(count)
-      This\\*ClickMessage\\SetValue("Click #" + Str(count) + " recorded!")
-    EndIf
-  }
-}</code></pre>
-  </div>
   
   Public Method OnCommand(cmdName.s) {
     If cmdName = #CMD_INCREMENT
@@ -2185,16 +2173,24 @@ Class MainViewModel Extends MVVM::ViewModelBase {
 
   <div class='code-container'>
     <div class='code-header'><span class='code-title'>4. Main Entry Point (main.pb)</span><span class='code-badge'>PB</span></div>
-    <pre><code>XIncludeFile "src/ui/UI.pbi"
+    <pre><code>EnableExplicit
+
 XIncludeFile "constants/AppConstants.pbi"
 XIncludeFile "viewmodels/MainViewModel.pbo"
 
 Protected *app.UI::Application = NewObject(UI::Application)
 Protected *vm.MainViewModel    = NewObject(MainViewModel)
-Protected *win.UI::Window      = UI::XMLLoader::LoadAndBindXML(xmlString$, *vm)
+*vm\\Init()
 
-*win\\Show()
-*app\\Run()</code></pre>
+Protected *win.UI::Window = UI::XMLLoader::LoadView("views/MainView.xml", *vm)
+If *win
+  *win\\Show()
+  *app\\Run()
+  *win\\Free()
+EndIf
+
+*vm\\Free()
+*app\\Free()</code></pre>
   </div>
 </div>
 """, "mvvm")

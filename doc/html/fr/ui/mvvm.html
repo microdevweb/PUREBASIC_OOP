@@ -144,27 +144,25 @@
     <pre><code>MonProjetMVVM/
 ├── src/
 │   └── ui/
-│       └── UI.pbi               ; POINT D'ENTRÉE UNIQUE (Core + UI + MVVM + XMLLoader)
 ├── constants/
 │   └── AppConstants.pbi         ; Identifiants partagés (#PROP_..., #CMD_...)
 ├── models/
-│   └── TaskModel.pbi            ; Données et structures pures
+│   └── TaskModel.pbi            ; Données et structures pures (optionnel)
 ├── viewmodels/
 │   └── TaskViewModel.pbo        ; Classe ViewModel héritant de MVVM::ViewModelBase
 ├── views/
 │   └── MainView.xml             ; Définition déclarative XML de la vue
 └── main.pb                      ; Point d'entrée principal de l'exécutable</code></pre>
   </div>
-  <p><strong>Ordre standard d'inclusion dans votre <code>main.pb</code> :</strong></p>
+  <p><strong>Zéro-Include Framework :</strong> Grâce au transpilateur PBO intelligent, l'inclusion du framework (<code>framework/UI.pbi</code>) est automatique dès qu'un élément <code>UI::</code> ou <code>MVVM::</code> est détecté. Vous n'avez plus besoin d'inclure manuellement le framework !</p>
+  <p><strong>Ordre d'inclusion dans votre <code>main.pb</code> :</strong></p>
   <div class='code-container'>
     <pre><code><span class='kw'>EnableExplicit</span>
-<span class='comment'>; 1. Le Framework UI & MVVM (ou XIncludeFile "src/ui/mvvm/MVVM.pbi" pour MVVM seul)</span>
-<span class='kw'>XIncludeFile</span> <span class='str'>"src/ui/UI.pbi"</span>
-<span class='comment'>; 2. Constantes partagées</span>
+<span class='comment'>; 1. Constantes partagées</span>
 <span class='kw'>XIncludeFile</span> <span class='str'>"constants/AppConstants.pbi"</span>
-<span class='comment'>; 3. Modèles de données (si existants)</span>
+<span class='comment'>; 2. Modèles de données (si existants)</span>
 <span class='comment'>; XIncludeFile "models/TaskModel.pbi"</span>
-<span class='comment'>; 4. ViewModels transpilés</span>
+<span class='comment'>; 3. ViewModels transpilés</span>
 <span class='kw'>XIncludeFile</span> <span class='str'>"viewmodels/TaskViewModel.pbo"</span></code></pre>
   </div>
 </div>
@@ -174,10 +172,10 @@
   <div class='table-wrapper'>
     <table>
       <tr><th>Classe</th><th>Type PureBasic</th><th>Méthodes Clés</th></tr>
-      <tr><td><code>StringProperty</code></td><td><code>.s</code> (Chaîne)</td><td><code>GetValue()</code>, <code>SetValue(val.s)</code>, <code>GetStringValue()</code></td></tr>
-      <tr><td><code>IntProperty</code></td><td><code>.i</code> (Entier)</td><td><code>GetValue()</code>, <code>SetValue(val.i)</code>, <code>GetStringValue()</code> (avec conversion automatique en texte)</td></tr>
-      <tr><td><code>BoolProperty</code></td><td><code>.b</code> (Booléen)</td><td><code>GetValue()</code>, <code>SetValue(val.b)</code>, <code>GetStringValue()</code></td></tr>
-      <tr><td><code>DoubleProperty</code></td><td><code>.d</code> (Flottant)</td><td><code>GetValue()</code>, <code>SetValue(val.d)</code>, <code>GetStringValue()</code></td></tr>
+      <tr><td><code>MVVM::StringProperty</code></td><td><code>.s</code> (Chaîne)</td><td><code>GetValue()</code>, <code>SetValue(val.s)</code>, <code>GetStringValue()</code></td></tr>
+      <tr><td><code>MVVM::IntProperty</code></td><td><code>.i</code> (Entier)</td><td><code>GetValue()</code>, <code>SetValue(val.i)</code>, <code>GetStringValue()</code> (avec conversion automatique en texte)</td></tr>
+      <tr><td><code>MVVM::BoolProperty</code></td><td><code>.b</code> (Booléen)</td><td><code>GetValue()</code>, <code>SetValue(val.b)</code>, <code>GetStringValue()</code></td></tr>
+      <tr><td><code>MVVM::DoubleProperty</code></td><td><code>.d</code> (Flottant)</td><td><code>GetValue()</code>, <code>SetValue(val.d)</code>, <code>GetStringValue()</code></td></tr>
     </table>
   </div>
 </div>
@@ -194,8 +192,7 @@
 
   <div class='code-container'>
     <div class='code-header'><span class='code-title'>2. Le ViewModel (viewmodels/MainViewModel.pbo)</span><span class='code-badge'>PBO</span></div>
-    <pre><code>XIncludeFile "../src/ui/UI.pbi" ; ou XIncludeFile "../src/ui/mvvm/MVVM.pbi"
-XIncludeFile "../constants/AppConstants.pbi"
+    <pre><code>XIncludeFile "../constants/AppConstants.pbi"
 
 Class MainViewModel Extends MVVM::ViewModelBase {
   Public *ClickMessage.MVVM::StringProperty
@@ -230,16 +227,24 @@ Class MainViewModel Extends MVVM::ViewModelBase {
 
   <div class='code-container'>
     <div class='code-header'><span class='code-title'>4. Le Point d'Entrée (main.pb)</span><span class='code-badge'>PB</span></div>
-    <pre><code>XIncludeFile "src/ui/UI.pbi"
+    <pre><code>EnableExplicit
+
 XIncludeFile "constants/AppConstants.pbi"
 XIncludeFile "viewmodels/MainViewModel.pbo"
 
 Protected *app.UI::Application = NewObject(UI::Application)
 Protected *vm.MainViewModel    = NewObject(MainViewModel)
-Protected *win.UI::Window      = UI::XMLLoader::LoadAndBindXML(xmlString$, *vm)
+*vm\Init()
 
-*win\Show()
-*app\Run()</code></pre>
+Protected *win.UI::Window = UI::XMLLoader::LoadView("views/MainView.xml", *vm)
+If *win
+  *win\Show()
+  *app\Run()
+  *win\Free()
+EndIf
+
+*vm\Free()
+*app\Free()</code></pre>
   </div>
 </div>
 

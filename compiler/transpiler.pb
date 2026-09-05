@@ -597,6 +597,18 @@ Procedure.s ResolveClassName(ident.s, currentNS.s)
     ProcedureReturn ""
   EndIf
 
+  ; 5b. Support UI::MVVM:: legacy alias
+  If Left(UCase(raw), 10) = "UI::MVVM::"
+    Protected strippedMvvm.s = Mid(raw, 5) ; "MVVM::..."
+    ForEach Classes()
+      If UCase(Classes()\fullName) = UCase(strippedMvvm)
+        result = Classes()\fullName
+        PopListPosition(Classes())
+        ProcedureReturn result
+      EndIf
+    Next
+  EndIf
+
   ; 6. Check root/global namespace
   ForEach Classes()
     If Classes()\namespace = "" And UCase(Classes()\name) = UCase(raw)
@@ -617,6 +629,12 @@ Global BaseDirectory.s = ""
 
 Procedure.s CanonicalizePath(path.s)
   path = ReplaceString(path, "/", "\")
+  CompilerIf #PB_Compiler_OS = #PB_OS_Windows
+    Protected buf.s = Space(2048)
+    If GetFullPathName_(@path, 2048, @buf, 0)
+      ProcedureReturn buf
+    EndIf
+  CompilerEndIf
   While FindString(path, "\.\") > 0
     path = ReplaceString(path, "\.\", "\")
   Wend
@@ -995,6 +1013,52 @@ Procedure.b ParsePBO(inputFile.s)
   IncludedFilesMap(UCase(CanonicalizePath(inputFile))) = 1
   If Not LoadSourceLinesRecursive(inputFile)
     ProcedureReturn #False
+  EndIf
+
+  ; Auto-detect Framework usage (UI::, MVVM::, Using UI, Using MVVM, etc.)
+  Protected needsFramework.b = #False
+  ForEach FileSourceLines()
+    Protected chkUp.s = UCase(FileSourceLines()\content)
+    If FindString(chkUp, "UI::") > 0 Or FindString(chkUp, "MVVM::") > 0 Or FindString(chkUp, "USING UI") > 0 Or FindString(chkUp, "USING MVVM") > 0 Or FindString(chkUp, "VIEWMODELBASE") > 0 Or FindString(chkUp, "OBSERVABLEOBJECT") > 0 Or FindString(chkUp, "STRINGPROPERTY") > 0 Or FindString(chkUp, "INTPROPERTY") > 0 Or FindString(chkUp, "<WINDOW") > 0 Or FindString(chkUp, "<STACKPANEL") > 0 Or FindString(chkUp, "<DOCKPANEL") > 0 Or FindString(chkUp, "<GRID") > 0
+      needsFramework = #True
+      Break
+    EndIf
+  Next
+
+  If needsFramework
+    Protected frameworkUIPath.s = CanonicalizePath(GetPathPart(ProgramFilename()) + "..\framework\UI.pbi")
+    If FileSize(frameworkUIPath) <= 0
+      frameworkUIPath = CanonicalizePath(GetCurrentDirectory() + "framework\UI.pbi")
+    EndIf
+    If FileSize(frameworkUIPath) <= 0 And BaseDirectory <> ""
+      frameworkUIPath = CanonicalizePath(BaseDirectory + "..\framework\UI.pbi")
+    EndIf
+    If FileSize(frameworkUIPath) <= 0 And BaseDirectory <> ""
+      frameworkUIPath = CanonicalizePath(BaseDirectory + "framework\UI.pbi")
+    EndIf
+
+    If FileSize(frameworkUIPath) > 0 And Not FindMapElement(IncludedFilesMap(), UCase(frameworkUIPath))
+      ; Save user lines
+      NewList UserSourceLines.OOP_SourceLine()
+      CopyList(FileSourceLines(), UserSourceLines())
+      ClearList(FileSourceLines())
+      
+      ; Load Framework first
+      IncludedFilesMap(UCase(frameworkUIPath)) = 1
+      If LoadSourceLinesRecursive(frameworkUIPath)
+        ; Append User lines after framework
+        ForEach UserSourceLines()
+          AddElement(FileSourceLines())
+          FileSourceLines()\content = UserSourceLines()\content
+          FileSourceLines()\srcLineNumber = UserSourceLines()\srcLineNumber
+          FileSourceLines()\srcFile = UserSourceLines()\srcFile
+        Next
+      Else
+        ; Fallback: restore user lines
+        CopyList(UserSourceLines(), FileSourceLines())
+      EndIf
+      ClearList(UserSourceLines())
+    EndIf
   EndIf
 
   If Not PreprocessCurlyBraces()

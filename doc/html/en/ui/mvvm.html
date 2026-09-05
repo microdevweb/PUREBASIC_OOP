@@ -130,43 +130,37 @@
   <p>PureBasic OOP incorporates a comprehensive <strong>MVVM (Model-View-ViewModel)</strong> subsystem inspired by modern WPF and .NET MAUI standards. It decouples core business logic from graphical user interfaces using reactive <strong>DataBinding</strong>.</p>
   <ul>
     <li><strong>Model</strong> : Application state, domain rules, and data structures.</li>
-    <li><strong>ViewModel</strong> : Exposes typed observable properties (<code>StringProperty</code>, <code>IntProperty</code>...) inheriting from <code>ViewModelBase</code>.</li>
+    <li><strong>ViewModel</strong> : Exposes typed observable properties (<code>MVVM::StringProperty</code>, <code>MVVM::IntProperty</code>...) inheriting from <code>MVVM::ViewModelBase</code>.</li>
     <li><strong>View</strong> : Declarative layout definition (via XML or OOP code) with <code>{Binding PropertyName, Mode=TwoWay}</code> markup expressions.</li>
     <li><strong>BindingEngine</strong> : Automatically synchronizes UI controls and ViewModel properties bidirectionally.</li>
   </ul>
 </div>
 
 <div class='doc-section'>
-  <h2 class='section-title'>Directory Organization & Include Strategy</h2>
+  <h2 class='section-title'>Directory Organization & Zero-Include Framework</h2>
   <p>Standardized, decoupled project tree structure for your MVVM applications:</p>
   <div class='code-container'>
     <div class='code-header'><span class='code-title'>Recommended Layout</span><span class='code-badge'>Project Tree</span></div>
     <pre><code>MyMVVMProject/
-├── src/
-│   └── ui/
-│       ├── UI.pbi               ; MASTER ENTRY POINT (Core + UI + MVVM + XMLLoader)
-│       └── mvvm/
-│           └── MVVM.pbi         ; Standalone MVVM Subsystem Entry Point
 ├── constants/
 │   └── AppConstants.pbi         ; Shared Property & Command Identifiers
 ├── models/
-│   └── TaskModel.pbi            ; Data entities & pure domain logic
+│   └── TaskModel.pbi            ; Data entities & pure domain logic (optional)
 ├── viewmodels/
 │   └── TaskViewModel.pbo        ; ViewModel class inheriting MVVM::ViewModelBase
 ├── views/
 │   └── MainView.xml             ; Declarative XML View
 └── main.pb                      ; Main executable entry point</code></pre>
   </div>
+  <p><strong>Zero-Include Framework:</strong> With the PBO Transpiler, the framework (<code>framework/UI.pbi</code>) is automatically detected and injected into memory whenever <code>UI::</code> or <code>MVVM::</code> namespaces are used. You no longer need to write manual framework includes!</p>
   <p><strong>Standard Include Order in your <code>main.pb</code>:</strong></p>
   <div class='code-container'>
     <pre><code><span class='kw'>EnableExplicit</span>
-<span class='comment'>; 1. Framework UI & MVVM Engine (or XIncludeFile "src/ui/mvvm/MVVM.pbi" for MVVM only)</span>
-<span class='kw'>XIncludeFile</span> <span class='str'>"src/ui/UI.pbi"</span>
-<span class='comment'>; 2. Shared Constants</span>
+<span class='comment'>; 1. Shared Constants</span>
 <span class='kw'>XIncludeFile</span> <span class='str'>"constants/AppConstants.pbi"</span>
-<span class='comment'>; 3. Data Models (if any)</span>
+<span class='comment'>; 2. Data Models (if any)</span>
 <span class='comment'>; XIncludeFile "models/TaskModel.pbi"</span>
-<span class='comment'>; 4. Transpiled ViewModels</span>
+<span class='comment'>; 3. Transpiled ViewModels</span>
 <span class='kw'>XIncludeFile</span> <span class='str'>"viewmodels/TaskViewModel.pbo"</span></code></pre>
   </div>
 </div>
@@ -176,10 +170,10 @@
   <div class='table-wrapper'>
     <table>
       <tr><th>Class</th><th>PureBasic Type</th><th>Key Methods</th></tr>
-      <tr><td><code>StringProperty</code></td><td><code>.s</code> (String)</td><td><code>GetValue()</code>, <code>SetValue(val.s)</code>, <code>GetStringValue()</code></td></tr>
-      <tr><td><code>IntProperty</code></td><td><code>.i</code> (Integer)</td><td><code>GetValue()</code>, <code>SetValue(val.i)</code>, <code>GetStringValue()</code> (with automated formatting)</td></tr>
-      <tr><td><code>BoolProperty</code></td><td><code>.b</code> (Boolean)</td><td><code>GetValue()</code>, <code>SetValue(val.b)</code>, <code>GetStringValue()</code></td></tr>
-      <tr><td><code>DoubleProperty</code></td><td><code>.d</code> (Float)</td><td><code>GetValue()</code>, <code>SetValue(val.d)</code>, <code>GetStringValue()</code></td></tr>
+      <tr><td><code>MVVM::StringProperty</code></td><td><code>.s</code> (String)</td><td><code>GetValue()</code>, <code>SetValue(val.s)</code>, <code>GetStringValue()</code></td></tr>
+      <tr><td><code>MVVM::IntProperty</code></td><td><code>.i</code> (Integer)</td><td><code>GetValue()</code>, <code>SetValue(val.i)</code>, <code>GetStringValue()</code> (with automated formatting)</td></tr>
+      <tr><td><code>MVVM::BoolProperty</code></td><td><code>.b</code> (Boolean)</td><td><code>GetValue()</code>, <code>SetValue(val.b)</code>, <code>GetStringValue()</code></td></tr>
+      <tr><td><code>MVVM::DoubleProperty</code></td><td><code>.d</code> (Float)</td><td><code>GetValue()</code>, <code>SetValue(val.d)</code>, <code>GetStringValue()</code></td></tr>
     </table>
   </div>
 </div>
@@ -196,8 +190,7 @@
 
   <div class='code-container'>
     <div class='code-header'><span class='code-title'>2. The ViewModel (viewmodels/MainViewModel.pbo)</span><span class='code-badge'>PBO</span></div>
-    <pre><code>XIncludeFile "../src/ui/UI.pbi" ; or XIncludeFile "../src/ui/mvvm/MVVM.pbi"
-XIncludeFile "../constants/AppConstants.pbi"
+    <pre><code>XIncludeFile "../constants/AppConstants.pbi"
 
 Class MainViewModel Extends MVVM::ViewModelBase {
   Public *ClickMessage.MVVM::StringProperty
@@ -208,16 +201,6 @@ Class MainViewModel Extends MVVM::ViewModelBase {
     This\*ClickMessage = This\BindString(#PROP_CLICK_MESSAGE, "Welcome!")
     This\*ClickCount   = This\BindInt(#PROP_CLICK_COUNT, 0)
   }
-  
-  Public Method OnCommand(cmdName.s) {
-    If cmdName = #CMD_INCREMENT
-      Protected count.i = This\*ClickCount\GetValue() + 1
-      This\*ClickCount\SetValue(count)
-      This\*ClickMessage\SetValue("Click #" + Str(count) + " recorded!")
-    EndIf
-  }
-}</code></pre>
-  </div>
   
   Public Method OnCommand(cmdName.s) {
     If cmdName = #CMD_INCREMENT
@@ -242,16 +225,24 @@ Class MainViewModel Extends MVVM::ViewModelBase {
 
   <div class='code-container'>
     <div class='code-header'><span class='code-title'>4. Main Entry Point (main.pb)</span><span class='code-badge'>PB</span></div>
-    <pre><code>XIncludeFile "src/ui/UI.pbi"
+    <pre><code>EnableExplicit
+
 XIncludeFile "constants/AppConstants.pbi"
 XIncludeFile "viewmodels/MainViewModel.pbo"
 
 Protected *app.UI::Application = NewObject(UI::Application)
 Protected *vm.MainViewModel    = NewObject(MainViewModel)
-Protected *win.UI::Window      = UI::XMLLoader::LoadAndBindXML(xmlString$, *vm)
+*vm\Init()
 
-*win\Show()
-*app\Run()</code></pre>
+Protected *win.UI::Window = UI::XMLLoader::LoadView("views/MainView.xml", *vm)
+If *win
+  *win\Show()
+  *app\Run()
+  *win\Free()
+EndIf
+
+*vm\Free()
+*app\Free()</code></pre>
   </div>
 </div>
 

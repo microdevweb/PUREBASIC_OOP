@@ -439,6 +439,12 @@ MyMVVMProject/
 ├── models/
 │   └── TaskModel.pbi            &lt;-- Data structures & pure business logic
 │
+├── constants/
+│   └── AppConstants.pbi         &lt;-- Shared Property & Command Identifiers
+│
+├── models/
+│   └── TaskModel.pbi            &lt;-- Data structures & pure business logic (optional)
+│
 ├── viewmodels/
 │   └── TaskViewModel.pbo        &lt;-- ViewModel class inheriting MVVM::ViewModelBase
 │
@@ -448,15 +454,11 @@ MyMVVMProject/
 └── main.pb                      &lt;-- Main Application Entry Point
   </div>
 
-  <h2>2.1. Two Framework Inclusion Strategies</h2>
-  <p>Depending on your architecture needs, you have two safe entry points using <code>XIncludeFile</code>:</p>
-  <ul>
-    <li><strong><code>XIncludeFile "src/ui/UI.pbi"</code> (Recommended for GUI apps)</strong>: Includes the entire framework in a single line (Core OOP, 18 UI Controls, WPF responsive layouts, complete MVVM subsystem, and XMLLoader engine).</li>
-    <li><strong><code>XIncludeFile "src/ui/mvvm/MVVM.pbi"</code> (For Headless / Testing / Non-GUI models)</strong>: Includes only the MVVM subsystem (ObservableObject, ViewModelBase, typed properties, RelayCommand, BindingEngine) without loading GUI controls.</li>
-  </ul>
+  <h2>2.1. Zero-Include Framework Architecture</h2>
+  <p>Thanks to the intelligent PBO Transpiler, <strong>you no longer need to manually write framework includes</strong>. As soon as the transpiler encounters <code>UI::</code>, <code>MVVM::</code>, or XML view declarations, it automatically injects the framework into memory.</p>
 
   <h2>2.2. Standard Include Order in <code>main.pb</code></h2>
-  <p>To ensure compiler and transpiler resolve all types and identifiers cleanly, always follow this order with <code>XIncludeFile</code>:</p>
+  <p>You only need to include your own project files:</p>
 
   <div class="code-container">
     <div class="code-header">
@@ -465,16 +467,13 @@ MyMVVMProject/
     </div>
     <pre><code><span class="kw">EnableExplicit</span>
 
-<span class="comment">; 1. ALWAYS FIRST: UI & MVVM Framework Engine (or src/ui/mvvm/MVVM.pbi)</span>
-<span class="kw">XIncludeFile</span> <span class="str">"src/ui/UI.pbi"</span>
-
-<span class="comment">; 2. SECOND: Shared Property and Command Constants</span>
+<span class="comment">; 1. Shared Property and Command Constants</span>
 <span class="kw">XIncludeFile</span> <span class="str">"constants/AppConstants.pbi"</span>
 
-<span class="comment">; 3. THIRD: Data Models (if any)</span>
+<span class="comment">; 2. Data Models (if any)</span>
 <span class="comment">; XIncludeFile "models/TaskModel.pbi"</span>
 
-<span class="comment">; 4. FOURTH: ViewModel Classes (.pbo transpiled)</span>
+<span class="comment">; 3. ViewModel Classes (.pbo transpiled)</span>
 <span class="kw">XIncludeFile</span> <span class="str">"viewmodels/TaskViewModel.pbo"</span></code></pre>
   </div>
 
@@ -487,7 +486,7 @@ MyMVVMProject/
 ┌─────────────────────────┐         ┌─────────────────────────┐
 │       VIEW (UI)         │         │   VIEWMODEL (Engine)    │
 │  MainView.xml or OOP UI │ ◄─────► │  Observable Properties  │
-│   TextBox, Button, List │ Binding │  StringProperty, Int... │
+│   TextBox, Button, List │ Binding │  MVVM::StringProperty...│
 └─────────────────────────┘         └────────────┬────────────┘
                                                  │ Logic
                                     ┌────────────▼────────────┐
@@ -498,7 +497,7 @@ MyMVVMProject/
 
   <ul>
     <li><strong>Model</strong>: Raw business entities, database records, and file storage.</li>
-    <li><strong>ViewModel</strong>: The reactive brain. Inherits from <code>MVVM::ViewModelBase</code> and manages <strong>Observable Properties</strong> (<code>StringProperty</code>, <code>IntProperty</code>). It automatically notifies listeners when values change.</li>
+    <li><strong>ViewModel</strong>: The reactive brain. Inherits from <code>MVVM::ViewModelBase</code> and manages <strong>Observable Properties</strong> (<code>MVVM::StringProperty</code>, <code>MVVM::IntProperty</code>). It automatically notifies listeners when values change.</li>
     <li><strong>View</strong>: Declarative user interface written in XML or constructed using OOP controls. Controls bind to ViewModel properties using <code>{Binding PropertyName}</code>.</li>
     <li><strong>BindingEngine</strong>: The synchronizer. Handles two-way binding (<em>TwoWay</em>): user keystrokes update the ViewModel, and ViewModel modifications automatically refresh the UI!</li>
   </ul>
@@ -540,7 +539,6 @@ MyMVVMProject/
     <pre><code><span class="comment">; ============================================================================</span>
 <span class="comment">; TaskViewModel.pbo - Reactive Task Manager ViewModel</span>
 <span class="comment">; ============================================================================</span>
-<span class="kw">XIncludeFile</span> <span class="str">"../src/ui/UI.pbi"</span>        <span class="comment">; or "../src/ui/mvvm/MVVM.pbi"</span>
 <span class="kw">XIncludeFile</span> <span class="str">"../constants/AppConstants.pbi"</span>
 
 <span class="kw">Class</span> TaskViewModel <span class="kw">Extends</span> MVVM::ViewModelBase {
@@ -559,7 +557,7 @@ MyMVVMProject/
   }
 
   <span class="comment">; --- UI Command Dispatcher ---</span>
-  <span class="kw">Public Override Method</span> OnCommand(cmdName.s) {
+  <span class="kw">Public Method</span> OnCommand(cmdName.s) {
     <span class="kw">Select</span> cmdName
       <span class="kw">Case</span> <span class="kw">#CMD_ADD_TASK</span>
         <span class="kw">Protected</span> title.s = Trim(<span class="kw">This</span>\*TaskTitle\GetValue())
@@ -637,30 +635,28 @@ MyMVVMProject/
 <span class="comment">; ============================================================================</span>
 <span class="kw">EnableExplicit</span>
 
-<span class="kw">XIncludeFile</span> <span class="str">"src/ui/UI.pbi"</span>
 <span class="kw">XIncludeFile</span> <span class="str">"constants/AppConstants.pbi"</span>
 <span class="kw">XIncludeFile</span> <span class="str">"viewmodels/TaskViewModel.pbo"</span>
 
 <span class="comment">; 1. Create Core Application</span>
 <span class="kw">Protected</span> *app.UI::Application = <span class="kw">NewObject</span>(UI::Application)
 
-<span class="comment">; 2. Instantiate ViewModel</span>
+<span class="comment">; 2. Instantiate and initialize ViewModel</span>
 <span class="kw">Protected</span> *vm.TaskViewModel = <span class="kw">NewObject</span>(TaskViewModel)
+*vm\Init()
 
 <span class="comment">; 3. Load XML View and bind to ViewModel</span>
-<span class="kw">Protected</span> xmlContent.s = <span class="str">""</span>
-<span class="kw">If</span> ReadFile(<span class="num">0</span>, <span class="str">"views/MainView.xml"</span>)
-  xmlContent = ReadString(<span class="num">0</span>, <span class="kw">#PB_File_IgnoreEOL</span> | <span class="kw">#PB_UTF8</span>)
-  CloseFile(<span class="num">0</span>)
-<span class="kw">EndIf</span>
-
-<span class="kw">Protected</span> *window.UI::Window = UI::XMLLoader::LoadAndBindXML(xmlContent, *vm)
+<span class="kw">Protected</span> *window.UI::Window = UI::XMLLoader::LoadView(<span class="str">"views/MainView.xml"</span>, *vm)
 
 <span class="kw">If</span> *window
   <span class="comment">; 4. Show Window and Run Event Loop</span>
   *window\Show()
   *app\Run()
-<span class="kw">EndIf</span></code></pre>
+  *window\Free()
+<span class="kw">EndIf</span>
+
+*vm\Free()
+*app\Free()</code></pre>
   </div>
 
   <div class="callout callout-tip">

@@ -108,7 +108,7 @@ Class Person {
 
 ---
 
-## 3. Responsive GUI Framework (`src/ui/`)
+## 3. Responsive GUI Framework (`framework/`)
 
 The PureBasic OOP GUI framework provides automatic layout management and standard UI controls without manual coordinate calculations.
 
@@ -209,7 +209,7 @@ MyMVVMProject/
 EnableExplicit
 
 ; 1. First: Framework Engine (brings all UI, Layouts, MVVM & XMLLoader)
-IncludeFile "src/ui/UI.pbi"
+IncludeFile "framework/UI.pbi"
 
 ; 2. Second: Shared Property and Command Constants
 IncludeFile "constants/AppConstants.pbi"
@@ -218,7 +218,7 @@ IncludeFile "constants/AppConstants.pbi"
 IncludeFile "viewmodels/MyViewModel.pbo"
 ```
 
-### 5.1 Strongly-Typed Observable Properties (`src/ui/mvvm/Property.pbi`)
+### 5.1 Strongly-Typed Observable Properties (`framework/mvvm/Property.pbi`)
 
 | Property Class | Accessors | Notification |
 | :--- | :--- | :--- |
@@ -228,22 +228,20 @@ IncludeFile "viewmodels/MyViewModel.pbo"
 | **`DoubleProperty`** | `Get()`, `Set(val.d)`, `GetString()`, `ToString(decimals.i)` | Automatic on `Set()` |
 
 ### 5.2 ViewModel Creation Helpers
-Within any class extending `UI::MVVM::ViewModelBase`:
+Within any class extending `MVVM::ViewModelBase`:
 - `This\BindString(name.s, defaultVal.s = "")`
 - `This\BindInt(name.s, defaultVal.i = 0)`
 - `This\BindBool(name.s, defaultVal.b = #False)`
 - `This\BindDouble(name.s, defaultVal.d = 0.0)`
 
 ### 5.3 Command Dispatching
-Buttons with `Click="CommandName"` or `Command="CommandName"` trigger the virtual `OnCommand(cmd.s, *param = 0)` method in the ViewModel:
+Buttons with `Command="CommandName"` trigger the `OnCommand(cmd.s)` method in the ViewModel:
 ```purebasic
-Public Method.b OnCommand(cmd.s, *param = 0) {
+Public Method OnCommand(cmd.s) {
   Select cmd
     Case "MyAction"
-      This\*MyProperty\Set("Updated!")
-      ProcedureReturn #True
+      This\*MyProperty\SetValue("Updated!")
   EndSelect
-  ProcedureReturn #False
 }
 ```
 
@@ -261,14 +259,13 @@ Public Method.b OnCommand(cmd.s, *param = 0) {
 
 ### File 2: `SimpleViewModel.pbi` (State & Logic)
 ```purebasic
-XIncludeFile "ui/UI.pbi"
 XIncludeFile "SimpleConstants.pbi"
 
 Namespace Demo {
 
-  Class SimpleViewModel Extends UI::MVVM::ViewModelBase {
-    Public *Message.UI::MVVM::StringProperty
-    Public *Count.UI::MVVM::IntProperty
+  Class SimpleViewModel Extends MVVM::ViewModelBase {
+    Public *Message.MVVM::StringProperty
+    Public *Count.MVVM::IntProperty
 
     Public Method Init() {
       Super\Init()
@@ -276,67 +273,57 @@ Namespace Demo {
       This\*Count   = This\BindInt(#PROP_COUNT, 0)
     }
 
-    Public Method.b OnCommand(cmd.s, *param = 0) {
+    Public Method OnCommand(cmd.s) {
       Select cmd
         Case #CMD_CLICK
-          This\*Count\Increment()
-          This\*Message\Set("Total Clicks: " + This\*Count\GetString())
-          ProcedureReturn #True
+          Protected newCount.i = This\*Count\GetValue() + 1
+          This\*Count\SetValue(newCount)
+          This\*Message\SetValue("Total Clicks: " + Str(newCount))
 
         Case #CMD_RESET
-          This\*Count\Set(0)
-          This\*Message\Set("Reset to 0")
-          ProcedureReturn #True
+          This\*Count\SetValue(0)
+          This\*Message\SetValue("Reset to 0")
       EndSelect
-      ProcedureReturn #False
     }
   }
 
 }
 ```
 
-### File 3: `SimpleView.pbi` (Declarative View)
-```purebasic
-XIncludeFile "ui/UI.pbi"
-XIncludeFile "SimpleConstants.pbi"
-XIncludeFile "SimpleViewModel.pbi"
-
-Namespace Demo {
-
-  Class SimpleView Extends UI::Window {
-
-    Public Method Init(*vm.Demo::SimpleViewModel) {
-      Super\Init()
-
-      Protected xml.s
-      xml + "<Window Title='MVVM Example' Width='450' Height='250'>"
-      xml + "  <StackPanel Orientation='Vertical' Margin='20' Spacing='12'>"
-      xml + "    <Label Text='PureBasic OOP MVVM Demo' Height='24'/>"
-      xml + "    <TextBox Text='{Binding " + #PROP_MESSAGE + "}' Height='28'/>"
-      xml + "    <StackPanel Orientation='Horizontal' Spacing='10' Height='34'>"
-      xml + "      <Button Text='Click Me' Click='" + #CMD_CLICK + "' Width='110' Height='32'/>"
-      xml + "      <Button Text='Reset'    Click='" + #CMD_RESET + "' Width='90'  Height='32'/>"
-      xml + "    </StackPanel>"
-      xml + "  </StackPanel>"
-      xml + "</Window>"
-
-      This\LoadViewFromString(xml, *vm)
-    }
-  }
-
-}
+### File 3: `SimpleView.xml` (Declarative View)
+```xml
+<Window Title="MVVM Example" Width="450" Height="250">
+  <StackPanel Margin="20" Spacing="12">
+    <Label Text="PureBasic OOP MVVM Demo" />
+    <TextBox Text="{Binding Message}" />
+    <StackPanel Orientation="Horizontal" Spacing="10">
+      <Button Text="Click Me" Command="ClickCmd" Width="110" Height="32" />
+      <Button Text="Reset"    Command="ResetCmd" Width="90"  Height="32" />
+    </StackPanel>
+  </StackPanel>
+</Window>
 ```
 
 ### File 4: `Main.pb` (Application Entry Point)
 ```purebasic
-XIncludeFile "SimpleView.pbi"
+EnableExplicit
 
-Define *app.UI::Application = New UI::Application("PureBasic OOP MVVM")
-Define *vm.Demo::SimpleViewModel = New Demo::SimpleViewModel()
-Define *view.Demo::SimpleView = New Demo::SimpleView(*vm)
+XIncludeFile "SimpleConstants.pbi"
+XIncludeFile "SimpleViewModel.pbi"
 
-*app\SetMainWindow(*view)
-*app\Run()
+Protected *app.UI::Application = NewObject(UI::Application)
+Protected *vm.Demo::SimpleViewModel = NewObject(Demo::SimpleViewModel)
+*vm\Init()
+
+Protected *win.UI::Window = UI::XMLLoader::LoadView("SimpleView.xml", *vm)
+If *win
+  *win\Show()
+  *app\Run()
+  *win\Free()
+EndIf
+
+*vm\Free()
+*app\Free()
 ```
 
 ---
@@ -345,10 +332,10 @@ Define *view.Demo::SimpleView = New Demo::SimpleView(*vm)
 
 ### Step 1: Transpile `.pbo` / `.pb` using Native Transpiler
 ```cmd
-compiler\transpiler.exe "src/examples/simple_mvvm/Main.pb" "src/examples/simple_mvvm/Main_transpiled.pb" --base-dir "src/examples/simple_mvvm"
+compiler\transpiler.exe "examples/03_simple_mvvm/Main.pb" "examples/03_simple_mvvm/Main_transpiled.pb" --base-dir "examples/03_simple_mvvm"
 ```
 
 ### Step 2: Compile with PureBasic Compiler
 ```cmd
-"C:\Program Files\PureBasic\Compilers\pbcompiler.exe" "src/examples/simple_mvvm/Main_transpiled.pb" /CONSOLE /DEBUGGER /EXE "src/examples/simple_mvvm/simple_mvvm.exe" /THREAD /UNICODE /XP /USER /DPIAWARE
+"C:\Program Files\PureBasic\Compilers\pbcompiler.exe" "examples/03_simple_mvvm/Main_transpiled.pb" /CONSOLE /DEBUGGER /EXE "examples/03_simple_mvvm/simple_mvvm.exe" /THREAD /UNICODE /XP /USER /DPIAWARE
 ```

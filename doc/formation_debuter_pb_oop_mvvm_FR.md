@@ -25,34 +25,17 @@ L'application permettra de saisir un titre, de cliquer sur un bouton pour l'ajou
 
 ---
 
-## 📁 Module 2 : Organisation des Dossiers & Stratégie des Includes
+## 📁 Module 2 : Organisation des Dossiers & Framework Zéro-Include
 
 Une architecture MVVM professionnelle repose sur une séparation claire des responsabilités dans l'arborescence de votre projet. Voici la structure recommandée :
 
 ```text
 MonProjetMVVM/
-│
-├── src/                          <-- Framework PureBasic OOP (ou chemin partagé)
-│   ├── core/                    <-- Object, List, Vector, Memory, Exceptions
-│   └── ui/
-│       ├── UI.pbi               <-- POINT D'ENTRÉE MASTER (Core + UI + MVVM + XMLLoader)
-│       ├── Component.pbo        <-- Socle WPF (Alignements, Marges, Arrange)
-│       ├── Gadget.pbo           <-- Encapsulation des 18 gadgets natifs
-│       ├── controls/            <-- Editor, ListView, TreeView, DatePicker...
-│       ├── layouts/             <-- StackPanel, DockPanel, Grid
-│       ├── mvvm/
-│       │   ├── MVVM.pbi         <-- POINT D'ENTRÉE MVVM AUTONOME (sans contrôles graphiques)
-│       │   ├── ObservableObject.pbi
-│       │   ├── ViewModelBase.pbi
-│       │   ├── Property.pbi
-│       │   └── BindingEngine.pbi
-│       └── XMLLoader.pbi        <-- Parseur et chargeur de vues XML
-│
 ├── constants/
 │   └── AppConstants.pbi         <-- Noms des propriétés et commandes partagées
 │
 ├── models/
-│   └── TaskModel.pbi            <-- Structures de données et logique métier pure
+│   └── TaskModel.pbi            <-- Structures de données et logique métier pure (optionnel)
 │
 ├── viewmodels/
 │   └── TaskViewModel.pbo        <-- Classe ViewModel héritant de MVVM::ViewModelBase
@@ -63,27 +46,22 @@ MonProjetMVVM/
 └── main.pb                      <-- Point d'entrée principal exécutable
 ```
 
-### 2.1. Les deux options d'inclusion du Framework
-Selon vos besoins, vous disposez de deux points d'entrée simples et sécurisés avec `XIncludeFile` :
-- **`XIncludeFile "src/ui/UI.pbi"` (Recommandé pour les applications graphiques)** : Inclut tout le framework en une seule ligne (Noyau Core, 18 Contrôles UI, Layouts réactifs WPF, Sous-système MVVM et Moteur XMLLoader).
-- **`XIncludeFile "src/ui/mvvm/MVVM.pbi"` (Pour modules ou tests headless)** : Inclut uniquement le moteur MVVM (ObservableObject, ViewModelBase, Propriétés typées, RelayCommand, BindingEngine) sans charger les gadgets graphiques.
+### 2.1. Zéro-Include Framework
+Grâce au transpilateur PBO intelligent, **vous n'avez plus besoin d'inclure manuellement les fichiers du framework**. Dès que le transpilateur rencontre les namespaces `UI::` ou `MVVM::`, il injecte automatiquement les modules nécessaires en mémoire.
 
-### 2.2. L'ordre d'inclusion obligatoire dans votre `main.pb`
-Pour garantir que le compilateur et le transpileur résolvent tous les types sans avertissement, respectez toujours cet ordre avec `XIncludeFile` :
+### 2.2. L'ordre d'inclusion dans votre `main.pb`
+Vous n'incluez que les fichiers de votre propre projet :
 
 ```purebasic
 EnableExplicit
 
-; 1. TOUJOURS EN PREMIER : Le framework UI & MVVM (ou src/ui/mvvm/MVVM.pbi)
-XIncludeFile "src/ui/UI.pbi"
-
-; 2. EN SECOND : Les constantes partagées de Bindings et de Commandes
+; 1. EN PREMIER : Les constantes partagées de Bindings et de Commandes
 XIncludeFile "constants/AppConstants.pbi"
 
-; 3. EN TROISIÈME : Les Modèles de données (si existants)
+; 2. EN SECOND : Les Modèles de données (si existants)
 ; XIncludeFile "models/TaskModel.pbi"
 
-; 4. EN QUATRIÈME : Les classes ViewModels (.pbo transpilées)
+; 3. EN TROISIÈME : Les classes ViewModels (.pbo transpilées)
 XIncludeFile "viewmodels/TaskViewModel.pbo"
 ```
 
@@ -97,7 +75,7 @@ Le pattern **MVVM** sépare clairement votre programme en trois responsabilités
 ┌─────────────────────────┐         ┌─────────────────────────┐
 │       VUE (View)        │         │   VIEWMODEL (Moteur)    │
 │  MainView.xml ou UI POO │ ◄─────► │  Propriétés Observables │
-│   TextBox, Button, List │ Binding │  StringProperty, Int... │
+│   TextBox, Button, List │ Binding │  MVVM::StringProperty...│
 └─────────────────────────┘         └────────────┬────────────┘
                                                  │ Métier
                                     ┌────────────▼────────────┐
@@ -107,7 +85,7 @@ Le pattern **MVVM** sépare clairement votre programme en trois responsabilités
 ```
 
 - **Model (Modèle)** : Représente la donnée brute (fichiers, structures, base de données).
-- **ViewModel (Modèle de Vue)** : C'est le « cerveau ». Il hérite de `MVVM::ViewModelBase` et expose des **Propriétés Observables** (`StringProperty`, `IntProperty`). Dès qu'une valeur change, il notifie les abonnés.
+- **ViewModel (Modèle de Vue)** : C'est le « cerveau ». Il hérite de `MVVM::ViewModelBase` et expose des **Propriétés Observables** (`MVVM::StringProperty`, `MVVM::IntProperty`). Dès qu'une valeur change, il notifie les abonnés.
 - **View (Vue)** : C'est l'interface visuelle déclarée en XML ou construite avec les classes UI. Elle se lie aux propriétés via la syntaxe `{Binding NomPropriete}`.
 - **BindingEngine (Moteur de Liaison)** : Il assure la liaison bidirectionnelle (*TwoWay*). Lorsque l'utilisateur tape du texte, le ViewModel est mis à jour. Lorsque le ViewModel modifie une variable, le contrôle graphique change tout seul !
 
@@ -142,7 +120,6 @@ Le ViewModel encapsule l'état et réagit aux actions. Il n'a **aucune dépendan
 ; ============================================================================
 ; TaskViewModel.pbo - ViewModel de gestion des tâches
 ; ============================================================================
-XIncludeFile "../src/ui/UI.pbi"        ; ou "../src/ui/mvvm/MVVM.pbi"
 XIncludeFile "../constants/AppConstants.pbi"
 
 Class TaskViewModel Extends MVVM::ViewModelBase {
@@ -161,7 +138,7 @@ Class TaskViewModel Extends MVVM::ViewModelBase {
   }
 
   ; --- Gestionnaire des Commandes UI ---
-  Public Override Method OnCommand(cmdName.s) {
+  Public Method OnCommand(cmdName.s) {
     Select cmdName
       Case #CMD_ADD_TASK
         Protected title.s = Trim(This\*TaskTitle\GetValue())
@@ -233,30 +210,28 @@ L'assemblage final dans `main.pb` ne nécessite que **quelques lignes de code** 
 ; ============================================================================
 EnableExplicit
 
-XIncludeFile "src/ui/UI.pbi"
 XIncludeFile "constants/AppConstants.pbi"
 XIncludeFile "viewmodels/TaskViewModel.pbo"
 
 ; 1. Création de l'application centrale
 Protected *app.UI::Application = NewObject(UI::Application)
 
-; 2. Instanciation du ViewModel
+; 2. Instanciation et initialisation du ViewModel
 Protected *vm.TaskViewModel = NewObject(TaskViewModel)
+*vm\Init()
 
 ; 3. Chargement de la vue XML et liaison automatique (DataBinding)
-Protected xmlContent.s = ""
-If ReadFile(0, "views/MainView.xml")
-  xmlContent = ReadString(0, #PB_File_IgnoreEOL | #PB_UTF8)
-  CloseFile(0)
-EndIf
-
-Protected *window.UI::Window = UI::XMLLoader::LoadAndBindXML(xmlContent, *vm)
+Protected *window.UI::Window = UI::XMLLoader::LoadView("views/MainView.xml", *vm)
 
 If *window
   ; 4. Affichage et boucle d'exécution
   *window\Show()
   *app\Run()
+  *window\Free()
 EndIf
+
+*vm\Free()
+*app\Free()
 ```
 
 > **🎉 Résultat Immédiat !**  
