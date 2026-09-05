@@ -15,7 +15,7 @@ Namespace UI {
 
     ; Constructeur 1: Par défaut (#False, 0,0, 50x26)
     Public Method Init() {
-      Super::Init(50, 26)
+      Super\Init(50, 26)
       This\isChecked = #False
       This\activeColor = RGB(52, 199, 89)      ; iOS Green
       This\inactiveColor = RGB(200, 200, 205)  ; Light Gray
@@ -24,7 +24,7 @@ Namespace UI {
 
     ; Constructeur 2: État initial spécifié (0,0, 50x26)
     Public Method Init(defaultState_p.b) {
-      Super::Init(50, 26)
+      Super\Init(50, 26)
       This\isChecked = defaultState_p
       This\activeColor = RGB(52, 199, 89)      ; iOS Green
       This\inactiveColor = RGB(200, 200, 205)  ; Light Gray
@@ -33,7 +33,7 @@ Namespace UI {
 
     ; Constructeur 3: Dimensions et état initial
     Public Method Init(w_p.i, h_p.i, defaultState_p.b) {
-      Super::Init(w_p, h_p)
+      Super\Init(w_p, h_p)
       This\isChecked = defaultState_p
       This\activeColor = RGB(52, 199, 89)      ; iOS Green
       This\inactiveColor = RGB(200, 200, 205)  ; Light Gray
@@ -42,7 +42,7 @@ Namespace UI {
 
     ; Constructeur 4: Position, dimensions et état initial
     Public Method Init(x_p.i, y_p.i, w_p.i, h_p.i, defaultState_p.b) {
-      Super::Init(x_p, y_p, w_p, h_p)
+      Super\Init(x_p, y_p, w_p, h_p)
       This\isChecked = defaultState_p
       This\activeColor = RGB(52, 199, 89)      ; iOS Green
       This\inactiveColor = RGB(200, 200, 205)  ; Light Gray

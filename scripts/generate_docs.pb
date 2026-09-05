@@ -371,7 +371,7 @@ SaveHTML(BaseDocDir + "fr\keywords\properties.html", BuildPage("fr", "properties
 ; FR Keyword: Inheritance
 Define fr_inheritance.s = "<div class='doc-section'>" +
   "<h2 class='section-title'>Description</h2>" +
-  "<p>Le mot-cl&eacute; <code>Extends</code> permet &agrave; une classe d'h&eacute;riter des champs et m&eacute;thodes d'une classe parente. Le mot-cl&eacute; <code>Super::</code> permet d'invoquer l'impl&eacute;mentation parente d'une m&eacute;thode surcharg&eacute;e.</p>" +
+  "<p>Le mot-cl&eacute; <code>Extends</code> permet &agrave; une classe d'h&eacute;riter des champs et m&eacute;thodes d'une classe parente. Le mot-cl&eacute; <code>Super\\</code> permet d'invoquer l'impl&eacute;mentation parente d'une m&eacute;thode surcharg&eacute;e.</p>" +
   "</div>" +
   "<div class='doc-section'>" +
   "<h2 class='section-title'>Exemple d'H&eacute;ritage</h2>" +
@@ -386,7 +386,7 @@ Define fr_inheritance.s = "<div class='doc-section'>" +
   #CRLF$ +
   "<span class='kw'>Class</span> <span class='tp'>Voiture</span> <span class='kw'>Extends</span> <span class='tp'>Vehicule</span>" + #CRLF$ +
   "  <span class='kw'>Public</span> <span class='kw'>Method</span> <span class='fn'>Demarrer</span>()" + #CRLF$ +
-  "    <span class='kw'>Super</span>::<span class='fn'>Demarrer</span>()" + #CRLF$ +
+  "    <span class='kw'>Super</span>\\<span class='fn'>Demarrer</span>()" + #CRLF$ +
   "    <span class='fn'>PrintN</span>('Moteur V8 en route !')" + #CRLF$ +
   "  <span class='kw'>EndMethod</span>" + #CRLF$ +
   "<span class='kw'>EndClass</span></code></pre>" +
@@ -427,7 +427,7 @@ Define fr_operators.s = "<div class='doc-section'>" +
   "<h2 class='section-title'>Op&eacute;rateurs et R&eacute;f&eacute;rences Sp&eacute;ciales</h2>" +
   "<ul>" +
   "  <li><code>This</code> : Pointeur vers l'instance courante de l'objet au sein de ses m&eacute;thodes.</li>" +
-  "  <li><code>Super::</code> : Appel explicite de la m&eacute;thode d'une classe parente.</li>" +
+  "  <li><code>Super\\</code> : Appel explicite de la m&eacute;thode d'une classe parente.</li>" +
   "  <li><code>TypeOf(*obj)</code> : Renvoie le nom de la classe d'une instance.</li>" +
   "  <li><code>InstanceOf(*obj, MaClasse)</code> : V&eacute;rifie si un objet h&eacute;rite ou est une instance d'une classe donn&eacute;e.</li>" +
   "</ul>" +
@@ -1039,7 +1039,7 @@ SaveHTML(BaseDocDir + "en\keywords\method.html", BuildPage("en", "method", "keyw
 
 ; EN Keyword: Properties & others
 SaveHTML(BaseDocDir + "en\keywords\properties.html", BuildPage("en", "properties", "keywords/properties.html", "Getter / Setter / Property", "Data encapsulation and property accessors.", "badge-keyword", "Property", "<p>Encapsulate private or protected field read/write access with <code>Getter</code> and <code>Setter</code> methods.</p>"))
-SaveHTML(BaseDocDir + "en\keywords\inheritance.html", BuildPage("en", "inheritance", "keywords/inheritance.html", "Extends / Super", "Class inheritance and parent method invocation.", "badge-keyword", "Inheritance", "<p>Use <code>Extends</code> for single inheritance and <code>Super::Method()</code> to call overridden base class implementations.</p>"))
+SaveHTML(BaseDocDir + "en\keywords\inheritance.html", BuildPage("en", "inheritance", "keywords/inheritance.html", "Extends / Super", "Class inheritance and parent method invocation.", "badge-keyword", "Inheritance", "<p>Use <code>Extends</code> for single inheritance and <code>Super\\Method()</code> to call overridden base class implementations.</p>"))
 SaveHTML(BaseDocDir + "en\keywords\encapsulation.html", BuildPage("en", "encapsulation", "keywords/encapsulation.html", "Public / Protected / Private", "Access control and member visibility.", "badge-keyword", "Access Control", "<p>Configure visibility using <code>Public</code>, <code>Protected</code>, or <code>Private</code> scopes.</p>"))
 SaveHTML(BaseDocDir + "en\keywords\lifecycle.html", BuildPage("en", "lifecycle", "keywords/lifecycle.html", "New / Free / Lifecycle", "Object instantiation, initialization, and memory disposal.", "badge-keyword", "Lifecycle", "<p>Create instances using <code>NewObject(ClassName, ...)</code> and dispose of them with <code>FreeObject(*instance)</code>.</p>"))
 SaveHTML(BaseDocDir + "en\keywords\operators.html", BuildPage("en", "operators", "keywords/operators.html", "This / Cast / TypeOf", "Context operators and object introspection.", "badge-keyword", "Operator", "<p>Use <code>This</code> for self-reference, <code>TypeOf(*obj)</code> for class reflection, and <code>InstanceOf</code> for type checking.</p>"))

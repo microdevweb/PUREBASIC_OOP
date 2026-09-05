@@ -13,7 +13,7 @@ Namespace Demo::Views {
   Class SimpleView Extends UI::Window {
 
     Public Method Init(*vm.Demo::ViewModels::SimpleViewModel) {
-      Super::Init()
+      Super\Init()
 
       Protected xml.s
       xml + "<Window Title='PureBasic OOP - Simple MVVM' Width='520' Height='340'>"

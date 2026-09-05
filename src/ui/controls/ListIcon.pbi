@@ -13,7 +13,7 @@ Namespace UI {
 
     ; Constructor 1: Column title and column width (auto-positioned by layout)
     Public Method Init(title_p.s, colWidth_p.i) {
-      Super::Init()
+      Super\Init()
       This\x = 0 : This\y = 0 : This\width = 300 : This\height = 200
       This\desiredWidth = 300 : This\desiredHeight = 200
       This\isVisible = #True : This\isEnabled = #True
@@ -25,7 +25,7 @@ Namespace UI {
 
     ; Constructor 2: Column title, column width and custom flags
     Public Method Init(title_p.s, colWidth_p.i, flags_p.i) {
-      Super::Init()
+      Super\Init()
       This\x = 0 : This\y = 0 : This\width = 300 : This\height = 200
       This\desiredWidth = 300 : This\desiredHeight = 200
       This\isVisible = #True : This\isEnabled = #True
@@ -37,7 +37,7 @@ Namespace UI {
 
     ; Constructor 3: Position, dimensions, column title and width
     Public Method Init(x_p.i, y_p.i, w_p.i, h_p.i, title_p.s, colWidth_p.i) {
-      Super::Init()
+      Super\Init()
       This\x = x_p : This\y = y_p : This\width = w_p : This\height = h_p
       This\desiredWidth = w_p : This\desiredHeight = h_p
       This\isVisible = #True : This\isEnabled = #True
@@ -49,7 +49,7 @@ Namespace UI {
 
     ; Constructor 4: Full parameters
     Public Method Init(x_p.i, y_p.i, w_p.i, h_p.i, title_p.s, colWidth_p.i, flags_p.i) {
-      Super::Init()
+      Super\Init()
       This\x = x_p : This\y = y_p : This\width = w_p : This\height = h_p
       This\desiredWidth = w_p : This\desiredHeight = h_p
       This\isVisible = #True : This\isEnabled = #True
@@ -132,7 +132,7 @@ Namespace UI {
     Public Method Free() {
       If (This\id) {
         UI::UnregisterGadget(This\id)
-        Super::Free()
+        Super\Free()
       }
     }
   }

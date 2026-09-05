@@ -13,17 +13,17 @@ Namespace UI::Layouts {
     Protected lastChildFill.b
 
     Public Method Init() {
-      Super::Init()
+      Super\Init()
       This\lastChildFill = #True
     }
 
     Public Method Init(fill.b) {
-      Super::Init()
+      Super\Init()
       This\lastChildFill = fill
     }
 
     Public Method Init(fill.b, w_p.i, h_p.i) {
-      Super::Init(w_p, h_p)
+      Super\Init(w_p, h_p)
       This\lastChildFill = fill
     }
 

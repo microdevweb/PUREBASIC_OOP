@@ -15,7 +15,7 @@ Namespace UI {
 
     ; Constructeur 0: Par defaut (0..100, 0,0, 100x25)
     Public Method Init() {
-      Super::Init()
+      Super\Init()
       This\x = 0 : This\y = 0 : This\width = 100 : This\height = 25
       This\desiredWidth = 100 : This\desiredHeight = 25
       This\isVisible = #True : This\isEnabled = #True
@@ -30,7 +30,7 @@ Namespace UI {
 
     ; Constructeur 1: Min et Max
     Public Method Init(min_p.i, max_p.i) {
-      Super::Init()
+      Super\Init()
       This\x = 0 : This\y = 0 : This\width = 100 : This\height = 25
       This\desiredWidth = 100 : This\desiredHeight = 25
       This\isVisible = #True : This\isEnabled = #True
@@ -45,7 +45,7 @@ Namespace UI {
 
     ; Constructeur 2: Min, Max et valeur initiale (100x25 par defaut)
     Public Method Init(min_p.i, max_p.i, current_p.i) {
-      Super::Init()
+      Super\Init()
       This\x = 0 : This\y = 0 : This\width = 100 : This\height = 25
       This\desiredWidth = 100 : This\desiredHeight = 25
       This\isVisible = #True : This\isEnabled = #True
@@ -60,7 +60,7 @@ Namespace UI {
 
     ; Constructeur 3: Min, Max, valeur initiale et dimensions
     Public Method Init(min_p.i, max_p.i, current_p.i, w_p.i, h_p.i) {
-      Super::Init()
+      Super\Init()
       This\x = 0 : This\y = 0 : This\width = w_p : This\height = h_p
       This\desiredWidth = w_p : This\desiredHeight = h_p
       This\isVisible = #True : This\isEnabled = #True
@@ -106,7 +106,7 @@ Namespace UI {
     Public Method Free() {
       If (This\id) {
         UI::UnregisterGadget(This\id)
-        Super::Free()
+        Super\Free()
       }
     }
   }

@@ -15,7 +15,7 @@ Namespace UI {
 
     ; Constructeur 1: Par défaut 0..100 (Positionné par Layout 0,0, 200x25)
     Public Method Init() {
-      Super::Init()
+      Super\Init()
       This\x = 0 : This\y = 0 : This\width = 200 : This\height = 25
       This\desiredWidth = 200 : This\desiredHeight = 25
       This\minVal = 0 : This\maxVal = 100
@@ -28,7 +28,7 @@ Namespace UI {
 
     ; Constructeur 2: Min et Max spécifiés
     Public Method Init(min_p.i, max_p.i) {
-      Super::Init()
+      Super\Init()
       This\x = 0 : This\y = 0 : This\width = 200 : This\height = 25
       This\desiredWidth = 200 : This\desiredHeight = 25
       This\minVal = min_p : This\maxVal = max_p
@@ -41,7 +41,7 @@ Namespace UI {
 
     ; Constructeur 3: Min, Max et dimensions
     Public Method Init(min_p.i, max_p.i, w_p.i, h_p.i) {
-      Super::Init()
+      Super\Init()
       This\x = 0 : This\y = 0 : This\width = w_p : This\height = h_p
       This\desiredWidth = w_p : This\desiredHeight = h_p
       This\minVal = min_p : This\maxVal = max_p
@@ -54,7 +54,7 @@ Namespace UI {
 
     ; Constructeur 4: Complet avec position et flags
     Public Method Init(x_p.i, y_p.i, w_p.i, h_p.i, min_p.i, max_p.i, flags_p.i) {
-      Super::Init()
+      Super\Init()
       This\x = x_p : This\y = y_p : This\width = w_p : This\height = h_p
       This\desiredWidth = w_p : This\desiredHeight = h_p
       This\minVal = min_p : This\maxVal = max_p
@@ -81,7 +81,7 @@ Namespace UI {
     Public Method Free() {
       If (This\id) {
         UI::UnregisterGadget(This\id)
-        Super::Free()
+        Super\Free()
       }
     }
   }

@@ -23,13 +23,13 @@ Namespace UI::MVVM {
     Protected List colObservers.UI_CollectionObserver()
 
     Public Method Init() {
-      Super::Init()
+      Super\Init()
     }
 
     Public Method Free() {
       ClearList(This\items())
       ClearList(This\colObservers())
-      Super::Free()
+      Super\Free()
     }
 
     ; ------------------------------------------------------------------------

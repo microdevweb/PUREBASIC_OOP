@@ -24,7 +24,7 @@ Namespace App::Geometry {
     Protected radius.d
 
     Public Method Init(nom.s, r.d) {
-      Super::Init(nom)
+      Super\Init(nom)
       This\radius = r
     }
 
@@ -41,7 +41,7 @@ Namespace App::Geometry {
     Protected width.d, height.d
 
     Public Method Init(nom.s, w.d, h.d) {
-      Super::Init(nom)
+      Super\Init(nom)
       This\width = w
       This\height = h
     }

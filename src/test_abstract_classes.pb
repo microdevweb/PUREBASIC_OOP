@@ -52,14 +52,14 @@ Class Rectangle Extends FormeGeometrique
   Public Method.d CalculerPerimetre()
   Public Method Dessiner()
   
-  ; Surcharge partielle de la methode par defaut (utilise Super::)
+  ; Surcharge partielle de la methode par defaut (utilise Super\)
   Public Method AfficherInfos()
   
   Public Method Free()
 EndClass
 
 Method Rectangle::Init(nom_p.s, couleur_p.s, l.d, h.d)
-  Super::Init(nom_p, couleur_p)
+  Super\Init(nom_p, couleur_p)
   This\largeur = l
   This\hauteur = h
 EndMethod
@@ -76,15 +76,15 @@ Method Rectangle::Dessiner()
   PrintN("   ==> [DESSIN] Rectangle (" + StrD(This\largeur, 2) + " x " + StrD(This\hauteur, 2) + ") en " + This\couleur)
 EndMethod
 
-; Surcharge Partielle : appel du parent Super::AfficherInfos() puis ajout de details
+; Surcharge Partielle : appel du parent Super\AfficherInfos() puis ajout de details
 Method Rectangle::AfficherInfos()
-  Super::AfficherInfos()
+  Super\AfficherInfos()
   PrintN("       Details : Largeur=" + StrD(This\largeur, 2) + ", Hauteur=" + StrD(This\hauteur, 2) + " -> Aire=" + StrD(This\CalculerAire(), 2))
 EndMethod
 
 Method Rectangle::Free()
   PrintN("[Rectangle::Free] Destruction specifique rectangle " + This\nom)
-  Super::Free()
+  Super\Free()
 EndMethod
 
 ; ----------------------------------------------------------------------------
@@ -100,14 +100,14 @@ Class Cercle Extends FormeGeometrique
   Public Method.d CalculerPerimetre()
   Public Method Dessiner()
   
-  ; Surcharge totale de AfficherInfos (sans appel Super::)
+  ; Surcharge totale de AfficherInfos (sans appel Super\)
   Public Method AfficherInfos()
   
   Public Method Free()
 EndClass
 
 Method Cercle::Init(nom_p.s, couleur_p.s, r.d)
-  Super::Init(nom_p, couleur_p)
+  Super\Init(nom_p, couleur_p)
   This\rayon = r
 EndMethod
 
@@ -130,7 +130,7 @@ EndMethod
 
 Method Cercle::Free()
   PrintN("[Cercle::Free] Destruction specifique cercle " + This\nom)
-  Super::Free()
+  Super\Free()
 EndMethod
 
 ; ============================================================================

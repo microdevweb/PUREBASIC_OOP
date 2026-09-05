@@ -5,7 +5,7 @@ Using UI::UI::Controls
 
 Class MainWindow Extends UI::Window{
   Public Method Init() {
-    Super::Init("Test UI",)
+    Super\Init("Test UI",)
   }
 
 }

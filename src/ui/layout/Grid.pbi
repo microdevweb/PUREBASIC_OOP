@@ -18,11 +18,11 @@ Namespace UI::Layouts {
     Protected List items.UI_GridItem()
 
     Public Method Init() {
-      Super::Init()
+      Super\Init()
     }
 
     Public Method Init(w_p.i, h_p.i) {
-      Super::Init(w_p, h_p)
+      Super\Init(w_p, h_p)
     }
 
     ; Parse definitions: "150", "Auto", "*", "2*"

@@ -55,7 +55,7 @@ Namespace UI {
 
     ; Constructeur 0: Vierge (pret pour LoadView)
     Public Method Init() {
-      Super::Init()
+      Super\Init()
       This\id = 0
       This\title = "Window"
       This\width = 800

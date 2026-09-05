@@ -13,7 +13,7 @@ Class MainWindow Extends UI::Window
   Private *main_layout.UI::Layouts::DockPanel
   Private *button_layout.UI::Layouts::StackPanel
   Public Method Init() 
-    Super::Init("Contact V1")
+    Super\Init("Contact V1")
     ; Instanciate buttons
     This\*bt_new = New UI::Button("add")
     ;This\*bt_new\SetSize(110,30)

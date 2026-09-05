@@ -94,7 +94,7 @@ Class MainWindow Extends UI::Window {
   Protected *comboTheme.UI::ComboBox
 
   Public Method Init() {
-    Super::Init("PureBasic OOP - Framework GUI Moderne", #PB_Ignore, #PB_Ignore, 480, 420, #PB_Window_SystemMenu | #PB_Window_ScreenCentered)
+    Super\Init("PureBasic OOP - Framework GUI Moderne", #PB_Ignore, #PB_Ignore, 480, 420, #PB_Window_SystemMenu | #PB_Window_ScreenCentered)
     UI::RegisterWindow(This\id, This)
 
     ; Titre

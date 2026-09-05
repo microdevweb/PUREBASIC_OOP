@@ -14,7 +14,7 @@ Namespace UI {
 
     ; Constructeur 0: Par defaut (date du jour, 0,0, 140x25)
     Public Method Init() {
-      Super::Init()
+      Super\Init()
       This\x = 0 : This\y = 0 : This\width = 140 : This\height = 25
       This\desiredWidth = 140 : This\desiredHeight = 25
       This\isVisible = #True : This\isEnabled = #True
@@ -27,7 +27,7 @@ Namespace UI {
 
     ; Constructeur 1: Masque personnalise
     Public Method Init(mask_p.s) {
-      Super::Init()
+      Super\Init()
       This\x = 0 : This\y = 0 : This\width = 140 : This\height = 25
       This\desiredWidth = 140 : This\desiredHeight = 25
       This\isVisible = #True : This\isEnabled = #True
@@ -40,7 +40,7 @@ Namespace UI {
 
     ; Constructeur 2: Date et Masque
     Public Method Init(dateVal_p.i, mask_p.s) {
-      Super::Init()
+      Super\Init()
       This\x = 0 : This\y = 0 : This\width = 140 : This\height = 25
       This\desiredWidth = 140 : This\desiredHeight = 25
       This\isVisible = #True : This\isEnabled = #True
@@ -53,7 +53,7 @@ Namespace UI {
 
     ; Constructeur 3: Date, Masque et dimensions
     Public Method Init(dateVal_p.i, mask_p.s, w_p.i, h_p.i) {
-      Super::Init()
+      Super\Init()
       This\x = 0 : This\y = 0 : This\width = w_p : This\height = h_p
       This\desiredWidth = w_p : This\desiredHeight = h_p
       This\isVisible = #True : This\isEnabled = #True
@@ -88,7 +88,7 @@ Namespace UI {
     Public Method Free() {
       If (This\id) {
         UI::UnregisterGadget(This\id)
-        Super::Free()
+        Super\Free()
       }
     }
   }

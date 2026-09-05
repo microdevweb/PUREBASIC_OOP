@@ -14,7 +14,7 @@ Namespace Demo::ViewModels {
     Protected taskCounter.i
 
     Public Method Init() {
-      Super::Init()
+      Super\Init()
       This\taskCounter = 0
       This\*tasksCollection = New UI::MVVM::ObservableCollection()
 
@@ -100,7 +100,7 @@ Namespace Demo::ViewModels {
       If This\*tasksCollection
         This\*tasksCollection\Free()
       EndIf
-      Super::Free()
+      Super\Free()
     }
   }
 

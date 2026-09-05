@@ -22,7 +22,7 @@ Namespace Demo::ViewModels {
     Public *TotalClicksText.UI::MVVM::StringProperty
 
     Public Method Init() {
-      Super::Init()
+      Super\Init()
 
       ; ----------------------------------------------------------------------
       ; Property Registration

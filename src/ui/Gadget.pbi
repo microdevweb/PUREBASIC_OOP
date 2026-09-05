@@ -13,7 +13,7 @@ Namespace UI {
     Protected fontID.i
 
     Public Method Init() {
-      Super::Init()
+      Super\Init()
     }
 
     Public Method.s GetText() {

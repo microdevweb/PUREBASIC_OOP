@@ -2254,7 +2254,7 @@ Procedure.s TranspileOOPFile(SourceFileName$, BaseDir$ = "")
       While Not Eof(f)
         Protected rawLine.s = ReadString(f)
         Protected l.s = Trim(UCase(rawLine))
-        If Left(l, 6) = "CLASS " Or Left(l, 7) = "METHOD " Or Left(l, 15) = "ABSTRACT CLASS " Or Left(l, 10) = "NAMESPACE " Or Left(l, 6) = "USING " Or FindString(l, "NEW ") > 0 Or FindString(l, "THIS\") > 0 Or FindString(l, "SUPER::") > 0 Or FindString(l, "XINCLUDEFILE") > 0 Or FindString(l, "INCLUDEFILE") > 0
+        If Left(l, 6) = "CLASS " Or Left(l, 7) = "METHOD " Or Left(l, 15) = "ABSTRACT CLASS " Or Left(l, 10) = "NAMESPACE " Or Left(l, 6) = "USING " Or FindString(l, "NEW ") > 0 Or FindString(l, "THIS\") > 0 Or FindString(l, "SUPER::") > 0 Or FindString(l, "SUPER\") > 0 Or FindString(l, "XINCLUDEFILE") > 0 Or FindString(l, "INCLUDEFILE") > 0
           isOOP = #True
           Break
         EndIf

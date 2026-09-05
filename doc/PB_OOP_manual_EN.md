@@ -72,7 +72,7 @@ Namespace App::Models {
     Protected height.d
 
     Public Method Init(name_p.s, color_p.s, w.d, h.d) {
-      Super::Init(name_p, color_p)
+      Super\Init(name_p, color_p)
       This\width = w
       This\height = h
     }
@@ -171,12 +171,52 @@ Layouts can be defined declaratively in XML files or directly in-memory as strin
 
 ---
 
-## 5. Modern MVVM Architectural Pattern
+## 5. The MVVM Architectural Pattern
+ 
+ The **MVVM (Model-View-ViewModel)** architectural pattern strictly decouples business domain logic from graphical UI rendering:
+ - **Model**: Domain data, structures, and business operations.
+ - **ViewModel**: State management, observable properties, and user commands. **Never references windows or gadgets directly**.
+ - **View**: Visual presentation layer binding to ViewModel properties via `{Binding ...}` syntax.
 
-The **MVVM (Model-View-ViewModel)** pattern provides clean separation of concerns and reactive data-binding:
-- **Model**: Business entities and data storage.
-- **ViewModel**: Manages state and logic. **Never references UI gadgets or windows directly**.
-- **View**: Visual presentation observing the ViewModel via `DataContext` and DataBinding expressions.
+### 5.0 Recommended Directory Layout & Include Strategy
+
+A clean, standard MVVM project structure is organized as follows:
+
+```text
+MyMVVMProject/
+│
+├── src/                          <-- PureBasic OOP Framework
+│   └── ui/
+│       └── UI.pbi               <-- SINGLE ENTRY POINT for UI & MVVM Framework
+│
+├── constants/
+│   └── AppConstants.pbi         <-- Shared Constants (Properties & Commands)
+│
+├── models/
+│   └── MyModel.pbi              <-- Data structures & domain logic
+│
+├── viewmodels/
+│   └── MyViewModel.pbo          <-- ViewModel class (.pbo) extending MVVM::ViewModelBase
+│
+├── views/
+│   └── MainView.xml             <-- Declarative XML View or Window class
+│
+└── main.pb                      <-- Main executable entry point
+```
+
+**Standard Include Order in `main.pb`:**
+```purebasic
+EnableExplicit
+
+; 1. First: Framework Engine (brings all UI, Layouts, MVVM & XMLLoader)
+IncludeFile "src/ui/UI.pbi"
+
+; 2. Second: Shared Property and Command Constants
+IncludeFile "constants/AppConstants.pbi"
+
+; 3. Third: ViewModel Classes
+IncludeFile "viewmodels/MyViewModel.pbo"
+```
 
 ### 5.1 Strongly-Typed Observable Properties (`src/ui/mvvm/Property.pbi`)
 
@@ -231,7 +271,7 @@ Namespace Demo {
     Public *Count.UI::MVVM::IntProperty
 
     Public Method Init() {
-      Super::Init()
+      Super\Init()
       This\*Message = This\BindString(#PROP_MESSAGE, "Click the button below")
       This\*Count   = This\BindInt(#PROP_COUNT, 0)
     }
@@ -266,7 +306,7 @@ Namespace Demo {
   Class SimpleView Extends UI::Window {
 
     Public Method Init(*vm.Demo::SimpleViewModel) {
-      Super::Init()
+      Super\Init()
 
       Protected xml.s
       xml + "<Window Title='MVVM Example' Width='450' Height='250'>"

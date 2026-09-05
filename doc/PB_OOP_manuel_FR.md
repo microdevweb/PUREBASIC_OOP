@@ -72,7 +72,7 @@ Namespace App::Models {
     Protected hauteur.d
 
     Public Method Init(nom_p.s, couleur_p.s, l.d, h.d) {
-      Super::Init(nom_p, couleur_p)
+      Super\Init(nom_p, couleur_p)
       This\largeur = l
       This\hauteur = h
     }
@@ -178,6 +178,46 @@ Le pattern **MVVM (Model-View-ViewModel)** separe rigoureusement la logique meti
 - **ViewModel** : Gere l'etat et les commandes. **Ne fait jamais reference aux fenetres ou gadgets directement**.
 - **View** : La presentation visuelle observant le ViewModel via son `DataContext` et les expressions `{Binding ...}`.
 
+### 5.0 Organisation des Dossiers & Stratégie des Includes
+
+Une structure standard recommandée pour tout projet PureBasic OOP / MVVM est la suivante :
+
+```text
+MonProjetMVVM/
+│
+├── src/                          <-- Framework PureBasic OOP
+│   └── ui/
+│       └── UI.pbi               <-- POINT D'ENTRÉE UNIQUE du Framework UI & MVVM
+│
+├── constants/
+│   └── AppConstants.pbi         <-- Constantes partagées (Propriétés & Commandes)
+│
+├── models/
+│   └── MonModel.pbi             <-- Données et logique métier pure
+│
+├── viewmodels/
+│   └── MonViewModel.pbo         <-- Classe ViewModel (.pbo) héritant de MVVM::ViewModelBase
+│
+├── views/
+│   └── MainView.xml             <-- Vue déclarative XML ou classe Window
+│
+└── main.pb                      <-- Point d'entrée exécutable
+```
+
+**Ordre obligatoire des Includes dans `main.pb` :**
+```purebasic
+EnableExplicit
+
+; 1. En premier : Le Framework UI & MVVM (embarque tout le moteur)
+IncludeFile "src/ui/UI.pbi"
+
+; 2. En second : Les constantes partagées de Bindings
+IncludeFile "constants/AppConstants.pbi"
+
+; 3. En troisième : Les ViewModels
+IncludeFile "viewmodels/MonViewModel.pbo"
+```
+
 ### 5.1 Proprietes Observables Fortement Typees (`src/ui/mvvm/Property.pbi`)
 
 | Classe de Propriete | Methodes | Notification |
@@ -231,7 +271,7 @@ Namespace Demo {
     Public *Count.UI::MVVM::IntProperty
 
     Public Method Init() {
-      Super::Init()
+      Super\Init()
       This\*Message = This\BindString(#PROP_MESSAGE, "Cliquez sur le bouton")
       This\*Count   = This\BindInt(#PROP_COUNT, 0)
     }
@@ -266,7 +306,7 @@ Namespace Demo {
   Class SimpleView Extends UI::Window {
 
     Public Method Init(*vm.Demo::SimpleViewModel) {
-      Super::Init()
+      Super\Init()
 
       Protected xml.s
       xml + "<Window Title='Exemple MVVM' Width='450' Height='250'>"

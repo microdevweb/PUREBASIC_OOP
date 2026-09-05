@@ -1,5 +1,5 @@
 ﻿; ============================================================================
-; Test PureBasic OOP : Heritage, Polymorphisme & Super::
+; Test PureBasic OOP : Heritage, Polymorphisme & Super\
 ; Fichier source : test_polymorphisme.pb
 ; ============================================================================
 
@@ -47,12 +47,12 @@ Class Chien Extends Animal
 EndClass
 
 Method Chien::Init(nom_p.s, age_p.i, race_p.s)
-  Super::Init(nom_p, age_p)
+  Super\Init(nom_p, age_p)
   This\race = race_p
 EndMethod
 
 Method Chien::Crier()
-  Super::Crier()
+  Super\Crier()
   PrintN("   ==> CHIEN (" + This\race + ") : Wouaf ! Wouaf ! Grrr !")
 EndMethod
 
@@ -62,7 +62,7 @@ EndMethod
 
 Method Chien::Free()
   PrintN("[Chien::Free] Liberation specifique du chien " + This\nom)
-  Super::Free()
+  Super\Free()
 EndMethod
 
 ; ----------------------------------------------------------------------------
@@ -78,12 +78,12 @@ Class Chat Extends Animal
 EndClass
 
 Method Chat::Init(nom_p.s, age_p.i, nbVies_p.i)
-  Super::Init(nom_p, age_p)
+  Super\Init(nom_p, age_p)
   This\nbVies = nbVies_p
 EndMethod
 
 Method Chat::Crier()
-  Super::Crier()
+  Super\Crier()
   PrintN("   ==> CHAT (Vies restantes: " + Str(This\nbVies) + ") : Miaouuuu...")
 EndMethod
 
@@ -93,7 +93,7 @@ EndMethod
 
 Method Chat::Free()
   PrintN("[Chat::Free] Liberation specifique du chat " + This\nom)
-  Super::Free()
+  Super\Free()
 EndMethod
 
 ; ============================================================================

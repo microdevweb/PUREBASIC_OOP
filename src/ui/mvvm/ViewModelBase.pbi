@@ -13,7 +13,7 @@ Namespace UI::MVVM {
     Protected Map *commands.UI::MVVM::RelayCommand()
 
     Public Method Init() {
-      Super::Init()
+      Super\Init()
     }
 
     Public Method Free() {
@@ -23,7 +23,7 @@ Namespace UI::MVVM {
         EndIf
       Next
       ClearMap(This\*commands())
-      Super::Free()
+      Super\Free()
     }
 
     ; ------------------------------------------------------------------------
@@ -76,6 +76,23 @@ Namespace UI::MVVM {
     Public Method.i BindDouble(name_p.s, initialVal.d = 0.0) {
       Protected *p.UI::MVVM::DoubleProperty = New UI::MVVM::DoubleProperty(This, name_p, initialVal)
       ProcedureReturn *p
+    }
+
+    ; Aliases for convenience & compatibility
+    Public Method.i RegisterString(name_p.s, initialVal.s = "") {
+      ProcedureReturn This\BindString(name_p, initialVal)
+    }
+
+    Public Method.i RegisterInt(name_p.s, initialVal.i = 0) {
+      ProcedureReturn This\BindInt(name_p, initialVal)
+    }
+
+    Public Method.i RegisterBool(name_p.s, initialVal.b = #False) {
+      ProcedureReturn This\BindBool(name_p, initialVal)
+    }
+
+    Public Method.i RegisterDouble(name_p.s, initialVal.d = 0.0) {
+      ProcedureReturn This\BindDouble(name_p, initialVal)
     }
 
     Public Method.b OnCommand(name_p.s, *param = 0) {

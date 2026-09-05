@@ -1484,9 +1484,13 @@ Procedure.s OOP_ResolveMethodPrototype(CallerExpr$, Line)
   Protected pNs2$, pClsName2$, pCol2.i
   NewMap visited.i()
   
-  ; Case 1: Super::Method
+  ; Case 1: Super::Method or Super\Method
   If Left(upperExpr$, 7) = "SUPER::"
     methodName$ = Mid(CallerExpr$, 8)
+  ElseIf Left(upperExpr$, 6) = "SUPER\"
+    methodName$ = Mid(CallerExpr$, 7)
+  EndIf
+  If methodName$ <> ""
     ; Find enclosing class and its parent
     encClass$ = AutoComplete_FindEnclosingClass(Line)
     If encClass$ <> ""

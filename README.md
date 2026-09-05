@@ -42,6 +42,9 @@ Comprehensive guides and manuals are available in the `doc/` folder:
 ## Quick Example: Minimal Reactive MVVM Application
 
 ```purebasic
+; 0. Include Framework / MVVM Subsystem
+XIncludeFile "src/ui/UI.pbi"
+
 ; 1. Shared Contract Constants
 #PROP_MSG = "Msg"
 #CMD_BTN  = "BtnCmd"
@@ -52,7 +55,7 @@ Class CounterViewModel Extends UI::MVVM::ViewModelBase {
   Public *Count.UI::MVVM::IntProperty
 
   Public Method Init() {
-    Super::Init()
+    Super\Init()
     This\*Msg   = This\BindString(#PROP_MSG, "Click count: 0")
     This\*Count = This\BindInt("Count", 0)
   }
@@ -70,7 +73,7 @@ Class CounterViewModel Extends UI::MVVM::ViewModelBase {
 ; 3. View (Inline XML)
 Class CounterView Extends UI::Window {
   Public Method Init(*vm.CounterViewModel) {
-    Super::Init()
+    Super\Init()
     Protected xml.s
     xml + "<Window Title='MVVM Demo' Width='400' Height='200'>"
     xml + "  <StackPanel Orientation='Vertical' Margin='20' Spacing='10'>"

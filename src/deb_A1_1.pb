@@ -6,7 +6,7 @@ Using UI::Controls
 
 Class MainWindow Extends UI::Window
   Public Method Init() 
-    Super::Init("Test",#PB_Ignore, #PB_Ignore, 480, 420, #PB_Window_SystemMenu | #PB_Window_ScreenCentered)
+    Super\Init("Test",#PB_Ignore, #PB_Ignore, 480, 420, #PB_Window_SystemMenu | #PB_Window_ScreenCentered)
   EndMethod 
   Public Method.b OnClose()
     ProcedureReturn #True

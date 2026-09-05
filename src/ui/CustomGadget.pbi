@@ -17,7 +17,7 @@ Namespace UI {
 
     ; Constructeur 1: Par défaut (Positionné par Layout 0,0, 100x30)
     Public Method Init() {
-      Super::Init()
+      Super\Init()
       This\x = 0 : This\y = 0 : This\width = 100 : This\height = 30
       This\desiredWidth = 100 : This\desiredHeight = 30
       This\isVisible = #True : This\isEnabled = #True
@@ -31,7 +31,7 @@ Namespace UI {
 
     ; Constructeur 2: Dimensions personnalisées
     Public Method Init(w_p.i, h_p.i) {
-      Super::Init()
+      Super\Init()
       This\x = 0 : This\y = 0 : This\width = w_p : This\height = h_p
       This\desiredWidth = w_p : This\desiredHeight = h_p
       This\isVisible = #True : This\isEnabled = #True
@@ -45,7 +45,7 @@ Namespace UI {
 
     ; Constructeur 3: Position et dimensions
     Public Method Init(x_p.i, y_p.i, w_p.i, h_p.i) {
-      Super::Init()
+      Super\Init()
       This\x = x_p : This\y = y_p : This\width = w_p : This\height = h_p
       This\desiredWidth = w_p : This\desiredHeight = h_p
       This\isVisible = #True : This\isEnabled = #True
@@ -59,7 +59,7 @@ Namespace UI {
 
     ; Constructeur 4: Complet avec flags
     Public Method Init(x_p.i, y_p.i, w_p.i, h_p.i, flags_p.i) {
-      Super::Init()
+      Super\Init()
       This\x = x_p : This\y = y_p : This\width = w_p : This\height = h_p
       This\desiredWidth = w_p : This\desiredHeight = h_p
       This\isVisible = #True : This\isEnabled = #True
@@ -146,7 +146,7 @@ Namespace UI {
     Public Method Free() {
       If (This\id) {
         UI::UnregisterGadget(This\id)
-        Super::Free()
+        Super\Free()
       }
     }
   }

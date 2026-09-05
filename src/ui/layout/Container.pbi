@@ -17,7 +17,7 @@ Namespace UI::Layouts {
 
     ; Constructeur 1: Par défaut
     Public Method Init() {
-      Super::Init()
+      Super\Init()
       This\paddingLeft = 0
       This\paddingTop = 0
       This\paddingRight = 0
@@ -28,7 +28,7 @@ Namespace UI::Layouts {
 
     ; Constructeur 2: Dimensions
     Public Method Init(w_p.i, h_p.i) {
-      Super::Init()
+      Super\Init()
       This\width = w_p : This\height = h_p
       This\desiredWidth = w_p : This\desiredHeight = h_p
       This\paddingLeft = 0
@@ -41,7 +41,7 @@ Namespace UI::Layouts {
 
     ; Constructeur 3: Position et dimensions
     Public Method Init(x_p.i, y_p.i, w_p.i, h_p.i) {
-      Super::Init()
+      Super\Init()
       This\x = x_p : This\y = y_p : This\width = w_p : This\height = h_p
       This\desiredWidth = w_p : This\desiredHeight = h_p
       This\paddingLeft = 0
@@ -114,17 +114,17 @@ Namespace UI::Layouts {
     }
 
     Public Method SetWidth(nw.i) {
-      Super::SetWidth(nw)
+      Super\SetWidth(nw)
       This\UpdateLayout()
     }
 
     Public Method SetHeight(nh.i) {
-      Super::SetHeight(nh)
+      Super\SetHeight(nh)
       This\UpdateLayout()
     }
 
     Public Method SetSize(nw.i, nh.i) {
-      Super::SetSize(nw, nh)
+      Super\SetSize(nw, nh)
       This\UpdateLayout()
     }
 

@@ -13,25 +13,25 @@ Namespace UI::Layouts {
     Protected spacing.i
 
     Public Method Init() {
-      Super::Init()
+      Super\Init()
       This\orientation = #UI_Orientation_Vertical
       This\spacing = 5
     }
 
     Public Method Init(orient.i) {
-      Super::Init()
+      Super\Init()
       This\orientation = orient
       This\spacing = 5
     }
 
     Public Method Init(orient.i, sp.i) {
-      Super::Init()
+      Super\Init()
       This\orientation = orient
       This\spacing = sp
     }
 
     Public Method Init(orient.i, sp.i, w_p.i, h_p.i) {
-      Super::Init(w_p, h_p)
+      Super\Init(w_p, h_p)
       This\orientation = orient
       This\spacing = sp
     }

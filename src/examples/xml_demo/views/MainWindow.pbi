@@ -22,7 +22,7 @@ Namespace Demo {
     Protected itemCount.i
 
     Public Method Init() {
-      Super::Init()
+      Super\Init()
       This\itemCount = 0
 
       ; 1. Charge la vue declarative XML avec resolution de chemin multi-niveaux

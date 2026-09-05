@@ -14,7 +14,7 @@ Namespace UI {
 
     ; Constructeur 0: Texte par defaut (0,0, 120x24)
     Public Method Init(text_p.s) {
-      Super::Init()
+      Super\Init()
       This\x = 0 : This\y = 0 : This\width = 120 : This\height = 24
       This\desiredWidth = 120 : This\desiredHeight = 24
       This\isVisible = #True : This\isEnabled = #True
@@ -27,7 +27,7 @@ Namespace UI {
 
     ; Constructeur 1: Texte et etat coche
     Public Method Init(text_p.s, checked_p.b) {
-      Super::Init()
+      Super\Init()
       This\x = 0 : This\y = 0 : This\width = 120 : This\height = 24
       This\desiredWidth = 120 : This\desiredHeight = 24
       This\isVisible = #True : This\isEnabled = #True
@@ -41,7 +41,7 @@ Namespace UI {
 
     ; Constructeur 2: Texte, dimensions et etat
     Public Method Init(text_p.s, w_p.i, h_p.i, checked_p.b = #False) {
-      Super::Init()
+      Super\Init()
       This\x = 0 : This\y = 0 : This\width = w_p : This\height = h_p
       This\desiredWidth = w_p : This\desiredHeight = h_p
       This\isVisible = #True : This\isEnabled = #True
@@ -55,7 +55,7 @@ Namespace UI {
 
     ; Constructeur 3: Complet (x, y, w, h, texte, etat)
     Public Method Init(x_p.i, y_p.i, w_p.i, h_p.i, text_p.s, checked_p.b = #False) {
-      Super::Init()
+      Super\Init()
       This\x = x_p : This\y = y_p : This\width = w_p : This\height = h_p
       This\desiredWidth = w_p : This\desiredHeight = h_p
       This\isVisible = #True : This\isEnabled = #True
@@ -91,7 +91,7 @@ Namespace UI {
     Public Method Free() {
       If (This\id) {
         UI::UnregisterGadget(This\id)
-        Super::Free()
+        Super\Free()
       }
     }
   }

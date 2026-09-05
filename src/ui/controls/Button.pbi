@@ -13,7 +13,7 @@ Namespace UI {
 
     ; Constructeur 1: Texte seul (Positionné par Layout 0,0, 120x30)
     Public Method Init(text_p.s) {
-      Super::Init()
+      Super\Init()
       This\x = 0 : This\y = 0 : This\width = 120 : This\height = 30
       This\desiredWidth = 120 : This\desiredHeight = 30
       This\isVisible = #True : This\isEnabled = #True
@@ -25,7 +25,7 @@ Namespace UI {
 
     ; Constructeur 2: Texte et dimensions
     Public Method Init(text_p.s, w_p.i, h_p.i) {
-      Super::Init()
+      Super\Init()
       This\x = 0 : This\y = 0 : This\width = w_p : This\height = h_p
       This\desiredWidth = w_p : This\desiredHeight = h_p
       This\isVisible = #True : This\isEnabled = #True
@@ -37,7 +37,7 @@ Namespace UI {
 
     ; Constructeur 3: Position, dimensions et texte
     Public Method Init(x_p.i, y_p.i, w_p.i, h_p.i, text_p.s) {
-      Super::Init()
+      Super\Init()
       This\x = x_p : This\y = y_p : This\width = w_p : This\height = h_p
       This\desiredWidth = w_p : This\desiredHeight = h_p
       This\isVisible = #True : This\isEnabled = #True
@@ -49,7 +49,7 @@ Namespace UI {
 
     ; Constructeur 4: Complet
     Public Method Init(x_p.i, y_p.i, w_p.i, h_p.i, text_p.s, flags_p.i) {
-      Super::Init()
+      Super\Init()
       This\x = x_p : This\y = y_p : This\width = w_p : This\height = h_p
       This\desiredWidth = w_p : This\desiredHeight = h_p
       This\isVisible = #True : This\isEnabled = #True
@@ -62,7 +62,7 @@ Namespace UI {
     Public Method Free() {
       If (This\id) {
         UI::UnregisterGadget(This\id)
-        Super::Free()
+        Super\Free()
       }
     }
   }

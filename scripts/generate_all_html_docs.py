@@ -1960,6 +1960,39 @@ save_page("fr", "ui/mvvm.html", "Architecture MVVM & DataBinding", "Pattern Mode
 </div>
 
 <div class='doc-section'>
+  <h2 class='section-title'>Organisation des Dossiers & Stratégie des Includes</h2>
+  <p>Une arborescence de projet standardisée et claire pour vos applications MVVM :</p>
+  <div class='code-container'>
+    <div class='code-header'><span class='code-title'>Structure recommandée</span><span class='code-badge'>Arborescence</span></div>
+    <pre><code>MonProjetMVVM/
+├── src/
+│   └── ui/
+│       └── UI.pbi               ; POINT D'ENTRÉE UNIQUE (Core + UI + MVVM + XMLLoader)
+├── constants/
+│   └── AppConstants.pbi         ; Identifiants partagés (#PROP_..., #CMD_...)
+├── models/
+│   └── TaskModel.pbi            ; Données et structures pures
+├── viewmodels/
+│   └── TaskViewModel.pbo        ; Classe ViewModel héritant de MVVM::ViewModelBase
+├── views/
+│   └── MainView.xml             ; Définition déclarative XML de la vue
+└── main.pb                      ; Point d'entrée principal de l'exécutable</code></pre>
+  </div>
+  <p><strong>Ordre standard d'inclusion dans votre <code>main.pb</code> :</strong></p>
+  <div class='code-container'>
+    <pre><code><span class='kw'>EnableExplicit</span>
+<span class='comment'>; 1. Le Framework UI & MVVM (ou XIncludeFile "src/ui/mvvm/MVVM.pbi" pour MVVM seul)</span>
+<span class='kw'>XIncludeFile</span> <span class='str'>"src/ui/UI.pbi"</span>
+<span class='comment'>; 2. Constantes partagées</span>
+<span class='kw'>XIncludeFile</span> <span class='str'>"constants/AppConstants.pbi"</span>
+<span class='comment'>; 3. Modèles de données (si existants)</span>
+<span class='comment'>; XIncludeFile "models/TaskModel.pbi"</span>
+<span class='comment'>; 4. ViewModels transpilés</span>
+<span class='kw'>XIncludeFile</span> <span class='str'>"viewmodels/TaskViewModel.pbo"</span></code></pre>
+  </div>
+</div>
+
+<div class='doc-section'>
   <h2 class='section-title'>Classes de Propriétés Typées</h2>
   <div class='table-wrapper'>
     <table>
@@ -1976,22 +2009,25 @@ save_page("fr", "ui/mvvm.html", "Architecture MVVM & DataBinding", "Pattern Mode
   <h2 class='section-title'>Exemple Complet en 4 Fichiers</h2>
   
   <div class='code-container'>
-    <div class='code-header'><span class='code-title'>1. Constantes Partagées (AppConstants.pbi)</span><span class='code-badge'>PBI</span></div>
+    <div class='code-header'><span class='code-title'>1. Constantes Partagées (constants/AppConstants.pbi)</span><span class='code-badge'>PBI</span></div>
     <pre><code>#PROP_CLICK_MESSAGE = "ClickMessage"
 #PROP_CLICK_COUNT   = "ClickCount"
 #CMD_INCREMENT      = "IncrementCommand"</code></pre>
   </div>
 
   <div class='code-container'>
-    <div class='code-header'><span class='code-title'>2. Le ViewModel (MainViewModel.pbo)</span><span class='code-badge'>PBO</span></div>
-    <pre><code>Class MainViewModel Extends MVVM::ViewModelBase {
+    <div class='code-header'><span class='code-title'>2. Le ViewModel (viewmodels/MainViewModel.pbo)</span><span class='code-badge'>PBO</span></div>
+    <pre><code>XIncludeFile "../src/ui/UI.pbi" ; ou XIncludeFile "../src/ui/mvvm/MVVM.pbi"
+XIncludeFile "../constants/AppConstants.pbi"
+
+Class MainViewModel Extends MVVM::ViewModelBase {
   Public *ClickMessage.MVVM::StringProperty
   Public *ClickCount.MVVM::IntProperty
   
   Public Method Init() {
-    Super::Init()
-    This\\*ClickMessage = This\\RegisterString(#PROP_CLICK_MESSAGE, "Bienvenue !")
-    This\\*ClickCount   = This\\RegisterInt(#PROP_CLICK_COUNT, 0)
+    Super\\Init()
+    This\\*ClickMessage = This\\BindString(#PROP_CLICK_MESSAGE, "Bienvenue !")
+    This\\*ClickCount   = This\\BindInt(#PROP_CLICK_COUNT, 0)
   }
   
   Public Method OnCommand(cmdName.s) {
@@ -2005,7 +2041,7 @@ save_page("fr", "ui/mvvm.html", "Architecture MVVM & DataBinding", "Pattern Mode
   </div>
 
   <div class='code-container'>
-    <div class='code-header'><span class='code-title'>3. La Vue Déclarative (MainView.xml)</span><span class='code-badge'>XML</span></div>
+    <div class='code-header'><span class='code-title'>3. La Vue Déclarative (views/MainView.xml)</span><span class='code-badge'>XML</span></div>
     <pre><code>&lt;Window Title="Démo MVVM" Width="420" Height="220"&gt;
   &lt;StackPanel Margin="20" Spacing="12"&gt;
     &lt;Label Text="{Binding ClickMessage}" /&gt;
@@ -2017,9 +2053,9 @@ save_page("fr", "ui/mvvm.html", "Architecture MVVM & DataBinding", "Pattern Mode
 
   <div class='code-container'>
     <div class='code-header'><span class='code-title'>4. Le Point d'Entrée (main.pb)</span><span class='code-badge'>PB</span></div>
-    <pre><code>IncludeFile "src/ui/UI.pbi"
-IncludeFile "AppConstants.pbi"
-IncludeFile "MainViewModel.pbo"
+    <pre><code>XIncludeFile "src/ui/UI.pbi"
+XIncludeFile "constants/AppConstants.pbi"
+XIncludeFile "viewmodels/MainViewModel.pbo"
 
 Protected *app.UI::Application = NewObject(UI::Application)
 Protected *vm.MainViewModel    = NewObject(MainViewModel)
@@ -2044,6 +2080,41 @@ save_page("en", "ui/mvvm.html", "MVVM Architecture & DataBinding", "Complete Mod
 </div>
 
 <div class='doc-section'>
+  <h2 class='section-title'>Directory Organization & Include Strategy</h2>
+  <p>Standardized, decoupled project tree structure for your MVVM applications:</p>
+  <div class='code-container'>
+    <div class='code-header'><span class='code-title'>Recommended Layout</span><span class='code-badge'>Project Tree</span></div>
+    <pre><code>MyMVVMProject/
+├── src/
+│   └── ui/
+│       ├── UI.pbi               ; MASTER ENTRY POINT (Core + UI + MVVM + XMLLoader)
+│       └── mvvm/
+│           └── MVVM.pbi         ; Standalone MVVM Subsystem Entry Point
+├── constants/
+│   └── AppConstants.pbi         ; Shared Property & Command Identifiers
+├── models/
+│   └── TaskModel.pbi            ; Data entities & pure domain logic
+├── viewmodels/
+│   └── TaskViewModel.pbo        ; ViewModel class inheriting MVVM::ViewModelBase
+├── views/
+│   └── MainView.xml             ; Declarative XML View
+└── main.pb                      ; Main executable entry point</code></pre>
+  </div>
+  <p><strong>Standard Include Order in your <code>main.pb</code>:</strong></p>
+  <div class='code-container'>
+    <pre><code><span class='kw'>EnableExplicit</span>
+<span class='comment'>; 1. Framework UI & MVVM Engine (or XIncludeFile "src/ui/mvvm/MVVM.pbi" for MVVM only)</span>
+<span class='kw'>XIncludeFile</span> <span class='str'>"src/ui/UI.pbi"</span>
+<span class='comment'>; 2. Shared Constants</span>
+<span class='kw'>XIncludeFile</span> <span class='str'>"constants/AppConstants.pbi"</span>
+<span class='comment'>; 3. Data Models (if any)</span>
+<span class='comment'>; XIncludeFile "models/TaskModel.pbi"</span>
+<span class='comment'>; 4. Transpiled ViewModels</span>
+<span class='kw'>XIncludeFile</span> <span class='str'>"viewmodels/TaskViewModel.pbo"</span></code></pre>
+  </div>
+</div>
+
+<div class='doc-section'>
   <h2 class='section-title'>Typed Observable Property Classes</h2>
   <div class='table-wrapper'>
     <table>
@@ -2060,23 +2131,36 @@ save_page("en", "ui/mvvm.html", "MVVM Architecture & DataBinding", "Complete Mod
   <h2 class='section-title'>Complete 4-File Quick Start Tutorial</h2>
   
   <div class='code-container'>
-    <div class='code-header'><span class='code-title'>1. Shared Constants (AppConstants.pbi)</span><span class='code-badge'>PBI</span></div>
+    <div class='code-header'><span class='code-title'>1. Shared Constants (constants/AppConstants.pbi)</span><span class='code-badge'>PBI</span></div>
     <pre><code>#PROP_CLICK_MESSAGE = "ClickMessage"
 #PROP_CLICK_COUNT   = "ClickCount"
 #CMD_INCREMENT      = "IncrementCommand"</code></pre>
   </div>
 
   <div class='code-container'>
-    <div class='code-header'><span class='code-title'>2. The ViewModel (MainViewModel.pbo)</span><span class='code-badge'>PBO</span></div>
-    <pre><code>Class MainViewModel Extends MVVM::ViewModelBase {
+    <div class='code-header'><span class='code-title'>2. The ViewModel (viewmodels/MainViewModel.pbo)</span><span class='code-badge'>PBO</span></div>
+    <pre><code>XIncludeFile "../src/ui/UI.pbi" ; or XIncludeFile "../src/ui/mvvm/MVVM.pbi"
+XIncludeFile "../constants/AppConstants.pbi"
+
+Class MainViewModel Extends MVVM::ViewModelBase {
   Public *ClickMessage.MVVM::StringProperty
   Public *ClickCount.MVVM::IntProperty
   
   Public Method Init() {
-    Super::Init()
-    This\\*ClickMessage = This\\RegisterString(#PROP_CLICK_MESSAGE, "Welcome!")
-    This\\*ClickCount   = This\\RegisterInt(#PROP_CLICK_COUNT, 0)
+    Super\\Init()
+    This\\*ClickMessage = This\\BindString(#PROP_CLICK_MESSAGE, "Welcome!")
+    This\\*ClickCount   = This\\BindInt(#PROP_CLICK_COUNT, 0)
   }
+  
+  Public Method OnCommand(cmdName.s) {
+    If cmdName = #CMD_INCREMENT
+      Protected count.i = This\\*ClickCount\\GetValue() + 1
+      This\\*ClickCount\\SetValue(count)
+      This\\*ClickMessage\\SetValue("Click #" + Str(count) + " recorded!")
+    EndIf
+  }
+}</code></pre>
+  </div>
   
   Public Method OnCommand(cmdName.s) {
     If cmdName = #CMD_INCREMENT
@@ -2089,7 +2173,7 @@ save_page("en", "ui/mvvm.html", "MVVM Architecture & DataBinding", "Complete Mod
   </div>
 
   <div class='code-container'>
-    <div class='code-header'><span class='code-title'>3. The Declarative View (MainView.xml)</span><span class='code-badge'>XML</span></div>
+    <div class='code-header'><span class='code-title'>3. The Declarative View (views/MainView.xml)</span><span class='code-badge'>XML</span></div>
     <pre><code>&lt;Window Title="MVVM Demo" Width="420" Height="220"&gt;
   &lt;StackPanel Margin="20" Spacing="12"&gt;
     &lt;Label Text="{Binding ClickMessage}" /&gt;
@@ -2101,9 +2185,9 @@ save_page("en", "ui/mvvm.html", "MVVM Architecture & DataBinding", "Complete Mod
 
   <div class='code-container'>
     <div class='code-header'><span class='code-title'>4. Main Entry Point (main.pb)</span><span class='code-badge'>PB</span></div>
-    <pre><code>IncludeFile "src/ui/UI.pbi"
-IncludeFile "AppConstants.pbi"
-IncludeFile "MainViewModel.pbo"
+    <pre><code>XIncludeFile "src/ui/UI.pbi"
+XIncludeFile "constants/AppConstants.pbi"
+XIncludeFile "viewmodels/MainViewModel.pbo"
 
 Protected *app.UI::Application = NewObject(UI::Application)
 Protected *vm.MainViewModel    = NewObject(MainViewModel)
@@ -2272,7 +2356,7 @@ save_page("fr", "keywords/inheritance.html", "Mots-clés Extends & Super", "Hér
   <div class='code-container'>
     <pre><code><span class='kw'>Class</span> Button <span class='kw'>Extends</span> UI::Gadget {
   <span class='kw'>Public Method</span> Init(text.s) {
-    <span class='kw'>Super</span>::Init()
+    <span class='kw'>Super</span>\\Init()
     <span class='kw'>This</span>\\SetText(text)
   }
 }</code></pre>
@@ -2280,7 +2364,7 @@ save_page("fr", "keywords/inheritance.html", "Mots-clés Extends & Super", "Hér
 </div>
 <div class='doc-section'>
   <h2 class='section-title'>Accès Parent avec Super</h2>
-  <p><code>Super::NomDeMethode()</code> appelle l'implémentation de la classe parente directe.</p>
+  <p><code>Super\\NomDeMethode()</code> appelle l'implémentation de la classe parente directe.</p>
 </div>
 """, "inheritance")
 
@@ -2291,7 +2375,7 @@ save_page("en", "keywords/inheritance.html", "Extends & Super Keywords", "Class 
   <div class='code-container'>
     <pre><code><span class='kw'>Class</span> Button <span class='kw'>Extends</span> UI::Gadget {
   <span class='kw'>Public Method</span> Init(text.s) {
-    <span class='kw'>Super</span>::Init()
+    <span class='kw'>Super</span>\\Init()
     <span class='kw'>This</span>\\SetText(text)
   }
 }</code></pre>
@@ -2299,7 +2383,7 @@ save_page("en", "keywords/inheritance.html", "Extends & Super Keywords", "Class 
 </div>
 <div class='doc-section'>
   <h2 class='section-title'>Parent Invocation with Super</h2>
-  <p><code>Super::MethodName()</code> delegates call to the immediate base class implementation.</p>
+  <p><code>Super\\MethodName()</code> delegates call to the immediate base class implementation.</p>
 </div>
 """, "inheritance")
 

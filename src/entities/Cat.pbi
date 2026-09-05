@@ -9,7 +9,7 @@ Class Cat Extends Animal
   Protected couleur.s
   
   Public Method Init(nom_p.s, age_p.i, couleur_p.s)
-    Super::Init(nom_p, age_p)
+    Super\Init(nom_p, age_p)
     This\couleur = couleur_p
   EndMethod
   

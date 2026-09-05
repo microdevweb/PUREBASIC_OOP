@@ -12,7 +12,7 @@ Namespace Demo::Views {
     Protected *viewModel.Demo::ViewModels::TaskViewModel
 
     Public Method Init(*vm.Demo::ViewModels::TaskViewModel) {
-      Super::Init()
+      Super\Init()
       This\*viewModel = *vm
 
       ; 1. Resout le chemin du fichier XML

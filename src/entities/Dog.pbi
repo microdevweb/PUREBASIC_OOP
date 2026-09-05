@@ -9,7 +9,7 @@ Class Dog Extends Animal
   Protected race.s
   
   Public Method Init(nom_p.s, age_p.i, race_p.s)
-    Super::Init(nom_p, age_p)
+    Super\Init(nom_p, age_p)
     This\race = race_p
   EndMethod
   
