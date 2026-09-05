@@ -230,6 +230,11 @@ Interface UI_MVVM_ObservableObject_vt
   RegisterObserver(*observer, *cb)
   UnregisterObserver(*observer)
   NotifyPropertyChanged(propName.s)
+  Get.s(propName.s)
+  Set_s_s.b(propName.s, val.s)
+  Set_s_i.b(propName.s, val.i)
+  Set_s_b.b(propName.s, val.b)
+  Set_s_d.b(propName.s, val.d)
   GetString.s(propName.s)
   SetString.b(propName.s, val.s)
   GetInt.i(propName.s)
@@ -252,6 +257,7 @@ Interface UI_MVVM_ViewModelBase_vt Extends UI_MVVM_ObservableObject_vt
   RegisterCommand(name_p.s, *cmd.UI_MVVM_RelayCommand_vt)
   GetCommand.i(name_p.s)
   ExecuteCommand.b(name_p.s, *param)
+  OnCommand.b(name_p.s, *param)
 EndInterface
 
 Interface UI_MVVM_ObservableCollection_vt Extends UI_MVVM_ObservableObject_vt
@@ -378,9 +384,7 @@ Interface UI_XMLLoader_vt
 EndInterface
 
 Interface Demo_ViewModels_SimpleViewModel_vt Extends UI_MVVM_ViewModelBase_vt
-  OnClickButton(btnIndex.i)
   OnHoverButton(btnIndex.i)
-  OnReset()
 EndInterface
 
 Interface Demo_Views_SimpleView_vt Extends UI_Window_vt
@@ -561,11 +565,6 @@ Declare UI_MVVM_RegisterCommandBinding(*control.UI_Gadget_vt, *viewModel.UI_MVVM
 Declare UI_MVVM_RegisterCollectionBinding(*control.UI_Gadget_vt, *collection.UI_MVVM_ObservableCollection_vt)
 Declare.b UI_MVVM_DispatchUIEvent(*control.UI_Gadget_vt, eventType.i)
 Declare UI_MVVM_UnregisterAll(*targetObj)
-Declare SimpleVM_OnClickBtn1(*param)
-Declare SimpleVM_OnClickBtn2(*param)
-Declare SimpleVM_OnClickBtn3(*param)
-Declare SimpleVM_OnReset(*param)
-Global *CurrentSimpleViewModel = 0
 
 ; ----------------------------------------------------------------------------
 ; 3. METHOD PROCEDURES IMPLEMENTATION
@@ -712,6 +711,11 @@ Declare UI_MVVM_ObservableObject_Free(*This.UI_MVVM_ObservableObject_Inst)
 Declare UI_MVVM_ObservableObject_RegisterObserver(*This.UI_MVVM_ObservableObject_Inst, *observer, *cb)
 Declare UI_MVVM_ObservableObject_UnregisterObserver(*This.UI_MVVM_ObservableObject_Inst, *observer)
 Declare UI_MVVM_ObservableObject_NotifyPropertyChanged(*This.UI_MVVM_ObservableObject_Inst, propName.s)
+Declare.s UI_MVVM_ObservableObject_Get(*This.UI_MVVM_ObservableObject_Inst, propName.s)
+Declare.b UI_MVVM_ObservableObject_Set_s_s(*This.UI_MVVM_ObservableObject_Inst, propName.s, val.s)
+Declare.b UI_MVVM_ObservableObject_Set_s_i(*This.UI_MVVM_ObservableObject_Inst, propName.s, val.i)
+Declare.b UI_MVVM_ObservableObject_Set_s_b(*This.UI_MVVM_ObservableObject_Inst, propName.s, val.b)
+Declare.b UI_MVVM_ObservableObject_Set_s_d(*This.UI_MVVM_ObservableObject_Inst, propName.s, val.d)
 Declare.s UI_MVVM_ObservableObject_GetString(*This.UI_MVVM_ObservableObject_Inst, propName.s)
 Declare.b UI_MVVM_ObservableObject_SetString(*This.UI_MVVM_ObservableObject_Inst, propName.s, val.s)
 Declare.i UI_MVVM_ObservableObject_GetInt(*This.UI_MVVM_ObservableObject_Inst, propName.s)
@@ -732,6 +736,7 @@ Declare UI_MVVM_ViewModelBase_Free(*This.UI_MVVM_ViewModelBase_Inst)
 Declare UI_MVVM_ViewModelBase_RegisterCommand(*This.UI_MVVM_ViewModelBase_Inst, name_p.s, *cmd.UI_MVVM_RelayCommand_vt)
 Declare.i UI_MVVM_ViewModelBase_GetCommand(*This.UI_MVVM_ViewModelBase_Inst, name_p.s)
 Declare.b UI_MVVM_ViewModelBase_ExecuteCommand(*This.UI_MVVM_ViewModelBase_Inst, name_p.s, *param)
+Declare.b UI_MVVM_ViewModelBase_OnCommand(*This.UI_MVVM_ViewModelBase_Inst, name_p.s, *param)
 Declare UI_MVVM_ObservableCollection_Init(*This.UI_MVVM_ObservableCollection_Inst)
 Declare UI_MVVM_ObservableCollection_Free(*This.UI_MVVM_ObservableCollection_Inst)
 Declare UI_MVVM_ObservableCollection_RegisterCollectionObserver(*This.UI_MVVM_ObservableCollection_Inst, *observer, *cb)
@@ -879,9 +884,8 @@ Declare.i UI_XMLLoader_ParseNode(*This.UI_XMLLoader_Inst, node.i, *targetWindow.
 Declare.b UI_XMLLoader_LoadFromFile(*This.UI_XMLLoader_Inst, xmlPath.s, *targetWindow.UI_Window_vt)
 Declare.b UI_XMLLoader_LoadFromString(*This.UI_XMLLoader_Inst, xmlContent.s, *targetWindow.UI_Window_vt)
 Declare Demo_ViewModels_SimpleViewModel_Init(*This.Demo_ViewModels_SimpleViewModel_Inst)
-Declare Demo_ViewModels_SimpleViewModel_OnClickButton(*This.Demo_ViewModels_SimpleViewModel_Inst, btnIndex.i)
+Declare.b Demo_ViewModels_SimpleViewModel_OnCommand(*This.Demo_ViewModels_SimpleViewModel_Inst, cmd.s, *param)
 Declare Demo_ViewModels_SimpleViewModel_OnHoverButton(*This.Demo_ViewModels_SimpleViewModel_Inst, btnIndex.i)
-Declare Demo_ViewModels_SimpleViewModel_OnReset(*This.Demo_ViewModels_SimpleViewModel_Inst)
 Declare Demo_Views_SimpleView_Init(*This.Demo_Views_SimpleView_Inst, *vm.Demo_ViewModels_SimpleViewModel_vt)
 Declare Demo_Views_SimpleView_OnTimer(*This.Demo_Views_SimpleView_Inst, timerId.i)
 
@@ -2087,6 +2091,31 @@ Procedure UI_MVVM_ObservableObject_NotifyPropertyChanged(*This.UI_MVVM_Observabl
         Next
 EndProcedure
 
+Procedure.s UI_MVVM_ObservableObject_Get(*This.UI_MVVM_ObservableObject_Inst, propName.s)
+  Protected *This_vt.UI_MVVM_ObservableObject_vt = *This
+        ProcedureReturn *This_vt\GetValueAsString(propName)
+EndProcedure
+
+Procedure.b UI_MVVM_ObservableObject_Set_s_s(*This.UI_MVVM_ObservableObject_Inst, propName.s, val.s)
+  Protected *This_vt.UI_MVVM_ObservableObject_vt = *This
+        ProcedureReturn *This_vt\SetString(propName, val)
+EndProcedure
+
+Procedure.b UI_MVVM_ObservableObject_Set_s_i(*This.UI_MVVM_ObservableObject_Inst, propName.s, val.i)
+  Protected *This_vt.UI_MVVM_ObservableObject_vt = *This
+        ProcedureReturn *This_vt\SetInt(propName, val)
+EndProcedure
+
+Procedure.b UI_MVVM_ObservableObject_Set_s_b(*This.UI_MVVM_ObservableObject_Inst, propName.s, val.b)
+  Protected *This_vt.UI_MVVM_ObservableObject_vt = *This
+        ProcedureReturn *This_vt\SetBool(propName, val)
+EndProcedure
+
+Procedure.b UI_MVVM_ObservableObject_Set_s_d(*This.UI_MVVM_ObservableObject_Inst, propName.s, val.d)
+  Protected *This_vt.UI_MVVM_ObservableObject_vt = *This
+        ProcedureReturn *This_vt\SetDouble(propName, val)
+EndProcedure
+
 Procedure.s UI_MVVM_ObservableObject_GetString(*This.UI_MVVM_ObservableObject_Inst, propName.s)
   Protected *This_vt.UI_MVVM_ObservableObject_vt = *This
         Protected pKey.s = LCase(propName)
@@ -2287,6 +2316,12 @@ Procedure.b UI_MVVM_ViewModelBase_ExecuteCommand(*This.UI_MVVM_ViewModelBase_Ins
             ProcedureReturn #True
           EndIf
         EndIf
+        ; Fallback to virtual OnCommand for zero-boilerplate command handling
+        ProcedureReturn *This_vt\OnCommand(name_p, *param)
+EndProcedure
+
+Procedure.b UI_MVVM_ViewModelBase_OnCommand(*This.UI_MVVM_ViewModelBase_Inst, name_p.s, *param)
+  Protected *This_vt.UI_MVVM_ViewModelBase_vt = *This
         ProcedureReturn #False
 EndProcedure
 
@@ -4157,9 +4192,13 @@ Procedure UI_XMLLoader_ApplyDataBindings(*This.UI_XMLLoader_Inst, *comp.UI_Compo
           UI_MVVM_RegisterBinding(*comp, "Value", *vm, propName\s, modeVal\i)
         EndIf
   
-        ; 4. Command Binding
+        ; 4. Command / Click Binding
         Protected cmdAttr.s = GetXMLAttribute(node, "Command")
         If cmdAttr = "" : cmdAttr = GetXMLAttribute(node, "command") : EndIf
+        If cmdAttr = "" : cmdAttr = GetXMLAttribute(node, "Click") : EndIf
+        If cmdAttr = "" : cmdAttr = GetXMLAttribute(node, "click") : EndIf
+        If cmdAttr = "" : cmdAttr = GetXMLAttribute(node, "OnClick") : EndIf
+        If cmdAttr = "" : cmdAttr = GetXMLAttribute(node, "onclick") : EndIf
         If cmdAttr <> ""
           If *This_vt\ParseBindingExpression(cmdAttr, @propName, @modeVal)
             UI_MVVM_RegisterCommandBinding(*comp, *vm, propName\s)
@@ -4559,53 +4598,58 @@ EndProcedure
 Procedure Demo_ViewModels_SimpleViewModel_Init(*This.Demo_ViewModels_SimpleViewModel_Inst)
   Protected *This_vt.Demo_ViewModels_SimpleViewModel_vt = *This
         UI_MVVM_ViewModelBase_Init(*This)
-        *CurrentSimpleViewModel = *This
         *This\clickCount = 0
   
-        ; 1. Initial State Properties
-        *This_vt\SetString("ClickMessage", "No button clicked yet")
-        *This_vt\SetString("HoverMessage", "Hover over any button to test mouse hover")
-        *This_vt\SetString("TotalClicksText", "Total Clicks: 0")
-        *This_vt\SetString("StatusText", "Status: Ready")
-  
-        ; 2. Register Commands
-        Protected *cmd1.UI_MVVM_RelayCommand_vt = New_UI_MVVM_RelayCommand_p(@SimpleVM_OnClickBtn1())
-        *This_vt\RegisterCommand("ClickBtn1Command", *cmd1)
-  
-        Protected *cmd2.UI_MVVM_RelayCommand_vt = New_UI_MVVM_RelayCommand_p(@SimpleVM_OnClickBtn2())
-        *This_vt\RegisterCommand("ClickBtn2Command", *cmd2)
-  
-        Protected *cmd3.UI_MVVM_RelayCommand_vt = New_UI_MVVM_RelayCommand_p(@SimpleVM_OnClickBtn3())
-        *This_vt\RegisterCommand("ClickBtn3Command", *cmd3)
-  
-        Protected *cmdReset.UI_MVVM_RelayCommand_vt = New_UI_MVVM_RelayCommand_p(@SimpleVM_OnReset())
-        *This_vt\RegisterCommand("ResetCommand", *cmdReset)
+        ; Initial State Properties
+        *This_vt\Set_s_s("ClickMessage", "No button clicked yet")
+        *This_vt\Set_s_s("HoverMessage", "Hover over any button to test mouse hover")
+        *This_vt\Set_s_s("TotalClicksText", "Total Clicks: 0")
+        *This_vt\Set_s_s("StatusText", "Status: Ready")
 EndProcedure
 
-Procedure Demo_ViewModels_SimpleViewModel_OnClickButton(*This.Demo_ViewModels_SimpleViewModel_Inst, btnIndex.i)
+Procedure.b Demo_ViewModels_SimpleViewModel_OnCommand(*This.Demo_ViewModels_SimpleViewModel_Inst, cmd.s, *param)
   Protected *This_vt.Demo_ViewModels_SimpleViewModel_vt = *This
-        *This\clickCount + 1
-        *This_vt\SetString("ClickMessage", "You clicked on Button " + Str(btnIndex))
-        *This_vt\SetString("TotalClicksText", "Total Clicks: " + Str(*This\clickCount))
-        *This_vt\SetString("StatusText", "Status: Button " + Str(btnIndex) + " clicked")
+        Select cmd
+          Case "ClickBtn1"
+            *This\clickCount + 1
+            *This_vt\Set_s_s("ClickMessage", "You clicked on Button 1")
+            *This_vt\Set_s_s("TotalClicksText", "Total Clicks: " + Str(*This\clickCount))
+            *This_vt\Set_s_s("StatusText", "Status: Button 1 clicked")
+            ProcedureReturn #True
+  
+          Case "ClickBtn2"
+            *This\clickCount + 1
+            *This_vt\Set_s_s("ClickMessage", "You clicked on Button 2")
+            *This_vt\Set_s_s("TotalClicksText", "Total Clicks: " + Str(*This\clickCount))
+            *This_vt\Set_s_s("StatusText", "Status: Button 2 clicked")
+            ProcedureReturn #True
+  
+          Case "ClickBtn3"
+            *This\clickCount + 1
+            *This_vt\Set_s_s("ClickMessage", "You clicked on Button 3")
+            *This_vt\Set_s_s("TotalClicksText", "Total Clicks: " + Str(*This\clickCount))
+            *This_vt\Set_s_s("StatusText", "Status: Button 3 clicked")
+            ProcedureReturn #True
+  
+          Case "Reset"
+            *This\clickCount = 0
+            *This_vt\Set_s_s("ClickMessage", "Values reset to default")
+            *This_vt\Set_s_s("HoverMessage", "Hover over any button to test mouse hover")
+            *This_vt\Set_s_s("TotalClicksText", "Total Clicks: 0")
+            *This_vt\Set_s_s("StatusText", "Status: Reset completed")
+            ProcedureReturn #True
+        EndSelect
+  
+        ProcedureReturn #False
 EndProcedure
 
 Procedure Demo_ViewModels_SimpleViewModel_OnHoverButton(*This.Demo_ViewModels_SimpleViewModel_Inst, btnIndex.i)
   Protected *This_vt.Demo_ViewModels_SimpleViewModel_vt = *This
         If btnIndex > 0
-          *This_vt\SetString("HoverMessage", "You are hovering Button " + Str(btnIndex))
+          *This_vt\Set_s_s("HoverMessage", "You are hovering Button " + Str(btnIndex))
         Else
-          *This_vt\SetString("HoverMessage", "No button hovered")
+          *This_vt\Set_s_s("HoverMessage", "No button hovered")
         EndIf
-EndProcedure
-
-Procedure Demo_ViewModels_SimpleViewModel_OnReset(*This.Demo_ViewModels_SimpleViewModel_Inst)
-  Protected *This_vt.Demo_ViewModels_SimpleViewModel_vt = *This
-        *This\clickCount = 0
-        *This_vt\SetString("ClickMessage", "Values reset to default")
-        *This_vt\SetString("HoverMessage", "Hover over any button to test mouse hover")
-        *This_vt\SetString("TotalClicksText", "Total Clicks: 0")
-        *This_vt\SetString("StatusText", "Status: Reset completed")
 EndProcedure
 
 Procedure Demo_Views_SimpleView_Init(*This.Demo_Views_SimpleView_Inst, *vm.Demo_ViewModels_SimpleViewModel_vt)
@@ -4651,10 +4695,10 @@ Procedure Demo_Views_SimpleView_Init(*This.Demo_Views_SimpleView_Inst, *vm.Demo_
             "  <StackPanel Dock='Fill' Orientation='Vertical' Spacing='8' Margin='15,10'>" +
             "    <Label Text='Actions (Click or Hover):' Height='20'/>" +
             "    <StackPanel Orientation='Horizontal' Spacing='10' Height='36'>" +
-            "      <Button Name='btn1' Text='Button 1' Command='{Binding ClickBtn1Command}' Width='100' Height='32'/>" +
-            "      <Button Name='btn2' Text='Button 2' Command='{Binding ClickBtn2Command}' Width='100' Height='32'/>" +
-            "      <Button Name='btn3' Text='Button 3' Command='{Binding ClickBtn3Command}' Width='100' Height='32'/>" +
-            "      <Button Name='btnReset' Text='Reset' Command='{Binding ResetCommand}' Width='90' Height='32'/>" +
+            "      <Button Name='btn1' Text='Button 1' Click='ClickBtn1' Width='100' Height='32'/>" +
+            "      <Button Name='btn2' Text='Button 2' Click='ClickBtn2' Width='100' Height='32'/>" +
+            "      <Button Name='btn3' Text='Button 3' Click='ClickBtn3' Width='100' Height='32'/>" +
+            "      <Button Name='btnReset' Text='Reset' Click='Reset' Width='90' Height='32'/>" +
             "    </StackPanel>" +
             "    <Label Text='Click Notification:' Margin='0,5,0,0' Height='20'/>" +
             "    <TextBox Name='txtClick' Text='{Binding ClickMessage}' Height='28'/>" +
@@ -4808,6 +4852,11 @@ DataSection
     Data.i @UI_MVVM_ObservableObject_RegisterObserver()
     Data.i @UI_MVVM_ObservableObject_UnregisterObserver()
     Data.i @UI_MVVM_ObservableObject_NotifyPropertyChanged()
+    Data.i @UI_MVVM_ObservableObject_Get()
+    Data.i @UI_MVVM_ObservableObject_Set_s_s()
+    Data.i @UI_MVVM_ObservableObject_Set_s_i()
+    Data.i @UI_MVVM_ObservableObject_Set_s_b()
+    Data.i @UI_MVVM_ObservableObject_Set_s_d()
     Data.i @UI_MVVM_ObservableObject_GetString()
     Data.i @UI_MVVM_ObservableObject_SetString()
     Data.i @UI_MVVM_ObservableObject_GetInt()
@@ -4827,6 +4876,11 @@ DataSection
     Data.i @UI_MVVM_ObservableObject_RegisterObserver()
     Data.i @UI_MVVM_ObservableObject_UnregisterObserver()
     Data.i @UI_MVVM_ObservableObject_NotifyPropertyChanged()
+    Data.i @UI_MVVM_ObservableObject_Get()
+    Data.i @UI_MVVM_ObservableObject_Set_s_s()
+    Data.i @UI_MVVM_ObservableObject_Set_s_i()
+    Data.i @UI_MVVM_ObservableObject_Set_s_b()
+    Data.i @UI_MVVM_ObservableObject_Set_s_d()
     Data.i @UI_MVVM_ObservableObject_GetString()
     Data.i @UI_MVVM_ObservableObject_SetString()
     Data.i @UI_MVVM_ObservableObject_GetInt()
@@ -4840,11 +4894,17 @@ DataSection
     Data.i @UI_MVVM_ViewModelBase_RegisterCommand()
     Data.i @UI_MVVM_ViewModelBase_GetCommand()
     Data.i @UI_MVVM_ViewModelBase_ExecuteCommand()
+    Data.i @UI_MVVM_ViewModelBase_OnCommand()
   UI_MVVM_ObservableCollection_VTable_Data:
     Data.i @UI_MVVM_ObservableCollection_Free()
     Data.i @UI_MVVM_ObservableObject_RegisterObserver()
     Data.i @UI_MVVM_ObservableObject_UnregisterObserver()
     Data.i @UI_MVVM_ObservableObject_NotifyPropertyChanged()
+    Data.i @UI_MVVM_ObservableObject_Get()
+    Data.i @UI_MVVM_ObservableObject_Set_s_s()
+    Data.i @UI_MVVM_ObservableObject_Set_s_i()
+    Data.i @UI_MVVM_ObservableObject_Set_s_b()
+    Data.i @UI_MVVM_ObservableObject_Set_s_d()
     Data.i @UI_MVVM_ObservableObject_GetString()
     Data.i @UI_MVVM_ObservableObject_SetString()
     Data.i @UI_MVVM_ObservableObject_GetInt()
@@ -5776,6 +5836,11 @@ DataSection
     Data.i @UI_MVVM_ObservableObject_RegisterObserver()
     Data.i @UI_MVVM_ObservableObject_UnregisterObserver()
     Data.i @UI_MVVM_ObservableObject_NotifyPropertyChanged()
+    Data.i @UI_MVVM_ObservableObject_Get()
+    Data.i @UI_MVVM_ObservableObject_Set_s_s()
+    Data.i @UI_MVVM_ObservableObject_Set_s_i()
+    Data.i @UI_MVVM_ObservableObject_Set_s_b()
+    Data.i @UI_MVVM_ObservableObject_Set_s_d()
     Data.i @UI_MVVM_ObservableObject_GetString()
     Data.i @UI_MVVM_ObservableObject_SetString()
     Data.i @UI_MVVM_ObservableObject_GetInt()
@@ -5789,9 +5854,8 @@ DataSection
     Data.i @UI_MVVM_ViewModelBase_RegisterCommand()
     Data.i @UI_MVVM_ViewModelBase_GetCommand()
     Data.i @UI_MVVM_ViewModelBase_ExecuteCommand()
-    Data.i @Demo_ViewModels_SimpleViewModel_OnClickButton()
+    Data.i @Demo_ViewModels_SimpleViewModel_OnCommand()
     Data.i @Demo_ViewModels_SimpleViewModel_OnHoverButton()
-    Data.i @Demo_ViewModels_SimpleViewModel_OnReset()
   Demo_Views_SimpleView_VTable_Data:
     Data.i @UI_Window_SetDataContext()
     Data.i @UI_Window_GetDataContext()
@@ -7119,39 +7183,9 @@ EndProcedure
 ; ============================================================================
 
 
-; Forward declarations for command callbacks
 
 
 
-
-
-Procedure SimpleVM_OnClickBtn1(*param)
-  If *CurrentSimpleViewModel
-    Protected *vm1.Demo_ViewModels_SimpleViewModel_vt = *CurrentSimpleViewModel
-    *vm1\OnClickButton(1)
-  EndIf
-EndProcedure
-
-Procedure SimpleVM_OnClickBtn2(*param)
-  If *CurrentSimpleViewModel
-    Protected *vm2.Demo_ViewModels_SimpleViewModel_vt = *CurrentSimpleViewModel
-    *vm2\OnClickButton(2)
-  EndIf
-EndProcedure
-
-Procedure SimpleVM_OnClickBtn3(*param)
-  If *CurrentSimpleViewModel
-    Protected *vm3.Demo_ViewModels_SimpleViewModel_vt = *CurrentSimpleViewModel
-    *vm3\OnClickButton(3)
-  EndIf
-EndProcedure
-
-Procedure SimpleVM_OnReset(*param)
-  If *CurrentSimpleViewModel
-    Protected *vmReset.Demo_ViewModels_SimpleViewModel_vt = *CurrentSimpleViewModel
-    *vmReset\OnReset()
-  EndIf
-EndProcedure
 
 
 

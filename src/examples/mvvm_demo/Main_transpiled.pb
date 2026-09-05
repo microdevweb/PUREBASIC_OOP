@@ -230,6 +230,11 @@ Interface UI_MVVM_ObservableObject_vt
   RegisterObserver(*observer, *cb)
   UnregisterObserver(*observer)
   NotifyPropertyChanged(propName.s)
+  Get.s(propName.s)
+  Set_s_s.b(propName.s, val.s)
+  Set_s_i.b(propName.s, val.i)
+  Set_s_b.b(propName.s, val.b)
+  Set_s_d.b(propName.s, val.d)
   GetString.s(propName.s)
   SetString.b(propName.s, val.s)
   GetInt.i(propName.s)
@@ -252,6 +257,7 @@ Interface UI_MVVM_ViewModelBase_vt Extends UI_MVVM_ObservableObject_vt
   RegisterCommand(name_p.s, *cmd.UI_MVVM_RelayCommand_vt)
   GetCommand.i(name_p.s)
   ExecuteCommand.b(name_p.s, *param)
+  OnCommand.b(name_p.s, *param)
 EndInterface
 
 Interface UI_MVVM_ObservableCollection_vt Extends UI_MVVM_ObservableObject_vt
@@ -582,11 +588,6 @@ Declare UI_MVVM_RegisterCommandBinding(*control.UI_Gadget_vt, *viewModel.UI_MVVM
 Declare UI_MVVM_RegisterCollectionBinding(*control.UI_Gadget_vt, *collection.UI_MVVM_ObservableCollection_vt)
 Declare.b UI_MVVM_DispatchUIEvent(*control.UI_Gadget_vt, eventType.i)
 Declare UI_MVVM_UnregisterAll(*targetObj)
-Declare TaskViewModel_OnAddTask(*param)
-Declare TaskViewModel_OnClearTasks(*param)
-Declare TaskViewModel_OnRefresh(*param)
-Declare TaskViewModel_OnExport(*param)
-Global *CurrentTaskViewModel = 0
 
 ; ----------------------------------------------------------------------------
 ; 3. METHOD PROCEDURES IMPLEMENTATION
@@ -733,6 +734,11 @@ Declare UI_MVVM_ObservableObject_Free(*This.UI_MVVM_ObservableObject_Inst)
 Declare UI_MVVM_ObservableObject_RegisterObserver(*This.UI_MVVM_ObservableObject_Inst, *observer, *cb)
 Declare UI_MVVM_ObservableObject_UnregisterObserver(*This.UI_MVVM_ObservableObject_Inst, *observer)
 Declare UI_MVVM_ObservableObject_NotifyPropertyChanged(*This.UI_MVVM_ObservableObject_Inst, propName.s)
+Declare.s UI_MVVM_ObservableObject_Get(*This.UI_MVVM_ObservableObject_Inst, propName.s)
+Declare.b UI_MVVM_ObservableObject_Set_s_s(*This.UI_MVVM_ObservableObject_Inst, propName.s, val.s)
+Declare.b UI_MVVM_ObservableObject_Set_s_i(*This.UI_MVVM_ObservableObject_Inst, propName.s, val.i)
+Declare.b UI_MVVM_ObservableObject_Set_s_b(*This.UI_MVVM_ObservableObject_Inst, propName.s, val.b)
+Declare.b UI_MVVM_ObservableObject_Set_s_d(*This.UI_MVVM_ObservableObject_Inst, propName.s, val.d)
 Declare.s UI_MVVM_ObservableObject_GetString(*This.UI_MVVM_ObservableObject_Inst, propName.s)
 Declare.b UI_MVVM_ObservableObject_SetString(*This.UI_MVVM_ObservableObject_Inst, propName.s, val.s)
 Declare.i UI_MVVM_ObservableObject_GetInt(*This.UI_MVVM_ObservableObject_Inst, propName.s)
@@ -753,6 +759,7 @@ Declare UI_MVVM_ViewModelBase_Free(*This.UI_MVVM_ViewModelBase_Inst)
 Declare UI_MVVM_ViewModelBase_RegisterCommand(*This.UI_MVVM_ViewModelBase_Inst, name_p.s, *cmd.UI_MVVM_RelayCommand_vt)
 Declare.i UI_MVVM_ViewModelBase_GetCommand(*This.UI_MVVM_ViewModelBase_Inst, name_p.s)
 Declare.b UI_MVVM_ViewModelBase_ExecuteCommand(*This.UI_MVVM_ViewModelBase_Inst, name_p.s, *param)
+Declare.b UI_MVVM_ViewModelBase_OnCommand(*This.UI_MVVM_ViewModelBase_Inst, name_p.s, *param)
 Declare UI_MVVM_ObservableCollection_Init(*This.UI_MVVM_ObservableCollection_Inst)
 Declare UI_MVVM_ObservableCollection_Free(*This.UI_MVVM_ObservableCollection_Inst)
 Declare UI_MVVM_ObservableCollection_RegisterCollectionObserver(*This.UI_MVVM_ObservableCollection_Inst, *observer, *cb)
@@ -910,6 +917,7 @@ Declare.b Demo_Models_TaskItem_IsCompleted(*This.Demo_Models_TaskItem_Inst)
 Declare Demo_Models_TaskItem_SetCompleted(*This.Demo_Models_TaskItem_Inst, done.b)
 Declare.s Demo_Models_TaskItem_ToTableRow(*This.Demo_Models_TaskItem_Inst)
 Declare Demo_ViewModels_TaskViewModel_Init(*This.Demo_ViewModels_TaskViewModel_Inst)
+Declare.b Demo_ViewModels_TaskViewModel_OnCommand(*This.Demo_ViewModels_TaskViewModel_Inst, cmd.s, *param)
 Declare.i Demo_ViewModels_TaskViewModel_GetTasksCollection(*This.Demo_ViewModels_TaskViewModel_Inst)
 Declare Demo_ViewModels_TaskViewModel_AddTask(*This.Demo_ViewModels_TaskViewModel_Inst, title.s, category.s)
 Declare Demo_ViewModels_TaskViewModel_UpdateCountText(*This.Demo_ViewModels_TaskViewModel_Inst)
@@ -2123,6 +2131,31 @@ Procedure UI_MVVM_ObservableObject_NotifyPropertyChanged(*This.UI_MVVM_Observabl
         Next
 EndProcedure
 
+Procedure.s UI_MVVM_ObservableObject_Get(*This.UI_MVVM_ObservableObject_Inst, propName.s)
+  Protected *This_vt.UI_MVVM_ObservableObject_vt = *This
+        ProcedureReturn *This_vt\GetValueAsString(propName)
+EndProcedure
+
+Procedure.b UI_MVVM_ObservableObject_Set_s_s(*This.UI_MVVM_ObservableObject_Inst, propName.s, val.s)
+  Protected *This_vt.UI_MVVM_ObservableObject_vt = *This
+        ProcedureReturn *This_vt\SetString(propName, val)
+EndProcedure
+
+Procedure.b UI_MVVM_ObservableObject_Set_s_i(*This.UI_MVVM_ObservableObject_Inst, propName.s, val.i)
+  Protected *This_vt.UI_MVVM_ObservableObject_vt = *This
+        ProcedureReturn *This_vt\SetInt(propName, val)
+EndProcedure
+
+Procedure.b UI_MVVM_ObservableObject_Set_s_b(*This.UI_MVVM_ObservableObject_Inst, propName.s, val.b)
+  Protected *This_vt.UI_MVVM_ObservableObject_vt = *This
+        ProcedureReturn *This_vt\SetBool(propName, val)
+EndProcedure
+
+Procedure.b UI_MVVM_ObservableObject_Set_s_d(*This.UI_MVVM_ObservableObject_Inst, propName.s, val.d)
+  Protected *This_vt.UI_MVVM_ObservableObject_vt = *This
+        ProcedureReturn *This_vt\SetDouble(propName, val)
+EndProcedure
+
 Procedure.s UI_MVVM_ObservableObject_GetString(*This.UI_MVVM_ObservableObject_Inst, propName.s)
   Protected *This_vt.UI_MVVM_ObservableObject_vt = *This
         Protected pKey.s = LCase(propName)
@@ -2323,6 +2356,12 @@ Procedure.b UI_MVVM_ViewModelBase_ExecuteCommand(*This.UI_MVVM_ViewModelBase_Ins
             ProcedureReturn #True
           EndIf
         EndIf
+        ; Fallback to virtual OnCommand for zero-boilerplate command handling
+        ProcedureReturn *This_vt\OnCommand(name_p, *param)
+EndProcedure
+
+Procedure.b UI_MVVM_ViewModelBase_OnCommand(*This.UI_MVVM_ViewModelBase_Inst, name_p.s, *param)
+  Protected *This_vt.UI_MVVM_ViewModelBase_vt = *This
         ProcedureReturn #False
 EndProcedure
 
@@ -4193,9 +4232,13 @@ Procedure UI_XMLLoader_ApplyDataBindings(*This.UI_XMLLoader_Inst, *comp.UI_Compo
           UI_MVVM_RegisterBinding(*comp, "Value", *vm, propName\s, modeVal\i)
         EndIf
   
-        ; 4. Command Binding
+        ; 4. Command / Click Binding
         Protected cmdAttr.s = GetXMLAttribute(node, "Command")
         If cmdAttr = "" : cmdAttr = GetXMLAttribute(node, "command") : EndIf
+        If cmdAttr = "" : cmdAttr = GetXMLAttribute(node, "Click") : EndIf
+        If cmdAttr = "" : cmdAttr = GetXMLAttribute(node, "click") : EndIf
+        If cmdAttr = "" : cmdAttr = GetXMLAttribute(node, "OnClick") : EndIf
+        If cmdAttr = "" : cmdAttr = GetXMLAttribute(node, "onclick") : EndIf
         If cmdAttr <> ""
           If *This_vt\ParseBindingExpression(cmdAttr, @propName, @modeVal)
             UI_MVVM_RegisterCommandBinding(*comp, *vm, propName\s)
@@ -4653,38 +4696,47 @@ EndProcedure
 Procedure Demo_ViewModels_TaskViewModel_Init(*This.Demo_ViewModels_TaskViewModel_Inst)
   Protected *This_vt.Demo_ViewModels_TaskViewModel_vt = *This
         UI_MVVM_ViewModelBase_Init(*This)
-        *CurrentTaskViewModel = *This
         *This\taskCounter = 0
         *This\tasksCollection = New_UI_MVVM_ObservableCollection()
   
         ; 1. Initial State
-        *This_vt\SetString("TaskInput", "")
-        *This_vt\SetString("FilterQuery", "")
-        *This_vt\SetString("Category", "Composants UI")
-        *This_vt\SetString("StatusMessage", "Architecture MVVM active - Pret")
-        *This_vt\SetString("TasksCountText", "0 taches")
-        *This_vt\SetInt("ProgressValue", 60)
-        *This_vt\SetBool("AutoRefresh", #True)
-        *This_vt\SetBool("DarkMode", #True)
+        *This_vt\Set_s_s("TaskInput", "")
+        *This_vt\Set_s_s("FilterQuery", "")
+        *This_vt\Set_s_s("Category", "UI Components")
+        *This_vt\Set_s_s("StatusMessage", "MVVM Architecture active - Ready")
+        *This_vt\Set_s_s("TasksCountText", "0 tasks")
+        *This_vt\Set_s_i("ProgressValue", 60)
+        *This_vt\Set_s_i("AutoRefresh", #True)
+        *This_vt\Set_s_i("DarkMode", #True)
   
-        ; 2. Register RelayCommands
-        Protected *cmdAdd.UI_MVVM_RelayCommand_vt = New_UI_MVVM_RelayCommand_p(@TaskViewModel_OnAddTask())
-        *This_vt\RegisterCommand("AddTaskCommand", *cmdAdd)
+        ; 2. Initial Sample Data
+        *This_vt\AddTask("ObservableObject.pbi", "MVVM Services")
+        *This_vt\AddTask("RelayCommand.pbi", "MVVM Services")
+        *This_vt\AddTask("TaskView.xml", "Declarative Views")
+        *This_vt\AddTask("BindingEngine.pbi", "Binding Engine")
+EndProcedure
+
+Procedure.b Demo_ViewModels_TaskViewModel_OnCommand(*This.Demo_ViewModels_TaskViewModel_Inst, cmd.s, *param)
+  Protected *This_vt.Demo_ViewModels_TaskViewModel_vt = *This
+        Select cmd
+          Case "AddTaskCommand", "AddTask", "OnAddTask"
+            *This_vt\HandleAddFromUI()
+            ProcedureReturn #True
   
-        Protected *cmdClear.UI_MVVM_RelayCommand_vt = New_UI_MVVM_RelayCommand_p(@TaskViewModel_OnClearTasks())
-        *This_vt\RegisterCommand("ClearTasksCommand", *cmdClear)
+          Case "ClearTasksCommand", "ClearTasks", "OnClearTasks"
+            *This_vt\ClearAllTasks()
+            ProcedureReturn #True
   
-        Protected *cmdRefresh.UI_MVVM_RelayCommand_vt = New_UI_MVVM_RelayCommand_p(@TaskViewModel_OnRefresh())
-        *This_vt\RegisterCommand("RefreshCommand", *cmdRefresh)
+          Case "RefreshCommand", "Refresh", "OnRefresh"
+            *This_vt\Set_s_s("StatusMessage", "Data synchronized with ViewModel.")
+            ProcedureReturn #True
   
-        Protected *cmdExport.UI_MVVM_RelayCommand_vt = New_UI_MVVM_RelayCommand_p(@TaskViewModel_OnExport())
-        *This_vt\RegisterCommand("ExportCommand", *cmdExport)
+          Case "ExportCommand", "Export", "OnExport"
+            *This_vt\Set_s_s("StatusMessage", "Data export completed.")
+            ProcedureReturn #True
+        EndSelect
   
-        ; 3. Initial Sample Data
-        *This_vt\AddTask("ObservableObject.pbi", "Services MVVM")
-        *This_vt\AddTask("RelayCommand.pbi", "Services MVVM")
-        *This_vt\AddTask("TaskView.xml", "Vues Declaratives")
-        *This_vt\AddTask("BindingEngine.pbi", "Moteur de Liaison")
+        ProcedureReturn #False
 EndProcedure
 
 Procedure.i Demo_ViewModels_TaskViewModel_GetTasksCollection(*This.Demo_ViewModels_TaskViewModel_Inst)
@@ -4699,14 +4751,14 @@ Procedure Demo_ViewModels_TaskViewModel_AddTask(*This.Demo_ViewModels_TaskViewMo
         Protected *item.Demo_Models_TaskItem_vt = New_Demo_Models_TaskItem_i_s_s(*This\taskCounter, title, category)
         *This\tasksCollection\Add(*item\ToTableRow())
         *This_vt\UpdateCountText()
-        *This_vt\SetString("StatusMessage", "Tache '" + title + "' ajoutee avec succes.")
+        *This_vt\Set_s_s("StatusMessage", "Task '" + title + "' added successfully.")
 EndProcedure
 
 Procedure Demo_ViewModels_TaskViewModel_UpdateCountText(*This.Demo_ViewModels_TaskViewModel_Inst)
   Protected *This_vt.Demo_ViewModels_TaskViewModel_vt = *This
         Protected cnt.i = *This\tasksCollection\Count()
-        *This_vt\SetString("TasksCountText", Str(cnt) + " tache(s) enregistree(s)")
-        *This_vt\SetInt("ProgressValue", cnt * 20)
+        *This_vt\Set_s_s("TasksCountText", Str(cnt) + " task(s) recorded")
+        *This_vt\Set_s_i("ProgressValue", cnt * 20)
 EndProcedure
 
 Procedure Demo_ViewModels_TaskViewModel_ClearAllTasks(*This.Demo_ViewModels_TaskViewModel_Inst)
@@ -4714,20 +4766,20 @@ Procedure Demo_ViewModels_TaskViewModel_ClearAllTasks(*This.Demo_ViewModels_Task
         *This\tasksCollection\Clear()
         *This\taskCounter = 0
         *This_vt\UpdateCountText()
-        *This_vt\SetString("StatusMessage", "Toutes les taches ont ete supprimees.")
+        *This_vt\Set_s_s("StatusMessage", "All tasks cleared.")
 EndProcedure
 
 Procedure Demo_ViewModels_TaskViewModel_HandleAddFromUI(*This.Demo_ViewModels_TaskViewModel_Inst)
   Protected *This_vt.Demo_ViewModels_TaskViewModel_vt = *This
-        Protected inputTitle.s = Trim(*This_vt\GetString("TaskInput"))
+        Protected inputTitle.s = Trim(*This_vt\Get("TaskInput"))
         If inputTitle = ""
-          *This_vt\SetString("StatusMessage", "Veuillez entrer un titre de tache.")
+          *This_vt\Set_s_s("StatusMessage", "Please enter a task title.")
           ProcedureReturn
         EndIf
-        Protected cat.s = *This_vt\GetString("Category")
+        Protected cat.s = *This_vt\Get("Category")
         If cat = "" : cat = "General" : EndIf
         *This_vt\AddTask(inputTitle, cat)
-        *This_vt\SetString("TaskInput", "")
+        *This_vt\Set_s_s("TaskInput", "")
 EndProcedure
 
 Procedure Demo_ViewModels_TaskViewModel_Free(*This.Demo_ViewModels_TaskViewModel_Inst)
@@ -4772,10 +4824,10 @@ Procedure Demo_Views_TaskView_Init(*This.Demo_Views_TaskView_Inst, *vm.Demo_View
           Protected defaultXml.s = "<Window Title='PureBasic OOP - Architecture MVVM &amp; DataBinding' Width='740' Height='560'>" +
             "<DockPanel LastChildFill='true'>" +
             "  <StackPanel Dock='Top' Orientation='Horizontal' Spacing='10' Margin='10' Height='40'>" +
-            "    <Button Text='Rafraichir' Command='{Binding RefreshCommand}' Width='110' Height='32'/>" +
-            "    <Button Text='Exporter' Command='{Binding ExportCommand}' Width='100' Height='32'/>" +
-            "    <Button Text='Vider Liste' Command='{Binding ClearTasksCommand}' Width='110' Height='32'/>" +
-            "    <TextBox Placeholder='Rechercher...' Text='{Binding Path=FilterQuery, Mode=TwoWay}' Width='220' Height='30'/>" +
+            "    <Button Text='Refresh' Click='Refresh' Width='100' Height='32'/>" +
+            "    <Button Text='Export' Click='Export' Width='100' Height='32'/>" +
+            "    <Button Text='Clear All' Click='ClearTasks' Width='100' Height='32'/>" +
+            "    <TextBox Placeholder='Search...' Text='{Binding Path=FilterQuery, Mode=TwoWay}' Width='220' Height='30'/>" +
             "  </StackPanel>" +
             "  <StackPanel Dock='Bottom' Orientation='Horizontal' Spacing='15' Margin='8,4' Height='32'>" +
             "    <Label Text='{Binding StatusMessage}' Width='320' Height='22'/>" +
@@ -4789,12 +4841,13 @@ Procedure Demo_Views_TaskView_Init(*This.Demo_Views_TaskView_Inst, *vm.Demo_View
             "  </StackPanel>" +
             "  <Grid Rows='Auto,*' Columns='*,*' Margin='5' Dock='Fill'>" +
             "    <StackPanel Row='0' Column='0' ColumnSpan='2' Orientation='Horizontal' Spacing='10' Margin='0,0,0,10'>" +
-            "      <Label Text='Titre:' Width='45' Height='24'/>" +
-            "      <TextBox Name='txtInput' Text='{Binding Path=TaskInput, Mode=TwoWay}' Placeholder='Entrez le titre d\\'une tache...' Width='220' Height='26'/>" +
-            "      <ComboBox Name='cboCategory' Items='Composants UI,Services MVVM,Vues Declaratives,Moteur de Liaison' SelectedIndex='0' Width='170' Height='26'/>" +
-            "      <Button Text='Ajouter' Command='{Binding AddTaskCommand}' Width='85' Height='28'/>" +
+            "      <Label Text='Title:' Width='45' Height='24'/>" +
+            "      <TextBox Name='txtInput' Text='{Binding Path=TaskInput, Mode=TwoWay}' Placeholder='Enter task title...' Width='220' Height='26'/>" +
+            "      <Label Text='Category:' Width='70' Height='24'/>" +
+            "      <ComboBox Name='cboCategory' Items='UI Components,MVVM Services,Declarative Views,Binding Engine' SelectedIndex='0' Width='170' Height='26'/>" +
+            "      <Button Text='Add' Click='AddTask' Width='85' Height='28'/>" +
             "    </StackPanel>" +
-            "    <ListIcon Name='lstTasks' Row='1' Column='0' ColumnSpan='2' Columns='ID:50,Titre:240,Categorie:160,Statut:100' GridLines='true' FullRowSelect='true' Margin='0'/>" +
+            "    <ListIcon Name='lstTasks' Row='1' Column='0' ColumnSpan='2' Columns='ID:50,Title:240,Category:160,Status:100' GridLines='true' FullRowSelect='true' Margin='0'/>" +
             "  </Grid>" +
             "</DockPanel>" +
             "</Window>"
@@ -4904,6 +4957,11 @@ DataSection
     Data.i @UI_MVVM_ObservableObject_RegisterObserver()
     Data.i @UI_MVVM_ObservableObject_UnregisterObserver()
     Data.i @UI_MVVM_ObservableObject_NotifyPropertyChanged()
+    Data.i @UI_MVVM_ObservableObject_Get()
+    Data.i @UI_MVVM_ObservableObject_Set_s_s()
+    Data.i @UI_MVVM_ObservableObject_Set_s_i()
+    Data.i @UI_MVVM_ObservableObject_Set_s_b()
+    Data.i @UI_MVVM_ObservableObject_Set_s_d()
     Data.i @UI_MVVM_ObservableObject_GetString()
     Data.i @UI_MVVM_ObservableObject_SetString()
     Data.i @UI_MVVM_ObservableObject_GetInt()
@@ -4923,6 +4981,11 @@ DataSection
     Data.i @UI_MVVM_ObservableObject_RegisterObserver()
     Data.i @UI_MVVM_ObservableObject_UnregisterObserver()
     Data.i @UI_MVVM_ObservableObject_NotifyPropertyChanged()
+    Data.i @UI_MVVM_ObservableObject_Get()
+    Data.i @UI_MVVM_ObservableObject_Set_s_s()
+    Data.i @UI_MVVM_ObservableObject_Set_s_i()
+    Data.i @UI_MVVM_ObservableObject_Set_s_b()
+    Data.i @UI_MVVM_ObservableObject_Set_s_d()
     Data.i @UI_MVVM_ObservableObject_GetString()
     Data.i @UI_MVVM_ObservableObject_SetString()
     Data.i @UI_MVVM_ObservableObject_GetInt()
@@ -4936,11 +4999,17 @@ DataSection
     Data.i @UI_MVVM_ViewModelBase_RegisterCommand()
     Data.i @UI_MVVM_ViewModelBase_GetCommand()
     Data.i @UI_MVVM_ViewModelBase_ExecuteCommand()
+    Data.i @UI_MVVM_ViewModelBase_OnCommand()
   UI_MVVM_ObservableCollection_VTable_Data:
     Data.i @UI_MVVM_ObservableCollection_Free()
     Data.i @UI_MVVM_ObservableObject_RegisterObserver()
     Data.i @UI_MVVM_ObservableObject_UnregisterObserver()
     Data.i @UI_MVVM_ObservableObject_NotifyPropertyChanged()
+    Data.i @UI_MVVM_ObservableObject_Get()
+    Data.i @UI_MVVM_ObservableObject_Set_s_s()
+    Data.i @UI_MVVM_ObservableObject_Set_s_i()
+    Data.i @UI_MVVM_ObservableObject_Set_s_b()
+    Data.i @UI_MVVM_ObservableObject_Set_s_d()
     Data.i @UI_MVVM_ObservableObject_GetString()
     Data.i @UI_MVVM_ObservableObject_SetString()
     Data.i @UI_MVVM_ObservableObject_GetInt()
@@ -5881,6 +5950,11 @@ DataSection
     Data.i @UI_MVVM_ObservableObject_RegisterObserver()
     Data.i @UI_MVVM_ObservableObject_UnregisterObserver()
     Data.i @UI_MVVM_ObservableObject_NotifyPropertyChanged()
+    Data.i @UI_MVVM_ObservableObject_Get()
+    Data.i @UI_MVVM_ObservableObject_Set_s_s()
+    Data.i @UI_MVVM_ObservableObject_Set_s_i()
+    Data.i @UI_MVVM_ObservableObject_Set_s_b()
+    Data.i @UI_MVVM_ObservableObject_Set_s_d()
     Data.i @UI_MVVM_ObservableObject_GetString()
     Data.i @UI_MVVM_ObservableObject_SetString()
     Data.i @UI_MVVM_ObservableObject_GetInt()
@@ -5894,6 +5968,7 @@ DataSection
     Data.i @UI_MVVM_ViewModelBase_RegisterCommand()
     Data.i @UI_MVVM_ViewModelBase_GetCommand()
     Data.i @UI_MVVM_ViewModelBase_ExecuteCommand()
+    Data.i @Demo_ViewModels_TaskViewModel_OnCommand()
     Data.i @Demo_ViewModels_TaskViewModel_GetTasksCollection()
     Data.i @Demo_ViewModels_TaskViewModel_AddTask()
     Data.i @Demo_ViewModels_TaskViewModel_UpdateCountText()
@@ -7245,6 +7320,7 @@ EndProcedure
 ; ============================================================================
 ; PureBasic OOP MVVM Demo - TaskViewModel.pbi
 ; Presentation State, Observable Properties and Commands
+; Author:      MicrodevWeb
 ; ============================================================================
 
 ; ============================================================================
@@ -7255,39 +7331,9 @@ EndProcedure
 
 
 
-; Forward command procedure declarations
 
 
 
-
-
-Procedure TaskViewModel_OnAddTask(*param)
-  If *CurrentTaskViewModel
-    Protected *vm.Demo_ViewModels_TaskViewModel_vt = *CurrentTaskViewModel
-    *vm\HandleAddFromUI()
-  EndIf
-EndProcedure
-
-Procedure TaskViewModel_OnClearTasks(*param)
-  If *CurrentTaskViewModel
-    Protected *vmClear.Demo_ViewModels_TaskViewModel_vt = *CurrentTaskViewModel
-    *vmClear\ClearAllTasks()
-  EndIf
-EndProcedure
-
-Procedure TaskViewModel_OnRefresh(*param)
-  If *CurrentTaskViewModel
-    Protected *vmRef.Demo_ViewModels_TaskViewModel_vt = *CurrentTaskViewModel
-    *vmRef\SetString("StatusMessage", "Donnees synchronisees avec le ViewModel.")
-  EndIf
-EndProcedure
-
-Procedure TaskViewModel_OnExport(*param)
-  If *CurrentTaskViewModel
-    Protected *vmExp.Demo_ViewModels_TaskViewModel_vt = *CurrentTaskViewModel
-    *vmExp\SetString("StatusMessage", "Exportation des donnees terminee.")
-  EndIf
-EndProcedure
 
 
 

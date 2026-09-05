@@ -51,6 +51,11 @@ Namespace UI::MVVM {
           ProcedureReturn #True
         EndIf
       EndIf
+      ; Fallback to virtual OnCommand for zero-boilerplate command handling
+      ProcedureReturn This\OnCommand(name_p, *param)
+    }
+
+    Public Method.b OnCommand(name_p.s, *param = 0) {
       ProcedureReturn #False
     }
   }

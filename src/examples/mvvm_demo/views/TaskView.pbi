@@ -44,10 +44,10 @@ Namespace Demo::Views {
         Protected defaultXml.s = "<Window Title='PureBasic OOP - Architecture MVVM &amp; DataBinding' Width='740' Height='560'>" +
           "<DockPanel LastChildFill='true'>" +
           "  <StackPanel Dock='Top' Orientation='Horizontal' Spacing='10' Margin='10' Height='40'>" +
-          "    <Button Text='Rafraichir' Command='{Binding RefreshCommand}' Width='110' Height='32'/>" +
-          "    <Button Text='Exporter' Command='{Binding ExportCommand}' Width='100' Height='32'/>" +
-          "    <Button Text='Vider Liste' Command='{Binding ClearTasksCommand}' Width='110' Height='32'/>" +
-          "    <TextBox Placeholder='Rechercher...' Text='{Binding Path=FilterQuery, Mode=TwoWay}' Width='220' Height='30'/>" +
+          "    <Button Text='Refresh' Click='Refresh' Width='100' Height='32'/>" +
+          "    <Button Text='Export' Click='Export' Width='100' Height='32'/>" +
+          "    <Button Text='Clear All' Click='ClearTasks' Width='100' Height='32'/>" +
+          "    <TextBox Placeholder='Search...' Text='{Binding Path=FilterQuery, Mode=TwoWay}' Width='220' Height='30'/>" +
           "  </StackPanel>" +
           "  <StackPanel Dock='Bottom' Orientation='Horizontal' Spacing='15' Margin='8,4' Height='32'>" +
           "    <Label Text='{Binding StatusMessage}' Width='320' Height='22'/>" +
@@ -61,12 +61,13 @@ Namespace Demo::Views {
           "  </StackPanel>" +
           "  <Grid Rows='Auto,*' Columns='*,*' Margin='5' Dock='Fill'>" +
           "    <StackPanel Row='0' Column='0' ColumnSpan='2' Orientation='Horizontal' Spacing='10' Margin='0,0,0,10'>" +
-          "      <Label Text='Titre:' Width='45' Height='24'/>" +
-          "      <TextBox Name='txtInput' Text='{Binding Path=TaskInput, Mode=TwoWay}' Placeholder='Entrez le titre d\\'une tache...' Width='220' Height='26'/>" +
-          "      <ComboBox Name='cboCategory' Items='Composants UI,Services MVVM,Vues Declaratives,Moteur de Liaison' SelectedIndex='0' Width='170' Height='26'/>" +
-          "      <Button Text='Ajouter' Command='{Binding AddTaskCommand}' Width='85' Height='28'/>" +
+          "      <Label Text='Title:' Width='45' Height='24'/>" +
+          "      <TextBox Name='txtInput' Text='{Binding Path=TaskInput, Mode=TwoWay}' Placeholder='Enter task title...' Width='220' Height='26'/>" +
+          "      <Label Text='Category:' Width='70' Height='24'/>" +
+          "      <ComboBox Name='cboCategory' Items='UI Components,MVVM Services,Declarative Views,Binding Engine' SelectedIndex='0' Width='170' Height='26'/>" +
+          "      <Button Text='Add' Click='AddTask' Width='85' Height='28'/>" +
           "    </StackPanel>" +
-          "    <ListIcon Name='lstTasks' Row='1' Column='0' ColumnSpan='2' Columns='ID:50,Titre:240,Categorie:160,Statut:100' GridLines='true' FullRowSelect='true' Margin='0'/>" +
+          "    <ListIcon Name='lstTasks' Row='1' Column='0' ColumnSpan='2' Columns='ID:50,Title:240,Category:160,Status:100' GridLines='true' FullRowSelect='true' Margin='0'/>" +
           "  </Grid>" +
           "</DockPanel>" +
           "</Window>"

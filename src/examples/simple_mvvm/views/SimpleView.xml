@@ -9,10 +9,10 @@
     <StackPanel Dock="Fill" Orientation="Vertical" Spacing="8" Margin="15,10">
       <Label Text="Actions (Click or Hover):" Height="20"/>
       <StackPanel Orientation="Horizontal" Spacing="10" Height="36">
-        <Button Name="btn1" Text="Button 1" Command="{Binding ClickBtn1Command}" Width="100" Height="32"/>
-        <Button Name="btn2" Text="Button 2" Command="{Binding ClickBtn2Command}" Width="100" Height="32"/>
-        <Button Name="btn3" Text="Button 3" Command="{Binding ClickBtn3Command}" Width="100" Height="32"/>
-        <Button Name="btnReset" Text="Reset" Command="{Binding ResetCommand}" Width="90" Height="32"/>
+        <Button Name="btn1" Text="Button 1" Click="ClickBtn1" Width="100" Height="32"/>
+        <Button Name="btn2" Text="Button 2" Click="ClickBtn2" Width="100" Height="32"/>
+        <Button Name="btn3" Text="Button 3" Click="ClickBtn3" Width="100" Height="32"/>
+        <Button Name="btnReset" Text="Reset" Click="Reset" Width="90" Height="32"/>
       </StackPanel>
       <Label Text="Click Notification:" Margin="0,5,0,0" Height="20"/>
       <TextBox Name="txtClick" Text="{Binding ClickMessage}" Height="28"/>

@@ -222,9 +222,13 @@ Namespace UI {
         UI_MVVM_RegisterBinding(*comp, "Value", *vm, propName\s, modeVal\i)
       EndIf
 
-      ; 4. Command Binding
+      ; 4. Command / Click Binding
       Protected cmdAttr.s = GetXMLAttribute(node, "Command")
       If cmdAttr = "" : cmdAttr = GetXMLAttribute(node, "command") : EndIf
+      If cmdAttr = "" : cmdAttr = GetXMLAttribute(node, "Click") : EndIf
+      If cmdAttr = "" : cmdAttr = GetXMLAttribute(node, "click") : EndIf
+      If cmdAttr = "" : cmdAttr = GetXMLAttribute(node, "OnClick") : EndIf
+      If cmdAttr = "" : cmdAttr = GetXMLAttribute(node, "onclick") : EndIf
       If cmdAttr <> ""
         If This\ParseBindingExpression(cmdAttr, @propName, @modeVal)
           UI_MVVM_RegisterCommandBinding(*comp, *vm, propName\s)

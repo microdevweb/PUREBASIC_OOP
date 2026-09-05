@@ -1,18 +1,11 @@
 ; ============================================================================
 ; PureBasic OOP MVVM Demo - TaskViewModel.pbi
 ; Presentation State, Observable Properties and Commands
+; Author:      MicrodevWeb
 ; ============================================================================
 
 XIncludeFile "../../../ui/UI.pbi"
 XIncludeFile "../models/TaskModel.pbi"
-
-; Forward command procedure declarations
-Declare TaskViewModel_OnAddTask(*param)
-Declare TaskViewModel_OnClearTasks(*param)
-Declare TaskViewModel_OnRefresh(*param)
-Declare TaskViewModel_OnExport(*param)
-
-Global *CurrentTaskViewModel = 0
 
 Namespace Demo::ViewModels {
 
@@ -22,38 +15,47 @@ Namespace Demo::ViewModels {
 
     Public Method Init() {
       Super::Init()
-      *CurrentTaskViewModel = This
       This\taskCounter = 0
       This\*tasksCollection = New UI::MVVM::ObservableCollection()
 
       ; 1. Initial State
-      This\SetString("TaskInput", "")
-      This\SetString("FilterQuery", "")
-      This\SetString("Category", "Composants UI")
-      This\SetString("StatusMessage", "Architecture MVVM active - Pret")
-      This\SetString("TasksCountText", "0 taches")
-      This\SetInt("ProgressValue", 60)
-      This\SetBool("AutoRefresh", #True)
-      This\SetBool("DarkMode", #True)
+      This\Set("TaskInput", "")
+      This\Set("FilterQuery", "")
+      This\Set("Category", "UI Components")
+      This\Set("StatusMessage", "MVVM Architecture active - Ready")
+      This\Set("TasksCountText", "0 tasks")
+      This\Set("ProgressValue", 60)
+      This\Set("AutoRefresh", #True)
+      This\Set("DarkMode", #True)
 
-      ; 2. Register RelayCommands
-      Protected *cmdAdd.UI::MVVM::RelayCommand = New UI::MVVM::RelayCommand(@TaskViewModel_OnAddTask())
-      This\RegisterCommand("AddTaskCommand", *cmdAdd)
+      ; 2. Initial Sample Data
+      This\AddTask("ObservableObject.pbi", "MVVM Services")
+      This\AddTask("RelayCommand.pbi", "MVVM Services")
+      This\AddTask("TaskView.xml", "Declarative Views")
+      This\AddTask("BindingEngine.pbi", "Binding Engine")
+    }
 
-      Protected *cmdClear.UI::MVVM::RelayCommand = New UI::MVVM::RelayCommand(@TaskViewModel_OnClearTasks())
-      This\RegisterCommand("ClearTasksCommand", *cmdClear)
+    ; Direct virtual command dispatcher
+    Public Method.b OnCommand(cmd.s, *param = 0) {
+      Select cmd
+        Case "AddTaskCommand", "AddTask", "OnAddTask"
+          This\HandleAddFromUI()
+          ProcedureReturn #True
 
-      Protected *cmdRefresh.UI::MVVM::RelayCommand = New UI::MVVM::RelayCommand(@TaskViewModel_OnRefresh())
-      This\RegisterCommand("RefreshCommand", *cmdRefresh)
+        Case "ClearTasksCommand", "ClearTasks", "OnClearTasks"
+          This\ClearAllTasks()
+          ProcedureReturn #True
 
-      Protected *cmdExport.UI::MVVM::RelayCommand = New UI::MVVM::RelayCommand(@TaskViewModel_OnExport())
-      This\RegisterCommand("ExportCommand", *cmdExport)
+        Case "RefreshCommand", "Refresh", "OnRefresh"
+          This\Set("StatusMessage", "Data synchronized with ViewModel.")
+          ProcedureReturn #True
 
-      ; 3. Initial Sample Data
-      This\AddTask("ObservableObject.pbi", "Services MVVM")
-      This\AddTask("RelayCommand.pbi", "Services MVVM")
-      This\AddTask("TaskView.xml", "Vues Declaratives")
-      This\AddTask("BindingEngine.pbi", "Moteur de Liaison")
+        Case "ExportCommand", "Export", "OnExport"
+          This\Set("StatusMessage", "Data export completed.")
+          ProcedureReturn #True
+      EndSelect
+
+      ProcedureReturn #False
     }
 
     Public Method.i GetTasksCollection() {
@@ -66,32 +68,32 @@ Namespace Demo::ViewModels {
       Protected *item.Demo::Models::TaskItem = New Demo::Models::TaskItem(This\taskCounter, title, category)
       This\*tasksCollection\Add(*item\ToTableRow())
       This\UpdateCountText()
-      This\SetString("StatusMessage", "Tache '" + title + "' ajoutee avec succes.")
+      This\Set("StatusMessage", "Task '" + title + "' added successfully.")
     }
 
     Public Method UpdateCountText() {
       Protected cnt.i = This\*tasksCollection\Count()
-      This\SetString("TasksCountText", Str(cnt) + " tache(s) enregistree(s)")
-      This\SetInt("ProgressValue", cnt * 20)
+      This\Set("TasksCountText", Str(cnt) + " task(s) recorded")
+      This\Set("ProgressValue", cnt * 20)
     }
 
     Public Method ClearAllTasks() {
       This\*tasksCollection\Clear()
       This\taskCounter = 0
       This\UpdateCountText()
-      This\SetString("StatusMessage", "Toutes les taches ont ete supprimees.")
+      This\Set("StatusMessage", "All tasks cleared.")
     }
 
     Public Method HandleAddFromUI() {
-      Protected inputTitle.s = Trim(This\GetString("TaskInput"))
+      Protected inputTitle.s = Trim(This\Get("TaskInput"))
       If inputTitle = ""
-        This\SetString("StatusMessage", "Veuillez entrer un titre de tache.")
+        This\Set("StatusMessage", "Please enter a task title.")
         ProcedureReturn
       EndIf
-      Protected cat.s = This\GetString("Category")
+      Protected cat.s = This\Get("Category")
       If cat = "" : cat = "General" : EndIf
       This\AddTask(inputTitle, cat)
-      This\SetString("TaskInput", "")
+      This\Set("TaskInput", "")
     }
 
     Public Method Free() {
@@ -104,30 +106,3 @@ Namespace Demo::ViewModels {
 
 }
 
-Procedure TaskViewModel_OnAddTask(*param)
-  If *CurrentTaskViewModel
-    Protected *vm.Demo::ViewModels::TaskViewModel = *CurrentTaskViewModel
-    *vm\HandleAddFromUI()
-  EndIf
-EndProcedure
-
-Procedure TaskViewModel_OnClearTasks(*param)
-  If *CurrentTaskViewModel
-    Protected *vmClear.Demo::ViewModels::TaskViewModel = *CurrentTaskViewModel
-    *vmClear\ClearAllTasks()
-  EndIf
-EndProcedure
-
-Procedure TaskViewModel_OnRefresh(*param)
-  If *CurrentTaskViewModel
-    Protected *vmRef.Demo::ViewModels::TaskViewModel = *CurrentTaskViewModel
-    *vmRef\SetString("StatusMessage", "Donnees synchronisees avec le ViewModel.")
-  EndIf
-EndProcedure
-
-Procedure TaskViewModel_OnExport(*param)
-  If *CurrentTaskViewModel
-    Protected *vmExp.Demo::ViewModels::TaskViewModel = *CurrentTaskViewModel
-    *vmExp\SetString("StatusMessage", "Exportation des donnees terminee.")
-  EndIf
-EndProcedure

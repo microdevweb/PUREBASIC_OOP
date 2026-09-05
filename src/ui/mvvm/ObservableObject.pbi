@@ -71,6 +71,29 @@ Namespace UI::MVVM {
     }
 
     ; ------------------------------------------------------------------------
+    ; Universal & Short Get / Set Methods
+    ; ------------------------------------------------------------------------
+    Public Method.s Get(propName.s) {
+      ProcedureReturn This\GetValueAsString(propName)
+    }
+
+    Public Method.b Set(propName.s, val.s) {
+      ProcedureReturn This\SetString(propName, val)
+    }
+
+    Public Method.b Set(propName.s, val.i) {
+      ProcedureReturn This\SetInt(propName, val)
+    }
+
+    Public Method.b Set(propName.s, val.b) {
+      ProcedureReturn This\SetBool(propName, val)
+    }
+
+    Public Method.b Set(propName.s, val.d) {
+      ProcedureReturn This\SetDouble(propName, val)
+    }
+
+    ; ------------------------------------------------------------------------
     ; String Properties
     ; ------------------------------------------------------------------------
     Public Method.s GetString(propName.s) {
