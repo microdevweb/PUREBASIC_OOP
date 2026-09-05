@@ -91,6 +91,11 @@ Namespace UI {
             If (FindMapElement(UI_GadgetMap(), Str(evGadget))) {
               Protected *g.UI::Gadget = UI_GadgetMap()
               If (*g) {
+                ; Dispatch to MVVM Binding Engine
+                Protected mvvmEngine.UI::MVVM::BindingEngine
+                mvvmEngine\DispatchUIEvent(*g, evType)
+
+                ; Dispatch to Gadget virtual methods
                 Select (evType) {
                   Case #PB_EventType_LeftClick:
                     *g\OnClick()
@@ -104,6 +109,14 @@ Namespace UI {
                     *g\OnRightClick()
                   Default:
                     *g\OnCustomEvent(evType)
+                }
+
+                ; Notify parent window
+                If (FindMapElement(UI_WindowMap(), Str(evWin))) {
+                  Protected *wNotify.UI::Window = UI_WindowMap()
+                  If (*wNotify) {
+                    *wNotify\OnChildEvent(*g, evType)
+                  }
                 }
               }
             }

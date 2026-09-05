@@ -31,3 +31,6 @@ XIncludeFile "controls/ListIcon.pbi"
 
 ; Declarative XML / XAML Layout Loader
 XIncludeFile "XMLLoader.pbi"
+
+; MVVM (Model-View-ViewModel) Architecture
+XIncludeFile "mvvm/MVVM.pbi"

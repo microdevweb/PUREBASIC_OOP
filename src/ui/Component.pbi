@@ -75,6 +75,7 @@ Namespace UI {
     Protected desiredHeight.i
     Protected hasExplicitWidth.b
     Protected hasExplicitHeight.b
+    Protected dataContext.i
 
     Public Method Init() {
       This\isVisible = #True
@@ -85,6 +86,15 @@ Namespace UI {
       This\desiredHeight = 30
       This\hasExplicitWidth = #False
       This\hasExplicitHeight = #False
+      This\dataContext = 0
+    }
+
+    Public Method SetDataContext(*dc) {
+      This\dataContext = *dc
+    }
+
+    Public Method.i GetDataContext() {
+      ProcedureReturn This\dataContext
     }
 
     Public Method.i GetID() {

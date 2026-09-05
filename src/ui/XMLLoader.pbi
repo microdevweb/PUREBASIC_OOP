@@ -154,6 +154,85 @@ Namespace UI {
       If enStr = "FALSE" Or enStr = "0"
         *comp\SetEnabled(#False)
       EndIf
+
+      ; MVVM DataBindings
+      This\ApplyDataBindings(*comp, node, *targetWindow)
+    }
+
+    ; ------------------------------------------------------------------------
+    ; Helper: Parse {Binding Path=..., Mode=...}
+    ; ------------------------------------------------------------------------
+    Protected Method.b ParseBindingExpression(attrVal.s, *outPropName.STRING, *outMode.INTEGER) {
+      attrVal = Trim(attrVal)
+      If Left(attrVal, 1) = "{" And Right(attrVal, 1) = "}"
+        Protected inside.s = Trim(Mid(attrVal, 2, Len(attrVal) - 2))
+        If LCase(Left(inside, 7)) = "binding"
+          inside = Trim(Mid(inside, 8))
+          *outMode\i = #UI_BindingMode_OneWay
+          *outPropName\s = ""
+
+          Protected count.i = CountString(inside, ",") + 1
+          Protected i.i
+          For i = 1 To count
+            Protected part.s = Trim(StringField(inside, i, ","))
+            If LCase(Left(part, 5)) = "path="
+              *outPropName\s = Trim(Mid(part, 6))
+            ElseIf LCase(Left(part, 5)) = "mode="
+              Protected mStr.s = UCase(Trim(Mid(part, 6)))
+              If mStr = "TWOWAY"
+                *outMode\i = #UI_BindingMode_TwoWay
+              ElseIf mStr = "ONEWAY"
+                *outMode\i = #UI_BindingMode_OneWay
+              EndIf
+            ElseIf *outPropName\s = "" And Not FindString(part, "=")
+              *outPropName\s = part
+            EndIf
+          Next
+          ProcedureReturn #True
+        EndIf
+      EndIf
+      ProcedureReturn #False
+    }
+
+    Protected Method ApplyDataBindings(*comp.UI::Component, node.i, *targetWindow.UI::Window) {
+      If Not *comp Or Not *targetWindow : ProcedureReturn : EndIf
+      Protected *vm.UI::MVVM::ViewModelBase = *targetWindow\GetDataContext()
+      If Not *vm : ProcedureReturn : EndIf
+
+      Protected mvvmEngine.UI::MVVM::BindingEngine
+      Protected propName.STRING, modeVal.INTEGER
+
+      ; 1. Text Binding
+      Protected textAttr.s = GetXMLAttribute(node, "Text")
+      If textAttr = "" : textAttr = GetXMLAttribute(node, "text") : EndIf
+      If This\ParseBindingExpression(textAttr, @propName, @modeVal)
+        mvvmEngine\RegisterBinding(*comp, "Text", *vm, propName\s, modeVal\i)
+      EndIf
+
+      ; 2. Checked / State Binding
+      Protected chkAttr.s = GetXMLAttribute(node, "Checked")
+      If chkAttr = "" : chkAttr = GetXMLAttribute(node, "checked") : EndIf
+      If This\ParseBindingExpression(chkAttr, @propName, @modeVal)
+        mvvmEngine\RegisterBinding(*comp, "Checked", *vm, propName\s, modeVal\i)
+      EndIf
+
+      ; 3. Value / Progress Binding
+      Protected valAttr.s = GetXMLAttribute(node, "Value")
+      If valAttr = "" : valAttr = GetXMLAttribute(node, "value") : EndIf
+      If This\ParseBindingExpression(valAttr, @propName, @modeVal)
+        mvvmEngine\RegisterBinding(*comp, "Value", *vm, propName\s, modeVal\i)
+      EndIf
+
+      ; 4. Command Binding
+      Protected cmdAttr.s = GetXMLAttribute(node, "Command")
+      If cmdAttr = "" : cmdAttr = GetXMLAttribute(node, "command") : EndIf
+      If cmdAttr <> ""
+        If This\ParseBindingExpression(cmdAttr, @propName, @modeVal)
+          mvvmEngine\RegisterCommandBinding(*comp, *vm, propName\s)
+        Else
+          mvvmEngine\RegisterCommandBinding(*comp, *vm, cmdAttr)
+        EndIf
+      EndIf
     }
 
     ; ------------------------------------------------------------------------

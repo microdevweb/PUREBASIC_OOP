@@ -246,7 +246,18 @@ Namespace UI {
       ProcedureReturn 0
     }
 
-    Public Method.b LoadView(xmlPath.s) {
+    Public Method SetDataContext(*dc) {
+      This\dataContext = *dc
+    }
+
+    Public Method.i GetDataContext() {
+      ProcedureReturn This\dataContext
+    }
+
+    Public Method.b LoadView(xmlPath.s, *dataContext_p = 0) {
+      If (*dataContext_p) {
+        This\SetDataContext(*dataContext_p)
+      }
       Protected *loader.UI::XMLLoader = New UI::XMLLoader()
       Protected res.b = #False
       If (*loader) {
@@ -256,7 +267,10 @@ Namespace UI {
       ProcedureReturn res
     }
 
-    Public Method.b LoadViewFromString(xmlContent.s) {
+    Public Method.b LoadViewFromString(xmlContent.s, *dataContext_p = 0) {
+      If (*dataContext_p) {
+        This\SetDataContext(*dataContext_p)
+      }
       Protected *loader.UI::XMLLoader = New UI::XMLLoader()
       Protected res.b = #False
       If (*loader) {
