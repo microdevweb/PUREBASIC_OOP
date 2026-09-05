@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Window Title="PureBasic OOP - Démonstrateur XAML / XML UI" Width="720" Height="540"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../ui/schema/ui_layout.xsd">
+
+  <DockPanel LastChildFill="true">
+    
+    <!-- Header Toolbar (Dock Top) -->
+    <StackPanel Dock="Top" Orientation="Horizontal" Spacing="10" Margin="10" Height="40">
+      <Button Name="btnNew" Text="Nouveau" Width="100" Height="32"/>
+      <Button Name="btnSave" Text="Enregistrer" Width="100" Height="32"/>
+      <TextBox Name="txtSearch" Placeholder="Rechercher..." Width="220" Height="30"/>
+      <Button Name="btnSearch" Text="Filtrer" Width="80" Height="32"/>
+    </StackPanel>
+
+    <!-- Status Bar (Dock Bottom) -->
+    <StackPanel Dock="Bottom" Orientation="Horizontal" Spacing="15" Margin="8,4" Height="32">
+      <Label Name="lblStatus" Text="Prêt - Vue XAML/XML chargée avec succès" Width="320" Height="22"/>
+      <ProgressBar Name="pbProgress" Value="75" Width="160" Height="20"/>
+      <ToggleSwitch Name="toggleDark" Text="Mode Actif" Width="120" Height="24" Checked="true"/>
+    </StackPanel>
+
+    <!-- Left Sidebar (Dock Left) -->
+    <StackPanel Dock="Left" Orientation="Vertical" Spacing="8" Margin="10,0" Width="140">
+      <Label Text="Actions Rapides" Height="20"/>
+      <Button Name="btnAction1" Text="Synchroniser" Height="30"/>
+      <Button Name="btnAction2" Text="Exporter CSV" Height="30"/>
+      <Button Name="btnAction3" Text="Paramètres" Height="30"/>
+      <CheckBox Name="chkAutoRefresh" Text="Auto-refresh" Checked="true" Height="24"/>
+    </StackPanel>
+
+    <!-- Center Content: Grid with Form & List (Dock Fill) -->
+    <Grid Rows="Auto,*" Columns="*,*" Margin="5" Dock="Fill">
+      
+      <!-- Top Form: Name and Category inputs -->
+      <StackPanel Row="0" Column="0" ColumnSpan="2" Orientation="Horizontal" Spacing="10" Margin="0,0,0,10">
+        <Label Text="Nom:" Width="40" Height="24"/>
+        <TextBox Name="txtName" Placeholder="Entrez un élément..." Width="180" Height="26"/>
+        <Label Text="Catégorie:" Width="65" Height="24"/>
+        <ComboBox Name="cboCategory" Items="Composants UI,Services Backend,Plugins,Thèmes" SelectedIndex="0" Width="160" Height="26"/>
+        <Button Name="btnAdd" Text="Ajouter" Width="80" Height="28"/>
+      </StackPanel>
+
+      <!-- Bottom ListIcon -->
+      <ListIcon Name="lstItems" Row="1" Column="0" ColumnSpan="2" 
+                Columns="ID:50,Nom:200,Catégorie:160,Statut:100" 
+                GridLines="true" FullRowSelect="true" Margin="0"/>
+    </Grid>
+
+  </DockPanel>
+
+</Window>

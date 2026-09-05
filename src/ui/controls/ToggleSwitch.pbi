@@ -1,4 +1,4 @@
-﻿; ============================================================================
+; ============================================================================
 ; PureBasic OOP GUI Framework - ToggleSwitch.pbi
 ; Modern iOS/Material-style animated toggle switch CustomGadget with Multi-Constructors
 ; Author:      MicrodevWeb
@@ -6,9 +6,9 @@
 
 XIncludeFile "../CustomGadget.pbi"
 
-Namespace UI::Controls {
+Namespace UI {
 
-  Class ToggleSwitch Extends UI::CustomGadget {
+  Class ToggleSwitch Extends CustomGadget {
     Protected isChecked.b
     Protected activeColor.i
     Protected inactiveColor.i

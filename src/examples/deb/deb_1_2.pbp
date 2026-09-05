@@ -7,7 +7,7 @@
   <section name="data">
     <explorer view="" pattern="0"/>
     <log show="1"/>
-    <lastopen date="2026-09-03 13:32" user="u237685" host="CSL0111"/>
+    <lastopen date="2026-09-05 09:28" user="u237685" host="CSL0111"/>
   </section>
   <section name="files">
     <file name="Main.pb">
@@ -16,7 +16,7 @@
     </file>
     <file name="views\MainWindow.pbi">
       <config load="0" scan="1" panel="1" warn="1" lastopen="1" sortindex="2" panelstate="++"/>
-      <fingerprint md5="8c14d3b84544b007a19e95b00ca79e6c"/>
+      <fingerprint md5="cfb824dfedf74db2aa1d20530e74c170"/>
     </file>
   </section>
   <section name="targets">

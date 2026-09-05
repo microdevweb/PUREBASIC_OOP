@@ -1,4 +1,4 @@
-﻿; ============================================================================
+; ============================================================================
 ; PureBasic OOP GUI Framework - StackPanel.pbi
 ; Linear layout panel arranging child components sequentially (Vertical or Horizontal)
 ; Author:      MicrodevWeb
@@ -52,6 +52,94 @@ Namespace UI::Layouts {
 
     Public Method.i GetSpacing() {
       ProcedureReturn This\spacing
+    }
+
+    Public Method.i GetDesiredHeight() {
+      If This\hasExplicitHeight And This\height > 0
+        ProcedureReturn This\height
+      EndIf
+
+      Protected totalH.i = 0
+      Protected maxH.i = 0
+      Protected count.i = 0
+
+      ForEach This\children()
+        Protected *child.UI::Component = This\children()
+        If *child
+          count = count + 1
+          Protected chH.i = *child\GetDesiredHeight()
+          If *child\GetMinHeight() > 0 And chH < *child\GetMinHeight()
+            chH = *child\GetMinHeight()
+          EndIf
+          If *child\GetMaxHeight() > 0 And chH > *child\GetMaxHeight()
+            chH = *child\GetMaxHeight()
+          EndIf
+          chH = chH + *child\GetMarginTop() + *child\GetMarginBottom()
+
+          If This\orientation = #UI_Orientation_Vertical
+            totalH = totalH + chH
+          Else
+            If chH > maxH : maxH = chH : EndIf
+          EndIf
+        EndIf
+      Next
+
+      If This\orientation = #UI_Orientation_Vertical
+        If count > 1
+          totalH = totalH + (count - 1) * This\spacing
+        EndIf
+        totalH = totalH + This\paddingTop + This\paddingBottom
+        If totalH <= 0 : totalH = 30 : EndIf
+        ProcedureReturn totalH
+      Else
+        maxH = maxH + This\paddingTop + This\paddingBottom
+        If maxH <= 0 : maxH = 30 : EndIf
+        ProcedureReturn maxH
+      EndIf
+    }
+
+    Public Method.i GetDesiredWidth() {
+      If This\hasExplicitWidth And This\width > 0
+        ProcedureReturn This\width
+      EndIf
+
+      Protected totalW.i = 0
+      Protected maxW.i = 0
+      Protected count.i = 0
+
+      ForEach This\children()
+        Protected *child.UI::Component = This\children()
+        If *child
+          count = count + 1
+          Protected chW.i = *child\GetDesiredWidth()
+          If *child\GetMinWidth() > 0 And chW < *child\GetMinWidth()
+            chW = *child\GetMinWidth()
+          EndIf
+          If *child\GetMaxWidth() > 0 And chW > *child\GetMaxWidth()
+            chW = *child\GetMaxWidth()
+          EndIf
+          chW = chW + *child\GetMarginLeft() + *child\GetMarginRight()
+
+          If This\orientation = #UI_Orientation_Horizontal
+            totalW = totalW + chW
+          Else
+            If chW > maxW : maxW = chW : EndIf
+          EndIf
+        EndIf
+      Next
+
+      If This\orientation = #UI_Orientation_Horizontal
+        If count > 1
+          totalW = totalW + (count - 1) * This\spacing
+        EndIf
+        totalW = totalW + This\paddingLeft + This\paddingRight
+        If totalW <= 0 : totalW = 100 : EndIf
+        ProcedureReturn totalW
+      Else
+        maxW = maxW + This\paddingLeft + This\paddingRight
+        If maxW <= 0 : maxW = 100 : EndIf
+        ProcedureReturn maxW
+      EndIf
     }
 
     Public Method Arrange(nx.i, ny.i, nw.i, nh.i) {

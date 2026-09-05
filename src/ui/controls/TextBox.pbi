@@ -1,4 +1,4 @@
-﻿; ============================================================================
+; ============================================================================
 ; PureBasic OOP GUI Framework - TextBox.pbi
 ; Standard Text Input / StringGadget wrapper with Multi-Constructors
 ; Author:      MicrodevWeb
@@ -76,6 +76,16 @@ Namespace UI {
         ProcedureReturn GetGadgetAttribute(This\id, #PB_String_ReadOnly)
       }
       ProcedureReturn #False
+    }
+
+    Public Method SetPlaceholder(ph_p.s) {
+      If (This\id And IsGadget(This\id)) {
+        CompilerIf #PB_Compiler_OS = #PB_OS_Windows
+          SendMessage_(GadgetID(This\id), 5377, #True, @ph_p) ; #EM_SETCUEBANNER = 5377
+        CompilerElse
+          GadgetToolTip(This\id, ph_p)
+        CompilerEndIf
+      }
     }
 
     Public Method SetReadOnly(ro.b) {

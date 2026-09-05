@@ -1,6 +1,6 @@
 ﻿# PBO_SOURCEMAP_V1
 SOURCE:src\examples\deb\Main.pb
-TARGET:src\examples\deb\Main_generated.pb
+TARGET:-o
 MAP:
 12:7
 13:8

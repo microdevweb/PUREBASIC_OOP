@@ -1,4 +1,4 @@
-﻿; ============================================================================
+; ============================================================================
 ; PureBasic OOP GUI Framework - UI.pbi (Master Header)
 ; Include this file to access the entire OOP UI subsystem
 ; Author:      MicrodevWeb
@@ -28,3 +28,6 @@ XIncludeFile "controls/ComboBox.pbi"
 ; Custom Controls
 XIncludeFile "controls/ToggleSwitch.pbi"
 XIncludeFile "controls/ListIcon.pbi"
+
+; Declarative XML / XAML Layout Loader
+XIncludeFile "XMLLoader.pbi"

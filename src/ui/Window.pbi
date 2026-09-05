@@ -1,4 +1,4 @@
-﻿; ============================================================================
+; ============================================================================
 ; PureBasic OOP GUI Framework - Window.pbi
 ; Standard GUI Window Wrapper with Multi-Constructors & Dynamic Accessors
 ; Author:      MicrodevWeb
@@ -13,6 +13,7 @@ Namespace UI {
     Protected title.s
     Protected flags.i
     Protected parentID.i
+    Protected Map *namedControls.UI::Component()
 
     ; ------------------------------------------------------------------------
     ; Internal Window Creation Helper
@@ -51,6 +52,15 @@ Namespace UI {
     ; ------------------------------------------------------------------------
     ; 1. Multiple Overloaded Constructors
     ; ------------------------------------------------------------------------
+
+    ; Constructeur 0: Vierge (pret pour LoadView)
+    Public Method Init() {
+      Super::Init()
+      This\id = 0
+      This\title = "Window"
+      This\width = 800
+      This\height = 600
+    }
 
     ; Constructeur 1: Titre uniquement (800x600, Centree a l'ecran, Menu Systeme + Reduire + Agrandir + Redimensionnable)
     Public Method Init(title_p.s) {
@@ -223,10 +233,27 @@ Namespace UI {
       ProcedureReturn This\rootContent
     }
 
-    Public Method UpdateLayout() {
-      If (This\rootContent And This\id And IsWindow(This\id)) {
-        This\rootContent\Arrange(0, 0, WindowWidth(This\id), WindowHeight(This\id))
+    Public Method RegisterControl(name_p.s, *ctrl.UI::Component) {
+      If (name_p <> "" And *ctrl) {
+        This\namedControls(LCase(name_p)) = *ctrl
       }
+    }
+
+    Public Method.i FindControl(name_p.s) {
+      If (FindMapElement(This\namedControls(), LCase(name_p))) {
+        ProcedureReturn This\namedControls()
+      }
+      ProcedureReturn 0
+    }
+
+    Public Method.b LoadView(xmlPath.s) {
+      Protected loader.UI::XMLLoader
+      ProcedureReturn loader\LoadFromFile(xmlPath, This)
+    }
+
+    Public Method.b LoadViewFromString(xmlContent.s) {
+      Protected loader.UI::XMLLoader
+      ProcedureReturn loader\LoadFromString(xmlContent, This)
     }
 
     ; ------------------------------------------------------------------------

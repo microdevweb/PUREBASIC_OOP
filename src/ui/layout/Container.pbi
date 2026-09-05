@@ -1,4 +1,4 @@
-﻿; ============================================================================
+; ============================================================================
 ; PureBasic OOP GUI Framework - Container.pbi
 ; Base abstract class for all responsive layout panels
 ; Author:      MicrodevWeb
@@ -111,6 +111,21 @@ Namespace UI::Layouts {
 
     Public Method.i GetChildCount() {
       ProcedureReturn ListSize(This\children())
+    }
+
+    Public Method SetWidth(nw.i) {
+      Super::SetWidth(nw)
+      This\UpdateLayout()
+    }
+
+    Public Method SetHeight(nh.i) {
+      Super::SetHeight(nh)
+      This\UpdateLayout()
+    }
+
+    Public Method SetSize(nw.i, nh.i) {
+      Super::SetSize(nw, nh)
+      This\UpdateLayout()
     }
 
     Public Method UpdateLayout() {

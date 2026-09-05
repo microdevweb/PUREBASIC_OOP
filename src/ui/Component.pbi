@@ -1,4 +1,4 @@
-﻿; ============================================================================
+; ============================================================================
 ; PureBasic OOP GUI Framework - Component.pbi
 ; Base abstract class for all PureBasic UI elements & Layouts
 ; Author:      MicrodevWeb
@@ -73,6 +73,8 @@ Namespace UI {
     Protected maxHeight.i
     Protected desiredWidth.i
     Protected desiredHeight.i
+    Protected hasExplicitWidth.b
+    Protected hasExplicitHeight.b
 
     Public Method Init() {
       This\isVisible = #True
@@ -81,6 +83,8 @@ Namespace UI {
       This\verticalAlignment = #UI_Align_VStretch
       This\desiredWidth = 100
       This\desiredHeight = 30
+      This\hasExplicitWidth = #False
+      This\hasExplicitHeight = #False
     }
 
     Public Method.i GetID() {
@@ -122,6 +126,7 @@ Namespace UI {
     Public Method SetWidth(nw.i) {
       This\width = nw
       This\desiredWidth = nw
+      This\hasExplicitWidth = #True
     }
 
     Public Method.i GetHeight() {
@@ -131,6 +136,25 @@ Namespace UI {
     Public Method SetHeight(nh.i) {
       This\height = nh
       This\desiredHeight = nh
+      This\hasExplicitHeight = #True
+    }
+
+    Public Method SetAutoWidth() {
+      This\hasExplicitWidth = #False
+      This\desiredWidth = 0
+    }
+
+    Public Method SetAutoHeight() {
+      This\hasExplicitHeight = #False
+      This\desiredHeight = 0
+    }
+
+    Public Method.b HasExplicitWidth() {
+      ProcedureReturn This\hasExplicitWidth
+    }
+
+    Public Method.b HasExplicitHeight() {
+      ProcedureReturn This\hasExplicitHeight
     }
 
     Public Method SetLocation(nx.i, ny.i) {
@@ -143,6 +167,8 @@ Namespace UI {
       This\height = nh
       This\desiredWidth = nw
       This\desiredHeight = nh
+      This\hasExplicitWidth = #True
+      This\hasExplicitHeight = #True
     }
 
     Public Method SetPosition(nx.i, ny.i, nw.i, nh.i) {

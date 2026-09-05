@@ -3251,7 +3251,7 @@ Procedure MainWindow_Init(*This.MainWindow_Inst)
       *This\button_layout\AddChild(*This\bt_delete)
      
       ; = main layout
-      *This\main_layout = New_UI_Layouts_DockPanel_void()
+      *This\main_layout = New UI_Layouts_DockPanel
       *This\main_layout\SetDock(*This\button_layout,#UI_Dock_Top)
       *This_vt\SetContent(*This\main_layout)
 EndProcedure

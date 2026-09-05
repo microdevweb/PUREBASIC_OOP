@@ -154,7 +154,10 @@ Interface UI_Window_vt Extends UI_Component_vt
   SetParentID(p.i)
   SetContent(*content.UI_Component_vt)
   GetContent.i()
-  UpdateLayout()
+  RegisterControl(name_p.s, *ctrl.UI_Component_vt)
+  FindControl.i(name_p.s)
+  LoadView.b(xmlPath.s)
+  LoadViewFromString.b(xmlContent.s)
   Close()
   Free()
   OnClose.b()
@@ -228,6 +231,7 @@ EndInterface
 
 Interface UI_TextBox_vt Extends UI_Gadget_vt
   IsReadOnly.b()
+  SetPlaceholder(ph_p.s)
   SetReadOnly(ro.b)
 EndInterface
 
@@ -257,7 +261,7 @@ Interface UI_ComboBox_vt Extends UI_Gadget_vt
   Clear()
 EndInterface
 
-Interface UI_Controls_ToggleSwitch_vt Extends UI_CustomGadget_vt
+Interface UI_ToggleSwitch_vt Extends UI_CustomGadget_vt
   IsChecked.b()
   SetChecked(state.b)
 EndInterface
@@ -276,7 +280,16 @@ Interface UI_ListIcon_vt Extends UI_Gadget_vt
   GetItemData.i(item.i)
 EndInterface
 
-Interface MainWindow_vt Extends UI_Window_vt
+Interface UI_XMLLoader_vt
+  ParseBoxValues(valStr.s, *outL.INTEGER, *outT.INTEGER, *outR.INTEGER, *outB.INTEGER)
+  ApplyCommonAttributes(*comp.UI_Component_vt, node.i, *targetWindow.UI_Window_vt)
+  ParseNode.i(node.i, *targetWindow.UI_Window_vt, *parentContainer.UI_Layouts_Container_vt)
+  LoadFromFile.b(xmlPath.s, *targetWindow.UI_Window_vt)
+  LoadFromString.b(xmlContent.s, *targetWindow.UI_Window_vt)
+EndInterface
+
+Interface Demo_MainWindow_vt Extends UI_Window_vt
+  AddDemoItem(nom.s, cat.s, statut.s)
 EndInterface
 
 ; ----------------------------------------------------------------------------
@@ -319,6 +332,7 @@ Structure UI_Window_Inst Extends UI_Component_Inst
   title.s
   flags.i
   parentID.i
+  Map *namedControls.UI_Component_vt()
   *rootContent.UI_Component_vt
 EndStructure
 
@@ -384,7 +398,7 @@ EndStructure
 Structure UI_ComboBox_Inst Extends UI_Gadget_Inst
 EndStructure
 
-Structure UI_Controls_ToggleSwitch_Inst Extends UI_CustomGadget_Inst
+Structure UI_ToggleSwitch_Inst Extends UI_CustomGadget_Inst
   isChecked.b
   activeColor.i
   inactiveColor.i
@@ -393,12 +407,24 @@ EndStructure
 Structure UI_ListIcon_Inst Extends UI_Gadget_Inst
 EndStructure
 
-Structure MainWindow_Inst Extends UI_Window_Inst
-  *bt_new.UI_Button_vt
-  *bt_edit.UI_Button_vt
-  *bt_delete.UI_Button_vt
-  *main_layout.UI_Layouts_DockPanel_vt
-  *button_layout.UI_Layouts_StackPanel_vt
+Structure UI_XMLLoader_Inst
+  *VTable.UI_XMLLoader_vt
+EndStructure
+
+Structure Demo_MainWindow_Inst Extends UI_Window_Inst
+  *btnAdd.UI_Button_vt
+  *btnNew.UI_Button_vt
+  *btnSave.UI_Button_vt
+  *btnSearch.UI_Button_vt
+  *txtName.UI_TextBox_vt
+  *txtSearch.UI_TextBox_vt
+  *cboCategory.UI_ComboBox_vt
+  *lstItems.UI_ListIcon_vt
+  *lblStatus.UI_Label_vt
+  *pbProgress.UI_ProgressBar_vt
+  *toggleDark.UI_ToggleSwitch_vt
+  *chkAutoRefresh.UI_CheckBox_vt
+  itemCount.i
 EndStructure
 
 ; ----------------------------------------------------------------------------
@@ -408,7 +434,6 @@ EndStructure
 Global NewMap UI_GadgetMap.i()
 Global NewMap UI_WindowMap.i()
 Declare UI_GlobalSizeCallback()
-Global *mainWin.MainWindow_vt,*app.UI_Application_vt
 
 ; ----------------------------------------------------------------------------
 ; 3. METHOD PROCEDURES IMPLEMENTATION
@@ -483,6 +508,7 @@ Declare UI_Gadget_OnLostFocus(*This.UI_Gadget_Inst)
 Declare UI_Gadget_OnRightClick(*This.UI_Gadget_Inst)
 Declare UI_Gadget_OnCustomEvent(*This.UI_Gadget_Inst, eventType.i)
 Declare UI_Window_CreateWindowInternal(*This.UI_Window_Inst, title_p.s, x_p.i, y_p.i, w_p.i, h_p.i, flags_p.i, parent_p.i)
+Declare UI_Window_Init_void(*This.UI_Window_Inst)
 Declare UI_Window_Init_s(*This.UI_Window_Inst, title_p.s)
 Declare UI_Window_Init_s_i_i(*This.UI_Window_Inst, title_p.s, w_p.i, h_p.i)
 Declare UI_Window_Init_s_i_i_i(*This.UI_Window_Inst, title_p.s, w_p.i, h_p.i, flags_p.i)
@@ -510,7 +536,10 @@ Declare UI_Window_SetVisible(*This.UI_Window_Inst, v.b)
 Declare UI_Window_SetEnabled(*This.UI_Window_Inst, e.b)
 Declare UI_Window_SetContent(*This.UI_Window_Inst, *content.UI_Component_vt)
 Declare.i UI_Window_GetContent(*This.UI_Window_Inst)
-Declare UI_Window_UpdateLayout(*This.UI_Window_Inst)
+Declare UI_Window_RegisterControl(*This.UI_Window_Inst, name_p.s, *ctrl.UI_Component_vt)
+Declare.i UI_Window_FindControl(*This.UI_Window_Inst, name_p.s)
+Declare.b UI_Window_LoadView(*This.UI_Window_Inst, xmlPath.s)
+Declare.b UI_Window_LoadViewFromString(*This.UI_Window_Inst, xmlContent.s)
 Declare UI_Window_Close(*This.UI_Window_Inst)
 Declare UI_Window_Free(*This.UI_Window_Inst)
 Declare.b UI_Window_OnClose(*This.UI_Window_Inst)
@@ -598,6 +627,7 @@ Declare UI_TextBox_Init_s_i_i(*This.UI_TextBox_Inst, defaultText_p.s, w_p.i, h_p
 Declare UI_TextBox_Init_i_i_i_i_s(*This.UI_TextBox_Inst, x_p.i, y_p.i, w_p.i, h_p.i, defaultText_p.s)
 Declare UI_TextBox_Init_i_i_i_i_s_i(*This.UI_TextBox_Inst, x_p.i, y_p.i, w_p.i, h_p.i, defaultText_p.s, flags_p.i)
 Declare.b UI_TextBox_IsReadOnly(*This.UI_TextBox_Inst)
+Declare UI_TextBox_SetPlaceholder(*This.UI_TextBox_Inst, ph_p.s)
 Declare UI_TextBox_SetReadOnly(*This.UI_TextBox_Inst, ro.b)
 Declare UI_TextBox_Free(*This.UI_TextBox_Inst)
 Declare UI_Label_Init_s(*This.UI_Label_Inst, text_p.s)
@@ -636,14 +666,14 @@ Declare UI_ComboBox_SetSelectedIndex(*This.UI_ComboBox_Inst, idx.i)
 Declare.s UI_ComboBox_GetSelectedItem(*This.UI_ComboBox_Inst)
 Declare UI_ComboBox_Clear(*This.UI_ComboBox_Inst)
 Declare UI_ComboBox_Free(*This.UI_ComboBox_Inst)
-Declare UI_Controls_ToggleSwitch_Init_void(*This.UI_Controls_ToggleSwitch_Inst)
-Declare UI_Controls_ToggleSwitch_Init_b(*This.UI_Controls_ToggleSwitch_Inst, defaultState_p.b)
-Declare UI_Controls_ToggleSwitch_Init_i_i_b(*This.UI_Controls_ToggleSwitch_Inst, w_p.i, h_p.i, defaultState_p.b)
-Declare UI_Controls_ToggleSwitch_Init_i_i_i_i_b(*This.UI_Controls_ToggleSwitch_Inst, x_p.i, y_p.i, w_p.i, h_p.i, defaultState_p.b)
-Declare.b UI_Controls_ToggleSwitch_IsChecked(*This.UI_Controls_ToggleSwitch_Inst)
-Declare UI_Controls_ToggleSwitch_SetChecked(*This.UI_Controls_ToggleSwitch_Inst, state.b)
-Declare UI_Controls_ToggleSwitch_OnClick(*This.UI_Controls_ToggleSwitch_Inst)
-Declare UI_Controls_ToggleSwitch_OnPaint(*This.UI_Controls_ToggleSwitch_Inst, w.i, h.i)
+Declare UI_ToggleSwitch_Init_void(*This.UI_ToggleSwitch_Inst)
+Declare UI_ToggleSwitch_Init_b(*This.UI_ToggleSwitch_Inst, defaultState_p.b)
+Declare UI_ToggleSwitch_Init_i_i_b(*This.UI_ToggleSwitch_Inst, w_p.i, h_p.i, defaultState_p.b)
+Declare UI_ToggleSwitch_Init_i_i_i_i_b(*This.UI_ToggleSwitch_Inst, x_p.i, y_p.i, w_p.i, h_p.i, defaultState_p.b)
+Declare.b UI_ToggleSwitch_IsChecked(*This.UI_ToggleSwitch_Inst)
+Declare UI_ToggleSwitch_SetChecked(*This.UI_ToggleSwitch_Inst, state.b)
+Declare UI_ToggleSwitch_OnClick(*This.UI_ToggleSwitch_Inst)
+Declare UI_ToggleSwitch_OnPaint(*This.UI_ToggleSwitch_Inst, w.i, h.i)
 Declare UI_ListIcon_Init_s_i(*This.UI_ListIcon_Inst, title_p.s, colWidth_p.i)
 Declare UI_ListIcon_Init_s_i_i(*This.UI_ListIcon_Inst, title_p.s, colWidth_p.i, flags_p.i)
 Declare UI_ListIcon_Init_i_i_i_i_s_i(*This.UI_ListIcon_Inst, x_p.i, y_p.i, w_p.i, h_p.i, title_p.s, colWidth_p.i)
@@ -660,8 +690,16 @@ Declare UI_ListIcon_Clear(*This.UI_ListIcon_Inst)
 Declare UI_ListIcon_SetItemData(*This.UI_ListIcon_Inst, item.i, value.i)
 Declare.i UI_ListIcon_GetItemData(*This.UI_ListIcon_Inst, item.i)
 Declare UI_ListIcon_Free(*This.UI_ListIcon_Inst)
-Declare MainWindow_Init(*This.MainWindow_Inst)
+Declare UI_XMLLoader_ParseBoxValues(*This.UI_XMLLoader_Inst, valStr.s, *outL.INTEGER, *outT.INTEGER, *outR.INTEGER, *outB.INTEGER)
+Declare UI_XMLLoader_ApplyCommonAttributes(*This.UI_XMLLoader_Inst, *comp.UI_Component_vt, node.i, *targetWindow.UI_Window_vt)
+Declare.i UI_XMLLoader_ParseNode(*This.UI_XMLLoader_Inst, node.i, *targetWindow.UI_Window_vt, *parentContainer.UI_Layouts_Container_vt)
+Declare.b UI_XMLLoader_LoadFromFile(*This.UI_XMLLoader_Inst, xmlPath.s, *targetWindow.UI_Window_vt)
+Declare.b UI_XMLLoader_LoadFromString(*This.UI_XMLLoader_Inst, xmlContent.s, *targetWindow.UI_Window_vt)
+Declare Demo_MainWindow_Init(*This.Demo_MainWindow_Inst)
+Declare Demo_MainWindow_AddDemoItem(*This.Demo_MainWindow_Inst, nom.s, cat.s, statut.s)
+Declare Demo_MainWindow_OnChildEvent(*This.Demo_MainWindow_Inst, *child.UI_Gadget_vt, eventType.i)
 
+Declare.i New_UI_Window_void()
 Declare.i New_UI_Window_s(title_p.s)
 Declare.i New_UI_Window_s_i_i(title_p.s, w_p.i, h_p.i)
 Declare.i New_UI_Window_s_i_i_i(title_p.s, w_p.i, h_p.i, flags_p.i)
@@ -724,18 +762,20 @@ Declare.i New_UI_ComboBox_i_i(w_p.i, h_p.i)
 Declare.i New_UI_ComboBox_i_i_i_i(x_p.i, y_p.i, w_p.i, h_p.i)
 Declare.i New_UI_ComboBox_i_i_i_i_i(x_p.i, y_p.i, w_p.i, h_p.i, flags_p.i)
 Declare Free_UI_ComboBox(*obj.UI_ComboBox_Inst)
-Declare.i New_UI_Controls_ToggleSwitch_void()
-Declare.i New_UI_Controls_ToggleSwitch_b(defaultState_p.b)
-Declare.i New_UI_Controls_ToggleSwitch_i_i_b(w_p.i, h_p.i, defaultState_p.b)
-Declare.i New_UI_Controls_ToggleSwitch_i_i_i_i_b(x_p.i, y_p.i, w_p.i, h_p.i, defaultState_p.b)
-Declare Free_UI_Controls_ToggleSwitch(*obj.UI_Controls_ToggleSwitch_Inst)
+Declare.i New_UI_ToggleSwitch_void()
+Declare.i New_UI_ToggleSwitch_b(defaultState_p.b)
+Declare.i New_UI_ToggleSwitch_i_i_b(w_p.i, h_p.i, defaultState_p.b)
+Declare.i New_UI_ToggleSwitch_i_i_i_i_b(x_p.i, y_p.i, w_p.i, h_p.i, defaultState_p.b)
+Declare Free_UI_ToggleSwitch(*obj.UI_ToggleSwitch_Inst)
 Declare.i New_UI_ListIcon_s_i(title_p.s, colWidth_p.i)
 Declare.i New_UI_ListIcon_s_i_i(title_p.s, colWidth_p.i, flags_p.i)
 Declare.i New_UI_ListIcon_i_i_i_i_s_i(x_p.i, y_p.i, w_p.i, h_p.i, title_p.s, colWidth_p.i)
 Declare.i New_UI_ListIcon_i_i_i_i_s_i_i(x_p.i, y_p.i, w_p.i, h_p.i, title_p.s, colWidth_p.i, flags_p.i)
 Declare Free_UI_ListIcon(*obj.UI_ListIcon_Inst)
-Declare.i New_MainWindow()
-Declare Free_MainWindow(*obj.MainWindow_Inst)
+Declare.i New_UI_XMLLoader()
+Declare Free_UI_XMLLoader(*obj.UI_XMLLoader_Inst)
+Declare.i New_Demo_MainWindow()
+Declare Free_Demo_MainWindow(*obj.Demo_MainWindow_Inst)
 
 Procedure UI_Component_Init(*This.UI_Component_Inst)
   Protected *This_vt.UI_Component_vt = *This
@@ -1180,6 +1220,15 @@ Procedure UI_Window_CreateWindowInternal(*This.UI_Window_Inst, title_p.s, x_p.i,
   EndIf
 EndProcedure
 
+Procedure UI_Window_Init_void(*This.UI_Window_Inst)
+  Protected *This_vt.UI_Window_vt = *This
+        UI_Component_Init(*This)
+        *This\id = 0
+        *This\title = "Window"
+        *This\width = 800
+        *This\height = 600
+EndProcedure
+
 Procedure UI_Window_Init_s(*This.UI_Window_Inst, title_p.s)
   Protected *This_vt.UI_Window_vt = *This
         Protected defFlags.i = #PB_Window_SystemMenu | #PB_Window_ScreenCentered | #PB_Window_MinimizeGadget | #PB_Window_MaximizeGadget | #PB_Window_SizeGadget
@@ -1366,11 +1415,31 @@ Procedure.i UI_Window_GetContent(*This.UI_Window_Inst)
         ProcedureReturn *This\rootContent
 EndProcedure
 
-Procedure UI_Window_UpdateLayout(*This.UI_Window_Inst)
+Procedure UI_Window_RegisterControl(*This.UI_Window_Inst, name_p.s, *ctrl.UI_Component_vt)
   Protected *This_vt.UI_Window_vt = *This
-  If (*This\rootContent And *This\id And IsWindow(*This\id))
-          *This\rootContent\Arrange(0, 0, WindowWidth(*This\id), WindowHeight(*This\id))
+  If (name_p <> "" And *ctrl)
+          *This\namedControls(LCase(name_p)) = *ctrl
   EndIf
+EndProcedure
+
+Procedure.i UI_Window_FindControl(*This.UI_Window_Inst, name_p.s)
+  Protected *This_vt.UI_Window_vt = *This
+  If (FindMapElement(*This\namedControls(), LCase(name_p)))
+          ProcedureReturn *This\namedControls()
+  EndIf
+        ProcedureReturn 0
+EndProcedure
+
+Procedure.b UI_Window_LoadView(*This.UI_Window_Inst, xmlPath.s)
+  Protected *This_vt.UI_Window_vt = *This
+        Protected loader.UI_XMLLoader_vt
+        ProcedureReturn loader\LoadFromFile(xmlPath, *This)
+EndProcedure
+
+Procedure.b UI_Window_LoadViewFromString(*This.UI_Window_Inst, xmlContent.s)
+  Protected *This_vt.UI_Window_vt = *This
+        Protected loader.UI_XMLLoader_vt
+        ProcedureReturn loader\LoadFromString(xmlContent, *This)
 EndProcedure
 
 Procedure UI_Window_Close(*This.UI_Window_Inst)
@@ -2621,6 +2690,17 @@ Procedure.b UI_TextBox_IsReadOnly(*This.UI_TextBox_Inst)
         ProcedureReturn #False
 EndProcedure
 
+Procedure UI_TextBox_SetPlaceholder(*This.UI_TextBox_Inst, ph_p.s)
+  Protected *This_vt.UI_TextBox_vt = *This
+  If (*This\id And IsGadget(*This\id))
+          CompilerIf #PB_Compiler_OS = #PB_OS_Windows
+            SendMessage_(GadgetID(*This\id), 5377, #True, @ph_p) ; #EM_SETCUEBANNER = 5377
+          CompilerElse
+            GadgetToolTip(*This\id, ph_p)
+          CompilerEndIf
+  EndIf
+EndProcedure
+
 Procedure UI_TextBox_SetReadOnly(*This.UI_TextBox_Inst, ro.b)
   Protected *This_vt.UI_TextBox_vt = *This
   If (*This\id And IsGadget(*This\id))
@@ -3009,8 +3089,8 @@ Procedure UI_ComboBox_Free(*This.UI_ComboBox_Inst)
   EndIf
 EndProcedure
 
-Procedure UI_Controls_ToggleSwitch_Init_void(*This.UI_Controls_ToggleSwitch_Inst)
-  Protected *This_vt.UI_Controls_ToggleSwitch_vt = *This
+Procedure UI_ToggleSwitch_Init_void(*This.UI_ToggleSwitch_Inst)
+  Protected *This_vt.UI_ToggleSwitch_vt = *This
         UI_CustomGadget_Init_i_i(*This, 50, 26)
         *This\isChecked = #False
         *This\activeColor = RGB(52, 199, 89)      ; iOS Green
@@ -3018,8 +3098,8 @@ Procedure UI_Controls_ToggleSwitch_Init_void(*This.UI_Controls_ToggleSwitch_Inst
         *This_vt\Redraw()
 EndProcedure
 
-Procedure UI_Controls_ToggleSwitch_Init_b(*This.UI_Controls_ToggleSwitch_Inst, defaultState_p.b)
-  Protected *This_vt.UI_Controls_ToggleSwitch_vt = *This
+Procedure UI_ToggleSwitch_Init_b(*This.UI_ToggleSwitch_Inst, defaultState_p.b)
+  Protected *This_vt.UI_ToggleSwitch_vt = *This
         UI_CustomGadget_Init_i_i(*This, 50, 26)
         *This\isChecked = defaultState_p
         *This\activeColor = RGB(52, 199, 89)      ; iOS Green
@@ -3027,8 +3107,8 @@ Procedure UI_Controls_ToggleSwitch_Init_b(*This.UI_Controls_ToggleSwitch_Inst, d
         *This_vt\Redraw()
 EndProcedure
 
-Procedure UI_Controls_ToggleSwitch_Init_i_i_b(*This.UI_Controls_ToggleSwitch_Inst, w_p.i, h_p.i, defaultState_p.b)
-  Protected *This_vt.UI_Controls_ToggleSwitch_vt = *This
+Procedure UI_ToggleSwitch_Init_i_i_b(*This.UI_ToggleSwitch_Inst, w_p.i, h_p.i, defaultState_p.b)
+  Protected *This_vt.UI_ToggleSwitch_vt = *This
         UI_CustomGadget_Init_i_i(*This, w_p, h_p)
         *This\isChecked = defaultState_p
         *This\activeColor = RGB(52, 199, 89)      ; iOS Green
@@ -3036,8 +3116,8 @@ Procedure UI_Controls_ToggleSwitch_Init_i_i_b(*This.UI_Controls_ToggleSwitch_Ins
         *This_vt\Redraw()
 EndProcedure
 
-Procedure UI_Controls_ToggleSwitch_Init_i_i_i_i_b(*This.UI_Controls_ToggleSwitch_Inst, x_p.i, y_p.i, w_p.i, h_p.i, defaultState_p.b)
-  Protected *This_vt.UI_Controls_ToggleSwitch_vt = *This
+Procedure UI_ToggleSwitch_Init_i_i_i_i_b(*This.UI_ToggleSwitch_Inst, x_p.i, y_p.i, w_p.i, h_p.i, defaultState_p.b)
+  Protected *This_vt.UI_ToggleSwitch_vt = *This
         UI_CustomGadget_Init_i_i_i_i(*This, x_p, y_p, w_p, h_p)
         *This\isChecked = defaultState_p
         *This\activeColor = RGB(52, 199, 89)      ; iOS Green
@@ -3045,26 +3125,26 @@ Procedure UI_Controls_ToggleSwitch_Init_i_i_i_i_b(*This.UI_Controls_ToggleSwitch
         *This_vt\Redraw()
 EndProcedure
 
-Procedure.b UI_Controls_ToggleSwitch_IsChecked(*This.UI_Controls_ToggleSwitch_Inst)
-  Protected *This_vt.UI_Controls_ToggleSwitch_vt = *This
+Procedure.b UI_ToggleSwitch_IsChecked(*This.UI_ToggleSwitch_Inst)
+  Protected *This_vt.UI_ToggleSwitch_vt = *This
         ProcedureReturn *This\isChecked
 EndProcedure
 
-Procedure UI_Controls_ToggleSwitch_SetChecked(*This.UI_Controls_ToggleSwitch_Inst, state.b)
-  Protected *This_vt.UI_Controls_ToggleSwitch_vt = *This
+Procedure UI_ToggleSwitch_SetChecked(*This.UI_ToggleSwitch_Inst, state.b)
+  Protected *This_vt.UI_ToggleSwitch_vt = *This
         *This\isChecked = state
         *This_vt\Redraw()
 EndProcedure
 
-Procedure UI_Controls_ToggleSwitch_OnClick(*This.UI_Controls_ToggleSwitch_Inst)
-  Protected *This_vt.UI_Controls_ToggleSwitch_vt = *This
+Procedure UI_ToggleSwitch_OnClick(*This.UI_ToggleSwitch_Inst)
+  Protected *This_vt.UI_ToggleSwitch_vt = *This
         *This\isChecked = 1 - *This\isChecked
         *This_vt\Redraw()
         *This_vt\OnChange()
 EndProcedure
 
-Procedure UI_Controls_ToggleSwitch_OnPaint(*This.UI_Controls_ToggleSwitch_Inst, w.i, h.i)
-  Protected *This_vt.UI_Controls_ToggleSwitch_vt = *This
+Procedure UI_ToggleSwitch_OnPaint(*This.UI_ToggleSwitch_Inst, w.i, h.i)
+  Protected *This_vt.UI_ToggleSwitch_vt = *This
         ; Background fill
         Box(0, 0, w, h, RGB(245, 245, 247))
   
@@ -3231,29 +3311,599 @@ Procedure UI_ListIcon_Free(*This.UI_ListIcon_Inst)
   EndIf
 EndProcedure
 
-Procedure MainWindow_Init(*This.MainWindow_Inst)
-  Protected *This_vt.MainWindow_vt = *This
-      UI_Window_Init_s(*This, "Contact V1")
-      ; Instanciate buttons
-      *This\bt_new = New_UI_Button_s("add")
-      ;*This\bt_new\SetSize(110,30)
-      *This\bt_edit = New_UI_Button_s("edit")
-      ;*This\bt_edit\SetSize(110,30)
-      *This\bt_delete = New_UI_Button_s("delete")
-      ;*This\bt_delete\SetSize(110,30)
-      ; Instanciate layouts
-      ; = button layout
-      *This\button_layout = New_UI_Layouts_StackPanel_void()
-      *This\button_layout\SetMargin(10,10,10,10)
-      *This\button_layout\SetOrientation(#UI_Orientation_Horizontal)
-      *This\button_layout\AddChild(*This\bt_new)
-      *This\button_layout\AddChild(*This\bt_edit)
-      *This\button_layout\AddChild(*This\bt_delete)
-     
-      ; = main layout
-      *This\main_layout = New_UI_Layouts_DockPanel_void()
-      *This\main_layout\SetDock(*This\button_layout,#UI_Dock_Top)
-      *This_vt\SetContent(*This\main_layout)
+Procedure UI_XMLLoader_ParseBoxValues(*This.UI_XMLLoader_Inst, valStr.s, *outL.INTEGER, *outT.INTEGER, *outR.INTEGER, *outB.INTEGER)
+  Protected *This_vt.UI_XMLLoader_vt = *This
+        valStr = Trim(valStr)
+        If valStr = ""
+          *outL\i = 0 : *outT\i = 0 : *outR\i = 0 : *outB\i = 0
+          ProcedureReturn
+        EndIf
+  
+        Protected count.i = CountString(valStr, ",") + 1
+        If count = 1
+          Protected v.i = Val(valStr)
+          *outL\i = v : *outT\i = v : *outR\i = v : *outB\i = v
+        ElseIf count = 2
+          Protected vH.i = Val(Trim(StringField(valStr, 1, ",")))
+          Protected vV.i = Val(Trim(StringField(valStr, 2, ",")))
+          *outL\i = vH : *outT\i = vV : *outR\i = vH : *outB\i = vV
+        ElseIf count >= 4
+          *outL\i = Val(Trim(StringField(valStr, 1, ",")))
+          *outT\i = Val(Trim(StringField(valStr, 2, ",")))
+          *outR\i = Val(Trim(StringField(valStr, 3, ",")))
+          *outB\i = Val(Trim(StringField(valStr, 4, ",")))
+        EndIf
+EndProcedure
+
+Procedure UI_XMLLoader_ApplyCommonAttributes(*This.UI_XMLLoader_Inst, *comp.UI_Component_vt, node.i, *targetWindow.UI_Window_vt)
+  Protected *This_vt.UI_XMLLoader_vt = *This
+        If Not *comp : ProcedureReturn : EndIf
+  
+        ; Name / ID for named control registration
+        Protected nameStr.s = GetXMLAttribute(node, "Name")
+        If nameStr = "" : nameStr = GetXMLAttribute(node, "name") : EndIf
+        If nameStr = "" : nameStr = GetXMLAttribute(node, "ID") : EndIf
+        If nameStr = "" : nameStr = GetXMLAttribute(node, "id") : EndIf
+        If nameStr <> ""
+          *comp\SetTag(nameStr)
+          If *targetWindow
+            *targetWindow\RegisterControl(nameStr, *comp)
+          EndIf
+        EndIf
+  
+        ; Dimensions
+        Protected wStr.s = GetXMLAttribute(node, "Width")
+        If wStr = "" : wStr = GetXMLAttribute(node, "width") : EndIf
+        If wStr <> "" : *comp\SetWidth(Val(wStr)) : EndIf
+  
+        Protected hStr.s = GetXMLAttribute(node, "Height")
+        If hStr = "" : hStr = GetXMLAttribute(node, "height") : EndIf
+        If hStr <> "" : *comp\SetHeight(Val(hStr)) : EndIf
+  
+        Protected minW.s = GetXMLAttribute(node, "MinWidth")
+        If minW <> "" : *comp\SetMinWidth(Val(minW)) : EndIf
+  
+        Protected minH.s = GetXMLAttribute(node, "MinHeight")
+        If minH <> "" : *comp\SetMinHeight(Val(minH)) : EndIf
+  
+        Protected maxW.s = GetXMLAttribute(node, "MaxWidth")
+        If maxW <> "" : *comp\SetMaxWidth(Val(maxW)) : EndIf
+  
+        Protected maxH.s = GetXMLAttribute(node, "MaxHeight")
+        If maxH <> "" : *comp\SetMaxHeight(Val(maxH)) : EndIf
+  
+        ; Margins
+        Protected mStr.s = GetXMLAttribute(node, "Margin")
+        If mStr = "" : mStr = GetXMLAttribute(node, "margin") : EndIf
+        If mStr <> ""
+          Protected mL.INTEGER, mT.INTEGER, mR.INTEGER, mB.INTEGER
+          *This_vt\ParseBoxValues(mStr, @mL, @mT, @mR, @mB)
+          *comp\SetMargin(mL\i, mT\i, mR\i, mB\i)
+        EndIf
+  
+        Protected mLStr.s = GetXMLAttribute(node, "MarginLeft")
+        If mLStr <> "" : *comp\SetMargin(Val(mLStr), *comp\GetMarginTop(), *comp\GetMarginRight(), *comp\GetMarginBottom()) : EndIf
+  
+        Protected mTStr.s = GetXMLAttribute(node, "MarginTop")
+        If mTStr <> "" : *comp\SetMargin(*comp\GetMarginLeft(), Val(mTStr), *comp\GetMarginRight(), *comp\GetMarginBottom()) : EndIf
+  
+        Protected mRStr.s = GetXMLAttribute(node, "MarginRight")
+        If mRStr <> "" : *comp\SetMargin(*comp\GetMarginLeft(), *comp\GetMarginTop(), Val(mRStr), *comp\GetMarginBottom()) : EndIf
+  
+        Protected mBStr.s = GetXMLAttribute(node, "MarginBottom")
+        If mBStr <> "" : *comp\SetMargin(*comp\GetMarginLeft(), *comp\GetMarginTop(), *comp\GetMarginRight(), Val(mBStr)) : EndIf
+  
+        ; Alignments
+        Protected hAlignStr.s = UCase(Trim(GetXMLAttribute(node, "HorizontalAlignment")))
+        If hAlignStr = "" : hAlignStr = UCase(Trim(GetXMLAttribute(node, "horizontalAlignment"))) : EndIf
+        If hAlignStr = "" : hAlignStr = UCase(Trim(GetXMLAttribute(node, "Align"))) : EndIf
+        If hAlignStr <> ""
+          Select hAlignStr
+            Case "LEFT"    : *comp\SetHorizontalAlignment(#UI_Align_Left)
+            Case "CENTER"  : *comp\SetHorizontalAlignment(#UI_Align_Center)
+            Case "RIGHT"   : *comp\SetHorizontalAlignment(#UI_Align_Right)
+            Case "STRETCH" : *comp\SetHorizontalAlignment(#UI_Align_Stretch)
+          EndSelect
+        EndIf
+  
+        Protected vAlignStr.s = UCase(Trim(GetXMLAttribute(node, "VerticalAlignment")))
+        If vAlignStr = "" : vAlignStr = UCase(Trim(GetXMLAttribute(node, "verticalAlignment"))) : EndIf
+        If vAlignStr = "" : vAlignStr = UCase(Trim(GetXMLAttribute(node, "VAlign"))) : EndIf
+        If vAlignStr <> ""
+          Select vAlignStr
+            Case "TOP"      : *comp\SetVerticalAlignment(#UI_Align_Top)
+            Case "MIDDLE", "CENTER" : *comp\SetVerticalAlignment(#UI_Align_Middle)
+            Case "BOTTOM"   : *comp\SetVerticalAlignment(#UI_Align_Bottom)
+            Case "STRETCH", "VSTRETCH" : *comp\SetVerticalAlignment(#UI_Align_VStretch)
+          EndSelect
+        EndIf
+  
+        ; Visibility & Enabled
+        Protected visStr.s = UCase(Trim(GetXMLAttribute(node, "IsVisible")))
+        If visStr = "" : visStr = UCase(Trim(GetXMLAttribute(node, "Visible"))) : EndIf
+        If visStr = "FALSE" Or visStr = "0"
+          *comp\SetVisible(#False)
+        EndIf
+  
+        Protected enStr.s = UCase(Trim(GetXMLAttribute(node, "IsEnabled")))
+        If enStr = "" : enStr = UCase(Trim(GetXMLAttribute(node, "Enabled"))) : EndIf
+        If enStr = "FALSE" Or enStr = "0"
+          *comp\SetEnabled(#False)
+        EndIf
+EndProcedure
+
+Procedure.i UI_XMLLoader_ParseNode(*This.UI_XMLLoader_Inst, node.i, *targetWindow.UI_Window_vt, *parentContainer.UI_Layouts_Container_vt)
+  Protected *This_vt.UI_XMLLoader_vt = *This
+        If Not node Or XMLNodeType(node) <> #PB_XML_Normal
+          ProcedureReturn 0
+        EndIf
+  
+        Protected tag.s = UCase(Trim(GetXMLNodeName(node)))
+        Protected *createdComp.UI_Component_vt = 0
+  
+        Select tag
+          ; ====================================================================
+          ; 1. WINDOW
+          ; ====================================================================
+          Case "WINDOW"
+            Protected title.s = GetXMLAttribute(node, "Title")
+            If title = "" : title = GetXMLAttribute(node, "title") : EndIf
+            If title = "" : title = "PureBasic OOP Window" : EndIf
+  
+            Protected winW.i = Val(GetXMLAttribute(node, "Width"))
+            If winW <= 0 : winW = 800 : EndIf
+  
+            Protected winH.i = Val(GetXMLAttribute(node, "Height"))
+            If winH <= 0 : winH = 600 : EndIf
+  
+            If *targetWindow
+              If *targetWindow\GetID() = 0
+                *targetWindow\CreateWindowInternal(title, #PB_Ignore, #PB_Ignore, winW, winH, #PB_Window_SystemMenu | #PB_Window_ScreenCentered | #PB_Window_SizeGadget | #PB_Window_MinimizeGadget | #PB_Window_MaximizeGadget, 0)
+              Else
+                *targetWindow\SetTitle(title)
+                *targetWindow\SetSize(winW, winH)
+              EndIf
+            EndIf
+  
+            ; Parse children inside Window (first container becomes root content)
+            Protected *childNode = ChildXMLNode(node)
+            While *childNode
+              If XMLNodeType(*childNode) = #PB_XML_Normal
+                Protected *rootChild.UI_Component_vt = *This_vt\ParseNode(*childNode, *targetWindow, 0)
+                If *rootChild And *targetWindow
+                  *targetWindow\SetContent(*rootChild)
+                  Break
+                EndIf
+              EndIf
+              *childNode = NextXMLNode(*childNode)
+            Wend
+            ProcedureReturn *targetWindow
+  
+          ; ====================================================================
+          ; 2. LAYOUT PANELS
+          ; ====================================================================
+          Case "DOCKPANEL"
+            Protected *dockPanel.UI_Layouts_DockPanel_vt = New_UI_Layouts_DockPanel_void()
+            Protected fillStr.s = UCase(Trim(GetXMLAttribute(node, "LastChildFill")))
+            If fillStr = "FALSE" Or fillStr = "0"
+              *dockPanel\SetLastChildFill(#False)
+            EndIf
+  
+            Protected padStr.s = GetXMLAttribute(node, "Padding")
+            If padStr <> ""
+              Protected pL.INTEGER, pT.INTEGER, pR.INTEGER, pB.INTEGER
+              *This_vt\ParseBoxValues(padStr, @pL, @pT, @pR, @pB)
+              *dockPanel\SetPadding(pL\i, pT\i, pR\i, pB\i)
+            EndIf
+  
+            *This_vt\ApplyCommonAttributes(*dockPanel, node, *targetWindow)
+            *createdComp = *dockPanel
+  
+            ; Parse children of DockPanel
+            Protected *dChildNode = ChildXMLNode(node)
+            While *dChildNode
+              If XMLNodeType(*dChildNode) = #PB_XML_Normal
+                Protected *cChild.UI_Component_vt = *This_vt\ParseNode(*dChildNode, *targetWindow, *dockPanel)
+                If *cChild
+                  Protected dockStr.s = UCase(Trim(GetXMLAttribute(*dChildNode, "Dock")))
+                  If dockStr = "" : dockStr = UCase(Trim(GetXMLAttribute(*dChildNode, "dock"))) : EndIf
+                  Protected dockType.i = #UI_Dock_Fill
+                  Select dockStr
+                    Case "TOP"    : dockType = #UI_Dock_Top
+                    Case "BOTTOM" : dockType = #UI_Dock_Bottom
+                    Case "LEFT"   : dockType = #UI_Dock_Left
+                    Case "RIGHT"  : dockType = #UI_Dock_Right
+                    Case "FILL"   : dockType = #UI_Dock_Fill
+                  EndSelect
+                  *dockPanel\SetDock(*cChild, dockType)
+                EndIf
+              EndIf
+              *dChildNode = NextXMLNode(*dChildNode)
+            Wend
+  
+          Case "STACKPANEL"
+            Protected *stackPanel.UI_Layouts_StackPanel_vt = New_UI_Layouts_StackPanel_void()
+            Protected orientStr.s = UCase(Trim(GetXMLAttribute(node, "Orientation")))
+            If orientStr = "HORIZONTAL"
+              *stackPanel\SetOrientation(#UI_Orientation_Horizontal)
+            Else
+              *stackPanel\SetOrientation(#UI_Orientation_Vertical)
+            EndIf
+  
+            Protected spStr.s = GetXMLAttribute(node, "Spacing")
+            If spStr <> "" : *stackPanel\SetSpacing(Val(spStr)) : EndIf
+  
+            Protected sPadStr.s = GetXMLAttribute(node, "Padding")
+            If sPadStr <> ""
+              Protected spL.INTEGER, spT.INTEGER, spR.INTEGER, spB.INTEGER
+              *This_vt\ParseBoxValues(sPadStr, @spL, @spT, @spR, @spB)
+              *stackPanel\SetPadding(spL\i, spT\i, spR\i, spB\i)
+            EndIf
+  
+            *This_vt\ApplyCommonAttributes(*stackPanel, node, *targetWindow)
+            *createdComp = *stackPanel
+  
+            ; Parse children of StackPanel
+            Protected *sChildNode = ChildXMLNode(node)
+            While *sChildNode
+              If XMLNodeType(*sChildNode) = #PB_XML_Normal
+                Protected *sChild.UI_Component_vt = *This_vt\ParseNode(*sChildNode, *targetWindow, *stackPanel)
+                If *sChild
+                  *stackPanel\AddChild(*sChild)
+                EndIf
+              EndIf
+              *sChildNode = NextXMLNode(*sChildNode)
+            Wend
+  
+          Case "GRID"
+            Protected *grid.UI_Layouts_Grid_vt = New_UI_Layouts_Grid_void()
+            Protected rowsStr.s = GetXMLAttribute(node, "Rows")
+            If rowsStr = "" : rowsStr = GetXMLAttribute(node, "rows") : EndIf
+            If rowsStr <> ""
+              Protected rCount.i = CountString(rowsStr, ",") + 1
+              Protected rIdx.i
+              For rIdx = 1 To rCount
+                *grid\AddRow(Trim(StringField(rowsStr, rIdx, ",")))
+              Next rIdx
+            EndIf
+  
+            Protected colsStr.s = GetXMLAttribute(node, "Columns")
+            If colsStr = "" : colsStr = GetXMLAttribute(node, "columns") : EndIf
+            If colsStr = "" : colsStr = GetXMLAttribute(node, "Cols") : EndIf
+            If colsStr <> ""
+              Protected cCount.i = CountString(colsStr, ",") + 1
+              Protected cIdx.i
+              For cIdx = 1 To cCount
+                *grid\AddColumn(Trim(StringField(colsStr, cIdx, ",")))
+              Next cIdx
+            EndIf
+  
+            Protected gPadStr.s = GetXMLAttribute(node, "Padding")
+            If gPadStr <> ""
+              Protected gpL.INTEGER, gpT.INTEGER, gpR.INTEGER, gpB.INTEGER
+              *This_vt\ParseBoxValues(gPadStr, @gpL, @gpT, @gpR, @gpB)
+              *grid\SetPadding(gpL\i, gpT\i, gpR\i, gpB\i)
+            EndIf
+  
+            *This_vt\ApplyCommonAttributes(*grid, node, *targetWindow)
+            *createdComp = *grid
+  
+            ; Parse children of Grid
+            Protected *gChildNode = ChildXMLNode(node)
+            While *gChildNode
+              If XMLNodeType(*gChildNode) = #PB_XML_Normal
+                Protected *gChild.UI_Component_vt = *This_vt\ParseNode(*gChildNode, *targetWindow, *grid)
+                If *gChild
+                  Protected rowVal.i = Val(GetXMLAttribute(*gChildNode, "Row"))
+                  Protected colVal.i = Val(GetXMLAttribute(*gChildNode, "Col"))
+                  If colVal = 0 : colVal = Val(GetXMLAttribute(*gChildNode, "Column")) : EndIf
+                  Protected rowSpan.i = Val(GetXMLAttribute(*gChildNode, "RowSpan"))
+                  If rowSpan <= 0 : rowSpan = 1 : EndIf
+                  Protected colSpan.i = Val(GetXMLAttribute(*gChildNode, "ColSpan"))
+                  If colSpan <= 0 : colSpan = 1 : EndIf
+  
+                  *grid\SetCellSpan(*gChild, rowVal, colVal, rowSpan, colSpan)
+                EndIf
+              EndIf
+              *gChildNode = NextXMLNode(*gChildNode)
+            Wend
+  
+          Case "CONTAINER"
+            Protected *container.UI_Layouts_Container_vt = New_UI_Layouts_Container_void()
+            Protected cPadStr.s = GetXMLAttribute(node, "Padding")
+            If cPadStr <> ""
+              Protected cpL.INTEGER, cpT.INTEGER, cpR.INTEGER, cpB.INTEGER
+              *This_vt\ParseBoxValues(cPadStr, @cpL, @cpT, @cpR, @cpB)
+              *container\SetPadding(cpL\i, cpT\i, cpR\i, cpB\i)
+            EndIf
+  
+            *This_vt\ApplyCommonAttributes(*container, node, *targetWindow)
+            *createdComp = *container
+  
+            Protected *cntChildNode = ChildXMLNode(node)
+            While *cntChildNode
+              If XMLNodeType(*cntChildNode) = #PB_XML_Normal
+                Protected *cntChild.UI_Component_vt = *This_vt\ParseNode(*cntChildNode, *targetWindow, *container)
+                If *cntChild
+                  *container\AddChild(*cntChild)
+                EndIf
+              EndIf
+              *cntChildNode = NextXMLNode(*cntChildNode)
+            Wend
+  
+          ; ====================================================================
+          ; 3. STANDARD & CUSTOM CONTROLS
+          ; ====================================================================
+          Case "BUTTON"
+            Protected btnText.s = GetXMLAttribute(node, "Text")
+            If btnText = "" : btnText = GetXMLAttribute(node, "text") : EndIf
+            Protected *btn.UI_Button_vt = New_UI_Button_s(btnText)
+            *This_vt\ApplyCommonAttributes(*btn, node, *targetWindow)
+            *createdComp = *btn
+  
+          Case "TEXTBOX", "STRING"
+            Protected tbText.s = GetXMLAttribute(node, "Text")
+            Protected *tb.UI_TextBox_vt = New_UI_TextBox_s(tbText)
+            Protected tbPlaceholder.s = GetXMLAttribute(node, "Placeholder")
+            If tbPlaceholder <> ""
+              *tb\SetPlaceholder(tbPlaceholder)
+            EndIf
+            *This_vt\ApplyCommonAttributes(*tb, node, *targetWindow)
+            *createdComp = *tb
+  
+          Case "LABEL", "TEXT"
+            Protected lblText.s = GetXMLAttribute(node, "Text")
+            Protected *lbl.UI_Label_vt = New_UI_Label_s(lblText)
+            *This_vt\ApplyCommonAttributes(*lbl, node, *targetWindow)
+            *createdComp = *lbl
+  
+          Case "CHECKBOX"
+            Protected cbText.s = GetXMLAttribute(node, "Text")
+            Protected cbChkStr.s = UCase(Trim(GetXMLAttribute(node, "Checked")))
+            Protected cbChk.b = #False
+            If cbChkStr = "TRUE" Or cbChkStr = "1" : cbChk = #True : EndIf
+            Protected *cb.UI_CheckBox_vt = New_UI_CheckBox_s_b(cbText, cbChk)
+            *This_vt\ApplyCommonAttributes(*cb, node, *targetWindow)
+            *createdComp = *cb
+  
+          Case "PROGRESSBAR"
+            Protected pbMin.i = Val(GetXMLAttribute(node, "Min"))
+            Protected pbMax.i = Val(GetXMLAttribute(node, "Max"))
+            If pbMax <= 0 : pbMax = 100 : EndIf
+            Protected pbVal.i = Val(GetXMLAttribute(node, "Value"))
+            Protected *pb.UI_ProgressBar_vt = New_UI_ProgressBar_i_i(pbMin, pbMax)
+            If pbVal > 0 : *pb\SetValue(pbVal) : EndIf
+            *This_vt\ApplyCommonAttributes(*pb, node, *targetWindow)
+            *createdComp = *pb
+  
+          Case "SLIDER", "TRACKBAR"
+            Protected slMin.i = Val(GetXMLAttribute(node, "Min"))
+            Protected slMax.i = Val(GetXMLAttribute(node, "Max"))
+            If slMax <= 0 : slMax = 100 : EndIf
+            Protected slVal.i = Val(GetXMLAttribute(node, "Value"))
+            Protected *sl.UI_Slider_vt = New_UI_Slider_i_i(slMin, slMax)
+            If slVal > 0 : *sl\SetValue(slVal) : EndIf
+            *This_vt\ApplyCommonAttributes(*sl, node, *targetWindow)
+            *createdComp = *sl
+  
+          Case "COMBOBOX"
+            Protected *combo.UI_ComboBox_vt = New_UI_ComboBox_void()
+            Protected cboItems.s = GetXMLAttribute(node, "Items")
+            If cboItems <> ""
+              Protected iCount.i = CountString(cboItems, ",") + 1
+              Protected ci.i
+              For ci = 1 To iCount
+                *combo\AddItem(Trim(StringField(cboItems, ci, ",")))
+              Next
+            EndIf
+            Protected cboSel.s = GetXMLAttribute(node, "SelectedIndex")
+            If cboSel <> ""
+              *combo\SetSelectedIndex(Val(cboSel))
+            EndIf
+            *This_vt\ApplyCommonAttributes(*combo, node, *targetWindow)
+            *createdComp = *combo
+  
+            ; Parse child <Item> nodes
+            Protected *itemNode = ChildXMLNode(node)
+            While *itemNode
+              If XMLNodeType(*itemNode) = #PB_XML_Normal And UCase(GetXMLNodeName(*itemNode)) = "ITEM"
+                Protected itemText.s = GetXMLAttribute(*itemNode, "Text")
+                If itemText = "" : itemText = GetXMLNodeText(*itemNode) : EndIf
+                *combo\AddItem(itemText)
+              EndIf
+              *itemNode = NextXMLNode(*itemNode)
+            Wend
+  
+          Case "LISTICON"
+            Protected colsAttr.s = GetXMLAttribute(node, "Columns")
+            Protected *li.UI_ListIcon_vt = 0
+            If colsAttr <> ""
+              Protected firstColDef.s = StringField(colsAttr, 1, ",")
+              Protected firstColTitle.s = Trim(StringField(firstColDef, 1, ":"))
+              Protected firstColWidth.i = Val(Trim(StringField(firstColDef, 2, ":")))
+              If firstColWidth <= 0 : firstColWidth = 100 : EndIf
+              *li = New_UI_ListIcon_s_i(firstColTitle, firstColWidth)
+              Protected colTotal.i = CountString(colsAttr, ",") + 1
+              Protected liColIdx.i
+              For liColIdx = 2 To colTotal
+                Protected cDef.s = StringField(colsAttr, liColIdx, ",")
+                Protected cTitle.s = Trim(StringField(cDef, 1, ":"))
+                Protected cWidth.i = Val(Trim(StringField(cDef, 2, ":")))
+                If cWidth <= 0 : cWidth = 100 : EndIf
+                *li\AddColumn(liColIdx - 1, cTitle, cWidth)
+              Next
+            Else
+              Protected firstColTitleDef.s = GetXMLAttribute(node, "FirstColumnTitle")
+              If firstColTitleDef = "" : firstColTitleDef = "Item" : EndIf
+              Protected firstColWidthDef.i = Val(GetXMLAttribute(node, "FirstColumnWidth"))
+              If firstColWidthDef <= 0 : firstColWidthDef = 150 : EndIf
+              *li = New_UI_ListIcon_s_i(firstColTitleDef, firstColWidthDef)
+            EndIf
+  
+            *This_vt\ApplyCommonAttributes(*li, node, *targetWindow)
+            *createdComp = *li
+  
+            ; Parse child <Column> nodes and <Item> nodes
+            Protected *liSubNode = ChildXMLNode(node)
+            Protected colPos.i = 1
+            While *liSubNode
+              If XMLNodeType(*liSubNode) = #PB_XML_Normal
+                Protected subTag.s = UCase(GetXMLNodeName(*liSubNode))
+                If subTag = "COLUMN"
+                  Protected colTitle.s = GetXMLAttribute(*liSubNode, "Title")
+                  Protected colWidth.i = Val(GetXMLAttribute(*liSubNode, "Width"))
+                  If colWidth <= 0 : colWidth = 100 : EndIf
+                  *li\AddColumn(colPos, colTitle, colWidth)
+                  colPos + 1
+                ElseIf subTag = "ITEM"
+                  Protected lItemText.s = GetXMLAttribute(*liSubNode, "Text")
+                  If lItemText = "" : lItemText = GetXMLNodeText(*liSubNode) : EndIf
+                  *li\AddItem(-1, lItemText, 0)
+                EndIf
+              EndIf
+              *liSubNode = NextXMLNode(*liSubNode)
+            Wend
+  
+          Case "TOGGLESWITCH"
+            Protected tsChkStr.s = UCase(Trim(GetXMLAttribute(node, "Checked")))
+            Protected tsChk.b = #False
+            If tsChkStr = "TRUE" Or tsChkStr = "1" : tsChk = #True : EndIf
+            Protected *ts.UI_ToggleSwitch_vt = New_UI_ToggleSwitch_b(tsChk)
+            *This_vt\ApplyCommonAttributes(*ts, node, *targetWindow)
+            *createdComp = *ts
+  
+        EndSelect
+  
+        ProcedureReturn *createdComp
+EndProcedure
+
+Procedure.b UI_XMLLoader_LoadFromFile(*This.UI_XMLLoader_Inst, xmlPath.s, *targetWindow.UI_Window_vt)
+  Protected *This_vt.UI_XMLLoader_vt = *This
+        If FileSize(xmlPath) <= 0
+          ProcedureReturn #False
+        EndIf
+  
+        Protected xmlHandle.i = LoadXML(#PB_Any, xmlPath)
+        If Not xmlHandle Or XMLStatus(xmlHandle) <> #PB_XML_Success
+          If xmlHandle : FreeXML(xmlHandle) : EndIf
+          ProcedureReturn #False
+        EndIf
+  
+        Protected *mainNode = MainXMLNode(xmlHandle)
+        If *mainNode
+          *This_vt\ParseNode(*mainNode, *targetWindow, 0)
+        EndIf
+  
+        FreeXML(xmlHandle)
+        ProcedureReturn #True
+EndProcedure
+
+Procedure.b UI_XMLLoader_LoadFromString(*This.UI_XMLLoader_Inst, xmlContent.s, *targetWindow.UI_Window_vt)
+  Protected *This_vt.UI_XMLLoader_vt = *This
+        If xmlContent = ""
+          ProcedureReturn #False
+        EndIf
+  
+        Protected xmlHandle.i = CatchXML(#PB_Any, @xmlContent, StringByteLength(xmlContent, #PB_UTF8), 0, #PB_UTF8)
+        If Not xmlHandle Or XMLStatus(xmlHandle) <> #PB_XML_Success
+          If xmlHandle : FreeXML(xmlHandle) : EndIf
+          ProcedureReturn #False
+        EndIf
+  
+        Protected *mainNode = MainXMLNode(xmlHandle)
+        If *mainNode
+          *This_vt\ParseNode(*mainNode, *targetWindow, 0)
+        EndIf
+  
+        FreeXML(xmlHandle)
+        ProcedureReturn #True
+EndProcedure
+
+Procedure Demo_MainWindow_Init(*This.Demo_MainWindow_Inst)
+  Protected *This_vt.Demo_MainWindow_vt = *This
+        UI_Window_Init_void(*This)
+        *This\itemCount = 0
+  
+        ; 1. Charge la vue déclarative XML
+        Protected xmlFile.s = GetPathPart(ProgramFilename()) + "views/MainWindow.xml"
+        If Not FileSize(xmlFile) > 0
+          xmlFile = "views/MainWindow.xml"
+        EndIf
+        If Not FileSize(xmlFile) > 0
+          xmlFile = "src/examples/xml_demo/views/MainWindow.xml"
+        EndIf
+        
+        If Not *This_vt\LoadView(xmlFile)
+          MessageRequester("Erreur", "Impossible de charger la vue XML: " + xmlFile)
+          ProcedureReturn
+        EndIf
+  
+        ; 2. Récupère les références des contrôles nommés
+        *This\btnAdd = *This_vt\FindControl("btnAdd")
+        *This\btnNew = *This_vt\FindControl("btnNew")
+        *This\btnSave = *This_vt\FindControl("btnSave")
+        *This\btnSearch = *This_vt\FindControl("btnSearch")
+        *This\txtName = *This_vt\FindControl("txtName")
+        *This\txtSearch = *This_vt\FindControl("txtSearch")
+        *This\cboCategory = *This_vt\FindControl("cboCategory")
+        *This\lstItems = *This_vt\FindControl("lstItems")
+        *This\lblStatus = *This_vt\FindControl("lblStatus")
+        *This\pbProgress = *This_vt\FindControl("pbProgress")
+        *This\toggleDark = *This_vt\FindControl("toggleDark")
+        *This\chkAutoRefresh = *This_vt\FindControl("chkAutoRefresh")
+  
+        ; 3. Initialise les données de test
+        *This_vt\AddDemoItem("Button.pbi", "Composants UI", "Actif")
+        *This_vt\AddDemoItem("XMLLoader.pbi", "Services Backend", "Actif")
+        *This_vt\AddDemoItem("DockPanel.pbi", "Composants UI", "Actif")
+        *This_vt\AddDemoItem("DarkTheme.pbi", "Thèmes", "Inactif")
+EndProcedure
+
+Procedure Demo_MainWindow_AddDemoItem(*This.Demo_MainWindow_Inst, nom.s, cat.s, statut.s)
+  Protected *This_vt.Demo_MainWindow_vt = *This
+        *This\itemCount + 1
+  If (*This\lstItems)
+          Protected rowData.s = Str(*This\itemCount) + Chr(10) + nom + Chr(10) + cat + Chr(10) + statut
+          *This\lstItems\AddItem(-1, rowData, 0)
+  EndIf
+EndProcedure
+
+Procedure Demo_MainWindow_OnChildEvent(*This.Demo_MainWindow_Inst, *child.UI_Gadget_vt, eventType.i)
+  Protected *This_vt.Demo_MainWindow_vt = *This
+        If Not *child : ProcedureReturn : EndIf
+  
+        ; Clic sur Ajouter
+        If (*This\btnAdd And *child\GetId() = *This\btnAdd\GetId())
+          Protected nameVal.s = ""
+          If (*This\txtName) : nameVal = Trim(*This\txtName\GetText()) : EndIf
+          If nameVal = ""
+            MessageRequester("Information", "Veuillez saisir un nom d'élément.")
+            ProcedureReturn
+          EndIf
+          
+          Protected catVal.s = "Général"
+          If (*This\cboCategory) : catVal = *This\cboCategory\GetSelectedItem() : EndIf
+          
+          *This_vt\AddDemoItem(nameVal, catVal, "Nouveau")
+          If (*This\txtName) : *This\txtName\SetText("") : EndIf
+          If (*This\lblStatus) : *This\lblStatus\SetText("Élément '" + nameVal + "' ajouté avec succès!") : EndIf
+  
+        ; Clic sur Nouveau
+        ElseIf (*This\btnNew And *child\GetId() = *This\btnNew\GetId())
+          If (*This\lstItems) : *This\lstItems\Clear() : EndIf
+          *This\itemCount = 0
+          If (*This\lblStatus) : *This\lblStatus\SetText("Liste réinitialisée.") : EndIf
+  
+        ; Clic sur Sauvegarder
+        ElseIf (*This\btnSave And *child\GetId() = *This\btnSave\GetId())
+          If (*This\lblStatus) : *This\lblStatus\SetText("Données sauvegardées avec succès.") : EndIf
+  
+        ; Clic sur Filtrer / Recherche
+        ElseIf (*This\btnSearch And *child\GetId() = *This\btnSearch\GetId())
+          Protected q.s = ""
+          If (*This\txtSearch) : q = Trim(*This\txtSearch\GetText()) : EndIf
+          If (*This\lblStatus) : *This\lblStatus\SetText("Filtre appliqué: '" + q + "'") : EndIf
+        EndIf
 EndProcedure
 
 ; ----------------------------------------------------------------------------
@@ -3319,7 +3969,10 @@ DataSection
     Data.i @UI_Window_SetParentID()
     Data.i @UI_Window_SetContent()
     Data.i @UI_Window_GetContent()
-    Data.i @UI_Window_UpdateLayout()
+    Data.i @UI_Window_RegisterControl()
+    Data.i @UI_Window_FindControl()
+    Data.i @UI_Window_LoadView()
+    Data.i @UI_Window_LoadViewFromString()
     Data.i @UI_Window_Close()
     Data.i @UI_Window_Free()
     Data.i @UI_Window_OnClose()
@@ -3719,6 +4372,7 @@ DataSection
     Data.i @UI_Gadget_OnRightClick()
     Data.i @UI_Gadget_OnCustomEvent()
     Data.i @UI_TextBox_IsReadOnly()
+    Data.i @UI_TextBox_SetPlaceholder()
     Data.i @UI_TextBox_SetReadOnly()
   UI_Label_VTable_Data:
     Data.i @UI_Component_GetID()
@@ -4051,7 +4705,7 @@ DataSection
     Data.i @UI_ComboBox_SetSelectedIndex()
     Data.i @UI_ComboBox_GetSelectedItem()
     Data.i @UI_ComboBox_Clear()
-  UI_Controls_ToggleSwitch_VTable_Data:
+  UI_ToggleSwitch_VTable_Data:
     Data.i @UI_Component_GetID()
     Data.i @UI_Component_GetHandle()
     Data.i @UI_Component_GetTag()
@@ -4109,13 +4763,13 @@ DataSection
     Data.i @UI_Gadget_SetFont()
     Data.i @UI_Gadget_SetFocus()
     Data.i @UI_CustomGadget_Free()
-    Data.i @UI_Controls_ToggleSwitch_OnClick()
+    Data.i @UI_ToggleSwitch_OnClick()
     Data.i @UI_Gadget_OnChange()
     Data.i @UI_Gadget_OnFocus()
     Data.i @UI_Gadget_OnLostFocus()
     Data.i @UI_Gadget_OnRightClick()
     Data.i @UI_CustomGadget_OnCustomEvent()
-    Data.i @UI_Controls_ToggleSwitch_OnPaint()
+    Data.i @UI_ToggleSwitch_OnPaint()
     Data.i @UI_CustomGadget_Redraw()
     Data.i @UI_CustomGadget_OnMouseEnter()
     Data.i @UI_CustomGadget_OnMouseLeave()
@@ -4123,8 +4777,8 @@ DataSection
     Data.i @UI_CustomGadget_OnMouseUp()
     Data.i @UI_CustomGadget_OnMouseMove()
     Data.i @UI_CustomGadget_OnKeyDown()
-    Data.i @UI_Controls_ToggleSwitch_IsChecked()
-    Data.i @UI_Controls_ToggleSwitch_SetChecked()
+    Data.i @UI_ToggleSwitch_IsChecked()
+    Data.i @UI_ToggleSwitch_SetChecked()
   UI_ListIcon_VTable_Data:
     Data.i @UI_Component_GetID()
     Data.i @UI_Component_GetHandle()
@@ -4200,7 +4854,13 @@ DataSection
     Data.i @UI_ListIcon_Clear()
     Data.i @UI_ListIcon_SetItemData()
     Data.i @UI_ListIcon_GetItemData()
-  MainWindow_VTable_Data:
+  UI_XMLLoader_VTable_Data:
+    Data.i @UI_XMLLoader_ParseBoxValues()
+    Data.i @UI_XMLLoader_ApplyCommonAttributes()
+    Data.i @UI_XMLLoader_ParseNode()
+    Data.i @UI_XMLLoader_LoadFromFile()
+    Data.i @UI_XMLLoader_LoadFromString()
+  Demo_MainWindow_VTable_Data:
     Data.i @UI_Component_GetID()
     Data.i @UI_Component_GetHandle()
     Data.i @UI_Component_GetTag()
@@ -4258,7 +4918,10 @@ DataSection
     Data.i @UI_Window_SetParentID()
     Data.i @UI_Window_SetContent()
     Data.i @UI_Window_GetContent()
-    Data.i @UI_Window_UpdateLayout()
+    Data.i @UI_Window_RegisterControl()
+    Data.i @UI_Window_FindControl()
+    Data.i @UI_Window_LoadView()
+    Data.i @UI_Window_LoadViewFromString()
     Data.i @UI_Window_Close()
     Data.i @UI_Window_Free()
     Data.i @UI_Window_OnClose()
@@ -4267,12 +4930,22 @@ DataSection
     Data.i @UI_Window_OnMinimize()
     Data.i @UI_Window_OnMaximize()
     Data.i @UI_Window_OnRestore()
-    Data.i @UI_Window_OnChildEvent()
+    Data.i @Demo_MainWindow_OnChildEvent()
+    Data.i @Demo_MainWindow_AddDemoItem()
 EndDataSection
 
 ; ----------------------------------------------------------------------------
 ; 5. CONSTRUCTORS & FACTORY FUNCTIONS
 ; ----------------------------------------------------------------------------
+
+Procedure.i New_UI_Window_void()
+  Protected *obj.UI_Window_Inst = AllocateStructure(UI_Window_Inst)
+  If *obj
+    *obj\VTable = ?UI_Window_VTable_Data
+    UI_Window_Init_void(*obj)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
 
 Procedure.i New_UI_Window_s(title_p.s)
   Protected *obj.UI_Window_Inst = AllocateStructure(UI_Window_Inst)
@@ -4802,43 +5475,43 @@ Procedure Free_UI_ComboBox(*obj.UI_ComboBox_Inst)
   EndIf
 EndProcedure
 
-Procedure.i New_UI_Controls_ToggleSwitch_void()
-  Protected *obj.UI_Controls_ToggleSwitch_Inst = AllocateStructure(UI_Controls_ToggleSwitch_Inst)
+Procedure.i New_UI_ToggleSwitch_void()
+  Protected *obj.UI_ToggleSwitch_Inst = AllocateStructure(UI_ToggleSwitch_Inst)
   If *obj
-    *obj\VTable = ?UI_Controls_ToggleSwitch_VTable_Data
-    UI_Controls_ToggleSwitch_Init_void(*obj)
+    *obj\VTable = ?UI_ToggleSwitch_VTable_Data
+    UI_ToggleSwitch_Init_void(*obj)
   EndIf
   ProcedureReturn *obj
 EndProcedure
 
-Procedure.i New_UI_Controls_ToggleSwitch_b(defaultState_p.b)
-  Protected *obj.UI_Controls_ToggleSwitch_Inst = AllocateStructure(UI_Controls_ToggleSwitch_Inst)
+Procedure.i New_UI_ToggleSwitch_b(defaultState_p.b)
+  Protected *obj.UI_ToggleSwitch_Inst = AllocateStructure(UI_ToggleSwitch_Inst)
   If *obj
-    *obj\VTable = ?UI_Controls_ToggleSwitch_VTable_Data
-    UI_Controls_ToggleSwitch_Init_b(*obj, defaultState_p)
+    *obj\VTable = ?UI_ToggleSwitch_VTable_Data
+    UI_ToggleSwitch_Init_b(*obj, defaultState_p)
   EndIf
   ProcedureReturn *obj
 EndProcedure
 
-Procedure.i New_UI_Controls_ToggleSwitch_i_i_b(w_p.i, h_p.i, defaultState_p.b)
-  Protected *obj.UI_Controls_ToggleSwitch_Inst = AllocateStructure(UI_Controls_ToggleSwitch_Inst)
+Procedure.i New_UI_ToggleSwitch_i_i_b(w_p.i, h_p.i, defaultState_p.b)
+  Protected *obj.UI_ToggleSwitch_Inst = AllocateStructure(UI_ToggleSwitch_Inst)
   If *obj
-    *obj\VTable = ?UI_Controls_ToggleSwitch_VTable_Data
-    UI_Controls_ToggleSwitch_Init_i_i_b(*obj, w_p, h_p, defaultState_p)
+    *obj\VTable = ?UI_ToggleSwitch_VTable_Data
+    UI_ToggleSwitch_Init_i_i_b(*obj, w_p, h_p, defaultState_p)
   EndIf
   ProcedureReturn *obj
 EndProcedure
 
-Procedure.i New_UI_Controls_ToggleSwitch_i_i_i_i_b(x_p.i, y_p.i, w_p.i, h_p.i, defaultState_p.b)
-  Protected *obj.UI_Controls_ToggleSwitch_Inst = AllocateStructure(UI_Controls_ToggleSwitch_Inst)
+Procedure.i New_UI_ToggleSwitch_i_i_i_i_b(x_p.i, y_p.i, w_p.i, h_p.i, defaultState_p.b)
+  Protected *obj.UI_ToggleSwitch_Inst = AllocateStructure(UI_ToggleSwitch_Inst)
   If *obj
-    *obj\VTable = ?UI_Controls_ToggleSwitch_VTable_Data
-    UI_Controls_ToggleSwitch_Init_i_i_i_i_b(*obj, x_p, y_p, w_p, h_p, defaultState_p)
+    *obj\VTable = ?UI_ToggleSwitch_VTable_Data
+    UI_ToggleSwitch_Init_i_i_i_i_b(*obj, x_p, y_p, w_p, h_p, defaultState_p)
   EndIf
   ProcedureReturn *obj
 EndProcedure
 
-Procedure Free_UI_Controls_ToggleSwitch(*obj.UI_Controls_ToggleSwitch_Inst)
+Procedure Free_UI_ToggleSwitch(*obj.UI_ToggleSwitch_Inst)
   If *obj
     UI_CustomGadget_Free(*obj)
     FreeStructure(*obj)
@@ -4888,16 +5561,30 @@ Procedure Free_UI_ListIcon(*obj.UI_ListIcon_Inst)
   EndIf
 EndProcedure
 
-Procedure.i New_MainWindow()
-  Protected *obj.MainWindow_Inst = AllocateStructure(MainWindow_Inst)
+Procedure.i New_UI_XMLLoader()
+  Protected *obj.UI_XMLLoader_Inst = AllocateStructure(UI_XMLLoader_Inst)
   If *obj
-    *obj\VTable = ?MainWindow_VTable_Data
-    MainWindow_Init(*obj)
+    *obj\VTable = ?UI_XMLLoader_VTable_Data
   EndIf
   ProcedureReturn *obj
 EndProcedure
 
-Procedure Free_MainWindow(*obj.MainWindow_Inst)
+Procedure Free_UI_XMLLoader(*obj.UI_XMLLoader_Inst)
+  If *obj
+    FreeStructure(*obj)
+  EndIf
+EndProcedure
+
+Procedure.i New_Demo_MainWindow()
+  Protected *obj.Demo_MainWindow_Inst = AllocateStructure(Demo_MainWindow_Inst)
+  If *obj
+    *obj\VTable = ?Demo_MainWindow_VTable_Data
+    Demo_MainWindow_Init(*obj)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure Free_Demo_MainWindow(*obj.Demo_MainWindow_Inst)
   If *obj
     UI_Window_Free(*obj)
     FreeStructure(*obj)
@@ -4908,7 +5595,14 @@ EndProcedure
 ; 6. MAIN PROGRAM EXECUTION
 ; ----------------------------------------------------------------------------
 
+; ============================================================================
+; PureBasic OOP GUI - XML / XAML UI Demo
+; Main.pb - Application Entry Point
+; ============================================================================
 
+; ============================================================================
+; PureBasic OOP GUI - MainWindow.pbi (Code-Behind for MainWindow.xml)
+; ============================================================================
 
 ; ============================================================================
 ; PureBasic OOP GUI Framework - UI.pbi (Master Header)
@@ -5109,24 +5803,26 @@ EndProcedure
 
 
 
-; IDE Options = PureBasic 6.40 (Windows - x64)
-; CursorPosition = 31
-; FirstLine = 5
-; EnableXP
-; DPIAware
+; Declarative XML / XAML Layout Loader
+; ============================================================================
+; PureBasic OOP GUI Framework - XMLLoader.pbi
+; Declarative XML / XAML Layout & View Loader for PureBasic OOP UI
+; Author:      MicrodevWeb
+; ============================================================================
 
 
-Procedure Init()
-  *mainWin = New_MainWindow()
-  *app = New_UI_Application_void()
-  *app\SetMainWindow(*mainWin)
-EndProcedure
 
-Init()
+
+
+
+
+
+; Initialisation de l'application OOP
+Define *app.UI_Application_vt = New_UI_Application_s("XML UI Demo")
+
+; Création de la fenêtre principale à partir de la vue XML
+Define *mainWin.Demo_MainWindow_vt = New_Demo_MainWindow()
+
+; Définition comme fenêtre principale et boucle d'événements
+*app\SetMainWindow(*mainWin)
 *app\Run_void()
-
-; IDE Options = PureBasic 6.40 (Windows - x64)
-; CursorPosition = 1
-; Folding = -
-; EnableXP
-; DPIAware

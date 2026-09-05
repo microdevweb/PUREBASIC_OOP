@@ -1,4 +1,4 @@
-﻿
+
 XIncludeFile "../../../ui/UI.pbi"
 Using UI
 Using UI::Controls
@@ -29,13 +29,15 @@ Class MainWindow Extends UI::Window
     This\*button_layout\AddChild(This\*bt_new)
     This\*button_layout\AddChild(This\*bt_edit)
     This\*button_layout\AddChild(This\*bt_delete)
+   
     ; = main layout
-    This\*main_layout = New UI::Layouts::DockPanel
+    This\*main_layout = New UI::Layouts::DockPanel()
     This\*main_layout\SetDock(This\*button_layout,#UI_Dock_Top)
     This\SetContent(This\*main_layout)
   EndMethod
 EndClass
 ; IDE Options = PureBasic 6.40 (Windows - x64)
-; CursorPosition = 3
+; CursorPosition = 31
+; FirstLine = 5
 ; EnableXP
 ; DPIAware
