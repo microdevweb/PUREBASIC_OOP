@@ -81,8 +81,7 @@ Namespace Demo::Views {
       ; 3. Lier la collection observable du ViewModel a la ListIcon
       Protected *lst.UI::Component = This\FindControl("lstTasks")
       If *lst And *vm
-        Protected engine.UI::MVVM::BindingEngine
-        engine\RegisterCollectionBinding(*lst, *vm\GetTasksCollection())
+        UI_MVVM_RegisterCollectionBinding(*lst, *vm\GetTasksCollection())
       EndIf
     }
   }

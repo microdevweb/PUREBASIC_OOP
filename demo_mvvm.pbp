@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://www.purebasic.com/namespace" version="1.0" creator="PureBasic 6.40 (Windows - x64)">
+  <section name="config">
+    <options closefiles="1" openmode="0" name="Nouveau projet"/>
+  </section>
+  <section name="data">
+    <explorer view="src\examples\mvvm_demo\viewmodels\" pattern="0"/>
+    <log show="1"/>
+    <lastopen date="2026-09-05 10:32" user="u237685" host="CSL0111"/>
+  </section>
+  <section name="files">
+    <file name="src\examples\mvvm_demo\Main.pb">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="1" sortindex="1" panelstate="++++"/>
+      <fingerprint md5="344632486360989e940420389e63c31b"/>
+    </file>
+    <file name="src\examples\mvvm_demo\views\TaskView.pbi">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="1" sortindex="2" panelstate="+++++"/>
+      <fingerprint md5="911c13e2972be4c8bda85bc974d594bf"/>
+    </file>
+    <file name="src\examples\mvvm_demo\viewmodels\TaskViewModel.pbi">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="1" sortindex="3" panelstate="+++++"/>
+      <fingerprint md5="e0d441ec42888a1ca9653d232f4fbaad"/>
+    </file>
+  </section>
+  <section name="targets">
+    <target name="Cible par défaut" enabled="1" default="1">
+      <inputfile value="src\examples\simple_mvvm\Main.pb"/>
+      <outputfile value=""/>
+      <options xpskin="1" dpiaware="1" debug="1" optimizer="0"/>
+    </target>
+  </section>
+</project>

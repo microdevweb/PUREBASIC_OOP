@@ -199,28 +199,27 @@ Namespace UI {
       Protected *vm.UI::MVVM::ViewModelBase = *targetWindow\GetDataContext()
       If Not *vm : ProcedureReturn : EndIf
 
-      Protected mvvmEngine.UI::MVVM::BindingEngine
       Protected propName.STRING, modeVal.INTEGER
 
       ; 1. Text Binding
       Protected textAttr.s = GetXMLAttribute(node, "Text")
       If textAttr = "" : textAttr = GetXMLAttribute(node, "text") : EndIf
       If This\ParseBindingExpression(textAttr, @propName, @modeVal)
-        mvvmEngine\RegisterBinding(*comp, "Text", *vm, propName\s, modeVal\i)
+        UI_MVVM_RegisterBinding(*comp, "Text", *vm, propName\s, modeVal\i)
       EndIf
 
       ; 2. Checked / State Binding
       Protected chkAttr.s = GetXMLAttribute(node, "Checked")
       If chkAttr = "" : chkAttr = GetXMLAttribute(node, "checked") : EndIf
       If This\ParseBindingExpression(chkAttr, @propName, @modeVal)
-        mvvmEngine\RegisterBinding(*comp, "Checked", *vm, propName\s, modeVal\i)
+        UI_MVVM_RegisterBinding(*comp, "Checked", *vm, propName\s, modeVal\i)
       EndIf
 
       ; 3. Value / Progress Binding
       Protected valAttr.s = GetXMLAttribute(node, "Value")
       If valAttr = "" : valAttr = GetXMLAttribute(node, "value") : EndIf
       If This\ParseBindingExpression(valAttr, @propName, @modeVal)
-        mvvmEngine\RegisterBinding(*comp, "Value", *vm, propName\s, modeVal\i)
+        UI_MVVM_RegisterBinding(*comp, "Value", *vm, propName\s, modeVal\i)
       EndIf
 
       ; 4. Command Binding
@@ -228,9 +227,9 @@ Namespace UI {
       If cmdAttr = "" : cmdAttr = GetXMLAttribute(node, "command") : EndIf
       If cmdAttr <> ""
         If This\ParseBindingExpression(cmdAttr, @propName, @modeVal)
-          mvvmEngine\RegisterCommandBinding(*comp, *vm, propName\s)
+          UI_MVVM_RegisterCommandBinding(*comp, *vm, propName\s)
         Else
-          mvvmEngine\RegisterCommandBinding(*comp, *vm, cmdAttr)
+          UI_MVVM_RegisterCommandBinding(*comp, *vm, cmdAttr)
         EndIf
       EndIf
     }

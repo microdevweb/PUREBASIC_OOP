@@ -38,9 +38,14 @@ Global NewList UI_ActivePropertyBindings.UI_PropertyBinding()
 Global NewList UI_ActiveCommandBindings.UI_CommandBinding()
 Global NewList UI_ActiveCollectionBindings.UI_CollectionBinding()
 
-; Forward procedure declarations for callbacks
+; Forward procedure declarations for callbacks and API
 Declare UI_BindingEngine_OnVMPropertyChanged(*vm, *pKeyPtr)
 Declare UI_BindingEngine_OnCollectionChanged(*col, actionType.i, index.i, *pTextPtr)
+Declare UI_MVVM_RegisterBinding(*control.UI_Gadget_vt, targetProp.s, *viewModel.UI_MVVM_ViewModelBase_vt, sourceProp.s, mode.i = #UI_BindingMode_OneWay)
+Declare UI_MVVM_RegisterCommandBinding(*control.UI_Gadget_vt, *viewModel.UI_MVVM_ViewModelBase_vt, commandName.s)
+Declare UI_MVVM_RegisterCollectionBinding(*control.UI_Gadget_vt, *collection.UI_MVVM_ObservableCollection_vt)
+Declare.b UI_MVVM_DispatchUIEvent(*control.UI_Gadget_vt, eventType.i)
+Declare UI_MVVM_UnregisterAll(*targetObj)
 
 Procedure UI_BindingEngine_OnVMPropertyChanged(*vm, *pKeyPtr)
   If Not *pKeyPtr : ProcedureReturn : EndIf
@@ -99,158 +104,164 @@ Procedure UI_BindingEngine_OnCollectionChanged(*col, actionType.i, index.i, *pTe
   Next
 EndProcedure
 
+Procedure UI_MVVM_RegisterBinding(*control.UI_Gadget_vt, targetProp.s, *viewModel.UI_MVVM_ViewModelBase_vt, sourceProp.s, mode.i = #UI_BindingMode_OneWay)
+  If Not *control Or Not *viewModel Or sourceProp = ""
+    ProcedureReturn
+  EndIf
+
+  AddElement(UI_ActivePropertyBindings())
+  UI_ActivePropertyBindings()\control = *control
+  UI_ActivePropertyBindings()\targetProp = targetProp
+  UI_ActivePropertyBindings()\viewModel = *viewModel
+  UI_ActivePropertyBindings()\sourceProp = sourceProp
+  UI_ActivePropertyBindings()\mode = mode
+  UI_ActivePropertyBindings()\isUpdating = #False
+
+  ; Subscribe to ViewModel property changes
+  *viewModel\RegisterObserver(*control, @UI_BindingEngine_OnVMPropertyChanged())
+
+  ; Initial push from ViewModel to View
+  Protected initialVal.s = *viewModel\GetValueAsString(sourceProp)
+  If initialVal <> "" And IsGadget(*control\GetID())
+    Protected tProp.s = LCase(targetProp)
+    Select tProp
+      Case "text"
+        SetGadgetText(*control\GetID(), initialVal)
+      Case "checked", "state"
+        Protected bVal.b = #False
+        If UCase(initialVal) = "TRUE" Or initialVal = "1" : bVal = #True : EndIf
+        SetGadgetState(*control\GetID(), bVal)
+      Case "progress", "progressvalue"
+        SetGadgetState(*control\GetID(), Val(initialVal))
+      Default:
+        SetGadgetText(*control\GetID(), initialVal)
+    EndSelect
+  EndIf
+EndProcedure
+
+Procedure UI_MVVM_RegisterCommandBinding(*control.UI_Gadget_vt, *viewModel.UI_MVVM_ViewModelBase_vt, commandName.s)
+  If Not *control Or Not *viewModel Or commandName = ""
+    ProcedureReturn
+  EndIf
+
+  AddElement(UI_ActiveCommandBindings())
+  UI_ActiveCommandBindings()\control = *control
+  UI_ActiveCommandBindings()\viewModel = *viewModel
+  UI_ActiveCommandBindings()\commandName = commandName
+EndProcedure
+
+Procedure UI_MVVM_RegisterCollectionBinding(*control.UI_Gadget_vt, *collection.UI_MVVM_ObservableCollection_vt)
+  If Not *control Or Not *collection
+    ProcedureReturn
+  EndIf
+
+  AddElement(UI_ActiveCollectionBindings())
+  UI_ActiveCollectionBindings()\control = *control
+  UI_ActiveCollectionBindings()\collection = *collection
+
+  *collection\RegisterCollectionObserver(*control, @UI_BindingEngine_OnCollectionChanged())
+
+  ; Initial populate
+  If IsGadget(*control\GetID())
+    ClearGadgetItems(*control\GetID())
+    Protected cCount.i = *collection\Count()
+    Protected i.i
+    For i = 0 To cCount - 1
+      AddGadgetItem(*control\GetID(), i, *collection\GetItem(i))
+    Next
+  EndIf
+EndProcedure
+
+Procedure.b UI_MVVM_DispatchUIEvent(*control.UI_Gadget_vt, eventType.i)
+  If Not *control : ProcedureReturn #False : EndIf
+
+  Protected handled.b = #False
+
+  ; 1. Check Command Bindings (Button click / Toggle change)
+  ForEach UI_ActiveCommandBindings()
+    If UI_ActiveCommandBindings()\control = *control
+      Protected *cmdVM.UI_MVVM_ViewModelBase_vt = UI_ActiveCommandBindings()\viewModel
+      If *cmdVM
+        *cmdVM\ExecuteCommand(UI_ActiveCommandBindings()\commandName, *control)
+        handled = #True
+      EndIf
+    EndIf
+  Next
+
+  ; 2. Check Two-Way Property Bindings (TextBox change / CheckBox click)
+  ForEach UI_ActivePropertyBindings()
+    If UI_ActivePropertyBindings()\control = *control
+      If UI_ActivePropertyBindings()\mode = #UI_BindingMode_TwoWay
+        If Not UI_ActivePropertyBindings()\isUpdating
+          UI_ActivePropertyBindings()\isUpdating = #True
+          Protected *propVM.UI_MVVM_ViewModelBase_vt = UI_ActivePropertyBindings()\viewModel
+          If *propVM And IsGadget(*control\GetID())
+            Protected curText.s = GetGadgetText(*control\GetID())
+            Protected tProp.s = LCase(UI_ActivePropertyBindings()\targetProp)
+            If tProp = "checked" Or tProp = "state"
+              If GetGadgetState(*control\GetID())
+                *propVM\SetBool(UI_ActivePropertyBindings()\sourceProp, #True)
+              Else
+                *propVM\SetBool(UI_ActivePropertyBindings()\sourceProp, #False)
+              EndIf
+            Else
+              *propVM\SetString(UI_ActivePropertyBindings()\sourceProp, curText)
+            EndIf
+            handled = #True
+          EndIf
+          UI_ActivePropertyBindings()\isUpdating = #False
+        EndIf
+      EndIf
+    EndIf
+  Next
+
+  ProcedureReturn handled
+EndProcedure
+
+Procedure UI_MVVM_UnregisterAll(*targetObj)
+  ForEach UI_ActivePropertyBindings()
+    If UI_ActivePropertyBindings()\control = *targetObj Or UI_ActivePropertyBindings()\viewModel = *targetObj
+      DeleteElement(UI_ActivePropertyBindings())
+    EndIf
+  Next
+
+  ForEach UI_ActiveCommandBindings()
+    If UI_ActiveCommandBindings()\control = *targetObj Or UI_ActiveCommandBindings()\viewModel = *targetObj
+      DeleteElement(UI_ActiveCommandBindings())
+    EndIf
+  Next
+
+  ForEach UI_ActiveCollectionBindings()
+    If UI_ActiveCollectionBindings()\control = *targetObj Or UI_ActiveCollectionBindings()\collection = *targetObj
+      DeleteElement(UI_ActiveCollectionBindings())
+    EndIf
+  Next
+EndProcedure
+
 Namespace UI::MVVM {
 
   Class BindingEngine {
 
-    ; ------------------------------------------------------------------------
-    ; Register Property Binding
-    ; ------------------------------------------------------------------------
     Public Method RegisterBinding(*control.UI::Gadget, targetProp.s, *viewModel.UI::MVVM::ViewModelBase, sourceProp.s, mode.i = #UI_BindingMode_OneWay) {
-      If Not *control Or Not *viewModel Or sourceProp = ""
-        ProcedureReturn
-      EndIf
-
-      AddElement(UI_ActivePropertyBindings())
-      UI_ActivePropertyBindings()\control = *control
-      UI_ActivePropertyBindings()\targetProp = targetProp
-      UI_ActivePropertyBindings()\viewModel = *viewModel
-      UI_ActivePropertyBindings()\sourceProp = sourceProp
-      UI_ActivePropertyBindings()\mode = mode
-      UI_ActivePropertyBindings()\isUpdating = #False
-
-      ; Subscribe to ViewModel property changes
-      *viewModel\RegisterObserver(*control, @UI_BindingEngine_OnVMPropertyChanged())
-
-      ; Initial push from ViewModel to View
-      Protected initialVal.s = *viewModel\GetValueAsString(sourceProp)
-      If initialVal <> "" And IsGadget(*control\GetID())
-        Protected tProp.s = LCase(targetProp)
-        Select tProp
-          Case "text"
-            SetGadgetText(*control\GetID(), initialVal)
-          Case "checked", "state"
-            Protected bVal.b = #False
-            If UCase(initialVal) = "TRUE" Or initialVal = "1" : bVal = #True : EndIf
-            SetGadgetState(*control\GetID(), bVal)
-          Case "progress", "progressvalue"
-            SetGadgetState(*control\GetID(), Val(initialVal))
-          Default:
-            SetGadgetText(*control\GetID(), initialVal)
-        EndSelect
-      EndIf
+      UI_MVVM_RegisterBinding(*control, targetProp, *viewModel, sourceProp, mode)
     }
 
-    ; ------------------------------------------------------------------------
-    ; Register Command Binding
-    ; ------------------------------------------------------------------------
     Public Method RegisterCommandBinding(*control.UI::Gadget, *viewModel.UI::MVVM::ViewModelBase, commandName.s) {
-      If Not *control Or Not *viewModel Or commandName = ""
-        ProcedureReturn
-      EndIf
-
-      AddElement(UI_ActiveCommandBindings())
-      UI_ActiveCommandBindings()\control = *control
-      UI_ActiveCommandBindings()\viewModel = *viewModel
-      UI_ActiveCommandBindings()\commandName = commandName
+      UI_MVVM_RegisterCommandBinding(*control, *viewModel, commandName)
     }
 
-    ; ------------------------------------------------------------------------
-    ; Register ObservableCollection Binding
-    ; ------------------------------------------------------------------------
     Public Method RegisterCollectionBinding(*control.UI::Gadget, *collection.UI::MVVM::ObservableCollection) {
-      If Not *control Or Not *collection
-        ProcedureReturn
-      EndIf
-
-      AddElement(UI_ActiveCollectionBindings())
-      UI_ActiveCollectionBindings()\control = *control
-      UI_ActiveCollectionBindings()\collection = *collection
-
-      *collection\RegisterCollectionObserver(*control, @UI_BindingEngine_OnCollectionChanged())
-
-      ; Initial populate
-      If IsGadget(*control\GetID())
-        ClearGadgetItems(*control\GetID())
-        Protected cCount.i = *collection\Count()
-        Protected i.i
-        For i = 0 To cCount - 1
-          AddGadgetItem(*control\GetID(), i, *collection\GetItem(i))
-        Next
-      EndIf
+      UI_MVVM_RegisterCollectionBinding(*control, *collection)
     }
 
-    ; ------------------------------------------------------------------------
-    ; Dispatch UI Event to Two-Way Bindings & Commands
-    ; ------------------------------------------------------------------------
     Public Method.b DispatchUIEvent(*control.UI::Gadget, eventType.i) {
-      If Not *control : ProcedureReturn #False : EndIf
-
-      Protected handled.b = #False
-
-      ; 1. Check Command Bindings (Button click / Toggle change)
-      ForEach UI_ActiveCommandBindings()
-        If UI_ActiveCommandBindings()\control = *control
-          Protected *cmdVM.UI::MVVM::ViewModelBase = UI_ActiveCommandBindings()\viewModel
-          If *cmdVM
-            *cmdVM\ExecuteCommand(UI_ActiveCommandBindings()\commandName, *control)
-            handled = #True
-          EndIf
-        EndIf
-      Next
-
-      ; 2. Check Two-Way Property Bindings (TextBox change / CheckBox click)
-      ForEach UI_ActivePropertyBindings()
-        If UI_ActivePropertyBindings()\control = *control
-          If UI_ActivePropertyBindings()\mode = #UI_BindingMode_TwoWay
-            If Not UI_ActivePropertyBindings()\isUpdating
-              UI_ActivePropertyBindings()\isUpdating = #True
-              Protected *propVM.UI::MVVM::ViewModelBase = UI_ActivePropertyBindings()\viewModel
-              If *propVM And IsGadget(*control\GetID())
-                Protected curText.s = GetGadgetText(*control\GetID())
-                Protected tProp.s = LCase(UI_ActivePropertyBindings()\targetProp)
-                If tProp = "checked" Or tProp = "state"
-                  If GetGadgetState(*control\GetID())
-                    *propVM\SetBool(UI_ActivePropertyBindings()\sourceProp, #True)
-                  Else
-                    *propVM\SetBool(UI_ActivePropertyBindings()\sourceProp, #False)
-                  EndIf
-                Else
-                  *propVM\SetString(UI_ActivePropertyBindings()\sourceProp, curText)
-                EndIf
-                handled = #True
-              EndIf
-              UI_ActivePropertyBindings()\isUpdating = #False
-            EndIf
-          EndIf
-        EndIf
-      Next
-
-      ProcedureReturn handled
+      ProcedureReturn UI_MVVM_DispatchUIEvent(*control, eventType)
     }
 
-    ; ------------------------------------------------------------------------
-    ; Clean up all bindings associated with a ViewModel or Control
-    ; ------------------------------------------------------------------------
     Public Method UnregisterAll(*targetObj) {
-      ForEach UI_ActivePropertyBindings()
-        If UI_ActivePropertyBindings()\control = *targetObj Or UI_ActivePropertyBindings()\viewModel = *targetObj
-          DeleteElement(UI_ActivePropertyBindings())
-        EndIf
-      Next
-
-      ForEach UI_ActiveCommandBindings()
-        If UI_ActiveCommandBindings()\control = *targetObj Or UI_ActiveCommandBindings()\viewModel = *targetObj
-          DeleteElement(UI_ActiveCommandBindings())
-        EndIf
-      Next
-
-      ForEach UI_ActiveCollectionBindings()
-        If UI_ActiveCollectionBindings()\control = *targetObj Or UI_ActiveCollectionBindings()\collection = *targetObj
-          DeleteElement(UI_ActiveCollectionBindings())
-        EndIf
-      Next
+      UI_MVVM_UnregisterAll(*targetObj)
     }
   }
 
 }
+

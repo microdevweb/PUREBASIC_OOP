@@ -377,26 +377,13 @@ Interface UI_XMLLoader_vt
   LoadFromString.b(xmlContent.s, *targetWindow.UI_Window_vt)
 EndInterface
 
-Interface Demo_Models_TaskItem_vt
-  GetId.i()
-  GetTitle.s()
-  SetTitle(t.s)
-  GetCategory.s()
-  SetCategory(c.s)
-  IsCompleted.b()
-  SetCompleted(done.b)
-  ToTableRow.s()
+Interface Demo_ViewModels_SimpleViewModel_vt Extends UI_MVVM_ViewModelBase_vt
+  OnClickButton(btnIndex.i)
+  OnHoverButton(btnIndex.i)
+  OnReset()
 EndInterface
 
-Interface Demo_ViewModels_TaskViewModel_vt Extends UI_MVVM_ViewModelBase_vt
-  GetTasksCollection.i()
-  AddTask(title.s, category.s)
-  UpdateCountText()
-  ClearAllTasks()
-  HandleAddFromUI()
-EndInterface
-
-Interface Demo_Views_TaskView_vt Extends UI_Window_vt
+Interface Demo_Views_SimpleView_vt Extends UI_Window_vt
 EndInterface
 
 ; ----------------------------------------------------------------------------
@@ -547,21 +534,13 @@ Structure UI_XMLLoader_Inst
   *VTable.UI_XMLLoader_vt
 EndStructure
 
-Structure Demo_Models_TaskItem_Inst
-  *VTable.Demo_Models_TaskItem_vt
-  id.i
-  title.s
-  category.s
-  isCompleted.b
+Structure Demo_ViewModels_SimpleViewModel_Inst Extends UI_MVVM_ViewModelBase_Inst
+  clickCount.i
 EndStructure
 
-Structure Demo_ViewModels_TaskViewModel_Inst Extends UI_MVVM_ViewModelBase_Inst
-  *tasksCollection.UI_MVVM_ObservableCollection_vt
-  taskCounter.i
-EndStructure
-
-Structure Demo_Views_TaskView_Inst Extends UI_Window_Inst
-  *viewModel.Demo_ViewModels_TaskViewModel_vt
+Structure Demo_Views_SimpleView_Inst Extends UI_Window_Inst
+  *viewModel.Demo_ViewModels_SimpleViewModel_vt
+  lastHoveredBtn.i
 EndStructure
 
 ; ----------------------------------------------------------------------------
@@ -582,11 +561,11 @@ Declare UI_MVVM_RegisterCommandBinding(*control.UI_Gadget_vt, *viewModel.UI_MVVM
 Declare UI_MVVM_RegisterCollectionBinding(*control.UI_Gadget_vt, *collection.UI_MVVM_ObservableCollection_vt)
 Declare.b UI_MVVM_DispatchUIEvent(*control.UI_Gadget_vt, eventType.i)
 Declare UI_MVVM_UnregisterAll(*targetObj)
-Declare TaskViewModel_OnAddTask(*param)
-Declare TaskViewModel_OnClearTasks(*param)
-Declare TaskViewModel_OnRefresh(*param)
-Declare TaskViewModel_OnExport(*param)
-Global *CurrentTaskViewModel = 0
+Declare SimpleVM_OnClickBtn1(*param)
+Declare SimpleVM_OnClickBtn2(*param)
+Declare SimpleVM_OnClickBtn3(*param)
+Declare SimpleVM_OnReset(*param)
+Global *CurrentSimpleViewModel = 0
 
 ; ----------------------------------------------------------------------------
 ; 3. METHOD PROCEDURES IMPLEMENTATION
@@ -899,24 +878,12 @@ Declare UI_XMLLoader_ApplyDataBindings(*This.UI_XMLLoader_Inst, *comp.UI_Compone
 Declare.i UI_XMLLoader_ParseNode(*This.UI_XMLLoader_Inst, node.i, *targetWindow.UI_Window_vt, *parentContainer.UI_Layouts_Container_vt)
 Declare.b UI_XMLLoader_LoadFromFile(*This.UI_XMLLoader_Inst, xmlPath.s, *targetWindow.UI_Window_vt)
 Declare.b UI_XMLLoader_LoadFromString(*This.UI_XMLLoader_Inst, xmlContent.s, *targetWindow.UI_Window_vt)
-Declare Demo_Models_TaskItem_Init_i_s_s(*This.Demo_Models_TaskItem_Inst, id_p.i, title_p.s, cat_p.s)
-Declare Demo_Models_TaskItem_Init_i_s_s_b(*This.Demo_Models_TaskItem_Inst, id_p.i, title_p.s, cat_p.s, done_p.b)
-Declare.i Demo_Models_TaskItem_GetId(*This.Demo_Models_TaskItem_Inst)
-Declare.s Demo_Models_TaskItem_GetTitle(*This.Demo_Models_TaskItem_Inst)
-Declare Demo_Models_TaskItem_SetTitle(*This.Demo_Models_TaskItem_Inst, t.s)
-Declare.s Demo_Models_TaskItem_GetCategory(*This.Demo_Models_TaskItem_Inst)
-Declare Demo_Models_TaskItem_SetCategory(*This.Demo_Models_TaskItem_Inst, c.s)
-Declare.b Demo_Models_TaskItem_IsCompleted(*This.Demo_Models_TaskItem_Inst)
-Declare Demo_Models_TaskItem_SetCompleted(*This.Demo_Models_TaskItem_Inst, done.b)
-Declare.s Demo_Models_TaskItem_ToTableRow(*This.Demo_Models_TaskItem_Inst)
-Declare Demo_ViewModels_TaskViewModel_Init(*This.Demo_ViewModels_TaskViewModel_Inst)
-Declare.i Demo_ViewModels_TaskViewModel_GetTasksCollection(*This.Demo_ViewModels_TaskViewModel_Inst)
-Declare Demo_ViewModels_TaskViewModel_AddTask(*This.Demo_ViewModels_TaskViewModel_Inst, title.s, category.s)
-Declare Demo_ViewModels_TaskViewModel_UpdateCountText(*This.Demo_ViewModels_TaskViewModel_Inst)
-Declare Demo_ViewModels_TaskViewModel_ClearAllTasks(*This.Demo_ViewModels_TaskViewModel_Inst)
-Declare Demo_ViewModels_TaskViewModel_HandleAddFromUI(*This.Demo_ViewModels_TaskViewModel_Inst)
-Declare Demo_ViewModels_TaskViewModel_Free(*This.Demo_ViewModels_TaskViewModel_Inst)
-Declare Demo_Views_TaskView_Init(*This.Demo_Views_TaskView_Inst, *vm.Demo_ViewModels_TaskViewModel_vt)
+Declare Demo_ViewModels_SimpleViewModel_Init(*This.Demo_ViewModels_SimpleViewModel_Inst)
+Declare Demo_ViewModels_SimpleViewModel_OnClickButton(*This.Demo_ViewModels_SimpleViewModel_Inst, btnIndex.i)
+Declare Demo_ViewModels_SimpleViewModel_OnHoverButton(*This.Demo_ViewModels_SimpleViewModel_Inst, btnIndex.i)
+Declare Demo_ViewModels_SimpleViewModel_OnReset(*This.Demo_ViewModels_SimpleViewModel_Inst)
+Declare Demo_Views_SimpleView_Init(*This.Demo_Views_SimpleView_Inst, *vm.Demo_ViewModels_SimpleViewModel_vt)
+Declare Demo_Views_SimpleView_OnTimer(*This.Demo_Views_SimpleView_Inst, timerId.i)
 
 Declare.i New_UI_Window_void()
 Declare.i New_UI_Window_s(title_p.s)
@@ -1004,13 +971,10 @@ Declare.i New_UI_ListIcon_i_i_i_i_s_i_i(x_p.i, y_p.i, w_p.i, h_p.i, title_p.s, c
 Declare Free_UI_ListIcon(*obj.UI_ListIcon_Inst)
 Declare.i New_UI_XMLLoader()
 Declare Free_UI_XMLLoader(*obj.UI_XMLLoader_Inst)
-Declare.i New_Demo_Models_TaskItem_i_s_s(id_p.i, title_p.s, cat_p.s)
-Declare.i New_Demo_Models_TaskItem_i_s_s_b(id_p.i, title_p.s, cat_p.s, done_p.b)
-Declare Free_Demo_Models_TaskItem(*obj.Demo_Models_TaskItem_Inst)
-Declare.i New_Demo_ViewModels_TaskViewModel()
-Declare Free_Demo_ViewModels_TaskViewModel(*obj.Demo_ViewModels_TaskViewModel_Inst)
-Declare.i New_Demo_Views_TaskView(*vm.Demo_ViewModels_TaskViewModel_vt)
-Declare Free_Demo_Views_TaskView(*obj.Demo_Views_TaskView_Inst)
+Declare.i New_Demo_ViewModels_SimpleViewModel()
+Declare Free_Demo_ViewModels_SimpleViewModel(*obj.Demo_ViewModels_SimpleViewModel_Inst)
+Declare.i New_Demo_Views_SimpleView(*vm.Demo_ViewModels_SimpleViewModel_vt)
+Declare Free_Demo_Views_SimpleView(*obj.Demo_Views_SimpleView_Inst)
 
 Procedure UI_Component_Init(*This.UI_Component_Inst)
   Protected *This_vt.UI_Component_vt = *This
@@ -4592,224 +4556,164 @@ Procedure.b UI_XMLLoader_LoadFromString(*This.UI_XMLLoader_Inst, xmlContent.s, *
         ProcedureReturn #True
 EndProcedure
 
-Procedure Demo_Models_TaskItem_Init_i_s_s(*This.Demo_Models_TaskItem_Inst, id_p.i, title_p.s, cat_p.s)
-  Protected *This_vt.Demo_Models_TaskItem_vt = *This
-        *This\id = id_p
-        *This\title = title_p
-        *This\category = cat_p
-        *This\isCompleted = #False
-EndProcedure
-
-Procedure Demo_Models_TaskItem_Init_i_s_s_b(*This.Demo_Models_TaskItem_Inst, id_p.i, title_p.s, cat_p.s, done_p.b)
-  Protected *This_vt.Demo_Models_TaskItem_vt = *This
-        *This\id = id_p
-        *This\title = title_p
-        *This\category = cat_p
-        *This\isCompleted = done_p
-EndProcedure
-
-Procedure.i Demo_Models_TaskItem_GetId(*This.Demo_Models_TaskItem_Inst)
-  Protected *This_vt.Demo_Models_TaskItem_vt = *This
-        ProcedureReturn *This\id
-EndProcedure
-
-Procedure.s Demo_Models_TaskItem_GetTitle(*This.Demo_Models_TaskItem_Inst)
-  Protected *This_vt.Demo_Models_TaskItem_vt = *This
-        ProcedureReturn *This\title
-EndProcedure
-
-Procedure Demo_Models_TaskItem_SetTitle(*This.Demo_Models_TaskItem_Inst, t.s)
-  Protected *This_vt.Demo_Models_TaskItem_vt = *This
-        *This\title = t
-EndProcedure
-
-Procedure.s Demo_Models_TaskItem_GetCategory(*This.Demo_Models_TaskItem_Inst)
-  Protected *This_vt.Demo_Models_TaskItem_vt = *This
-        ProcedureReturn *This\category
-EndProcedure
-
-Procedure Demo_Models_TaskItem_SetCategory(*This.Demo_Models_TaskItem_Inst, c.s)
-  Protected *This_vt.Demo_Models_TaskItem_vt = *This
-        *This\category = c
-EndProcedure
-
-Procedure.b Demo_Models_TaskItem_IsCompleted(*This.Demo_Models_TaskItem_Inst)
-  Protected *This_vt.Demo_Models_TaskItem_vt = *This
-        ProcedureReturn *This\isCompleted
-EndProcedure
-
-Procedure Demo_Models_TaskItem_SetCompleted(*This.Demo_Models_TaskItem_Inst, done.b)
-  Protected *This_vt.Demo_Models_TaskItem_vt = *This
-        *This\isCompleted = done
-EndProcedure
-
-Procedure.s Demo_Models_TaskItem_ToTableRow(*This.Demo_Models_TaskItem_Inst)
-  Protected *This_vt.Demo_Models_TaskItem_vt = *This
-        Protected statusStr.s = "En cours"
-        If *This\isCompleted : statusStr = "Termine" : EndIf
-        ProcedureReturn Str(*This\id) + Chr(10) + *This\title + Chr(10) + *This\category + Chr(10) + statusStr
-EndProcedure
-
-Procedure Demo_ViewModels_TaskViewModel_Init(*This.Demo_ViewModels_TaskViewModel_Inst)
-  Protected *This_vt.Demo_ViewModels_TaskViewModel_vt = *This
+Procedure Demo_ViewModels_SimpleViewModel_Init(*This.Demo_ViewModels_SimpleViewModel_Inst)
+  Protected *This_vt.Demo_ViewModels_SimpleViewModel_vt = *This
         UI_MVVM_ViewModelBase_Init(*This)
-        *CurrentTaskViewModel = *This
-        *This\taskCounter = 0
-        *This\tasksCollection = New_UI_MVVM_ObservableCollection()
+        *CurrentSimpleViewModel = *This
+        *This\clickCount = 0
   
-        ; 1. Initial State
-        *This_vt\SetString("TaskInput", "")
-        *This_vt\SetString("FilterQuery", "")
-        *This_vt\SetString("Category", "Composants UI")
-        *This_vt\SetString("StatusMessage", "Architecture MVVM active - Pret")
-        *This_vt\SetString("TasksCountText", "0 taches")
-        *This_vt\SetInt("ProgressValue", 60)
-        *This_vt\SetBool("AutoRefresh", #True)
-        *This_vt\SetBool("DarkMode", #True)
+        ; 1. Initial State Properties
+        *This_vt\SetString("ClickMessage", "No button clicked yet")
+        *This_vt\SetString("HoverMessage", "Hover over any button to test mouse hover")
+        *This_vt\SetString("TotalClicksText", "Total Clicks: 0")
+        *This_vt\SetString("StatusText", "Status: Ready")
   
-        ; 2. Register RelayCommands
-        Protected *cmdAdd.UI_MVVM_RelayCommand_vt = New_UI_MVVM_RelayCommand_p(@TaskViewModel_OnAddTask())
-        *This_vt\RegisterCommand("AddTaskCommand", *cmdAdd)
+        ; 2. Register Commands
+        Protected *cmd1.UI_MVVM_RelayCommand_vt = New_UI_MVVM_RelayCommand_p(@SimpleVM_OnClickBtn1())
+        *This_vt\RegisterCommand("ClickBtn1Command", *cmd1)
   
-        Protected *cmdClear.UI_MVVM_RelayCommand_vt = New_UI_MVVM_RelayCommand_p(@TaskViewModel_OnClearTasks())
-        *This_vt\RegisterCommand("ClearTasksCommand", *cmdClear)
+        Protected *cmd2.UI_MVVM_RelayCommand_vt = New_UI_MVVM_RelayCommand_p(@SimpleVM_OnClickBtn2())
+        *This_vt\RegisterCommand("ClickBtn2Command", *cmd2)
   
-        Protected *cmdRefresh.UI_MVVM_RelayCommand_vt = New_UI_MVVM_RelayCommand_p(@TaskViewModel_OnRefresh())
-        *This_vt\RegisterCommand("RefreshCommand", *cmdRefresh)
+        Protected *cmd3.UI_MVVM_RelayCommand_vt = New_UI_MVVM_RelayCommand_p(@SimpleVM_OnClickBtn3())
+        *This_vt\RegisterCommand("ClickBtn3Command", *cmd3)
   
-        Protected *cmdExport.UI_MVVM_RelayCommand_vt = New_UI_MVVM_RelayCommand_p(@TaskViewModel_OnExport())
-        *This_vt\RegisterCommand("ExportCommand", *cmdExport)
-  
-        ; 3. Initial Sample Data
-        *This_vt\AddTask("ObservableObject.pbi", "Services MVVM")
-        *This_vt\AddTask("RelayCommand.pbi", "Services MVVM")
-        *This_vt\AddTask("TaskView.xml", "Vues Declaratives")
-        *This_vt\AddTask("BindingEngine.pbi", "Moteur de Liaison")
+        Protected *cmdReset.UI_MVVM_RelayCommand_vt = New_UI_MVVM_RelayCommand_p(@SimpleVM_OnReset())
+        *This_vt\RegisterCommand("ResetCommand", *cmdReset)
 EndProcedure
 
-Procedure.i Demo_ViewModels_TaskViewModel_GetTasksCollection(*This.Demo_ViewModels_TaskViewModel_Inst)
-  Protected *This_vt.Demo_ViewModels_TaskViewModel_vt = *This
-        ProcedureReturn *This\tasksCollection
+Procedure Demo_ViewModels_SimpleViewModel_OnClickButton(*This.Demo_ViewModels_SimpleViewModel_Inst, btnIndex.i)
+  Protected *This_vt.Demo_ViewModels_SimpleViewModel_vt = *This
+        *This\clickCount + 1
+        *This_vt\SetString("ClickMessage", "You clicked on Button " + Str(btnIndex))
+        *This_vt\SetString("TotalClicksText", "Total Clicks: " + Str(*This\clickCount))
+        *This_vt\SetString("StatusText", "Status: Button " + Str(btnIndex) + " clicked")
 EndProcedure
 
-Procedure Demo_ViewModels_TaskViewModel_AddTask(*This.Demo_ViewModels_TaskViewModel_Inst, title.s, category.s)
-  Protected *This_vt.Demo_ViewModels_TaskViewModel_vt = *This
-        If Trim(title) = "" : ProcedureReturn : EndIf
-        *This\taskCounter + 1
-        Protected *item.Demo_Models_TaskItem_vt = New_Demo_Models_TaskItem_i_s_s(*This\taskCounter, title, category)
-        *This\tasksCollection\Add(*item\ToTableRow())
-        *This_vt\UpdateCountText()
-        *This_vt\SetString("StatusMessage", "Tache '" + title + "' ajoutee avec succes.")
-EndProcedure
-
-Procedure Demo_ViewModels_TaskViewModel_UpdateCountText(*This.Demo_ViewModels_TaskViewModel_Inst)
-  Protected *This_vt.Demo_ViewModels_TaskViewModel_vt = *This
-        Protected cnt.i = *This\tasksCollection\Count()
-        *This_vt\SetString("TasksCountText", Str(cnt) + " tache(s) enregistree(s)")
-        *This_vt\SetInt("ProgressValue", cnt * 20)
-EndProcedure
-
-Procedure Demo_ViewModels_TaskViewModel_ClearAllTasks(*This.Demo_ViewModels_TaskViewModel_Inst)
-  Protected *This_vt.Demo_ViewModels_TaskViewModel_vt = *This
-        *This\tasksCollection\Clear()
-        *This\taskCounter = 0
-        *This_vt\UpdateCountText()
-        *This_vt\SetString("StatusMessage", "Toutes les taches ont ete supprimees.")
-EndProcedure
-
-Procedure Demo_ViewModels_TaskViewModel_HandleAddFromUI(*This.Demo_ViewModels_TaskViewModel_Inst)
-  Protected *This_vt.Demo_ViewModels_TaskViewModel_vt = *This
-        Protected inputTitle.s = Trim(*This_vt\GetString("TaskInput"))
-        If inputTitle = ""
-          *This_vt\SetString("StatusMessage", "Veuillez entrer un titre de tache.")
-          ProcedureReturn
+Procedure Demo_ViewModels_SimpleViewModel_OnHoverButton(*This.Demo_ViewModels_SimpleViewModel_Inst, btnIndex.i)
+  Protected *This_vt.Demo_ViewModels_SimpleViewModel_vt = *This
+        If btnIndex > 0
+          *This_vt\SetString("HoverMessage", "You are hovering Button " + Str(btnIndex))
+        Else
+          *This_vt\SetString("HoverMessage", "No button hovered")
         EndIf
-        Protected cat.s = *This_vt\GetString("Category")
-        If cat = "" : cat = "General" : EndIf
-        *This_vt\AddTask(inputTitle, cat)
-        *This_vt\SetString("TaskInput", "")
 EndProcedure
 
-Procedure Demo_ViewModels_TaskViewModel_Free(*This.Demo_ViewModels_TaskViewModel_Inst)
-  Protected *This_vt.Demo_ViewModels_TaskViewModel_vt = *This
-        If *This\tasksCollection
-          *This\tasksCollection\Free()
-        EndIf
-        UI_MVVM_ViewModelBase_Free(*This)
+Procedure Demo_ViewModels_SimpleViewModel_OnReset(*This.Demo_ViewModels_SimpleViewModel_Inst)
+  Protected *This_vt.Demo_ViewModels_SimpleViewModel_vt = *This
+        *This\clickCount = 0
+        *This_vt\SetString("ClickMessage", "Values reset to default")
+        *This_vt\SetString("HoverMessage", "Hover over any button to test mouse hover")
+        *This_vt\SetString("TotalClicksText", "Total Clicks: 0")
+        *This_vt\SetString("StatusText", "Status: Reset completed")
 EndProcedure
 
-Procedure Demo_Views_TaskView_Init(*This.Demo_Views_TaskView_Inst, *vm.Demo_ViewModels_TaskViewModel_vt)
-  Protected *This_vt.Demo_Views_TaskView_vt = *This
+Procedure Demo_Views_SimpleView_Init(*This.Demo_Views_SimpleView_Inst, *vm.Demo_ViewModels_SimpleViewModel_vt)
+  Protected *This_vt.Demo_Views_SimpleView_vt = *This
         UI_Window_Init_void(*This)
         *This\viewModel = *vm
+        *This\lastHoveredBtn = 0
   
-        ; 1. Resout le chemin du fichier XML
-        Protected xmlFile.s = #PB_Compiler_FilePath + "TaskView.xml"
+        ; 1. Resolve XML file path
+        Protected xmlFile.s = #PB_Compiler_FilePath + "SimpleView.xml"
         If Not FileSize(xmlFile) > 0
-          xmlFile = #PB_Compiler_FilePath + "views/TaskView.xml"
+          xmlFile = #PB_Compiler_FilePath + "views/SimpleView.xml"
         EndIf
         If Not FileSize(xmlFile) > 0
-          xmlFile = GetPathPart(ProgramFilename()) + "views/TaskView.xml"
+          xmlFile = GetPathPart(ProgramFilename()) + "views/SimpleView.xml"
         EndIf
         If Not FileSize(xmlFile) > 0
-          xmlFile = GetPathPart(ProgramFilename()) + "TaskView.xml"
+          xmlFile = GetPathPart(ProgramFilename()) + "SimpleView.xml"
         EndIf
         If Not FileSize(xmlFile) > 0
-          xmlFile = "src/examples/mvvm_demo/views/TaskView.xml"
+          xmlFile = "src/examples/simple_mvvm/views/SimpleView.xml"
         EndIf
         If Not FileSize(xmlFile) > 0
-          xmlFile = "views/TaskView.xml"
+          xmlFile = "views/SimpleView.xml"
         EndIf
   
-        ; 2. Charge la vue declarative en injectant le DataContext (ViewModel)
+        ; 2. Load declarative view with DataContext (ViewModel)
         Protected loaded.b = #False
         If FileSize(xmlFile) > 0
           loaded = *This_vt\LoadView(xmlFile, *vm)
         EndIf
   
         If Not loaded
-          ; Fallback XML embarque
-          Protected defaultXml.s = "<Window Title='PureBasic OOP - Architecture MVVM &amp; DataBinding' Width='740' Height='560'>" +
+          ; Embedded fallback XML
+          Protected defaultXml.s = "<Window Title='PureBasic OOP - Simple MVVM Test' Width='560' Height='400'>" +
             "<DockPanel LastChildFill='true'>" +
-            "  <StackPanel Dock='Top' Orientation='Horizontal' Spacing='10' Margin='10' Height='40'>" +
-            "    <Button Text='Rafraichir' Command='{Binding RefreshCommand}' Width='110' Height='32'/>" +
-            "    <Button Text='Exporter' Command='{Binding ExportCommand}' Width='100' Height='32'/>" +
-            "    <Button Text='Vider Liste' Command='{Binding ClearTasksCommand}' Width='110' Height='32'/>" +
-            "    <TextBox Placeholder='Rechercher...' Text='{Binding Path=FilterQuery, Mode=TwoWay}' Width='220' Height='30'/>" +
+            "  <StackPanel Dock='Top' Orientation='Vertical' Margin='15,10,15,5'>" +
+            "    <Label Text='MVVM DataBinding and Hover Test' Height='24'/>" +
             "  </StackPanel>" +
-            "  <StackPanel Dock='Bottom' Orientation='Horizontal' Spacing='15' Margin='8,4' Height='32'>" +
-            "    <Label Text='{Binding StatusMessage}' Width='320' Height='22'/>" +
-            "    <ProgressBar Value='{Binding ProgressValue}' Width='160' Height='20'/>" +
-            "    <ToggleSwitch Text='Mode Actif' Checked='{Binding DarkMode, Mode=TwoWay}' Width='120' Height='24'/>" +
+            "  <StackPanel Dock='Bottom' Orientation='Horizontal' Margin='15,5' Height='26'>" +
+            "    <Label Text='{Binding StatusText}' Width='500' Height='20'/>" +
             "  </StackPanel>" +
-            "  <StackPanel Dock='Left' Orientation='Vertical' Spacing='8' Margin='10,0' Width='150'>" +
-            "    <Label Text='Statistiques MVVM' Height='20'/>" +
-            "    <Label Text='{Binding TasksCountText}' Height='20'/>" +
-            "    <CheckBox Text='Auto-refresh' Checked='{Binding AutoRefresh, Mode=TwoWay}' Height='24'/>" +
-            "  </StackPanel>" +
-            "  <Grid Rows='Auto,*' Columns='*,*' Margin='5' Dock='Fill'>" +
-            "    <StackPanel Row='0' Column='0' ColumnSpan='2' Orientation='Horizontal' Spacing='10' Margin='0,0,0,10'>" +
-            "      <Label Text='Titre:' Width='45' Height='24'/>" +
-            "      <TextBox Name='txtInput' Text='{Binding Path=TaskInput, Mode=TwoWay}' Placeholder='Entrez le titre d\\'une tache...' Width='220' Height='26'/>" +
-            "      <ComboBox Name='cboCategory' Items='Composants UI,Services MVVM,Vues Declaratives,Moteur de Liaison' SelectedIndex='0' Width='170' Height='26'/>" +
-            "      <Button Text='Ajouter' Command='{Binding AddTaskCommand}' Width='85' Height='28'/>" +
+            "  <StackPanel Dock='Fill' Orientation='Vertical' Spacing='8' Margin='15,10'>" +
+            "    <Label Text='Actions (Click or Hover):' Height='20'/>" +
+            "    <StackPanel Orientation='Horizontal' Spacing='10' Height='36'>" +
+            "      <Button Name='btn1' Text='Button 1' Command='{Binding ClickBtn1Command}' Width='100' Height='32'/>" +
+            "      <Button Name='btn2' Text='Button 2' Command='{Binding ClickBtn2Command}' Width='100' Height='32'/>" +
+            "      <Button Name='btn3' Text='Button 3' Command='{Binding ClickBtn3Command}' Width='100' Height='32'/>" +
+            "      <Button Name='btnReset' Text='Reset' Command='{Binding ResetCommand}' Width='90' Height='32'/>" +
             "    </StackPanel>" +
-            "    <ListIcon Name='lstTasks' Row='1' Column='0' ColumnSpan='2' Columns='ID:50,Titre:240,Categorie:160,Statut:100' GridLines='true' FullRowSelect='true' Margin='0'/>" +
-            "  </Grid>" +
+            "    <Label Text='Click Notification:' Margin='0,5,0,0' Height='20'/>" +
+            "    <TextBox Name='txtClick' Text='{Binding ClickMessage}' Height='28'/>" +
+            "    <Label Text='Hover Notification:' Margin='0,5,0,0' Height='20'/>" +
+            "    <TextBox Name='txtHover' Text='{Binding HoverMessage}' Height='28'/>" +
+            "    <Label Text='{Binding TotalClicksText}' Margin='0,5,0,0' Height='22'/>" +
+            "  </StackPanel>" +
             "</DockPanel>" +
             "</Window>"
           loaded = *This_vt\LoadViewFromString(defaultXml, *vm)
         EndIf
   
         If Not loaded
-          MessageRequester("Erreur", "Impossible de charger la vue TaskView.")
+          MessageRequester("Error", "Failed to load SimpleView.")
           ProcedureReturn
         EndIf
   
-        ; 3. Lier la collection observable du ViewModel a la ListIcon
-        Protected *lst.UI_Component_vt = *This_vt\FindControl("lstTasks")
-        If *lst And *vm
-          UI_MVVM_RegisterCollectionBinding(*lst, *vm\GetTasksCollection())
+        ; 3. Start Window Timer for hover detection (50 ms interval)
+        If *This_vt\GetID() And IsWindow(*This_vt\GetID())
+          AddWindowTimer(*This_vt\GetID(), 100, 50)
+        EndIf
+EndProcedure
+
+Procedure Demo_Views_SimpleView_OnTimer(*This.Demo_Views_SimpleView_Inst, timerId.i)
+  Protected *This_vt.Demo_Views_SimpleView_vt = *This
+        If timerId = 100 And *This_vt\GetID() And IsWindow(*This_vt\GetID()) And *This\viewModel
+          Protected mx.i = WindowMouseX(*This_vt\GetID())
+          Protected my.i = WindowMouseY(*This_vt\GetID())
+  
+          Protected *btn1.UI_Component_vt = *This_vt\FindControl("btn1")
+          Protected *btn2.UI_Component_vt = *This_vt\FindControl("btn2")
+          Protected *btn3.UI_Component_vt = *This_vt\FindControl("btn3")
+          Protected *btnReset.UI_Component_vt = *This_vt\FindControl("btnReset")
+  
+          Protected hovered.i = 0
+          If *btn1 And mx >= *btn1\GetX() And mx <= *btn1\GetX() + *btn1\GetWidth() And my >= *btn1\GetY() And my <= *btn1\GetY() + *btn1\GetHeight()
+            hovered = 1
+          ElseIf *btn2 And mx >= *btn2\GetX() And mx <= *btn2\GetX() + *btn2\GetWidth() And my >= *btn2\GetY() And my <= *btn2\GetY() + *btn2\GetHeight()
+            hovered = 2
+          ElseIf *btn3 And mx >= *btn3\GetX() And mx <= *btn3\GetX() + *btn3\GetWidth() And my >= *btn3\GetY() And my <= *btn3\GetY() + *btn3\GetHeight()
+            hovered = 3
+          ElseIf *btnReset And mx >= *btnReset\GetX() And mx <= *btnReset\GetX() + *btnReset\GetWidth() And my >= *btnReset\GetY() And my <= *btnReset\GetY() + *btnReset\GetHeight()
+            hovered = 4
+          EndIf
+  
+          If hovered <> *This\lastHoveredBtn
+            *This\lastHoveredBtn = hovered
+            If hovered = 1
+              *This\viewModel\OnHoverButton(1)
+            ElseIf hovered = 2
+              *This\viewModel\OnHoverButton(2)
+            ElseIf hovered = 3
+              *This\viewModel\OnHoverButton(3)
+            ElseIf hovered = 4
+              *This\viewModel\SetString("HoverMessage", "You are hovering Reset Button")
+            Else
+              *This\viewModel\OnHoverButton(0)
+            EndIf
+          EndIf
         EndIf
 EndProcedure
 
@@ -5867,17 +5771,8 @@ DataSection
     Data.i @UI_XMLLoader_ParseNode()
     Data.i @UI_XMLLoader_LoadFromFile()
     Data.i @UI_XMLLoader_LoadFromString()
-  Demo_Models_TaskItem_VTable_Data:
-    Data.i @Demo_Models_TaskItem_GetId()
-    Data.i @Demo_Models_TaskItem_GetTitle()
-    Data.i @Demo_Models_TaskItem_SetTitle()
-    Data.i @Demo_Models_TaskItem_GetCategory()
-    Data.i @Demo_Models_TaskItem_SetCategory()
-    Data.i @Demo_Models_TaskItem_IsCompleted()
-    Data.i @Demo_Models_TaskItem_SetCompleted()
-    Data.i @Demo_Models_TaskItem_ToTableRow()
-  Demo_ViewModels_TaskViewModel_VTable_Data:
-    Data.i @Demo_ViewModels_TaskViewModel_Free()
+  Demo_ViewModels_SimpleViewModel_VTable_Data:
+    Data.i @UI_MVVM_ViewModelBase_Free()
     Data.i @UI_MVVM_ObservableObject_RegisterObserver()
     Data.i @UI_MVVM_ObservableObject_UnregisterObserver()
     Data.i @UI_MVVM_ObservableObject_NotifyPropertyChanged()
@@ -5894,12 +5789,10 @@ DataSection
     Data.i @UI_MVVM_ViewModelBase_RegisterCommand()
     Data.i @UI_MVVM_ViewModelBase_GetCommand()
     Data.i @UI_MVVM_ViewModelBase_ExecuteCommand()
-    Data.i @Demo_ViewModels_TaskViewModel_GetTasksCollection()
-    Data.i @Demo_ViewModels_TaskViewModel_AddTask()
-    Data.i @Demo_ViewModels_TaskViewModel_UpdateCountText()
-    Data.i @Demo_ViewModels_TaskViewModel_ClearAllTasks()
-    Data.i @Demo_ViewModels_TaskViewModel_HandleAddFromUI()
-  Demo_Views_TaskView_VTable_Data:
+    Data.i @Demo_ViewModels_SimpleViewModel_OnClickButton()
+    Data.i @Demo_ViewModels_SimpleViewModel_OnHoverButton()
+    Data.i @Demo_ViewModels_SimpleViewModel_OnReset()
+  Demo_Views_SimpleView_VTable_Data:
     Data.i @UI_Window_SetDataContext()
     Data.i @UI_Window_GetDataContext()
     Data.i @UI_Component_GetID()
@@ -5971,7 +5864,7 @@ DataSection
     Data.i @UI_Window_OnMinimize()
     Data.i @UI_Window_OnMaximize()
     Data.i @UI_Window_OnRestore()
-    Data.i @UI_Window_OnTimer()
+    Data.i @Demo_Views_SimpleView_OnTimer()
     Data.i @UI_Window_OnChildEvent()
 EndDataSection
 
@@ -6705,56 +6598,32 @@ Procedure Free_UI_XMLLoader(*obj.UI_XMLLoader_Inst)
   EndIf
 EndProcedure
 
-Procedure.i New_Demo_Models_TaskItem_i_s_s(id_p.i, title_p.s, cat_p.s)
-  Protected *obj.Demo_Models_TaskItem_Inst = AllocateStructure(Demo_Models_TaskItem_Inst)
+Procedure.i New_Demo_ViewModels_SimpleViewModel()
+  Protected *obj.Demo_ViewModels_SimpleViewModel_Inst = AllocateStructure(Demo_ViewModels_SimpleViewModel_Inst)
   If *obj
-    *obj\VTable = ?Demo_Models_TaskItem_VTable_Data
-    Demo_Models_TaskItem_Init_i_s_s(*obj, id_p, title_p, cat_p)
+    *obj\VTable = ?Demo_ViewModels_SimpleViewModel_VTable_Data
+    Demo_ViewModels_SimpleViewModel_Init(*obj)
   EndIf
   ProcedureReturn *obj
 EndProcedure
 
-Procedure.i New_Demo_Models_TaskItem_i_s_s_b(id_p.i, title_p.s, cat_p.s, done_p.b)
-  Protected *obj.Demo_Models_TaskItem_Inst = AllocateStructure(Demo_Models_TaskItem_Inst)
+Procedure Free_Demo_ViewModels_SimpleViewModel(*obj.Demo_ViewModels_SimpleViewModel_Inst)
   If *obj
-    *obj\VTable = ?Demo_Models_TaskItem_VTable_Data
-    Demo_Models_TaskItem_Init_i_s_s_b(*obj, id_p, title_p, cat_p, done_p)
-  EndIf
-  ProcedureReturn *obj
-EndProcedure
-
-Procedure Free_Demo_Models_TaskItem(*obj.Demo_Models_TaskItem_Inst)
-  If *obj
+    UI_MVVM_ViewModelBase_Free(*obj)
     FreeStructure(*obj)
   EndIf
 EndProcedure
 
-Procedure.i New_Demo_ViewModels_TaskViewModel()
-  Protected *obj.Demo_ViewModels_TaskViewModel_Inst = AllocateStructure(Demo_ViewModels_TaskViewModel_Inst)
+Procedure.i New_Demo_Views_SimpleView(*vm.Demo_ViewModels_SimpleViewModel_vt)
+  Protected *obj.Demo_Views_SimpleView_Inst = AllocateStructure(Demo_Views_SimpleView_Inst)
   If *obj
-    *obj\VTable = ?Demo_ViewModels_TaskViewModel_VTable_Data
-    Demo_ViewModels_TaskViewModel_Init(*obj)
+    *obj\VTable = ?Demo_Views_SimpleView_VTable_Data
+    Demo_Views_SimpleView_Init(*obj, *vm)
   EndIf
   ProcedureReturn *obj
 EndProcedure
 
-Procedure Free_Demo_ViewModels_TaskViewModel(*obj.Demo_ViewModels_TaskViewModel_Inst)
-  If *obj
-    Demo_ViewModels_TaskViewModel_Free(*obj)
-    FreeStructure(*obj)
-  EndIf
-EndProcedure
-
-Procedure.i New_Demo_Views_TaskView(*vm.Demo_ViewModels_TaskViewModel_vt)
-  Protected *obj.Demo_Views_TaskView_Inst = AllocateStructure(Demo_Views_TaskView_Inst)
-  If *obj
-    *obj\VTable = ?Demo_Views_TaskView_VTable_Data
-    Demo_Views_TaskView_Init(*obj, *vm)
-  EndIf
-  ProcedureReturn *obj
-EndProcedure
-
-Procedure Free_Demo_Views_TaskView(*obj.Demo_Views_TaskView_Inst)
+Procedure Free_Demo_Views_SimpleView(*obj.Demo_Views_SimpleView_Inst)
   If *obj
     UI_Window_Free(*obj)
     FreeStructure(*obj)
@@ -6766,13 +6635,14 @@ EndProcedure
 ; ----------------------------------------------------------------------------
 
 ; ============================================================================
-; PureBasic OOP GUI Framework - MVVM Demo Application
+; PureBasic OOP MVVM - Simple MVVM Test Application
 ; Main.pb - Application Entry Point
 ; ============================================================================
 
 ; ============================================================================
-; PureBasic OOP MVVM Demo - TaskView.pbi
-; Minimal Code-Behind View for TaskView.xml
+; PureBasic OOP MVVM - SimpleView.pbi
+; Code-behind for SimpleView.xml with Timer-based Hover Detection
+; Author:      MicrodevWeb
 ; ============================================================================
 
 ; ============================================================================
@@ -7243,64 +7113,58 @@ EndProcedure
 ; Window & Application Dispatcher
 
 ; ============================================================================
-; PureBasic OOP MVVM Demo - TaskViewModel.pbi
-; Presentation State, Observable Properties and Commands
-; ============================================================================
-
-; ============================================================================
-; PureBasic OOP MVVM Demo - TaskModel.pbi
-; Pure Domain Model Entity
+; PureBasic OOP MVVM - SimpleViewModel.pbi
+; Simple ViewModel for testing MVVM DataBinding and Commands
+; Author:      MicrodevWeb
 ; ============================================================================
 
 
-
-
-; Forward command procedure declarations
+; Forward declarations for command callbacks
 
 
 
 
 
-Procedure TaskViewModel_OnAddTask(*param)
-  If *CurrentTaskViewModel
-    Protected *vm.Demo_ViewModels_TaskViewModel_vt = *CurrentTaskViewModel
-    *vm\HandleAddFromUI()
+Procedure SimpleVM_OnClickBtn1(*param)
+  If *CurrentSimpleViewModel
+    Protected *vm1.Demo_ViewModels_SimpleViewModel_vt = *CurrentSimpleViewModel
+    *vm1\OnClickButton(1)
   EndIf
 EndProcedure
 
-Procedure TaskViewModel_OnClearTasks(*param)
-  If *CurrentTaskViewModel
-    Protected *vmClear.Demo_ViewModels_TaskViewModel_vt = *CurrentTaskViewModel
-    *vmClear\ClearAllTasks()
+Procedure SimpleVM_OnClickBtn2(*param)
+  If *CurrentSimpleViewModel
+    Protected *vm2.Demo_ViewModels_SimpleViewModel_vt = *CurrentSimpleViewModel
+    *vm2\OnClickButton(2)
   EndIf
 EndProcedure
 
-Procedure TaskViewModel_OnRefresh(*param)
-  If *CurrentTaskViewModel
-    Protected *vmRef.Demo_ViewModels_TaskViewModel_vt = *CurrentTaskViewModel
-    *vmRef\SetString("StatusMessage", "Donnees synchronisees avec le ViewModel.")
+Procedure SimpleVM_OnClickBtn3(*param)
+  If *CurrentSimpleViewModel
+    Protected *vm3.Demo_ViewModels_SimpleViewModel_vt = *CurrentSimpleViewModel
+    *vm3\OnClickButton(3)
   EndIf
 EndProcedure
 
-Procedure TaskViewModel_OnExport(*param)
-  If *CurrentTaskViewModel
-    Protected *vmExp.Demo_ViewModels_TaskViewModel_vt = *CurrentTaskViewModel
-    *vmExp\SetString("StatusMessage", "Exportation des donnees terminee.")
+Procedure SimpleVM_OnReset(*param)
+  If *CurrentSimpleViewModel
+    Protected *vmReset.Demo_ViewModels_SimpleViewModel_vt = *CurrentSimpleViewModel
+    *vmReset\OnReset()
   EndIf
 EndProcedure
 
 
 
 
-; 1. Initialisation de l'Application OOP
-Define *app.UI_Application_vt = New_UI_Application_s("PureBasic OOP MVVM Demo")
+; 1. Initialize OOP Application
+Define *app.UI_Application_vt = New_UI_Application_s("PureBasic OOP Simple MVVM")
 
-; 2. Instanciation du ViewModel (Donnees et Logique)
-Define *vm.Demo_ViewModels_TaskViewModel_vt = New_Demo_ViewModels_TaskViewModel()
+; 2. Instantiate ViewModel (State & Business Logic)
+Define *vm.Demo_ViewModels_SimpleViewModel_vt = New_Demo_ViewModels_SimpleViewModel()
 
-; 3. Instanciation de la Vue (Injection du ViewModel)
-Define *view.Demo_Views_TaskView_vt = New_Demo_Views_TaskView(*vm)
+; 3. Instantiate View (Inject ViewModel as DataContext)
+Define *view.Demo_Views_SimpleView_vt = New_Demo_Views_SimpleView(*vm)
 
-; 4. Execution de la boucle d'evenements
+; 4. Run Application Event Loop
 *app\SetMainWindow(*view)
 *app\Run_void()

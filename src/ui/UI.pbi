@@ -6,9 +6,10 @@
 
 XIncludeFile "Component.pbi"
 XIncludeFile "Gadget.pbi"
-XIncludeFile "Window.pbi"
-XIncludeFile "Application.pbi"
 XIncludeFile "CustomGadget.pbi"
+
+; MVVM (Model-View-ViewModel) Architecture
+XIncludeFile "mvvm/MVVM.pbi"
 
 ; Responsive Layouts (WPF-Style)
 XIncludeFile "layout/Container.pbi"
@@ -32,5 +33,7 @@ XIncludeFile "controls/ListIcon.pbi"
 ; Declarative XML / XAML Layout Loader
 XIncludeFile "XMLLoader.pbi"
 
-; MVVM (Model-View-ViewModel) Architecture
-XIncludeFile "mvvm/MVVM.pbi"
+; Window & Application Dispatcher
+XIncludeFile "Window.pbi"
+XIncludeFile "Application.pbi"
+

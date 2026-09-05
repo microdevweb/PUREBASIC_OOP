@@ -322,6 +322,9 @@ Namespace UI {
     Public Method OnRestore() {
     }
 
+    Public Method OnTimer(timerId.i) {
+    }
+
     Public Method OnChildEvent(*child.UI::Gadget, eventType.i) {
     }
   }

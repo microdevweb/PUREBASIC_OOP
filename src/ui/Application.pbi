@@ -23,6 +23,7 @@ Macro UI_UnregisterGadget(id_p)
 EndMacro
 
 Declare UI_GlobalSizeCallback()
+Declare.b UI_MVVM_DispatchUIEvent(*control.UI_Gadget_vt, eventType.i)
 
 Procedure UI_GlobalSizeCallback()
   Protected evWin.i = EventWindow()
@@ -92,8 +93,7 @@ Namespace UI {
               Protected *g.UI::Gadget = UI_GadgetMap()
               If (*g) {
                 ; Dispatch to MVVM Binding Engine
-                Protected mvvmEngine.UI::MVVM::BindingEngine
-                mvvmEngine\DispatchUIEvent(*g, evType)
+                UI_MVVM_DispatchUIEvent(*g, evType)
 
                 ; Dispatch to Gadget virtual methods
                 Select (evType) {
@@ -180,6 +180,14 @@ Namespace UI {
               Protected *targetWinRest.UI::Window = UI_WindowMap()
               If (*targetWinRest) {
                 *targetWinRest\OnRestore()
+              }
+            }
+
+          Case #PB_Event_Timer:
+            If (FindMapElement(UI_WindowMap(), Str(evWin))) {
+              Protected *targetWinTimer.UI::Window = UI_WindowMap()
+              If (*targetWinTimer) {
+                *targetWinTimer\OnTimer(EventTimer())
               }
             }
         }
