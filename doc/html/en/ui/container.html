@@ -60,12 +60,20 @@
       <li class='nav-item'><a href='../ui/button.html'><span>Button</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/checkbox.html'><span>CheckBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/combobox.html'><span>ComboBox</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/datepicker.html'><span>DatePicker</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/editor.html'><span>Editor</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/groupbox.html'><span>GroupBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/label.html'><span>Label</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/listicon.html'><span>ListIcon</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/listview.html'><span>ListView</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/progressbar.html'><span>ProgressBar</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/radiobutton.html'><span>RadioButton</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/slider.html'><span>Slider</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/spinbox.html'><span>SpinBox</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/tabcontrol.html'><span>TabControl</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/textbox.html'><span>TextBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/toggleswitch.html'><span>ToggleSwitch</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/treeview.html'><span>TreeView</span><span class='badge badge-ui'>UI</span></a></li>
     </ul>
   </div>
   <div class='nav-section'>
@@ -74,6 +82,12 @@
       <li class='nav-item'><a href='../ui/stackpanel.html'><span>StackPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/dockpanel.html'><span>DockPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/grid.html'><span>Grid</span><span class='badge badge-wpf'>WPF</span></a></li>
+    </ul>
+  </div>
+  <div class='nav-section'>
+    <div class='nav-section-title'>MVVM Architecture & DataBinding</div>
+    <ul class='nav-list'>
+      <li class='nav-item'><a href='../ui/mvvm.html'><span>MVVM Architecture & Bindings</span><span class='badge badge-mvvm'>MVVM</span></a></li>
     </ul>
   </div>
   <div class='nav-section'>
@@ -94,9 +108,9 @@
       <div class='page-header'>
         <div class='title-row'>
           <h1 class='page-title'>Container Class</h1>
-          <span class='badge badge-wpf'>Base Layout</span>
+          <span class='badge badge-wpf'>WPF Layout</span>
         </div>
-        <p class='page-lead'>Abstract base class for all WPF-style responsive layout panels.</p>
+        <p class='page-lead'>Abstract base class for responsive WPF-style layout panels.</p>
       </div>
       
       <div class='inheritance-box'>
@@ -137,30 +151,21 @@
 
 <div class='doc-section'>
   <h2 class='section-title'>Description</h2>
-  <p>The abstract <code>UI::Layouts::Container</code> class (in <code>src/ui/layout/Container.pbo</code>) inherits from <code>UI::Component</code> and forms the foundation for all responsive layout panels (<code>StackPanel</code>, <code>DockPanel</code>, <code>Grid</code>), orchestrating child element lists and internal padding.</p>
+  <p>The abstract <code>UI::Layouts::Container</code> class (inheriting from <code>UI::Component</code>) is the foundation of all responsive layout panels. It manages child component collections, internal padding, and recursive arrangement calculations.</p>
 </div>
+
 <div class='doc-section'>
-  <h2 class='section-title'>Overloaded Constructors</h2>
-  <div class='table-wrapper'>
-    <table>
-      <tr><th>Constructor</th><th>Description</th></tr>
-      <tr><td><code>Init()</code></td><td>Default container with Stretch alignment.</td></tr>
-      <tr><td><code>Init(w.i, h.i)</code></td><td>Container with initial dimensions.</td></tr>
-      <tr><td><code>Init(x.i, y.i, w.i, h.i)</code></td><td>Container with absolute coordinates and dimensions.</td></tr>
-    </table>
-  </div>
-</div>
-<div class='doc-section'>
-  <h2 class='section-title'>Child & Padding Management Methods</h2>
+  <h2 class='section-title'>Core Container Methods</h2>
   <div class='table-wrapper'>
     <table>
       <tr><th>Method</th><th>Description</th></tr>
-      <tr><td><code>AddChild(*child.UI::Component)</code></td><td>Appends a child control or sub-layout panel.</td></tr>
-      <tr><td><code>RemoveChild(*child.UI::Component)</code></td><td>Removes a child element.</td></tr>
-      <tr><td><code>ClearChildren()</code></td><td>Clears all child elements.</td></tr>
-      <tr><td><code>GetChildCount()</code></td><td>Returns total number of children.</td></tr>
-      <tr><td><code>SetPadding(l.i, t.i, r.i, b.i)</code></td><td>Sets internal padding on all 4 edges.</td></tr>
-      <tr><td><code>SetPaddingAll(p.i)</code></td><td>Sets uniform internal padding on all 4 edges.</td></tr>
+      <tr><td><code>AddChild(*child.UI::Component)</code></td><td>Adds a child component to the layout panel.</td></tr>
+      <tr><td><code>RemoveChild(*child.UI::Component)</code></td><td>Removes a child component.</td></tr>
+      <tr><td><code>ClearChildren()</code></td><td>Clears all children in panel.</td></tr>
+      <tr><td><code>GetChildCount()</code></td><td>Returns number of managed children.</td></tr>
+      <tr><td><code>GetChild(index.i)</code></td><td>Returns pointer to child at index.</td></tr>
+      <tr><td><code>SetPadding(l.i, t.i, r.i, b.i)</code></td><td>Sets internal panel padding in pixels.</td></tr>
+      <tr><td><code>SetPaddingAll(p.i)</code></td><td>Sets uniform padding on all 4 sides.</td></tr>
     </table>
   </div>
 </div>

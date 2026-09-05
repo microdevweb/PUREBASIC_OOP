@@ -60,12 +60,20 @@
       <li class='nav-item'><a href='../ui/button.html'><span>Button</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/checkbox.html'><span>CheckBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/combobox.html'><span>ComboBox</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/datepicker.html'><span>DatePicker</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/editor.html'><span>Editor</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/groupbox.html'><span>GroupBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/label.html'><span>Label</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/listicon.html'><span>ListIcon</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/listview.html'><span>ListView</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/progressbar.html'><span>ProgressBar</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/radiobutton.html'><span>RadioButton</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/slider.html'><span>Slider</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/spinbox.html'><span>SpinBox</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/tabcontrol.html'><span>TabControl</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/textbox.html'><span>TextBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/toggleswitch.html'><span>ToggleSwitch</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/treeview.html'><span>TreeView</span><span class='badge badge-ui'>UI</span></a></li>
     </ul>
   </div>
   <div class='nav-section'>
@@ -74,6 +82,12 @@
       <li class='nav-item'><a href='../ui/stackpanel.html'><span>StackPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/dockpanel.html'><span>DockPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/grid.html'><span>Grid</span><span class='badge badge-wpf'>WPF</span></a></li>
+    </ul>
+  </div>
+  <div class='nav-section'>
+    <div class='nav-section-title'>MVVM Architecture & DataBinding</div>
+    <ul class='nav-list'>
+      <li class='nav-item'><a href='../ui/mvvm.html'><span>MVVM Architecture & Bindings</span><span class='badge badge-mvvm'>MVVM</span></a></li>
     </ul>
   </div>
   <div class='nav-section'>
@@ -94,9 +108,9 @@
       <div class='page-header'>
         <div class='title-row'>
           <h1 class='page-title'>Application Class</h1>
-          <span class='badge badge-ui'>Core</span>
+          <span class='badge badge-core'>Core UI</span>
         </div>
-        <p class='page-lead'>Application lifecycle orchestrator, event loop, and global dispatcher.</p>
+        <p class='page-lead'>Global application loop, dispatching, and lifecycle manager.</p>
       </div>
       
       <div class='inheritance-box'>
@@ -111,17 +125,16 @@
 
 <div class='doc-section'>
   <h2 class='section-title'>Description</h2>
-  <p>The <code>UI::Application</code> class is the singleton orchestrator for PureBasic OOP applications. It manages the blocking message loop (<code>WaitWindowEvent</code>) and automatically dispatches events to virtual handler methods.</p>
+  <p>The <code>UI::Application</code> class acts as the core application engine managing the master event loop (<code>WaitWindowEvent</code>) and automated OOP event dispatching.</p>
 </div>
+
 <div class='doc-section'>
-  <h2 class='section-title'>Constructors & Core Methods</h2>
+  <h2 class='section-title'>Specific Methods</h2>
   <div class='table-wrapper'>
     <table>
       <tr><th>Method</th><th>Description</th></tr>
-      <tr><td><code>Init(appName.s = 'PB App')</code></td><td>Initializes the application environment and sets up global registry.</td></tr>
-      <tr><td><code>Run()</code></td><td>Starts the main event dispatch loop until all windows are closed.</td></tr>
-      <tr><td><code>Exit()</code></td><td>Requests clean termination of the event loop.</td></tr>
-      <tr><td><code>AddWindow(*win.UI::Window)</code></td><td>Registers a window in the application lifecycle.</td></tr>
+      <tr><td><code>Run()</code></td><td>Runs the main event loop until all windows are closed.</td></tr>
+      <tr><td><code>Exit()</code></td><td>Terminates application execution cleanly.</td></tr>
     </table>
   </div>
 </div>

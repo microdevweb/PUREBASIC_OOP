@@ -60,12 +60,20 @@
       <li class='nav-item active'><a href='../ui/button.html'><span>Button</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/checkbox.html'><span>CheckBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/combobox.html'><span>ComboBox</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/datepicker.html'><span>DatePicker</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/editor.html'><span>Editor</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/groupbox.html'><span>GroupBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/label.html'><span>Label</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/listicon.html'><span>ListIcon</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/listview.html'><span>ListView</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/progressbar.html'><span>ProgressBar</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/radiobutton.html'><span>RadioButton</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/slider.html'><span>Slider</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/spinbox.html'><span>SpinBox</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/tabcontrol.html'><span>TabControl</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/textbox.html'><span>TextBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/toggleswitch.html'><span>ToggleSwitch</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/treeview.html'><span>TreeView</span><span class='badge badge-ui'>UI</span></a></li>
     </ul>
   </div>
   <div class='nav-section'>
@@ -74,6 +82,12 @@
       <li class='nav-item'><a href='../ui/stackpanel.html'><span>StackPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/dockpanel.html'><span>DockPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/grid.html'><span>Grid</span><span class='badge badge-wpf'>WPF</span></a></li>
+    </ul>
+  </div>
+  <div class='nav-section'>
+    <div class='nav-section-title'>Architecture MVVM & DataBinding</div>
+    <ul class='nav-list'>
+      <li class='nav-item'><a href='../ui/mvvm.html'><span>Architecture MVVM & Bindings</span><span class='badge badge-mvvm'>MVVM</span></a></li>
     </ul>
   </div>
   <div class='nav-section'>
@@ -96,7 +110,7 @@
           <h1 class='page-title'>Classe Button</h1>
           <span class='badge badge-ui'>UI Class</span>
         </div>
-        <p class='page-lead'>Contrôle bouton poussoir cliquable avec multi-constructeurs et gestion d'événements.</p>
+        <p class='page-lead'>Contrôle bouton poussoir cliquable avec multi-constructeurs et événement OnClick().</p>
       </div>
       
       <div class='inheritance-box'>
@@ -140,28 +154,29 @@
 
 <div class='doc-section'>
   <h2 class='section-title'>Description</h2>
-  <p>La classe <code>UI::Button</code> encapsule un bouton poussoir cliquable PureBasic avec gestion directe de l'événement virtuel <code>OnClick()</code> et prise en charge des layouts réactifs.</p>
+  <p>La classe <code>UI::Button</code> encapsule un bouton poussoir PureBasic (<code>ButtonGadget</code>). Elle permet d'intercepter directement les clics via la méthode virtuelle <code>OnClick()</code> ou via les Bindings MVVM.</p>
 </div>
+
 <div class='doc-section'>
-  <h2 class='section-title'>Constructeurs Surchargés</h2>
+  <h2 class='section-title'>Constructeurs</h2>
   <div class='table-wrapper'>
     <table>
       <tr><th>Constructeur</th><th>Description</th></tr>
-      <tr><td><code>Init()</code></td><td>Bouton par défaut sans texte (dimensions gérées par les layouts).</td></tr>
-      <tr><td><code>Init(text.s)</code></td><td>Bouton avec texte, dimensions calculées par les layouts.</td></tr>
-      <tr><td><code>Init(text.s, w.i, h.i)</code></td><td>Bouton avec texte et dimensions souhaitées.</td></tr>
-      <tr><td><code>Init(text.s, x.i, y.i, w.i, h.i)</code></td><td>Bouton avec texte, position absolue et dimensions.</td></tr>
-      <tr><td><code>Init(text.s, x.i, y.i, w.i, h.i, flags.i)</code></td><td>Bouton complet avec flags PureBasic ButtonGadget.</td></tr>
+      <tr><td><code>Init()</code></td><td>Bouton par défaut sans texte (taille gérée par le layout).</td></tr>
+      <tr><td><code>Init(text.s)</code></td><td>Bouton avec libellé textuel initial.</td></tr>
+      <tr><td><code>Init(x.i, y.i, w.i, h.i, text.s)</code></td><td>Bouton avec coordonnées et dimensions absolues.</td></tr>
     </table>
   </div>
 </div>
+
 <div class='doc-section'>
   <h2 class='section-title'>Méthodes Spécifiques</h2>
   <div class='table-wrapper'>
     <table>
       <tr><th>Méthode</th><th>Description</th></tr>
-      <tr><td><code>GetText() / SetText(txt.s)</code></td><td>Obtient ou modifie le texte du bouton.</td></tr>
-      <tr><td><code>OnClick()</code></td><td>Méthode virtuelle appelée lors du clic utilisateur.</td></tr>
+      <tr><td><code>GetText()</code></td><td>Retourne le libellé textuel du bouton.</td></tr>
+      <tr><td><code>SetText(text.s)</code></td><td>Modifie le texte affiché sur le bouton.</td></tr>
+      <tr><td><code>OnClick()</code></td><td>Méthode virtuelle exécutée lors d'un clic utilisateur.</td></tr>
     </table>
   </div>
 </div>

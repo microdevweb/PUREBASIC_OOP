@@ -60,12 +60,20 @@
       <li class='nav-item'><a href='../ui/button.html'><span>Button</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/checkbox.html'><span>CheckBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/combobox.html'><span>ComboBox</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/datepicker.html'><span>DatePicker</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/editor.html'><span>Editor</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/groupbox.html'><span>GroupBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/label.html'><span>Label</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/listicon.html'><span>ListIcon</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/listview.html'><span>ListView</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/progressbar.html'><span>ProgressBar</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/radiobutton.html'><span>RadioButton</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/slider.html'><span>Slider</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/spinbox.html'><span>SpinBox</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/tabcontrol.html'><span>TabControl</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/textbox.html'><span>TextBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/toggleswitch.html'><span>ToggleSwitch</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/treeview.html'><span>TreeView</span><span class='badge badge-ui'>UI</span></a></li>
     </ul>
   </div>
   <div class='nav-section'>
@@ -74,6 +82,12 @@
       <li class='nav-item'><a href='../ui/stackpanel.html'><span>StackPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/dockpanel.html'><span>DockPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/grid.html'><span>Grid</span><span class='badge badge-wpf'>WPF</span></a></li>
+    </ul>
+  </div>
+  <div class='nav-section'>
+    <div class='nav-section-title'>Architecture MVVM & DataBinding</div>
+    <ul class='nav-list'>
+      <li class='nav-item'><a href='../ui/mvvm.html'><span>Architecture MVVM & Bindings</span><span class='badge badge-mvvm'>MVVM</span></a></li>
     </ul>
   </div>
   <div class='nav-section'>
@@ -94,9 +108,9 @@
       <div class='page-header'>
         <div class='title-row'>
           <h1 class='page-title'>Classe Application</h1>
-          <span class='badge badge-ui'>Core</span>
+          <span class='badge badge-core'>Core UI</span>
         </div>
-        <p class='page-lead'>Chef d'orchestre de l'application PureBasic, de la boucle principale et du dispatch d'événements.</p>
+        <p class='page-lead'>Boucle d'événements globale, routage et gestionnaire d'application.</p>
       </div>
       
       <div class='inheritance-box'>
@@ -111,17 +125,16 @@
 
 <div class='doc-section'>
   <h2 class='section-title'>Description</h2>
-  <p>La classe <code>UI::Application</code> est le singleton de pilotage d'une application PureBasic OOP. Elle gère la boucle principale d'événements (<code>WaitWindowEvent</code>), la détection des gadgets et le routage automatique vers les méthodes virtuelles (<code>OnClick</code>, <code>OnChange</code>, <code>OnClose</code>, etc.).</p>
+  <p>La classe <code>UI::Application</code> est le singleton applicatif gérant la boucle d'événements centrale (<code>WaitWindowEvent</code>) et le routage automatique vers les gadgets et fenêtres POO.</p>
 </div>
+
 <div class='doc-section'>
-  <h2 class='section-title'>Constructeurs & Méthodes Statiques</h2>
+  <h2 class='section-title'>Méthodes Spécifiques</h2>
   <div class='table-wrapper'>
     <table>
       <tr><th>Méthode</th><th>Description</th></tr>
-      <tr><td><code>Init(appName.s = 'PB App')</code></td><td>Initialise l'environnement applicatif et enregistre l'instance globale.</td></tr>
-      <tr><td><code>Run()</code></td><td>Lance la boucle principale bloquante d'événements jusqu'à fermeture de toutes les fenêtres.</td></tr>
-      <tr><td><code>Exit()</code></td><td>Demande l'arrêt propre de la boucle événementielle et quitte l'application.</td></tr>
-      <tr><td><code>AddWindow(*win.UI::Window)</code></td><td>Enregistre une fenêtre dans le cycle de vie de l'application.</td></tr>
+      <tr><td><code>Run()</code></td><td>Démarre la boucle d'événements jusqu'à la fermeture de toutes les fenêtres.</td></tr>
+      <tr><td><code>Exit()</code></td><td>Termine proprement l'exécution de l'application.</td></tr>
     </table>
   </div>
 </div>

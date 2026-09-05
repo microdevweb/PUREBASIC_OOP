@@ -60,12 +60,20 @@
       <li class='nav-item'><a href='../ui/button.html'><span>Button</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/checkbox.html'><span>CheckBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item active'><a href='../ui/combobox.html'><span>ComboBox</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/datepicker.html'><span>DatePicker</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/editor.html'><span>Editor</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/groupbox.html'><span>GroupBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/label.html'><span>Label</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/listicon.html'><span>ListIcon</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/listview.html'><span>ListView</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/progressbar.html'><span>ProgressBar</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/radiobutton.html'><span>RadioButton</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/slider.html'><span>Slider</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/spinbox.html'><span>SpinBox</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/tabcontrol.html'><span>TabControl</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/textbox.html'><span>TextBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/toggleswitch.html'><span>ToggleSwitch</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/treeview.html'><span>TreeView</span><span class='badge badge-ui'>UI</span></a></li>
     </ul>
   </div>
   <div class='nav-section'>
@@ -74,6 +82,12 @@
       <li class='nav-item'><a href='../ui/stackpanel.html'><span>StackPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/dockpanel.html'><span>DockPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/grid.html'><span>Grid</span><span class='badge badge-wpf'>WPF</span></a></li>
+    </ul>
+  </div>
+  <div class='nav-section'>
+    <div class='nav-section-title'>MVVM Architecture & DataBinding</div>
+    <ul class='nav-list'>
+      <li class='nav-item'><a href='../ui/mvvm.html'><span>MVVM Architecture & Bindings</span><span class='badge badge-mvvm'>MVVM</span></a></li>
     </ul>
   </div>
   <div class='nav-section'>
@@ -96,7 +110,7 @@
           <h1 class='page-title'>ComboBox Class</h1>
           <span class='badge badge-ui'>UI Class</span>
         </div>
-        <p class='page-lead'>Dropdown selection list with overloaded constructors.</p>
+        <p class='page-lead'>Drop-down selection list with item management and change events.</p>
       </div>
       
       <div class='inheritance-box'>
@@ -140,30 +154,20 @@
 
 <div class='doc-section'>
   <h2 class='section-title'>Description</h2>
-  <p>The <code>UI::ComboBox</code> class wraps a native dropdown list with item population, index tracking, and virtual <code>OnSelect()</code> event handling.</p>
+  <p>The <code>UI::ComboBox</code> class wraps PureBasic's <code>ComboBoxGadget</code>. It provides item addition, selection queries, and change event handling via <code>OnChange()</code>.</p>
 </div>
-<div class='doc-section'>
-  <h2 class='section-title'>Overloaded Constructors</h2>
-  <div class='table-wrapper'>
-    <table>
-      <tr><th>Constructor</th><th>Description</th></tr>
-      <tr><td><code>Init()</code></td><td>Default ComboBox arranged by layout panels.</td></tr>
-      <tr><td><code>Init(w.i, h.i)</code></td><td>ComboBox with preferred dimensions.</td></tr>
-      <tr><td><code>Init(x.i, y.i, w.i, h.i)</code></td><td>ComboBox with absolute bounds.</td></tr>
-      <tr><td><code>Init(x.i, y.i, w.i, h.i, flags.i)</code></td><td>Full ComboBox with PureBasic flags.</td></tr>
-    </table>
-  </div>
-</div>
+
 <div class='doc-section'>
   <h2 class='section-title'>Specific Methods</h2>
   <div class='table-wrapper'>
     <table>
       <tr><th>Method</th><th>Description</th></tr>
-      <tr><td><code>AddItem(item.s)</code></td><td>Appends an item to the dropdown list.</td></tr>
-      <tr><td><code>GetSelectedIndex() / SetSelectedIndex(idx.i)</code></td><td>Gets or sets current selected index.</td></tr>
-      <tr><td><code>GetSelectedText()</code></td><td>Returns text of selected item.</td></tr>
-      <tr><td><code>Clear()</code></td><td>Removes all items from list.</td></tr>
-      <tr><td><code>OnSelect()</code></td><td>Virtual method triggered on selection change.</td></tr>
+      <tr><td><code>AddItem(text.s)</code></td><td>Appends an item to the dropdown list.</td></tr>
+      <tr><td><code>Clear()</code></td><td>Clears all items in the list.</td></tr>
+      <tr><td><code>GetSelectedIndex()</code></td><td>Returns current selected index (or -1).</td></tr>
+      <tr><td><code>SetSelectedIndex(index.i)</code></td><td>Selects item at specified index.</td></tr>
+      <tr><td><code>GetItemText(index.i)</code></td><td>Returns text of item at specified index.</td></tr>
+      <tr><td><code>OnChange()</code></td><td>Virtual method triggered when user changes selection.</td></tr>
     </table>
   </div>
 </div>

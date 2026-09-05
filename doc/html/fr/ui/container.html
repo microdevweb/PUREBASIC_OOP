@@ -60,12 +60,20 @@
       <li class='nav-item'><a href='../ui/button.html'><span>Button</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/checkbox.html'><span>CheckBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/combobox.html'><span>ComboBox</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/datepicker.html'><span>DatePicker</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/editor.html'><span>Editor</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/groupbox.html'><span>GroupBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/label.html'><span>Label</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/listicon.html'><span>ListIcon</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/listview.html'><span>ListView</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/progressbar.html'><span>ProgressBar</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/radiobutton.html'><span>RadioButton</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/slider.html'><span>Slider</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/spinbox.html'><span>SpinBox</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/tabcontrol.html'><span>TabControl</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/textbox.html'><span>TextBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/toggleswitch.html'><span>ToggleSwitch</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/treeview.html'><span>TreeView</span><span class='badge badge-ui'>UI</span></a></li>
     </ul>
   </div>
   <div class='nav-section'>
@@ -74,6 +82,12 @@
       <li class='nav-item'><a href='../ui/stackpanel.html'><span>StackPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/dockpanel.html'><span>DockPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/grid.html'><span>Grid</span><span class='badge badge-wpf'>WPF</span></a></li>
+    </ul>
+  </div>
+  <div class='nav-section'>
+    <div class='nav-section-title'>Architecture MVVM & DataBinding</div>
+    <ul class='nav-list'>
+      <li class='nav-item'><a href='../ui/mvvm.html'><span>Architecture MVVM & Bindings</span><span class='badge badge-mvvm'>MVVM</span></a></li>
     </ul>
   </div>
   <div class='nav-section'>
@@ -94,9 +108,9 @@
       <div class='page-header'>
         <div class='title-row'>
           <h1 class='page-title'>Classe Container</h1>
-          <span class='badge badge-wpf'>Base Layout</span>
+          <span class='badge badge-wpf'>WPF Layout</span>
         </div>
-        <p class='page-lead'>Classe abstraite de base pour tous les conteneurs de layout réactifs (WPF).</p>
+        <p class='page-lead'>Classe abstraite racine des conteneurs de disposition réactifs (WPF-style).</p>
       </div>
       
       <div class='inheritance-box'>
@@ -137,30 +151,21 @@
 
 <div class='doc-section'>
   <h2 class='section-title'>Description</h2>
-  <p>La classe abstraite <code>UI::Layouts::Container</code> (dans <code>src/ui/layout/Container.pbo</code>) hérite de <code>UI::Component</code> et forme le socle de tous les panneaux de disposition responsive (<code>StackPanel</code>, <code>DockPanel</code>, <code>Grid</code>). Elle gère la liste dynamique des enfants et le padding interne.</p>
+  <p>La classe abstraite <code>UI::Layouts::Container</code> (héritant de <code>UI::Component</code>) est la base de tous les panneaux de disposition automatique réactive. Elle gère la liste dynamique des composants enfants (<code>Children</code>), les marges intérieures (<code>Padding</code>) et le calcul en cascade de la disposition.</p>
 </div>
+
 <div class='doc-section'>
-  <h2 class='section-title'>Constructeurs Surchargés</h2>
-  <div class='table-wrapper'>
-    <table>
-      <tr><th>Constructeur</th><th>Description</th></tr>
-      <tr><td><code>Init()</code></td><td>Conteneur par défaut avec alignement Stretch.</td></tr>
-      <tr><td><code>Init(w.i, h.i)</code></td><td>Conteneur avec dimensions initiales.</td></tr>
-      <tr><td><code>Init(x.i, y.i, w.i, h.i)</code></td><td>Conteneur avec coordonnées absolues et dimensions.</td></tr>
-    </table>
-  </div>
-</div>
-<div class='doc-section'>
-  <h2 class='section-title'>Méthodes de Gestion des Enfants et Padding</h2>
+  <h2 class='section-title'>Méthodes Principales de Container</h2>
   <div class='table-wrapper'>
     <table>
       <tr><th>Méthode</th><th>Description</th></tr>
-      <tr><td><code>AddChild(*child.UI::Component)</code></td><td>Ajoute un composant enfant (contrôle ou sous-layout) dans le conteneur.</td></tr>
-      <tr><td><code>RemoveChild(*child.UI::Component)</code></td><td>Retire un composant enfant du conteneur.</td></tr>
-      <tr><td><code>ClearChildren()</code></td><td>Vide l'ensemble des enfants du conteneur.</td></tr>
-      <tr><td><code>GetChildCount()</code></td><td>Retourne le nombre total d'enfants actuels.</td></tr>
-      <tr><td><code>SetPadding(l.i, t.i, r.i, b.i)</code></td><td>Définit le padding interne (espace entre les bords et les enfants).</td></tr>
-      <tr><td><code>SetPaddingAll(p.i)</code></td><td>Définit un padding interne identique sur les 4 côtés.</td></tr>
+      <tr><td><code>AddChild(*child.UI::Component)</code></td><td>Ajoute un composant enfant au conteneur.</td></tr>
+      <tr><td><code>RemoveChild(*child.UI::Component)</code></td><td>Retire un composant du conteneur.</td></tr>
+      <tr><td><code>ClearChildren()</code></td><td>Supprime tous les composants enfants.</td></tr>
+      <tr><td><code>GetChildCount()</code></td><td>Retourne le nombre d'enfants gérés.</td></tr>
+      <tr><td><code>GetChild(index.i)</code></td><td>Retourne le pointeur vers l'enfant à l'index donné.</td></tr>
+      <tr><td><code>SetPadding(l.i, t.i, r.i, b.i)</code></td><td>Définit les marges intérieures du conteneur en pixels.</td></tr>
+      <tr><td><code>SetPaddingAll(p.i)</code></td><td>Définit une marge intérieure identique sur les 4 côtés.</td></tr>
     </table>
   </div>
 </div>

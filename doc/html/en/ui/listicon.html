@@ -60,12 +60,20 @@
       <li class='nav-item'><a href='../ui/button.html'><span>Button</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/checkbox.html'><span>CheckBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/combobox.html'><span>ComboBox</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/datepicker.html'><span>DatePicker</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/editor.html'><span>Editor</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/groupbox.html'><span>GroupBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/label.html'><span>Label</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item active'><a href='../ui/listicon.html'><span>ListIcon</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/listview.html'><span>ListView</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/progressbar.html'><span>ProgressBar</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/radiobutton.html'><span>RadioButton</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/slider.html'><span>Slider</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/spinbox.html'><span>SpinBox</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/tabcontrol.html'><span>TabControl</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/textbox.html'><span>TextBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/toggleswitch.html'><span>ToggleSwitch</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/treeview.html'><span>TreeView</span><span class='badge badge-ui'>UI</span></a></li>
     </ul>
   </div>
   <div class='nav-section'>
@@ -74,6 +82,12 @@
       <li class='nav-item'><a href='../ui/stackpanel.html'><span>StackPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/dockpanel.html'><span>DockPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/grid.html'><span>Grid</span><span class='badge badge-wpf'>WPF</span></a></li>
+    </ul>
+  </div>
+  <div class='nav-section'>
+    <div class='nav-section-title'>MVVM Architecture & DataBinding</div>
+    <ul class='nav-list'>
+      <li class='nav-item'><a href='../ui/mvvm.html'><span>MVVM Architecture & Bindings</span><span class='badge badge-mvvm'>MVVM</span></a></li>
     </ul>
   </div>
   <div class='nav-section'>
@@ -96,7 +110,7 @@
           <h1 class='page-title'>ListIcon Class</h1>
           <span class='badge badge-ui'>UI Class</span>
         </div>
-        <p class='page-lead'>Multi-column tabular data grid with overloaded constructors.</p>
+        <p class='page-lead'>Multi-column data grid view with icons, columns, and row selection.</p>
       </div>
       
       <div class='inheritance-box'>
@@ -140,31 +154,20 @@
 
 <div class='doc-section'>
   <h2 class='section-title'>Description</h2>
-  <p>The <code>UI::ListIcon</code> class wraps a native multi-column <code>ListIconGadget</code> to display tabular data records with selection and double-click event handling.</p>
+  <p>The <code>UI::ListIcon</code> class encapsulates PureBasic's <code>ListIconGadget</code>. It provides a high-performance tabular multi-column grid view with row selection and column sizing.</p>
 </div>
-<div class='doc-section'>
-  <h2 class='section-title'>Overloaded Constructors</h2>
-  <div class='table-wrapper'>
-    <table>
-      <tr><th>Constructor</th><th>Description</th></tr>
-      <tr><td><code>Init()</code></td><td>Default ListIcon arranged by layout panels.</td></tr>
-      <tr><td><code>Init(firstColTitle.s, firstColWidth.i)</code></td><td>ListIcon initialized with first column title and width.</td></tr>
-      <tr><td><code>Init(firstColTitle.s, firstColWidth.i, w.i, h.i)</code></td><td>ListIcon with first column and preferred dimensions.</td></tr>
-      <tr><td><code>Init(x.i, y.i, w.i, h.i, firstColTitle.s, firstColWidth.i, flags.i)</code></td><td>Full ListIcon with absolute coordinates and flags.</td></tr>
-    </table>
-  </div>
-</div>
+
 <div class='doc-section'>
   <h2 class='section-title'>Specific Methods</h2>
   <div class='table-wrapper'>
     <table>
       <tr><th>Method</th><th>Description</th></tr>
-      <tr><td><code>AddColumn(colIndex.i, title.s, width.i)</code></td><td>Adds a new column header.</td></tr>
-      <tr><td><code>AddItem(index.i, text.s)</code></td><td>Inserts a data row (columns separated by Chr(10)).</td></tr>
-      <tr><td><code>GetSelectedIndex() / SetSelectedIndex(idx.i)</code></td><td>Gets or sets the selected row index.</td></tr>
-      <tr><td><code>GetItemText(index.i, col.i)</code></td><td>Returns text content of a specific cell.</td></tr>
-      <tr><td><code>Clear()</code></td><td>Removes all rows.</td></tr>
-      <tr><td><code>OnSelect() / OnDoubleClick()</code></td><td>Virtual methods triggered on row selection or double-click.</td></tr>
+      <tr><td><code>AddColumn(col.i, title.s, width.i)</code></td><td>Adds or configures a column header and width.</td></tr>
+      <tr><td><code>AddItem(text.s)</code></td><td>Appends a row of items separated by <code>#LF$</code>.</td></tr>
+      <tr><td><code>GetSelectedIndex()</code></td><td>Returns currently selected row index.</td></tr>
+      <tr><td><code>SetSelectedIndex(index.i)</code></td><td>Selects row at specified index.</td></tr>
+      <tr><td><code>Clear()</code></td><td>Removes all rows from the table.</td></tr>
+      <tr><td><code>OnChange()</code></td><td>Virtual event triggered when selected row changes.</td></tr>
     </table>
   </div>
 </div>

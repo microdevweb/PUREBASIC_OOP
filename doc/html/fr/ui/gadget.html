@@ -60,12 +60,20 @@
       <li class='nav-item'><a href='../ui/button.html'><span>Button</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/checkbox.html'><span>CheckBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/combobox.html'><span>ComboBox</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/datepicker.html'><span>DatePicker</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/editor.html'><span>Editor</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/groupbox.html'><span>GroupBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/label.html'><span>Label</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/listicon.html'><span>ListIcon</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/listview.html'><span>ListView</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/progressbar.html'><span>ProgressBar</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/radiobutton.html'><span>RadioButton</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/slider.html'><span>Slider</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/spinbox.html'><span>SpinBox</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/tabcontrol.html'><span>TabControl</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/textbox.html'><span>TextBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/toggleswitch.html'><span>ToggleSwitch</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/treeview.html'><span>TreeView</span><span class='badge badge-ui'>UI</span></a></li>
     </ul>
   </div>
   <div class='nav-section'>
@@ -74,6 +82,12 @@
       <li class='nav-item'><a href='../ui/stackpanel.html'><span>StackPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/dockpanel.html'><span>DockPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/grid.html'><span>Grid</span><span class='badge badge-wpf'>WPF</span></a></li>
+    </ul>
+  </div>
+  <div class='nav-section'>
+    <div class='nav-section-title'>Architecture MVVM & DataBinding</div>
+    <ul class='nav-list'>
+      <li class='nav-item'><a href='../ui/mvvm.html'><span>Architecture MVVM & Bindings</span><span class='badge badge-mvvm'>MVVM</span></a></li>
     </ul>
   </div>
   <div class='nav-section'>
@@ -94,9 +108,9 @@
       <div class='page-header'>
         <div class='title-row'>
           <h1 class='page-title'>Classe Gadget</h1>
-          <span class='badge badge-ui'>Base UI</span>
+          <span class='badge badge-ui'>Base Native</span>
         </div>
-        <p class='page-lead'>Classe de base abstraite pour tous les contrôles natifs PureBasic.</p>
+        <p class='page-lead'>Classe de base encapsulant un gadget natif PureBasic avec routage d'événements.</p>
       </div>
       
       <div class='inheritance-box'>
@@ -114,11 +128,19 @@
       <a href='button.html' class='derived-badge'>UI::Button</a>
       <a href='checkbox.html' class='derived-badge'>UI::CheckBox</a>
       <a href='combobox.html' class='derived-badge'>UI::ComboBox</a>
+      <a href='datepicker.html' class='derived-badge'>UI::DatePicker</a>
+      <a href='editor.html' class='derived-badge'>UI::Editor</a>
+      <a href='groupbox.html' class='derived-badge'>UI::GroupBox</a>
       <a href='label.html' class='derived-badge'>UI::Label</a>
       <a href='listicon.html' class='derived-badge'>UI::ListIcon</a>
+      <a href='listview.html' class='derived-badge'>UI::ListView</a>
       <a href='progressbar.html' class='derived-badge'>UI::ProgressBar</a>
+      <a href='radiobutton.html' class='derived-badge'>UI::RadioButton</a>
       <a href='slider.html' class='derived-badge'>UI::Slider</a>
+      <a href='spinbox.html' class='derived-badge'>UI::SpinBox</a>
+      <a href='tabcontrol.html' class='derived-badge'>UI::TabControl</a>
       <a href='textbox.html' class='derived-badge'>UI::TextBox</a>
+      <a href='treeview.html' class='derived-badge'>UI::TreeView</a>
       <a href='customgadget.html' class='derived-badge'>UI::CustomGadget</a>
     </div>
   </div>
@@ -145,7 +167,7 @@
 
 <div class='doc-section'>
   <h2 class='section-title'>Description</h2>
-  <p>La classe abstraite <code>UI::Gadget</code> (dans <code>src/ui/Gadget.pbo</code>) hérite de <code>UI::Component</code> et encapsule un contrôle graphique natif du système d'exploitation. Elle fait le pont entre le cycle de vie PureBasic (<code>#PB_Any</code>, <code>GadgetID()</code>) et la programmation objet événementielle.</p>
+  <p>La classe <code>UI::Gadget</code> (héritant de <code>UI::Component</code>) est la racine de tous les contrôles natifs du système d'exploitation créés par PureBasic. Elle encapsule l'identifiant interne PureBasic (<code>#PB_Any</code>), le Handle natif de l'OS (HWND sur Windows), la gestion des polices, couleurs et l'événement virtuel <code>OnEvent(eventType.i)</code>.</p>
 </div>
 
 <div class='doc-section'>
@@ -153,13 +175,14 @@
   <div class='table-wrapper'>
     <table>
       <tr><th>Méthode</th><th>Description</th></tr>
-      <tr><td><code>GetID()</code></td><td>Retourne le numéro de gadget PureBasic (#Gadget).</td></tr>
-      <tr><td><code>GetHandle()</code></td><td>Retourne le handle OS natif (<code>GadgetID(#Gadget)</code> sous Windows/Linux/Mac).</td></tr>
-      <tr><td><code>SetFont(fontID.i)</code></td><td>Applique une police PureBasic au gadget.</td></tr>
-      <tr><td><code>SetColor(colorType.i, color.i)</code></td><td>Définit la couleur de fond ou de texte du gadget.</td></tr>
-      <tr><td><code>SetToolTip(tip.s)</code></td><td>Définit le texte d'aide au survol.</td></tr>
-      <tr><td><code>SetFocus()</code></td><td>Donne le focus clavier actif au gadget.</td></tr>
-      <tr><td><code>FreeGadget()</code></td><td>Libère le contrôle natif et supprime son association OOP.</td></tr>
+      <tr><td><code>GetID()</code></td><td>Retourne l'identifiant PB interne du gadget.</td></tr>
+      <tr><td><code>GetHandle()</code></td><td>Retourne le Handle natif du système d'exploitation (HWND).</td></tr>
+      <tr><td><code>SetFont(fontID.i)</code></td><td>Applique une police typographique au contrôle.</td></tr>
+      <tr><td><code>SetColor(colorType.i, color.i)</code></td><td>Définit la couleur du texte ou de fond (ex: <code>#PB_Gadget_FrontColor</code>).</td></tr>
+      <tr><td><code>SetToolTip(tip.s)</code></td><td>Définit le texte de l'infobulle d'aide au survol.</td></tr>
+      <tr><td><code>SetFocus()</code></td><td>Donne le focus clavier à ce contrôle.</td></tr>
+      <tr><td><code>OnEvent(eventType.i)</code></td><td>Méthode virtuelle appelée automatiquement lors de la réception d'un événement PB sur ce gadget.</td></tr>
+      <tr><td><code>FreeGadget()</code></td><td>Détruit le gadget natif proprement.</td></tr>
     </table>
   </div>
 </div>

@@ -60,12 +60,20 @@
       <li class='nav-item'><a href='../ui/button.html'><span>Button</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/checkbox.html'><span>CheckBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/combobox.html'><span>ComboBox</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/datepicker.html'><span>DatePicker</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/editor.html'><span>Editor</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/groupbox.html'><span>GroupBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/label.html'><span>Label</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/listicon.html'><span>ListIcon</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/listview.html'><span>ListView</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/progressbar.html'><span>ProgressBar</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/radiobutton.html'><span>RadioButton</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/slider.html'><span>Slider</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/spinbox.html'><span>SpinBox</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/tabcontrol.html'><span>TabControl</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/textbox.html'><span>TextBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/toggleswitch.html'><span>ToggleSwitch</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/treeview.html'><span>TreeView</span><span class='badge badge-ui'>UI</span></a></li>
     </ul>
   </div>
   <div class='nav-section'>
@@ -74,6 +82,12 @@
       <li class='nav-item'><a href='../ui/stackpanel.html'><span>StackPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/dockpanel.html'><span>DockPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item active'><a href='../ui/grid.html'><span>Grid</span><span class='badge badge-wpf'>WPF</span></a></li>
+    </ul>
+  </div>
+  <div class='nav-section'>
+    <div class='nav-section-title'>Architecture MVVM & DataBinding</div>
+    <ul class='nav-list'>
+      <li class='nav-item'><a href='../ui/mvvm.html'><span>Architecture MVVM & Bindings</span><span class='badge badge-mvvm'>MVVM</span></a></li>
     </ul>
   </div>
   <div class='nav-section'>
@@ -96,7 +110,7 @@
           <h1 class='page-title'>Classe Grid</h1>
           <span class='badge badge-wpf'>WPF Layout</span>
         </div>
-        <p class='page-lead'>Grille de disposition bidimensionnelle 2D avec dimensionnement proportionnel Star (*).</p>
+        <p class='page-lead'>Grille de disposition matricielle en lignes et colonnes proportionnelles (*, px, auto).</p>
       </div>
       
       <div class='inheritance-box'>
@@ -140,28 +154,17 @@
 
 <div class='doc-section'>
   <h2 class='section-title'>Description</h2>
-  <p>La classe <code>UI::Layouts::Grid</code> organise les composants dans une grille 2D flexible de lignes et de colonnes avec dimensionnement fixe en pixels, automatique (<code>"Auto"</code>) ou proportionnel Star (<code>"*"</code>, <code>"2*"</code>).</p>
+  <p>La classe <code>UI::Layouts::Grid</code> fournit un système de grille matricielle puissant inspiré de WPF/XAML, permettant de positionner des composants dans des cellules définies par des lignes et colonnes avec dimensions fixes (pixels) ou proportionnelles (étoiles <code>*</code>).</p>
 </div>
+
 <div class='doc-section'>
-  <h2 class='section-title'>Constructeurs Surchargés</h2>
-  <div class='table-wrapper'>
-    <table>
-      <tr><th>Constructeur</th><th>Description</th></tr>
-      <tr><td><code>Init()</code></td><td>Grille 2D réactive par défaut.</td></tr>
-      <tr><td><code>Init(w.i, h.i)</code></td><td>Grille avec dimensions initiales.</td></tr>
-    </table>
-  </div>
-</div>
-<div class='doc-section'>
-  <h2 class='section-title'>Méthodes Spécifiques de Grid</h2>
+  <h2 class='section-title'>Méthodes Spécifiques</h2>
   <div class='table-wrapper'>
     <table>
       <tr><th>Méthode</th><th>Description</th></tr>
-      <tr><td><code>AddRowDefinition(heightDef.s)</code></td><td>Ajoute une ligne (ex. <code>"50"</code>, <code>"Auto"</code>, <code>"*"</code>, <code>"2*"</code>).</td></tr>
-      <tr><td><code>AddColumnDefinition(widthDef.s)</code></td><td>Ajoute une colonne (ex. <code>"120"</code>, <code>"Auto"</code>, <code>"*"</code>).</td></tr>
-      <tr><td><code>SetRow(*child, rowIndex.i)</code></td><td>Place l'élément enfant sur la ligne spécifiée (0-indexé).</td></tr>
-      <tr><td><code>SetColumn(*child, colIndex.i)</code></td><td>Place l'élément enfant sur la colonne spécifiée (0-indexé).</td></tr>
-      <tr><td><code>SetRowSpan(*child, span.i) / SetColumnSpan(*child, span.i)</code></td><td>Étend l'élément sur plusieurs lignes ou colonnes.</td></tr>
+      <tr><td><code>AddRow(height.i, unitType.i = #UI_Unit_Star)</code></td><td>Ajoute une définition de ligne (hauteur en pixels ou ratio d'étoiles).</td></tr>
+      <tr><td><code>AddColumn(width.i, unitType.i = #UI_Unit_Star)</code></td><td>Ajoute une définition de colonne (largeur en pixels ou ratio d'étoiles).</td></tr>
+      <tr><td><code>SetCell(*child.UI::Component, row.i, col.i, rowSpan.i = 1, colSpan.i = 1)</code></td><td>Place un composant dans une cellule avec fusion de lignes/colonnes optionnelle.</td></tr>
     </table>
   </div>
 </div>

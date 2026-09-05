@@ -120,7 +120,15 @@ Le framework GUI de PureBasic OOP permet de construire des interfaces graphiques
 | **`UI::TextBox`** | `Init()`<br>`Init(defaultText.s)`<br>`Init(defaultText.s, w.i, h.i)` | Champ de saisie de texte mono-ligne. |
 | **`UI::Label`** | `Init(text.s)`<br>`Init(text.s, w.i, h.i)` | Texte statique d'affichage. |
 | **`UI::CheckBox`** | `Init(text.s)`<br>`Init(text.s, checked.b)` | Case a cocher avec etat booleen. |
+| **`UI::RadioButton`** | `Init(text.s)`<br>`Init(text.s, checked.b)` | Bouton radio avec exclusion mutuelle. |
 | **`UI::ComboBox`** | `Init()`<br>`Init(w.i, h.i)` | Liste deroulante de selection. |
+| **`UI::SpinBox`** | `Init(min.i, max.i)`<br>`Init(min.i, max.i, current.i)` | Compteur numerique avec fleches haut/bas. |
+| **`UI::Editor`** | `Init()`<br>`Init(w.i, h.i)`<br>`Init(text.s, w.i, h.i)` | Zone d'edition de texte multi-lignes. |
+| **`UI::ListView`** | `Init()`<br>`Init(w.i, h.i)` | Liste simple d'elements (ListBox). |
+| **`UI::TreeView`** | `Init()`<br>`Init(w.i, h.i)` | Arborescence hierarchique (Tree). |
+| **`UI::DatePicker`** | `Init()`<br>`Init(mask.s)`<br>`Init(dateVal.i, mask.s)` | Selecteur visuel de date et calendrier. |
+| **`UI::GroupBox`** | `Init(caption.s)`<br>`Init(caption.s, w.i, h.i)` | Cadre de regroupement avec titre. |
+| **`UI::TabControl`** | `Init()`<br>`Init(w.i, h.i)` | Conteneur d'onglets (Panel). |
 | **`UI::ProgressBar`** | `Init()` *(0..100)*<br>`Init(min.i, max.i)` | Barre de progression visuelle. |
 | **`UI::Slider`** | `Init()` *(0..100)*<br>`Init(min.i, max.i)` | Curseur coulissant (TrackBar). |
 | **`UI::ListIcon`** | `Init(title.s, colWidth.i)` | Tableau multi-colonnes / grille de donnees. |

@@ -15,9 +15,17 @@ XIncludeFile "controls/Button.pbi"
 XIncludeFile "controls/TextBox.pbi"
 XIncludeFile "controls/Label.pbi"
 XIncludeFile "controls/CheckBox.pbi"
+XIncludeFile "controls/RadioButton.pbi"
 XIncludeFile "controls/ProgressBar.pbi"
 XIncludeFile "controls/Slider.pbi"
 XIncludeFile "controls/ComboBox.pbi"
+XIncludeFile "controls/SpinBox.pbi"
+XIncludeFile "controls/Editor.pbi"
+XIncludeFile "controls/ListView.pbi"
+XIncludeFile "controls/TreeView.pbi"
+XIncludeFile "controls/DatePicker.pbi"
+XIncludeFile "controls/GroupBox.pbi"
+XIncludeFile "controls/TabControl.pbi"
 XIncludeFile "controls/ListIcon.pbi"
 XIncludeFile "controls/ToggleSwitch.pbi"
 
@@ -579,6 +587,90 @@ Namespace UI {
           Protected *ts.UI::ToggleSwitch = New UI::ToggleSwitch(tsChk)
           This\ApplyCommonAttributes(*ts, node, *targetWindow)
           *createdComp = *ts
+
+        Case "EDITOR", "TEXTAREA"
+          Protected edText.s = GetXMLAttribute(node, "Text")
+          If edText = "" : edText = GetXMLNodeText(node) : EndIf
+          Protected *ed.UI::Editor = New UI::Editor()
+          If edText <> "" : *ed\SetText(edText) : EndIf
+          This\ApplyCommonAttributes(*ed, node, *targetWindow)
+          *createdComp = *ed
+
+        Case "RADIOBUTTON", "OPTION"
+          Protected rbText.s = GetXMLAttribute(node, "Text")
+          If rbText = "" : rbText = GetXMLNodeText(node) : EndIf
+          Protected rbChkStr.s = UCase(Trim(GetXMLAttribute(node, "Checked")))
+          Protected rbChk.b = #False
+          If rbChkStr = "TRUE" Or rbChkStr = "1" : rbChk = #True : EndIf
+          Protected *rb.UI::RadioButton = New UI::RadioButton(rbText, rbChk)
+          Protected rbGrp.s = GetXMLAttribute(node, "Group")
+          If rbGrp <> "" : *rb\SetGroup(Val(rbGrp)) : EndIf
+          This\ApplyCommonAttributes(*rb, node, *targetWindow)
+          *createdComp = *rb
+
+        Case "LISTVIEW"
+          Protected *lv.UI::ListView = New UI::ListView()
+          Protected lvItems.s = GetXMLAttribute(node, "Items")
+          If lvItems <> ""
+            Protected lviCount.i = CountString(lvItems, ",") + 1
+            Protected lvi.i
+            For lvi = 1 To lviCount
+              *lv\AddItem(Trim(StringField(lvItems, lvi, ",")))
+            Next
+          EndIf
+          This\ApplyCommonAttributes(*lv, node, *targetWindow)
+          *createdComp = *lv
+          Protected *lvItemNode = ChildXMLNode(node)
+          While *lvItemNode
+            If XMLNodeType(*lvItemNode) = #PB_XML_Normal And UCase(GetXMLNodeName(*lvItemNode)) = "ITEM"
+              Protected lvItemText.s = GetXMLAttribute(*lvItemNode, "Text")
+              If lvItemText = "" : lvItemText = GetXMLNodeText(*lvItemNode) : EndIf
+              *lv\AddItem(lvItemText)
+            EndIf
+            *lvItemNode = NextXMLNode(*lvItemNode)
+          Wend
+
+        Case "SPINBOX", "SPIN"
+          Protected spMin.i = Val(GetXMLAttribute(node, "Min"))
+          Protected spMax.i = Val(GetXMLAttribute(node, "Max"))
+          If spMax <= spMin : spMax = 100 : EndIf
+          Protected spVal.i = Val(GetXMLAttribute(node, "Value"))
+          Protected *sp.UI::SpinBox = New UI::SpinBox(spMin, spMax, spVal)
+          This\ApplyCommonAttributes(*sp, node, *targetWindow)
+          *createdComp = *sp
+
+        Case "GROUPBOX", "FRAME"
+          Protected gbText.s = GetXMLAttribute(node, "Text")
+          If gbText = "" : gbText = GetXMLAttribute(node, "Caption") : EndIf
+          Protected *gb.UI::GroupBox = New UI::GroupBox(gbText)
+          This\ApplyCommonAttributes(*gb, node, *targetWindow)
+          *createdComp = *gb
+
+        Case "TREEVIEW", "TREE"
+          Protected *tv.UI::TreeView = New UI::TreeView()
+          This\ApplyCommonAttributes(*tv, node, *targetWindow)
+          *createdComp = *tv
+
+        Case "DATEPICKER", "DATE"
+          Protected dpMask.s = GetXMLAttribute(node, "Mask")
+          If dpMask = "" : dpMask = "%dd/%mm/%yyyy" : EndIf
+          Protected *dp.UI::DatePicker = New UI::DatePicker(dpMask)
+          This\ApplyCommonAttributes(*dp, node, *targetWindow)
+          *createdComp = *dp
+
+        Case "TABCONTROL", "PANEL"
+          Protected *tc.UI::TabControl = New UI::TabControl()
+          This\ApplyCommonAttributes(*tc, node, *targetWindow)
+          *createdComp = *tc
+          Protected *tabNode = ChildXMLNode(node)
+          While *tabNode
+            If XMLNodeType(*tabNode) = #PB_XML_Normal And (UCase(GetXMLNodeName(*tabNode)) = "TAB" Or UCase(GetXMLNodeName(*tabNode)) = "ITEM")
+              Protected tabTitle.s = GetXMLAttribute(*tabNode, "Title")
+              If tabTitle = "" : tabTitle = GetXMLAttribute(*tabNode, "Text") : EndIf
+              *tc\AddTab(tabTitle)
+            EndIf
+            *tabNode = NextXMLNode(*tabNode)
+          Wend
 
       EndSelect
 

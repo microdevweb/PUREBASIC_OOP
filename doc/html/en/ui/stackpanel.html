@@ -60,12 +60,20 @@
       <li class='nav-item'><a href='../ui/button.html'><span>Button</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/checkbox.html'><span>CheckBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/combobox.html'><span>ComboBox</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/datepicker.html'><span>DatePicker</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/editor.html'><span>Editor</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/groupbox.html'><span>GroupBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/label.html'><span>Label</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/listicon.html'><span>ListIcon</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/listview.html'><span>ListView</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/progressbar.html'><span>ProgressBar</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/radiobutton.html'><span>RadioButton</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/slider.html'><span>Slider</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/spinbox.html'><span>SpinBox</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/tabcontrol.html'><span>TabControl</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/textbox.html'><span>TextBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/toggleswitch.html'><span>ToggleSwitch</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/treeview.html'><span>TreeView</span><span class='badge badge-ui'>UI</span></a></li>
     </ul>
   </div>
   <div class='nav-section'>
@@ -74,6 +82,12 @@
       <li class='nav-item active'><a href='../ui/stackpanel.html'><span>StackPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/dockpanel.html'><span>DockPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/grid.html'><span>Grid</span><span class='badge badge-wpf'>WPF</span></a></li>
+    </ul>
+  </div>
+  <div class='nav-section'>
+    <div class='nav-section-title'>MVVM Architecture & DataBinding</div>
+    <ul class='nav-list'>
+      <li class='nav-item'><a href='../ui/mvvm.html'><span>MVVM Architecture & Bindings</span><span class='badge badge-mvvm'>MVVM</span></a></li>
     </ul>
   </div>
   <div class='nav-section'>
@@ -96,7 +110,7 @@
           <h1 class='page-title'>StackPanel Class</h1>
           <span class='badge badge-wpf'>WPF Layout</span>
         </div>
-        <p class='page-lead'>Linear vertical or horizontal layout panel with overloaded constructors.</p>
+        <p class='page-lead'>Sequential linear horizontal or vertical layout container.</p>
       </div>
       
       <div class='inheritance-box'>
@@ -142,27 +156,17 @@
 
 <div class='doc-section'>
   <h2 class='section-title'>Description</h2>
-  <p>The <code>UI::Layouts::StackPanel</code> arranges child elements into a single linear flow (vertical or horizontal) with configurable spacing between items.</p>
+  <p>The <code>UI::Layouts::StackPanel</code> class stacks its child elements sequentially either vertically (default) or horizontally (<code>#UI_Orientation_Horizontal</code>), respecting each child's margins and alignments.</p>
 </div>
-<div class='doc-section'>
-  <h2 class='section-title'>Overloaded Constructors</h2>
-  <div class='table-wrapper'>
-    <table>
-      <tr><th>Constructor</th><th>Description</th></tr>
-      <tr><td><code>Init()</code></td><td>Vertical StackPanel with 5px spacing by default.</td></tr>
-      <tr><td><code>Init(orientation.i)</code></td><td>StackPanel with chosen orientation (<code>#UI_Orientation_Vertical</code> or <code>#UI_Orientation_Horizontal</code>).</td></tr>
-      <tr><td><code>Init(orientation.i, spacing.i)</code></td><td>Custom orientation and spacing.</td></tr>
-      <tr><td><code>Init(orientation.i, spacing.i, w.i, h.i)</code></td><td>Custom orientation, spacing, and dimensions.</td></tr>
-    </table>
-  </div>
-</div>
+
 <div class='doc-section'>
   <h2 class='section-title'>Specific Methods</h2>
   <div class='table-wrapper'>
     <table>
       <tr><th>Method</th><th>Description</th></tr>
-      <tr><td><code>SetOrientation(orientation.i)</code></td><td>Sets flow orientation (<code>#UI_Orientation_Vertical</code> or <code>#UI_Orientation_Horizontal</code>).</td></tr>
-      <tr><td><code>SetSpacing(spacing.i)</code></td><td>Sets spacing in pixels between consecutive items.</td></tr>
+      <tr><td><code>Init(orientation.i = #UI_Orientation_Vertical, spacing.i = 0)</code></td><td>Initializes stack panel with orientation and spacing.</td></tr>
+      <tr><td><code>SetOrientation(orientation.i)</code></td><td>Changes orientation (<code>#UI_Orientation_Vertical</code> or <code>#UI_Orientation_Horizontal</code>).</td></tr>
+      <tr><td><code>SetSpacing(spacing.i)</code></td><td>Sets pixel spacing between consecutive children.</td></tr>
     </table>
   </div>
 </div>

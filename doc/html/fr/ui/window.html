@@ -60,12 +60,20 @@
       <li class='nav-item'><a href='../ui/button.html'><span>Button</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/checkbox.html'><span>CheckBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/combobox.html'><span>ComboBox</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/datepicker.html'><span>DatePicker</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/editor.html'><span>Editor</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/groupbox.html'><span>GroupBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/label.html'><span>Label</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/listicon.html'><span>ListIcon</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/listview.html'><span>ListView</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/progressbar.html'><span>ProgressBar</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/radiobutton.html'><span>RadioButton</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/slider.html'><span>Slider</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/spinbox.html'><span>SpinBox</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/tabcontrol.html'><span>TabControl</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/textbox.html'><span>TextBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/toggleswitch.html'><span>ToggleSwitch</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/treeview.html'><span>TreeView</span><span class='badge badge-ui'>UI</span></a></li>
     </ul>
   </div>
   <div class='nav-section'>
@@ -74,6 +82,12 @@
       <li class='nav-item'><a href='../ui/stackpanel.html'><span>StackPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/dockpanel.html'><span>DockPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/grid.html'><span>Grid</span><span class='badge badge-wpf'>WPF</span></a></li>
+    </ul>
+  </div>
+  <div class='nav-section'>
+    <div class='nav-section-title'>Architecture MVVM & DataBinding</div>
+    <ul class='nav-list'>
+      <li class='nav-item'><a href='../ui/mvvm.html'><span>Architecture MVVM & Bindings</span><span class='badge badge-mvvm'>MVVM</span></a></li>
     </ul>
   </div>
   <div class='nav-section'>
@@ -94,9 +108,9 @@
       <div class='page-header'>
         <div class='title-row'>
           <h1 class='page-title'>Classe Window</h1>
-          <span class='badge badge-ui'>Core UI</span>
+          <span class='badge badge-core'>Core UI</span>
         </div>
-        <p class='page-lead'>Fenêtre native événementielle avec boucle de messages et conteneur de layout principal.</p>
+        <p class='page-lead'>Encapsulation d'une fenêtre principale ou de dialogue avec gestion du cycle de vie.</p>
       </div>
       
       <div class='inheritance-box'>
@@ -111,30 +125,18 @@
 
 <div class='doc-section'>
   <h2 class='section-title'>Description</h2>
-  <p>La classe <code>UI::Window</code> encapsule une fenêtre native PureBasic (<code>OpenWindow</code>) avec gestion événementielle complète, redimensionnement automatique du layout principal et routage unifié des événements.</p>
+  <p>La classe <code>UI::Window</code> encapsule les fenêtres PureBasic (<code>OpenWindow</code>). Elle gère le redimensionnement automatique des layouts enfants, les barres d'outils, menus et la fermeture propre.</p>
 </div>
+
 <div class='doc-section'>
-  <h2 class='section-title'>Constructeurs Surchargés</h2>
-  <div class='table-wrapper'>
-    <table>
-      <tr><th>Constructeur</th><th>Description</th></tr>
-      <tr><td><code>Init()</code></td><td>Fenêtre par défaut (800x600, centrée).</td></tr>
-      <tr><td><code>Init(title.s, w.i, h.i)</code></td><td>Fenêtre avec titre et dimensions, centrée à l'écran.</td></tr>
-      <tr><td><code>Init(title.s, x.i, y.i, w.i, h.i)</code></td><td>Fenêtre avec titre, position et dimensions.</td></tr>
-      <tr><td><code>Init(title.s, x.i, y.i, w.i, h.i, flags.i)</code></td><td>Fenêtre complète avec flags PureBasic OpenWindow.</td></tr>
-    </table>
-  </div>
-</div>
-<div class='doc-section'>
-  <h2 class='section-title'>Méthodes Principales</h2>
+  <h2 class='section-title'>Méthodes Spécifiques</h2>
   <div class='table-wrapper'>
     <table>
       <tr><th>Méthode</th><th>Description</th></tr>
-      <tr><td><code>SetLayout(*rootLayout.UI::Layouts::Container)</code></td><td>Définit le panneau de disposition racine qui s'adapte automatiquement à la taille de la fenêtre.</td></tr>
-      <tr><td><code>AddGadget(*gadget.UI::Gadget)</code></td><td>Ajoute un contrôle graphique à la fenêtre.</td></tr>
-      <tr><td><code>Show() / Hide() / Close()</code></td><td>Affiche, masque ou ferme la fenêtre.</td></tr>
-      <tr><td><code>GetID() / GetHandle()</code></td><td>Retourne le #Window PureBasic ou le handle OS (HWND/NSWindow).</td></tr>
-      <tr><td><code>OnClose() / OnResize()</code></td><td>Méthodes virtuelles appelées lors des événements système de fermeture ou redimensionnement.</td></tr>
+      <tr><td><code>Init(title.s, w.i = 800, h.i = 600, flags.i = #PB_Window_SystemMenu | #PB_Window_SizeGadget)</code></td><td>Crée la fenêtre.</td></tr>
+      <tr><td><code>SetContent(*rootComponent.UI::Component)</code></td><td>Assigne le panneau de layout racine qui sera redimensionné avec la fenêtre.</td></tr>
+      <tr><td><code>Show() / Hide()</code></td><td>Affiche ou masque la fenêtre.</td></tr>
+      <tr><td><code>Close()</code></td><td>Ferme et détruit la fenêtre.</td></tr>
     </table>
   </div>
 </div>

@@ -120,7 +120,15 @@ The PureBasic OOP GUI framework provides automatic layout management and standar
 | **`UI::TextBox`** | `Init()`<br>`Init(defaultText.s)`<br>`Init(defaultText.s, w.i, h.i)` | Single-line editable text input. |
 | **`UI::Label`** | `Init(text.s)`<br>`Init(text.s, w.i, h.i)` | Static text label. |
 | **`UI::CheckBox`** | `Init(text.s)`<br>`Init(text.s, checked.b)` | Checkbox toggle with boolean state. |
+| **`UI::RadioButton`** | `Init(text.s)`<br>`Init(text.s, checked.b)` | Radio button with mutual exclusion. |
 | **`UI::ComboBox`** | `Init()`<br>`Init(w.i, h.i)` | Dropdown selection control. |
+| **`UI::SpinBox`** | `Init(min.i, max.i)`<br>`Init(min.i, max.i, current.i)` | Numeric up/down spinner control. |
+| **`UI::Editor`** | `Init()`<br>`Init(w.i, h.i)`<br>`Init(text.s, w.i, h.i)` | Multiline text editor / area. |
+| **`UI::ListView`** | `Init()`<br>`Init(w.i, h.i)` | Simple items list box. |
+| **`UI::TreeView`** | `Init()`<br>`Init(w.i, h.i)` | Hierarchical tree view control. |
+| **`UI::DatePicker`** | `Init()`<br>`Init(mask.s)`<br>`Init(dateVal.i, mask.s)` | Visual date picker and calendar. |
+| **`UI::GroupBox`** | `Init(caption.s)`<br>`Init(caption.s, w.i, h.i)` | Labeled grouping frame. |
+| **`UI::TabControl`** | `Init()`<br>`Init(w.i, h.i)` | Tabbed container panel. |
 | **`UI::ProgressBar`** | `Init()` *(0..100)*<br>`Init(min.i, max.i)` | Visual progress bar indicator. |
 | **`UI::Slider`** | `Init()` *(0..100)*<br>`Init(min.i, max.i)` | TrackBar slider control. |
 | **`UI::ListIcon`** | `Init(title.s, colWidth.i)` | Multi-column table / data grid. |

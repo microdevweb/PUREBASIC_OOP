@@ -60,12 +60,20 @@
       <li class='nav-item'><a href='../ui/button.html'><span>Button</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/checkbox.html'><span>CheckBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/combobox.html'><span>ComboBox</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/datepicker.html'><span>DatePicker</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/editor.html'><span>Editor</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/groupbox.html'><span>GroupBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/label.html'><span>Label</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/listicon.html'><span>ListIcon</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/listview.html'><span>ListView</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/progressbar.html'><span>ProgressBar</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/radiobutton.html'><span>RadioButton</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item active'><a href='../ui/slider.html'><span>Slider</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/spinbox.html'><span>SpinBox</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/tabcontrol.html'><span>TabControl</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/textbox.html'><span>TextBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/toggleswitch.html'><span>ToggleSwitch</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/treeview.html'><span>TreeView</span><span class='badge badge-ui'>UI</span></a></li>
     </ul>
   </div>
   <div class='nav-section'>
@@ -74,6 +82,12 @@
       <li class='nav-item'><a href='../ui/stackpanel.html'><span>StackPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/dockpanel.html'><span>DockPanel</span><span class='badge badge-wpf'>WPF</span></a></li>
       <li class='nav-item'><a href='../ui/grid.html'><span>Grid</span><span class='badge badge-wpf'>WPF</span></a></li>
+    </ul>
+  </div>
+  <div class='nav-section'>
+    <div class='nav-section-title'>Architecture MVVM & DataBinding</div>
+    <ul class='nav-list'>
+      <li class='nav-item'><a href='../ui/mvvm.html'><span>Architecture MVVM & Bindings</span><span class='badge badge-mvvm'>MVVM</span></a></li>
     </ul>
   </div>
   <div class='nav-section'>
@@ -96,7 +110,7 @@
           <h1 class='page-title'>Classe Slider</h1>
           <span class='badge badge-ui'>UI Class</span>
         </div>
-        <p class='page-lead'>Curseur de réglage numérique (TrackBar) avec multi-constructeurs.</p>
+        <p class='page-lead'>Curseur de réglage numérique interactif (TrackBar).</p>
       </div>
       
       <div class='inheritance-box'>
@@ -138,26 +152,17 @@
 
 <div class='doc-section'>
   <h2 class='section-title'>Description</h2>
-  <p>La classe <code>UI::Slider</code> encapsule un curseur de réglage de valeur (<code>TrackBarGadget</code>) avec événement <code>OnChange()</code>.</p>
+  <p>La classe <code>UI::Slider</code> encapsule le <code>TrackBarGadget</code> de PureBasic. Elle permet de sélectionner une valeur numérique continue entre deux bornes en déplaçant un curseur.</p>
 </div>
+
 <div class='doc-section'>
-  <h2 class='section-title'>Constructeurs Surchargés</h2>
+  <h2 class='section-title'>Constructeurs & Méthodes</h2>
   <div class='table-wrapper'>
     <table>
-      <tr><th>Constructeur</th><th>Description</th></tr>
-      <tr><td><code>Init()</code></td><td>Curseur 0-100 par défaut.</td></tr>
-      <tr><td><code>Init(min.i, max.i)</code></td><td>Curseur avec plage personnalisée.</td></tr>
-      <tr><td><code>Init(min.i, max.i, w.i, h.i)</code></td><td>Curseur avec plage et dimensions souhaitées.</td></tr>
-      <tr><td><code>Init(x.i, y.i, w.i, h.i, min.i, max.i, flags.i)</code></td><td>Curseur complet avec coordonnées absolues et flags.</td></tr>
-    </table>
-  </div>
-</div>
-<div class='doc-section'>
-  <h2 class='section-title'>Méthodes Spécifiques</h2>
-  <div class='table-wrapper'>
-    <table>
-      <tr><th>Méthode</th><th>Description</th></tr>
-      <tr><td><code>GetValue() / SetValue(val.i)</code></td><td>Obtient ou définit la position du curseur.</td></tr>
+      <tr><th>Signature</th><th>Description</th></tr>
+      <tr><td><code>Init(min.i = 0, max.i = 100, val.i = 0)</code></td><td>Initialise le curseur avec ses bornes et sa valeur initiale.</td></tr>
+      <tr><td><code>GetValue() / SetValue(val.i)</code></td><td>Lit ou met à jour la position courante du curseur.</td></tr>
+      <tr><td><code>GetMinimum() / GetMaximum()</code></td><td>Retourne les valeurs minimale et maximale.</td></tr>
       <tr><td><code>OnChange()</code></td><td>Méthode virtuelle appelée lors du déplacement du curseur.</td></tr>
     </table>
   </div>

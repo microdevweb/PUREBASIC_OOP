@@ -103,8 +103,8 @@ EndStructure
 #UI_GridUnit_Pixel = 0
 #UI_GridUnit_Auto  = 1
 #UI_GridUnit_Star  = 2
-#PROP_CLICK_MESSAGE     = "ClickMessage"
-#PROP_STATUS_TEXT       = "StatusText"
+#PROP_CLICK_MESSAGE      = "ClickMessage"
+#PROP_STATUS_TEXT        = "StatusText"
 #PROP_CLICK_COUNT        = "ClickCount"
 #PROP_TOTAL_CLICKS_TEXT  = "TotalClicksText"
 #CMD_CLICK_BTN1         = "ClickBtn1"
@@ -381,6 +381,13 @@ Interface UI_CheckBox_vt Extends UI_Gadget_vt
   SetChecked(checked.b)
 EndInterface
 
+Interface UI_RadioButton_vt Extends UI_Gadget_vt
+  IsChecked.b()
+  SetChecked(state_p.b)
+  GetGroup.i()
+  SetGroup(grp.i)
+EndInterface
+
 Interface UI_ProgressBar_vt Extends UI_Gadget_vt
   GetValue.i()
   SetValue(v.i)
@@ -397,6 +404,73 @@ Interface UI_ComboBox_vt Extends UI_Gadget_vt
   SetSelectedIndex(idx.i)
   GetSelectedItem.s()
   Clear()
+EndInterface
+
+Interface UI_SpinBox_vt Extends UI_Gadget_vt
+  GetValue.i()
+  SetValue(val_p.i)
+  GetMin.i()
+  GetMax.i()
+  SetRange(min_p.i, max_p.i)
+EndInterface
+
+Interface UI_Editor_vt Extends UI_Gadget_vt
+  AddLine(lineText.s)
+  Clear()
+  SetReadOnly(ro.b)
+  GetReadOnly.b()
+  SetWordWrap(wrap.b)
+  GetWordWrap.b()
+EndInterface
+
+Interface UI_ListView_vt Extends UI_Gadget_vt
+  AddItem(text_p.s)
+  InsertItem(pos_p.i, text_p.s)
+  RemoveItem(pos_p.i)
+  ClearItems()
+  GetItemText.s(pos_p.i)
+  SetItemText(pos_p.i, text_p.s)
+  GetItemCount.i()
+  GetSelectedIndex.i()
+  SetSelectedIndex(idx_p.i)
+  GetSelectedText.s()
+EndInterface
+
+Interface UI_TreeView_vt Extends UI_Gadget_vt
+  AddItem(text_p.s)
+  AddChildItem(text_p.s, subLevel_p.i)
+  InsertItem(pos_p.i, text_p.s, subLevel_p.i)
+  RemoveItem(pos_p.i)
+  ClearItems()
+  GetItemText.s(pos_p.i)
+  SetItemText(pos_p.i, text_p.s)
+  GetItemCount.i()
+  GetSelectedIndex.i()
+  SetSelectedIndex(idx_p.i)
+  GetItemSubLevel.i(pos_p.i)
+  Expand(pos_p.i)
+  Collapse(pos_p.i)
+EndInterface
+
+Interface UI_DatePicker_vt Extends UI_Gadget_vt
+  GetDate.i()
+  SetDate(dateVal_p.i)
+  GetFormattedDate.s(format_p.s)
+EndInterface
+
+Interface UI_GroupBox_vt Extends UI_Gadget_vt
+EndInterface
+
+Interface UI_TabControl_vt Extends UI_Gadget_vt
+  AddTab(title_p.s)
+  AddTabWithIcon(title_p.s, imageID_p.i)
+  OpenTab(tabIndex_p.i)
+  CloseTab()
+  GetCurrentTab.i()
+  SetCurrentTab(tabIndex_p.i)
+  GetTabCount.i()
+  GetTabText.s(tabIndex_p.i)
+  SetTabText(tabIndex_p.i, text_p.s)
 EndInterface
 
 Interface UI_ToggleSwitch_vt Extends UI_CustomGadget_vt
@@ -582,6 +656,10 @@ EndStructure
 Structure UI_CheckBox_Inst Extends UI_Gadget_Inst
 EndStructure
 
+Structure UI_RadioButton_Inst Extends UI_Gadget_Inst
+  groupID.i
+EndStructure
+
 Structure UI_ProgressBar_Inst Extends UI_Gadget_Inst
   minVal.i
   maxVal.i
@@ -593,6 +671,30 @@ Structure UI_Slider_Inst Extends UI_Gadget_Inst
 EndStructure
 
 Structure UI_ComboBox_Inst Extends UI_Gadget_Inst
+EndStructure
+
+Structure UI_SpinBox_Inst Extends UI_Gadget_Inst
+  minVal.i
+  maxVal.i
+EndStructure
+
+Structure UI_Editor_Inst Extends UI_Gadget_Inst
+EndStructure
+
+Structure UI_ListView_Inst Extends UI_Gadget_Inst
+EndStructure
+
+Structure UI_TreeView_Inst Extends UI_Gadget_Inst
+EndStructure
+
+Structure UI_DatePicker_Inst Extends UI_Gadget_Inst
+  mask.s
+EndStructure
+
+Structure UI_GroupBox_Inst Extends UI_Gadget_Inst
+EndStructure
+
+Structure UI_TabControl_Inst Extends UI_Gadget_Inst
 EndStructure
 
 Structure UI_ToggleSwitch_Inst Extends UI_CustomGadget_Inst
@@ -927,6 +1029,15 @@ Declare UI_CheckBox_Init_i_i_i_i_s_i(*This.UI_CheckBox_Inst, x_p.i, y_p.i, w_p.i
 Declare.b UI_CheckBox_IsChecked(*This.UI_CheckBox_Inst)
 Declare UI_CheckBox_SetChecked(*This.UI_CheckBox_Inst, checked.b)
 Declare UI_CheckBox_Free(*This.UI_CheckBox_Inst)
+Declare UI_RadioButton_Init_s(*This.UI_RadioButton_Inst, text_p.s)
+Declare UI_RadioButton_Init_s_b(*This.UI_RadioButton_Inst, text_p.s, checked_p.b)
+Declare UI_RadioButton_Init_s_i_i_b(*This.UI_RadioButton_Inst, text_p.s, w_p.i, h_p.i, checked_p.b)
+Declare UI_RadioButton_Init_i_i_i_i_s_b(*This.UI_RadioButton_Inst, x_p.i, y_p.i, w_p.i, h_p.i, text_p.s, checked_p.b)
+Declare.b UI_RadioButton_IsChecked(*This.UI_RadioButton_Inst)
+Declare UI_RadioButton_SetChecked(*This.UI_RadioButton_Inst, state_p.b)
+Declare.i UI_RadioButton_GetGroup(*This.UI_RadioButton_Inst)
+Declare UI_RadioButton_SetGroup(*This.UI_RadioButton_Inst, grp.i)
+Declare UI_RadioButton_Free(*This.UI_RadioButton_Inst)
 Declare UI_ProgressBar_Init_void(*This.UI_ProgressBar_Inst)
 Declare UI_ProgressBar_Init_i_i(*This.UI_ProgressBar_Inst, min_p.i, max_p.i)
 Declare UI_ProgressBar_Init_i_i_i_i(*This.UI_ProgressBar_Inst, min_p.i, max_p.i, w_p.i, h_p.i)
@@ -951,6 +1062,82 @@ Declare UI_ComboBox_SetSelectedIndex(*This.UI_ComboBox_Inst, idx.i)
 Declare.s UI_ComboBox_GetSelectedItem(*This.UI_ComboBox_Inst)
 Declare UI_ComboBox_Clear(*This.UI_ComboBox_Inst)
 Declare UI_ComboBox_Free(*This.UI_ComboBox_Inst)
+Declare UI_SpinBox_Init_void(*This.UI_SpinBox_Inst)
+Declare UI_SpinBox_Init_i_i(*This.UI_SpinBox_Inst, min_p.i, max_p.i)
+Declare UI_SpinBox_Init_i_i_i(*This.UI_SpinBox_Inst, min_p.i, max_p.i, current_p.i)
+Declare UI_SpinBox_Init_i_i_i_i_i(*This.UI_SpinBox_Inst, min_p.i, max_p.i, current_p.i, w_p.i, h_p.i)
+Declare.i UI_SpinBox_GetValue(*This.UI_SpinBox_Inst)
+Declare UI_SpinBox_SetValue(*This.UI_SpinBox_Inst, val_p.i)
+Declare.i UI_SpinBox_GetMin(*This.UI_SpinBox_Inst)
+Declare.i UI_SpinBox_GetMax(*This.UI_SpinBox_Inst)
+Declare UI_SpinBox_SetRange(*This.UI_SpinBox_Inst, min_p.i, max_p.i)
+Declare UI_SpinBox_Free(*This.UI_SpinBox_Inst)
+Declare UI_Editor_Init_void(*This.UI_Editor_Inst)
+Declare UI_Editor_Init_i_i(*This.UI_Editor_Inst, w_p.i, h_p.i)
+Declare UI_Editor_Init_s_i_i(*This.UI_Editor_Inst, text_p.s, w_p.i, h_p.i)
+Declare UI_Editor_Init_i_i_i_i_s_i(*This.UI_Editor_Inst, x_p.i, y_p.i, w_p.i, h_p.i, text_p.s, flags_p.i)
+Declare UI_Editor_AddLine(*This.UI_Editor_Inst, lineText.s)
+Declare UI_Editor_Clear(*This.UI_Editor_Inst)
+Declare UI_Editor_SetReadOnly(*This.UI_Editor_Inst, ro.b)
+Declare.b UI_Editor_GetReadOnly(*This.UI_Editor_Inst)
+Declare UI_Editor_SetWordWrap(*This.UI_Editor_Inst, wrap.b)
+Declare.b UI_Editor_GetWordWrap(*This.UI_Editor_Inst)
+Declare UI_Editor_Free(*This.UI_Editor_Inst)
+Declare UI_ListView_Init_void(*This.UI_ListView_Inst)
+Declare UI_ListView_Init_i_i(*This.UI_ListView_Inst, w_p.i, h_p.i)
+Declare UI_ListView_Init_i_i_i_i_i(*This.UI_ListView_Inst, x_p.i, y_p.i, w_p.i, h_p.i, flags_p.i)
+Declare UI_ListView_AddItem(*This.UI_ListView_Inst, text_p.s)
+Declare UI_ListView_InsertItem(*This.UI_ListView_Inst, pos_p.i, text_p.s)
+Declare UI_ListView_RemoveItem(*This.UI_ListView_Inst, pos_p.i)
+Declare UI_ListView_ClearItems(*This.UI_ListView_Inst)
+Declare.s UI_ListView_GetItemText(*This.UI_ListView_Inst, pos_p.i)
+Declare UI_ListView_SetItemText(*This.UI_ListView_Inst, pos_p.i, text_p.s)
+Declare.i UI_ListView_GetItemCount(*This.UI_ListView_Inst)
+Declare.i UI_ListView_GetSelectedIndex(*This.UI_ListView_Inst)
+Declare UI_ListView_SetSelectedIndex(*This.UI_ListView_Inst, idx_p.i)
+Declare.s UI_ListView_GetSelectedText(*This.UI_ListView_Inst)
+Declare UI_ListView_Free(*This.UI_ListView_Inst)
+Declare UI_TreeView_Init_void(*This.UI_TreeView_Inst)
+Declare UI_TreeView_Init_i_i(*This.UI_TreeView_Inst, w_p.i, h_p.i)
+Declare UI_TreeView_Init_i_i_i_i_i(*This.UI_TreeView_Inst, x_p.i, y_p.i, w_p.i, h_p.i, flags_p.i)
+Declare UI_TreeView_AddItem(*This.UI_TreeView_Inst, text_p.s)
+Declare UI_TreeView_AddChildItem(*This.UI_TreeView_Inst, text_p.s, subLevel_p.i)
+Declare UI_TreeView_InsertItem(*This.UI_TreeView_Inst, pos_p.i, text_p.s, subLevel_p.i)
+Declare UI_TreeView_RemoveItem(*This.UI_TreeView_Inst, pos_p.i)
+Declare UI_TreeView_ClearItems(*This.UI_TreeView_Inst)
+Declare.s UI_TreeView_GetItemText(*This.UI_TreeView_Inst, pos_p.i)
+Declare UI_TreeView_SetItemText(*This.UI_TreeView_Inst, pos_p.i, text_p.s)
+Declare.i UI_TreeView_GetItemCount(*This.UI_TreeView_Inst)
+Declare.i UI_TreeView_GetSelectedIndex(*This.UI_TreeView_Inst)
+Declare UI_TreeView_SetSelectedIndex(*This.UI_TreeView_Inst, idx_p.i)
+Declare.i UI_TreeView_GetItemSubLevel(*This.UI_TreeView_Inst, pos_p.i)
+Declare UI_TreeView_Expand(*This.UI_TreeView_Inst, pos_p.i)
+Declare UI_TreeView_Collapse(*This.UI_TreeView_Inst, pos_p.i)
+Declare UI_TreeView_Free(*This.UI_TreeView_Inst)
+Declare UI_DatePicker_Init_void(*This.UI_DatePicker_Inst)
+Declare UI_DatePicker_Init_s(*This.UI_DatePicker_Inst, mask_p.s)
+Declare UI_DatePicker_Init_i_s(*This.UI_DatePicker_Inst, dateVal_p.i, mask_p.s)
+Declare UI_DatePicker_Init_i_s_i_i(*This.UI_DatePicker_Inst, dateVal_p.i, mask_p.s, w_p.i, h_p.i)
+Declare.i UI_DatePicker_GetDate(*This.UI_DatePicker_Inst)
+Declare UI_DatePicker_SetDate(*This.UI_DatePicker_Inst, dateVal_p.i)
+Declare.s UI_DatePicker_GetFormattedDate(*This.UI_DatePicker_Inst, format_p.s)
+Declare UI_DatePicker_Free(*This.UI_DatePicker_Inst)
+Declare UI_GroupBox_Init_s(*This.UI_GroupBox_Inst, caption_p.s)
+Declare UI_GroupBox_Init_s_i_i(*This.UI_GroupBox_Inst, caption_p.s, w_p.i, h_p.i)
+Declare UI_GroupBox_Init_i_i_i_i_s_i(*This.UI_GroupBox_Inst, x_p.i, y_p.i, w_p.i, h_p.i, caption_p.s, flags_p.i)
+Declare UI_GroupBox_Free(*This.UI_GroupBox_Inst)
+Declare UI_TabControl_Init_void(*This.UI_TabControl_Inst)
+Declare UI_TabControl_Init_i_i(*This.UI_TabControl_Inst, w_p.i, h_p.i)
+Declare UI_TabControl_AddTab(*This.UI_TabControl_Inst, title_p.s)
+Declare UI_TabControl_AddTabWithIcon(*This.UI_TabControl_Inst, title_p.s, imageID_p.i)
+Declare UI_TabControl_OpenTab(*This.UI_TabControl_Inst, tabIndex_p.i)
+Declare UI_TabControl_CloseTab(*This.UI_TabControl_Inst)
+Declare.i UI_TabControl_GetCurrentTab(*This.UI_TabControl_Inst)
+Declare UI_TabControl_SetCurrentTab(*This.UI_TabControl_Inst, tabIndex_p.i)
+Declare.i UI_TabControl_GetTabCount(*This.UI_TabControl_Inst)
+Declare.s UI_TabControl_GetTabText(*This.UI_TabControl_Inst, tabIndex_p.i)
+Declare UI_TabControl_SetTabText(*This.UI_TabControl_Inst, tabIndex_p.i, text_p.s)
+Declare UI_TabControl_Free(*This.UI_TabControl_Inst)
 Declare UI_ToggleSwitch_Init_void(*This.UI_ToggleSwitch_Inst)
 Declare UI_ToggleSwitch_Init_b(*This.UI_ToggleSwitch_Inst, defaultState_p.b)
 Declare UI_ToggleSwitch_Init_i_i_b(*This.UI_ToggleSwitch_Inst, w_p.i, h_p.i, defaultState_p.b)
@@ -1056,6 +1243,11 @@ Declare.i New_UI_CheckBox_s_b(text_p.s, checked_p.b)
 Declare.i New_UI_CheckBox_s_i_i_b(text_p.s, w_p.i, h_p.i, checked_p.b)
 Declare.i New_UI_CheckBox_i_i_i_i_s_i(x_p.i, y_p.i, w_p.i, h_p.i, text_p.s, flags_p.i)
 Declare Free_UI_CheckBox(*obj.UI_CheckBox_Inst)
+Declare.i New_UI_RadioButton_s(text_p.s)
+Declare.i New_UI_RadioButton_s_b(text_p.s, checked_p.b)
+Declare.i New_UI_RadioButton_s_i_i_b(text_p.s, w_p.i, h_p.i, checked_p.b)
+Declare.i New_UI_RadioButton_i_i_i_i_s_b(x_p.i, y_p.i, w_p.i, h_p.i, text_p.s, checked_p.b)
+Declare Free_UI_RadioButton(*obj.UI_RadioButton_Inst)
 Declare.i New_UI_ProgressBar_void()
 Declare.i New_UI_ProgressBar_i_i(min_p.i, max_p.i)
 Declare.i New_UI_ProgressBar_i_i_i_i(min_p.i, max_p.i, w_p.i, h_p.i)
@@ -1071,6 +1263,36 @@ Declare.i New_UI_ComboBox_i_i(w_p.i, h_p.i)
 Declare.i New_UI_ComboBox_i_i_i_i(x_p.i, y_p.i, w_p.i, h_p.i)
 Declare.i New_UI_ComboBox_i_i_i_i_i(x_p.i, y_p.i, w_p.i, h_p.i, flags_p.i)
 Declare Free_UI_ComboBox(*obj.UI_ComboBox_Inst)
+Declare.i New_UI_SpinBox_void()
+Declare.i New_UI_SpinBox_i_i(min_p.i, max_p.i)
+Declare.i New_UI_SpinBox_i_i_i(min_p.i, max_p.i, current_p.i)
+Declare.i New_UI_SpinBox_i_i_i_i_i(min_p.i, max_p.i, current_p.i, w_p.i, h_p.i)
+Declare Free_UI_SpinBox(*obj.UI_SpinBox_Inst)
+Declare.i New_UI_Editor_void()
+Declare.i New_UI_Editor_i_i(w_p.i, h_p.i)
+Declare.i New_UI_Editor_s_i_i(text_p.s, w_p.i, h_p.i)
+Declare.i New_UI_Editor_i_i_i_i_s_i(x_p.i, y_p.i, w_p.i, h_p.i, text_p.s, flags_p.i)
+Declare Free_UI_Editor(*obj.UI_Editor_Inst)
+Declare.i New_UI_ListView_void()
+Declare.i New_UI_ListView_i_i(w_p.i, h_p.i)
+Declare.i New_UI_ListView_i_i_i_i_i(x_p.i, y_p.i, w_p.i, h_p.i, flags_p.i)
+Declare Free_UI_ListView(*obj.UI_ListView_Inst)
+Declare.i New_UI_TreeView_void()
+Declare.i New_UI_TreeView_i_i(w_p.i, h_p.i)
+Declare.i New_UI_TreeView_i_i_i_i_i(x_p.i, y_p.i, w_p.i, h_p.i, flags_p.i)
+Declare Free_UI_TreeView(*obj.UI_TreeView_Inst)
+Declare.i New_UI_DatePicker_void()
+Declare.i New_UI_DatePicker_s(mask_p.s)
+Declare.i New_UI_DatePicker_i_s(dateVal_p.i, mask_p.s)
+Declare.i New_UI_DatePicker_i_s_i_i(dateVal_p.i, mask_p.s, w_p.i, h_p.i)
+Declare Free_UI_DatePicker(*obj.UI_DatePicker_Inst)
+Declare.i New_UI_GroupBox_s(caption_p.s)
+Declare.i New_UI_GroupBox_s_i_i(caption_p.s, w_p.i, h_p.i)
+Declare.i New_UI_GroupBox_i_i_i_i_s_i(x_p.i, y_p.i, w_p.i, h_p.i, caption_p.s, flags_p.i)
+Declare Free_UI_GroupBox(*obj.UI_GroupBox_Inst)
+Declare.i New_UI_TabControl_void()
+Declare.i New_UI_TabControl_i_i(w_p.i, h_p.i)
+Declare Free_UI_TabControl(*obj.UI_TabControl_Inst)
 Declare.i New_UI_ToggleSwitch_void()
 Declare.i New_UI_ToggleSwitch_b(defaultState_p.b)
 Declare.i New_UI_ToggleSwitch_i_i_b(w_p.i, h_p.i, defaultState_p.b)
@@ -3834,6 +4056,94 @@ Procedure UI_CheckBox_Free(*This.UI_CheckBox_Inst)
   EndIf
 EndProcedure
 
+Procedure UI_RadioButton_Init_s(*This.UI_RadioButton_Inst, text_p.s)
+  Protected *This_vt.UI_RadioButton_vt = *This
+        UI_Gadget_Init(*This)
+        *This\x = 0 : *This\y = 0 : *This\width = 120 : *This\height = 24
+        *This\desiredWidth = 120 : *This\desiredHeight = 24
+        *This\isVisible = #True : *This\isEnabled = #True
+        *This\groupID = 0
+        *This\id = OptionGadget(#PB_Any, 0, 0, 120, 24, text_p)
+  If (*This\id)
+          UI_RegisterGadget(*This\id, *This)
+  EndIf
+EndProcedure
+
+Procedure UI_RadioButton_Init_s_b(*This.UI_RadioButton_Inst, text_p.s, checked_p.b)
+  Protected *This_vt.UI_RadioButton_vt = *This
+        UI_Gadget_Init(*This)
+        *This\x = 0 : *This\y = 0 : *This\width = 120 : *This\height = 24
+        *This\desiredWidth = 120 : *This\desiredHeight = 24
+        *This\isVisible = #True : *This\isEnabled = #True
+        *This\groupID = 0
+        *This\id = OptionGadget(#PB_Any, 0, 0, 120, 24, text_p)
+  If (*This\id)
+          SetGadgetState(*This\id, checked_p)
+          UI_RegisterGadget(*This\id, *This)
+  EndIf
+EndProcedure
+
+Procedure UI_RadioButton_Init_s_i_i_b(*This.UI_RadioButton_Inst, text_p.s, w_p.i, h_p.i, checked_p.b)
+  Protected *This_vt.UI_RadioButton_vt = *This
+        UI_Gadget_Init(*This)
+        *This\x = 0 : *This\y = 0 : *This\width = w_p : *This\height = h_p
+        *This\desiredWidth = w_p : *This\desiredHeight = h_p
+        *This\isVisible = #True : *This\isEnabled = #True
+        *This\groupID = 0
+        *This\id = OptionGadget(#PB_Any, 0, 0, w_p, h_p, text_p)
+  If (*This\id)
+          SetGadgetState(*This\id, checked_p)
+          UI_RegisterGadget(*This\id, *This)
+  EndIf
+EndProcedure
+
+Procedure UI_RadioButton_Init_i_i_i_i_s_b(*This.UI_RadioButton_Inst, x_p.i, y_p.i, w_p.i, h_p.i, text_p.s, checked_p.b)
+  Protected *This_vt.UI_RadioButton_vt = *This
+        UI_Gadget_Init(*This)
+        *This\x = x_p : *This\y = y_p : *This\width = w_p : *This\height = h_p
+        *This\desiredWidth = w_p : *This\desiredHeight = h_p
+        *This\isVisible = #True : *This\isEnabled = #True
+        *This\groupID = 0
+        *This\id = OptionGadget(#PB_Any, x_p, y_p, w_p, h_p, text_p)
+  If (*This\id)
+          SetGadgetState(*This\id, checked_p)
+          UI_RegisterGadget(*This\id, *This)
+  EndIf
+EndProcedure
+
+Procedure.b UI_RadioButton_IsChecked(*This.UI_RadioButton_Inst)
+  Protected *This_vt.UI_RadioButton_vt = *This
+  If (*This\id And IsGadget(*This\id))
+          ProcedureReturn GetGadgetState(*This\id)
+  EndIf
+        ProcedureReturn #False
+EndProcedure
+
+Procedure UI_RadioButton_SetChecked(*This.UI_RadioButton_Inst, state_p.b)
+  Protected *This_vt.UI_RadioButton_vt = *This
+  If (*This\id And IsGadget(*This\id))
+          SetGadgetState(*This\id, state_p)
+  EndIf
+EndProcedure
+
+Procedure.i UI_RadioButton_GetGroup(*This.UI_RadioButton_Inst)
+  Protected *This_vt.UI_RadioButton_vt = *This
+        ProcedureReturn *This\groupID
+EndProcedure
+
+Procedure UI_RadioButton_SetGroup(*This.UI_RadioButton_Inst, grp.i)
+  Protected *This_vt.UI_RadioButton_vt = *This
+        *This\groupID = grp
+EndProcedure
+
+Procedure UI_RadioButton_Free(*This.UI_RadioButton_Inst)
+  Protected *This_vt.UI_RadioButton_vt = *This
+  If (*This\id)
+          UI_UnregisterGadget(*This\id)
+          UI_Gadget_Free(*This)
+  EndIf
+EndProcedure
+
 Procedure UI_ProgressBar_Init_void(*This.UI_ProgressBar_Inst)
   Protected *This_vt.UI_ProgressBar_vt = *This
         UI_Gadget_Init(*This)
@@ -4072,6 +4382,699 @@ EndProcedure
 
 Procedure UI_ComboBox_Free(*This.UI_ComboBox_Inst)
   Protected *This_vt.UI_ComboBox_vt = *This
+  If (*This\id)
+          UI_UnregisterGadget(*This\id)
+          UI_Gadget_Free(*This)
+  EndIf
+EndProcedure
+
+Procedure UI_SpinBox_Init_void(*This.UI_SpinBox_Inst)
+  Protected *This_vt.UI_SpinBox_vt = *This
+        UI_Gadget_Init(*This)
+        *This\x = 0 : *This\y = 0 : *This\width = 100 : *This\height = 25
+        *This\desiredWidth = 100 : *This\desiredHeight = 25
+        *This\isVisible = #True : *This\isEnabled = #True
+        *This\minVal = 0 : *This\maxVal = 100
+        *This\id = SpinGadget(#PB_Any, 0, 0, 100, 25, 0, 100, #PB_Spin_Numeric)
+  If (*This\id)
+          SetGadgetState(*This\id, 0)
+          SetGadgetText(*This\id, "0")
+          UI_RegisterGadget(*This\id, *This)
+  EndIf
+EndProcedure
+
+Procedure UI_SpinBox_Init_i_i(*This.UI_SpinBox_Inst, min_p.i, max_p.i)
+  Protected *This_vt.UI_SpinBox_vt = *This
+        UI_Gadget_Init(*This)
+        *This\x = 0 : *This\y = 0 : *This\width = 100 : *This\height = 25
+        *This\desiredWidth = 100 : *This\desiredHeight = 25
+        *This\isVisible = #True : *This\isEnabled = #True
+        *This\minVal = min_p : *This\maxVal = max_p
+        *This\id = SpinGadget(#PB_Any, 0, 0, 100, 25, min_p, max_p, #PB_Spin_Numeric)
+  If (*This\id)
+          SetGadgetState(*This\id, min_p)
+          SetGadgetText(*This\id, Str(min_p))
+          UI_RegisterGadget(*This\id, *This)
+  EndIf
+EndProcedure
+
+Procedure UI_SpinBox_Init_i_i_i(*This.UI_SpinBox_Inst, min_p.i, max_p.i, current_p.i)
+  Protected *This_vt.UI_SpinBox_vt = *This
+        UI_Gadget_Init(*This)
+        *This\x = 0 : *This\y = 0 : *This\width = 100 : *This\height = 25
+        *This\desiredWidth = 100 : *This\desiredHeight = 25
+        *This\isVisible = #True : *This\isEnabled = #True
+        *This\minVal = min_p : *This\maxVal = max_p
+        *This\id = SpinGadget(#PB_Any, 0, 0, 100, 25, min_p, max_p, #PB_Spin_Numeric)
+  If (*This\id)
+          SetGadgetState(*This\id, current_p)
+          SetGadgetText(*This\id, Str(current_p))
+          UI_RegisterGadget(*This\id, *This)
+  EndIf
+EndProcedure
+
+Procedure UI_SpinBox_Init_i_i_i_i_i(*This.UI_SpinBox_Inst, min_p.i, max_p.i, current_p.i, w_p.i, h_p.i)
+  Protected *This_vt.UI_SpinBox_vt = *This
+        UI_Gadget_Init(*This)
+        *This\x = 0 : *This\y = 0 : *This\width = w_p : *This\height = h_p
+        *This\desiredWidth = w_p : *This\desiredHeight = h_p
+        *This\isVisible = #True : *This\isEnabled = #True
+        *This\minVal = min_p : *This\maxVal = max_p
+        *This\id = SpinGadget(#PB_Any, 0, 0, w_p, h_p, min_p, max_p, #PB_Spin_Numeric)
+  If (*This\id)
+          SetGadgetState(*This\id, current_p)
+          SetGadgetText(*This\id, Str(current_p))
+          UI_RegisterGadget(*This\id, *This)
+  EndIf
+EndProcedure
+
+Procedure.i UI_SpinBox_GetValue(*This.UI_SpinBox_Inst)
+  Protected *This_vt.UI_SpinBox_vt = *This
+  If (*This\id And IsGadget(*This\id))
+          ProcedureReturn GetGadgetState(*This\id)
+  EndIf
+        ProcedureReturn 0
+EndProcedure
+
+Procedure UI_SpinBox_SetValue(*This.UI_SpinBox_Inst, val_p.i)
+  Protected *This_vt.UI_SpinBox_vt = *This
+  If (*This\id And IsGadget(*This\id))
+          SetGadgetState(*This\id, val_p)
+          SetGadgetText(*This\id, Str(val_p))
+  EndIf
+EndProcedure
+
+Procedure.i UI_SpinBox_GetMin(*This.UI_SpinBox_Inst)
+  Protected *This_vt.UI_SpinBox_vt = *This
+        ProcedureReturn *This\minVal
+EndProcedure
+
+Procedure.i UI_SpinBox_GetMax(*This.UI_SpinBox_Inst)
+  Protected *This_vt.UI_SpinBox_vt = *This
+        ProcedureReturn *This\maxVal
+EndProcedure
+
+Procedure UI_SpinBox_SetRange(*This.UI_SpinBox_Inst, min_p.i, max_p.i)
+  Protected *This_vt.UI_SpinBox_vt = *This
+        *This\minVal = min_p : *This\maxVal = max_p
+  If (*This\id And IsGadget(*This\id))
+          SetGadgetAttribute(*This\id, #PB_Spin_Minimum, min_p)
+          SetGadgetAttribute(*This\id, #PB_Spin_Maximum, max_p)
+  EndIf
+EndProcedure
+
+Procedure UI_SpinBox_Free(*This.UI_SpinBox_Inst)
+  Protected *This_vt.UI_SpinBox_vt = *This
+  If (*This\id)
+          UI_UnregisterGadget(*This\id)
+          UI_Gadget_Free(*This)
+  EndIf
+EndProcedure
+
+Procedure UI_Editor_Init_void(*This.UI_Editor_Inst)
+  Protected *This_vt.UI_Editor_vt = *This
+        UI_Gadget_Init(*This)
+        *This\x = 0 : *This\y = 0 : *This\width = 200 : *This\height = 120
+        *This\desiredWidth = 200 : *This\desiredHeight = 120
+        *This\isVisible = #True : *This\isEnabled = #True
+        *This\id = EditorGadget(#PB_Any, 0, 0, 200, 120, 0)
+  If (*This\id)
+          UI_RegisterGadget(*This\id, *This)
+  EndIf
+EndProcedure
+
+Procedure UI_Editor_Init_i_i(*This.UI_Editor_Inst, w_p.i, h_p.i)
+  Protected *This_vt.UI_Editor_vt = *This
+        UI_Gadget_Init(*This)
+        *This\x = 0 : *This\y = 0 : *This\width = w_p : *This\height = h_p
+        *This\desiredWidth = w_p : *This\desiredHeight = h_p
+        *This\isVisible = #True : *This\isEnabled = #True
+        *This\id = EditorGadget(#PB_Any, 0, 0, w_p, h_p, 0)
+  If (*This\id)
+          UI_RegisterGadget(*This\id, *This)
+  EndIf
+EndProcedure
+
+Procedure UI_Editor_Init_s_i_i(*This.UI_Editor_Inst, text_p.s, w_p.i, h_p.i)
+  Protected *This_vt.UI_Editor_vt = *This
+        UI_Gadget_Init(*This)
+        *This\x = 0 : *This\y = 0 : *This\width = w_p : *This\height = h_p
+        *This\desiredWidth = w_p : *This\desiredHeight = h_p
+        *This\isVisible = #True : *This\isEnabled = #True
+        *This\id = EditorGadget(#PB_Any, 0, 0, w_p, h_p, 0)
+  If (*This\id)
+          SetGadgetText(*This\id, text_p)
+          UI_RegisterGadget(*This\id, *This)
+  EndIf
+EndProcedure
+
+Procedure UI_Editor_Init_i_i_i_i_s_i(*This.UI_Editor_Inst, x_p.i, y_p.i, w_p.i, h_p.i, text_p.s, flags_p.i)
+  Protected *This_vt.UI_Editor_vt = *This
+        UI_Gadget_Init(*This)
+        *This\x = x_p : *This\y = y_p : *This\width = w_p : *This\height = h_p
+        *This\desiredWidth = w_p : *This\desiredHeight = h_p
+        *This\isVisible = #True : *This\isEnabled = #True
+        *This\id = EditorGadget(#PB_Any, x_p, y_p, w_p, h_p, flags_p)
+  If (*This\id)
+          If text_p <> "" : SetGadgetText(*This\id, text_p) : EndIf
+          UI_RegisterGadget(*This\id, *This)
+  EndIf
+EndProcedure
+
+Procedure UI_Editor_AddLine(*This.UI_Editor_Inst, lineText.s)
+  Protected *This_vt.UI_Editor_vt = *This
+  If (*This\id And IsGadget(*This\id))
+          AddGadgetItem(*This\id, -1, lineText)
+  EndIf
+EndProcedure
+
+Procedure UI_Editor_Clear(*This.UI_Editor_Inst)
+  Protected *This_vt.UI_Editor_vt = *This
+  If (*This\id And IsGadget(*This\id))
+          ClearGadgetItems(*This\id)
+  EndIf
+EndProcedure
+
+Procedure UI_Editor_SetReadOnly(*This.UI_Editor_Inst, ro.b)
+  Protected *This_vt.UI_Editor_vt = *This
+  If (*This\id And IsGadget(*This\id))
+          SetGadgetAttribute(*This\id, #PB_Editor_ReadOnly, ro)
+  EndIf
+EndProcedure
+
+Procedure.b UI_Editor_GetReadOnly(*This.UI_Editor_Inst)
+  Protected *This_vt.UI_Editor_vt = *This
+  If (*This\id And IsGadget(*This\id))
+          ProcedureReturn GetGadgetAttribute(*This\id, #PB_Editor_ReadOnly)
+  EndIf
+        ProcedureReturn #False
+EndProcedure
+
+Procedure UI_Editor_SetWordWrap(*This.UI_Editor_Inst, wrap.b)
+  Protected *This_vt.UI_Editor_vt = *This
+  If (*This\id And IsGadget(*This\id))
+          SetGadgetAttribute(*This\id, #PB_Editor_WordWrap, wrap)
+  EndIf
+EndProcedure
+
+Procedure.b UI_Editor_GetWordWrap(*This.UI_Editor_Inst)
+  Protected *This_vt.UI_Editor_vt = *This
+  If (*This\id And IsGadget(*This\id))
+          ProcedureReturn GetGadgetAttribute(*This\id, #PB_Editor_WordWrap)
+  EndIf
+        ProcedureReturn #False
+EndProcedure
+
+Procedure UI_Editor_Free(*This.UI_Editor_Inst)
+  Protected *This_vt.UI_Editor_vt = *This
+  If (*This\id)
+          UI_UnregisterGadget(*This\id)
+          UI_Gadget_Free(*This)
+  EndIf
+EndProcedure
+
+Procedure UI_ListView_Init_void(*This.UI_ListView_Inst)
+  Protected *This_vt.UI_ListView_vt = *This
+        UI_Gadget_Init(*This)
+        *This\x = 0 : *This\y = 0 : *This\width = 180 : *This\height = 140
+        *This\desiredWidth = 180 : *This\desiredHeight = 140
+        *This\isVisible = #True : *This\isEnabled = #True
+        *This\id = ListViewGadget(#PB_Any, 0, 0, 180, 140, 0)
+  If (*This\id)
+          UI_RegisterGadget(*This\id, *This)
+  EndIf
+EndProcedure
+
+Procedure UI_ListView_Init_i_i(*This.UI_ListView_Inst, w_p.i, h_p.i)
+  Protected *This_vt.UI_ListView_vt = *This
+        UI_Gadget_Init(*This)
+        *This\x = 0 : *This\y = 0 : *This\width = w_p : *This\height = h_p
+        *This\desiredWidth = w_p : *This\desiredHeight = h_p
+        *This\isVisible = #True : *This\isEnabled = #True
+        *This\id = ListViewGadget(#PB_Any, 0, 0, w_p, h_p, 0)
+  If (*This\id)
+          UI_RegisterGadget(*This\id, *This)
+  EndIf
+EndProcedure
+
+Procedure UI_ListView_Init_i_i_i_i_i(*This.UI_ListView_Inst, x_p.i, y_p.i, w_p.i, h_p.i, flags_p.i)
+  Protected *This_vt.UI_ListView_vt = *This
+        UI_Gadget_Init(*This)
+        *This\x = x_p : *This\y = y_p : *This\width = w_p : *This\height = h_p
+        *This\desiredWidth = w_p : *This\desiredHeight = h_p
+        *This\isVisible = #True : *This\isEnabled = #True
+        *This\id = ListViewGadget(#PB_Any, x_p, y_p, w_p, h_p, flags_p)
+  If (*This\id)
+          UI_RegisterGadget(*This\id, *This)
+  EndIf
+EndProcedure
+
+Procedure UI_ListView_AddItem(*This.UI_ListView_Inst, text_p.s)
+  Protected *This_vt.UI_ListView_vt = *This
+  If (*This\id And IsGadget(*This\id))
+          AddGadgetItem(*This\id, -1, text_p)
+  EndIf
+EndProcedure
+
+Procedure UI_ListView_InsertItem(*This.UI_ListView_Inst, pos_p.i, text_p.s)
+  Protected *This_vt.UI_ListView_vt = *This
+  If (*This\id And IsGadget(*This\id))
+          AddGadgetItem(*This\id, pos_p, text_p)
+  EndIf
+EndProcedure
+
+Procedure UI_ListView_RemoveItem(*This.UI_ListView_Inst, pos_p.i)
+  Protected *This_vt.UI_ListView_vt = *This
+  If (*This\id And IsGadget(*This\id))
+          RemoveGadgetItem(*This\id, pos_p)
+  EndIf
+EndProcedure
+
+Procedure UI_ListView_ClearItems(*This.UI_ListView_Inst)
+  Protected *This_vt.UI_ListView_vt = *This
+  If (*This\id And IsGadget(*This\id))
+          ClearGadgetItems(*This\id)
+  EndIf
+EndProcedure
+
+Procedure.s UI_ListView_GetItemText(*This.UI_ListView_Inst, pos_p.i)
+  Protected *This_vt.UI_ListView_vt = *This
+  If (*This\id And IsGadget(*This\id))
+          ProcedureReturn GetGadgetItemText(*This\id, pos_p)
+  EndIf
+        ProcedureReturn ""
+EndProcedure
+
+Procedure UI_ListView_SetItemText(*This.UI_ListView_Inst, pos_p.i, text_p.s)
+  Protected *This_vt.UI_ListView_vt = *This
+  If (*This\id And IsGadget(*This\id))
+          SetGadgetItemText(*This\id, pos_p, text_p)
+  EndIf
+EndProcedure
+
+Procedure.i UI_ListView_GetItemCount(*This.UI_ListView_Inst)
+  Protected *This_vt.UI_ListView_vt = *This
+  If (*This\id And IsGadget(*This\id))
+          ProcedureReturn CountGadgetItems(*This\id)
+  EndIf
+        ProcedureReturn 0
+EndProcedure
+
+Procedure.i UI_ListView_GetSelectedIndex(*This.UI_ListView_Inst)
+  Protected *This_vt.UI_ListView_vt = *This
+  If (*This\id And IsGadget(*This\id))
+          ProcedureReturn GetGadgetState(*This\id)
+  EndIf
+        ProcedureReturn -1
+EndProcedure
+
+Procedure UI_ListView_SetSelectedIndex(*This.UI_ListView_Inst, idx_p.i)
+  Protected *This_vt.UI_ListView_vt = *This
+  If (*This\id And IsGadget(*This\id))
+          SetGadgetState(*This\id, idx_p)
+  EndIf
+EndProcedure
+
+Procedure.s UI_ListView_GetSelectedText(*This.UI_ListView_Inst)
+  Protected *This_vt.UI_ListView_vt = *This
+        Protected idx.i = *This_vt\GetSelectedIndex()
+        If idx >= 0
+          ProcedureReturn *This_vt\GetItemText(idx)
+        EndIf
+        ProcedureReturn ""
+EndProcedure
+
+Procedure UI_ListView_Free(*This.UI_ListView_Inst)
+  Protected *This_vt.UI_ListView_vt = *This
+  If (*This\id)
+          UI_UnregisterGadget(*This\id)
+          UI_Gadget_Free(*This)
+  EndIf
+EndProcedure
+
+Procedure UI_TreeView_Init_void(*This.UI_TreeView_Inst)
+  Protected *This_vt.UI_TreeView_vt = *This
+        UI_Gadget_Init(*This)
+        *This\x = 0 : *This\y = 0 : *This\width = 200 : *This\height = 180
+        *This\desiredWidth = 200 : *This\desiredHeight = 180
+        *This\isVisible = #True : *This\isEnabled = #True
+        *This\id = TreeGadget(#PB_Any, 0, 0, 200, 180, 0)
+  If (*This\id)
+          UI_RegisterGadget(*This\id, *This)
+  EndIf
+EndProcedure
+
+Procedure UI_TreeView_Init_i_i(*This.UI_TreeView_Inst, w_p.i, h_p.i)
+  Protected *This_vt.UI_TreeView_vt = *This
+        UI_Gadget_Init(*This)
+        *This\x = 0 : *This\y = 0 : *This\width = w_p : *This\height = h_p
+        *This\desiredWidth = w_p : *This\desiredHeight = h_p
+        *This\isVisible = #True : *This\isEnabled = #True
+        *This\id = TreeGadget(#PB_Any, 0, 0, w_p, h_p, 0)
+  If (*This\id)
+          UI_RegisterGadget(*This\id, *This)
+  EndIf
+EndProcedure
+
+Procedure UI_TreeView_Init_i_i_i_i_i(*This.UI_TreeView_Inst, x_p.i, y_p.i, w_p.i, h_p.i, flags_p.i)
+  Protected *This_vt.UI_TreeView_vt = *This
+        UI_Gadget_Init(*This)
+        *This\x = x_p : *This\y = y_p : *This\width = w_p : *This\height = h_p
+        *This\desiredWidth = w_p : *This\desiredHeight = h_p
+        *This\isVisible = #True : *This\isEnabled = #True
+        *This\id = TreeGadget(#PB_Any, x_p, y_p, w_p, h_p, flags_p)
+  If (*This\id)
+          UI_RegisterGadget(*This\id, *This)
+  EndIf
+EndProcedure
+
+Procedure UI_TreeView_AddItem(*This.UI_TreeView_Inst, text_p.s)
+  Protected *This_vt.UI_TreeView_vt = *This
+  If (*This\id And IsGadget(*This\id))
+          AddGadgetItem(*This\id, -1, text_p, 0, 0)
+  EndIf
+EndProcedure
+
+Procedure UI_TreeView_AddChildItem(*This.UI_TreeView_Inst, text_p.s, subLevel_p.i)
+  Protected *This_vt.UI_TreeView_vt = *This
+  If (*This\id And IsGadget(*This\id))
+          AddGadgetItem(*This\id, -1, text_p, 0, subLevel_p)
+  EndIf
+EndProcedure
+
+Procedure UI_TreeView_InsertItem(*This.UI_TreeView_Inst, pos_p.i, text_p.s, subLevel_p.i)
+  Protected *This_vt.UI_TreeView_vt = *This
+  If (*This\id And IsGadget(*This\id))
+          AddGadgetItem(*This\id, pos_p, text_p, 0, subLevel_p)
+  EndIf
+EndProcedure
+
+Procedure UI_TreeView_RemoveItem(*This.UI_TreeView_Inst, pos_p.i)
+  Protected *This_vt.UI_TreeView_vt = *This
+  If (*This\id And IsGadget(*This\id))
+          RemoveGadgetItem(*This\id, pos_p)
+  EndIf
+EndProcedure
+
+Procedure UI_TreeView_ClearItems(*This.UI_TreeView_Inst)
+  Protected *This_vt.UI_TreeView_vt = *This
+  If (*This\id And IsGadget(*This\id))
+          ClearGadgetItems(*This\id)
+  EndIf
+EndProcedure
+
+Procedure.s UI_TreeView_GetItemText(*This.UI_TreeView_Inst, pos_p.i)
+  Protected *This_vt.UI_TreeView_vt = *This
+  If (*This\id And IsGadget(*This\id))
+          ProcedureReturn GetGadgetItemText(*This\id, pos_p)
+  EndIf
+        ProcedureReturn ""
+EndProcedure
+
+Procedure UI_TreeView_SetItemText(*This.UI_TreeView_Inst, pos_p.i, text_p.s)
+  Protected *This_vt.UI_TreeView_vt = *This
+  If (*This\id And IsGadget(*This\id))
+          SetGadgetItemText(*This\id, pos_p, text_p)
+  EndIf
+EndProcedure
+
+Procedure.i UI_TreeView_GetItemCount(*This.UI_TreeView_Inst)
+  Protected *This_vt.UI_TreeView_vt = *This
+  If (*This\id And IsGadget(*This\id))
+          ProcedureReturn CountGadgetItems(*This\id)
+  EndIf
+        ProcedureReturn 0
+EndProcedure
+
+Procedure.i UI_TreeView_GetSelectedIndex(*This.UI_TreeView_Inst)
+  Protected *This_vt.UI_TreeView_vt = *This
+  If (*This\id And IsGadget(*This\id))
+          ProcedureReturn GetGadgetState(*This\id)
+  EndIf
+        ProcedureReturn -1
+EndProcedure
+
+Procedure UI_TreeView_SetSelectedIndex(*This.UI_TreeView_Inst, idx_p.i)
+  Protected *This_vt.UI_TreeView_vt = *This
+  If (*This\id And IsGadget(*This\id))
+          SetGadgetState(*This\id, idx_p)
+  EndIf
+EndProcedure
+
+Procedure.i UI_TreeView_GetItemSubLevel(*This.UI_TreeView_Inst, pos_p.i)
+  Protected *This_vt.UI_TreeView_vt = *This
+  If (*This\id And IsGadget(*This\id))
+          ProcedureReturn GetGadgetAttribute(*This\id, #PB_Tree_SubLevel)
+  EndIf
+        ProcedureReturn 0
+EndProcedure
+
+Procedure UI_TreeView_Expand(*This.UI_TreeView_Inst, pos_p.i)
+  Protected *This_vt.UI_TreeView_vt = *This
+  If (*This\id And IsGadget(*This\id))
+          SetGadgetItemState(*This\id, pos_p, #PB_Tree_Expanded)
+  EndIf
+EndProcedure
+
+Procedure UI_TreeView_Collapse(*This.UI_TreeView_Inst, pos_p.i)
+  Protected *This_vt.UI_TreeView_vt = *This
+  If (*This\id And IsGadget(*This\id))
+          SetGadgetItemState(*This\id, pos_p, #PB_Tree_Collapsed)
+  EndIf
+EndProcedure
+
+Procedure UI_TreeView_Free(*This.UI_TreeView_Inst)
+  Protected *This_vt.UI_TreeView_vt = *This
+  If (*This\id)
+          UI_UnregisterGadget(*This\id)
+          UI_Gadget_Free(*This)
+  EndIf
+EndProcedure
+
+Procedure UI_DatePicker_Init_void(*This.UI_DatePicker_Inst)
+  Protected *This_vt.UI_DatePicker_vt = *This
+        UI_Gadget_Init(*This)
+        *This\x = 0 : *This\y = 0 : *This\width = 140 : *This\height = 25
+        *This\desiredWidth = 140 : *This\desiredHeight = 25
+        *This\isVisible = #True : *This\isEnabled = #True
+        *This\mask = "%dd/%mm/%yyyy"
+        *This\id = DateGadget(#PB_Any, 0, 0, 140, 25, *This\mask, Date(), 0)
+  If (*This\id)
+          UI_RegisterGadget(*This\id, *This)
+  EndIf
+EndProcedure
+
+Procedure UI_DatePicker_Init_s(*This.UI_DatePicker_Inst, mask_p.s)
+  Protected *This_vt.UI_DatePicker_vt = *This
+        UI_Gadget_Init(*This)
+        *This\x = 0 : *This\y = 0 : *This\width = 140 : *This\height = 25
+        *This\desiredWidth = 140 : *This\desiredHeight = 25
+        *This\isVisible = #True : *This\isEnabled = #True
+        *This\mask = mask_p
+        *This\id = DateGadget(#PB_Any, 0, 0, 140, 25, mask_p, Date(), 0)
+  If (*This\id)
+          UI_RegisterGadget(*This\id, *This)
+  EndIf
+EndProcedure
+
+Procedure UI_DatePicker_Init_i_s(*This.UI_DatePicker_Inst, dateVal_p.i, mask_p.s)
+  Protected *This_vt.UI_DatePicker_vt = *This
+        UI_Gadget_Init(*This)
+        *This\x = 0 : *This\y = 0 : *This\width = 140 : *This\height = 25
+        *This\desiredWidth = 140 : *This\desiredHeight = 25
+        *This\isVisible = #True : *This\isEnabled = #True
+        *This\mask = mask_p
+        *This\id = DateGadget(#PB_Any, 0, 0, 140, 25, mask_p, dateVal_p, 0)
+  If (*This\id)
+          UI_RegisterGadget(*This\id, *This)
+  EndIf
+EndProcedure
+
+Procedure UI_DatePicker_Init_i_s_i_i(*This.UI_DatePicker_Inst, dateVal_p.i, mask_p.s, w_p.i, h_p.i)
+  Protected *This_vt.UI_DatePicker_vt = *This
+        UI_Gadget_Init(*This)
+        *This\x = 0 : *This\y = 0 : *This\width = w_p : *This\height = h_p
+        *This\desiredWidth = w_p : *This\desiredHeight = h_p
+        *This\isVisible = #True : *This\isEnabled = #True
+        *This\mask = mask_p
+        *This\id = DateGadget(#PB_Any, 0, 0, w_p, h_p, mask_p, dateVal_p, 0)
+  If (*This\id)
+          UI_RegisterGadget(*This\id, *This)
+  EndIf
+EndProcedure
+
+Procedure.i UI_DatePicker_GetDate(*This.UI_DatePicker_Inst)
+  Protected *This_vt.UI_DatePicker_vt = *This
+  If (*This\id And IsGadget(*This\id))
+          ProcedureReturn GetGadgetState(*This\id)
+  EndIf
+        ProcedureReturn 0
+EndProcedure
+
+Procedure UI_DatePicker_SetDate(*This.UI_DatePicker_Inst, dateVal_p.i)
+  Protected *This_vt.UI_DatePicker_vt = *This
+  If (*This\id And IsGadget(*This\id))
+          SetGadgetState(*This\id, dateVal_p)
+  EndIf
+EndProcedure
+
+Procedure.s UI_DatePicker_GetFormattedDate(*This.UI_DatePicker_Inst, format_p.s)
+  Protected *This_vt.UI_DatePicker_vt = *This
+        Protected d.i = *This_vt\GetDate()
+        If d > 0
+          ProcedureReturn FormatDate(format_p, d)
+        EndIf
+        ProcedureReturn ""
+EndProcedure
+
+Procedure UI_DatePicker_Free(*This.UI_DatePicker_Inst)
+  Protected *This_vt.UI_DatePicker_vt = *This
+  If (*This\id)
+          UI_UnregisterGadget(*This\id)
+          UI_Gadget_Free(*This)
+  EndIf
+EndProcedure
+
+Procedure UI_GroupBox_Init_s(*This.UI_GroupBox_Inst, caption_p.s)
+  Protected *This_vt.UI_GroupBox_vt = *This
+        UI_Gadget_Init(*This)
+        *This\x = 0 : *This\y = 0 : *This\width = 200 : *This\height = 150
+        *This\desiredWidth = 200 : *This\desiredHeight = 150
+        *This\isVisible = #True : *This\isEnabled = #True
+        *This\id = FrameGadget(#PB_Any, 0, 0, 200, 150, caption_p)
+  If (*This\id)
+          UI_RegisterGadget(*This\id, *This)
+  EndIf
+EndProcedure
+
+Procedure UI_GroupBox_Init_s_i_i(*This.UI_GroupBox_Inst, caption_p.s, w_p.i, h_p.i)
+  Protected *This_vt.UI_GroupBox_vt = *This
+        UI_Gadget_Init(*This)
+        *This\x = 0 : *This\y = 0 : *This\width = w_p : *This\height = h_p
+        *This\desiredWidth = w_p : *This\desiredHeight = h_p
+        *This\isVisible = #True : *This\isEnabled = #True
+        *This\id = FrameGadget(#PB_Any, 0, 0, w_p, h_p, caption_p)
+  If (*This\id)
+          UI_RegisterGadget(*This\id, *This)
+  EndIf
+EndProcedure
+
+Procedure UI_GroupBox_Init_i_i_i_i_s_i(*This.UI_GroupBox_Inst, x_p.i, y_p.i, w_p.i, h_p.i, caption_p.s, flags_p.i)
+  Protected *This_vt.UI_GroupBox_vt = *This
+        UI_Gadget_Init(*This)
+        *This\x = x_p : *This\y = y_p : *This\width = w_p : *This\height = h_p
+        *This\desiredWidth = w_p : *This\desiredHeight = h_p
+        *This\isVisible = #True : *This\isEnabled = #True
+        *This\id = FrameGadget(#PB_Any, x_p, y_p, w_p, h_p, caption_p, flags_p)
+  If (*This\id)
+          UI_RegisterGadget(*This\id, *This)
+  EndIf
+EndProcedure
+
+Procedure UI_GroupBox_Free(*This.UI_GroupBox_Inst)
+  Protected *This_vt.UI_GroupBox_vt = *This
+  If (*This\id)
+          UI_UnregisterGadget(*This\id)
+          UI_Gadget_Free(*This)
+  EndIf
+EndProcedure
+
+Procedure UI_TabControl_Init_void(*This.UI_TabControl_Inst)
+  Protected *This_vt.UI_TabControl_vt = *This
+        UI_Gadget_Init(*This)
+        *This\x = 0 : *This\y = 0 : *This\width = 300 : *This\height = 200
+        *This\desiredWidth = 300 : *This\desiredHeight = 200
+        *This\isVisible = #True : *This\isEnabled = #True
+        *This\id = PanelGadget(#PB_Any, 0, 0, 300, 200)
+  If (*This\id)
+          CloseGadgetList()
+          UI_RegisterGadget(*This\id, *This)
+  EndIf
+EndProcedure
+
+Procedure UI_TabControl_Init_i_i(*This.UI_TabControl_Inst, w_p.i, h_p.i)
+  Protected *This_vt.UI_TabControl_vt = *This
+        UI_Gadget_Init(*This)
+        *This\x = 0 : *This\y = 0 : *This\width = w_p : *This\height = h_p
+        *This\desiredWidth = w_p : *This\desiredHeight = h_p
+        *This\isVisible = #True : *This\isEnabled = #True
+        *This\id = PanelGadget(#PB_Any, 0, 0, w_p, h_p)
+  If (*This\id)
+          CloseGadgetList()
+          UI_RegisterGadget(*This\id, *This)
+  EndIf
+EndProcedure
+
+Procedure UI_TabControl_AddTab(*This.UI_TabControl_Inst, title_p.s)
+  Protected *This_vt.UI_TabControl_vt = *This
+  If (*This\id And IsGadget(*This\id))
+          OpenGadgetList(*This\id)
+          AddGadgetItem(*This\id, -1, title_p, 0)
+          CloseGadgetList()
+  EndIf
+EndProcedure
+
+Procedure UI_TabControl_AddTabWithIcon(*This.UI_TabControl_Inst, title_p.s, imageID_p.i)
+  Protected *This_vt.UI_TabControl_vt = *This
+  If (*This\id And IsGadget(*This\id))
+          OpenGadgetList(*This\id)
+          AddGadgetItem(*This\id, -1, title_p, imageID_p)
+          CloseGadgetList()
+  EndIf
+EndProcedure
+
+Procedure UI_TabControl_OpenTab(*This.UI_TabControl_Inst, tabIndex_p.i)
+  Protected *This_vt.UI_TabControl_vt = *This
+  If (*This\id And IsGadget(*This\id))
+          OpenGadgetList(*This\id, tabIndex_p)
+  EndIf
+EndProcedure
+
+Procedure UI_TabControl_CloseTab(*This.UI_TabControl_Inst)
+  Protected *This_vt.UI_TabControl_vt = *This
+        CloseGadgetList()
+EndProcedure
+
+Procedure.i UI_TabControl_GetCurrentTab(*This.UI_TabControl_Inst)
+  Protected *This_vt.UI_TabControl_vt = *This
+  If (*This\id And IsGadget(*This\id))
+          ProcedureReturn GetGadgetState(*This\id)
+  EndIf
+        ProcedureReturn -1
+EndProcedure
+
+Procedure UI_TabControl_SetCurrentTab(*This.UI_TabControl_Inst, tabIndex_p.i)
+  Protected *This_vt.UI_TabControl_vt = *This
+  If (*This\id And IsGadget(*This\id))
+          SetGadgetState(*This\id, tabIndex_p)
+  EndIf
+EndProcedure
+
+Procedure.i UI_TabControl_GetTabCount(*This.UI_TabControl_Inst)
+  Protected *This_vt.UI_TabControl_vt = *This
+  If (*This\id And IsGadget(*This\id))
+          ProcedureReturn CountGadgetItems(*This\id)
+  EndIf
+        ProcedureReturn 0
+EndProcedure
+
+Procedure.s UI_TabControl_GetTabText(*This.UI_TabControl_Inst, tabIndex_p.i)
+  Protected *This_vt.UI_TabControl_vt = *This
+  If (*This\id And IsGadget(*This\id))
+          ProcedureReturn GetGadgetItemText(*This\id, tabIndex_p)
+  EndIf
+        ProcedureReturn ""
+EndProcedure
+
+Procedure UI_TabControl_SetTabText(*This.UI_TabControl_Inst, tabIndex_p.i, text_p.s)
+  Protected *This_vt.UI_TabControl_vt = *This
+  If (*This\id And IsGadget(*This\id))
+          SetGadgetItemText(*This\id, tabIndex_p, text_p)
+  EndIf
+EndProcedure
+
+Procedure UI_TabControl_Free(*This.UI_TabControl_Inst)
+  Protected *This_vt.UI_TabControl_vt = *This
   If (*This\id)
           UI_UnregisterGadget(*This\id)
           UI_Gadget_Free(*This)
@@ -4849,6 +5852,90 @@ Procedure.i UI_XMLLoader_ParseNode(*This.UI_XMLLoader_Inst, node.i, *targetWindo
             Protected *ts.UI_ToggleSwitch_vt = New_UI_ToggleSwitch_b(tsChk)
             *This_vt\ApplyCommonAttributes(*ts, node, *targetWindow)
             *createdComp = *ts
+  
+          Case "EDITOR", "TEXTAREA"
+            Protected edText.s = GetXMLAttribute(node, "Text")
+            If edText = "" : edText = GetXMLNodeText(node) : EndIf
+            Protected *ed.UI_Editor_vt = New_UI_Editor_void()
+            If edText <> "" : *ed\SetText(edText) : EndIf
+            *This_vt\ApplyCommonAttributes(*ed, node, *targetWindow)
+            *createdComp = *ed
+  
+          Case "RADIOBUTTON", "OPTION"
+            Protected rbText.s = GetXMLAttribute(node, "Text")
+            If rbText = "" : rbText = GetXMLNodeText(node) : EndIf
+            Protected rbChkStr.s = UCase(Trim(GetXMLAttribute(node, "Checked")))
+            Protected rbChk.b = #False
+            If rbChkStr = "TRUE" Or rbChkStr = "1" : rbChk = #True : EndIf
+            Protected *rb.UI_RadioButton_vt = New_UI_RadioButton_s_b(rbText, rbChk)
+            Protected rbGrp.s = GetXMLAttribute(node, "Group")
+            If rbGrp <> "" : *rb\SetGroup(Val(rbGrp)) : EndIf
+            *This_vt\ApplyCommonAttributes(*rb, node, *targetWindow)
+            *createdComp = *rb
+  
+          Case "LISTVIEW"
+            Protected *lv.UI_ListView_vt = New_UI_ListView_void()
+            Protected lvItems.s = GetXMLAttribute(node, "Items")
+            If lvItems <> ""
+              Protected lviCount.i = CountString(lvItems, ",") + 1
+              Protected lvi.i
+              For lvi = 1 To lviCount
+                *lv\AddItem(Trim(StringField(lvItems, lvi, ",")))
+              Next
+            EndIf
+            *This_vt\ApplyCommonAttributes(*lv, node, *targetWindow)
+            *createdComp = *lv
+            Protected *lvItemNode = ChildXMLNode(node)
+            While *lvItemNode
+              If XMLNodeType(*lvItemNode) = #PB_XML_Normal And UCase(GetXMLNodeName(*lvItemNode)) = "ITEM"
+                Protected lvItemText.s = GetXMLAttribute(*lvItemNode, "Text")
+                If lvItemText = "" : lvItemText = GetXMLNodeText(*lvItemNode) : EndIf
+                *lv\AddItem(lvItemText)
+              EndIf
+              *lvItemNode = NextXMLNode(*lvItemNode)
+            Wend
+  
+          Case "SPINBOX", "SPIN"
+            Protected spMin.i = Val(GetXMLAttribute(node, "Min"))
+            Protected spMax.i = Val(GetXMLAttribute(node, "Max"))
+            If spMax <= spMin : spMax = 100 : EndIf
+            Protected spVal.i = Val(GetXMLAttribute(node, "Value"))
+            Protected *sp.UI_SpinBox_vt = New_UI_SpinBox_i_i_i(spMin, spMax, spVal)
+            *This_vt\ApplyCommonAttributes(*sp, node, *targetWindow)
+            *createdComp = *sp
+  
+          Case "GROUPBOX", "FRAME"
+            Protected gbText.s = GetXMLAttribute(node, "Text")
+            If gbText = "" : gbText = GetXMLAttribute(node, "Caption") : EndIf
+            Protected *gb.UI_GroupBox_vt = New_UI_GroupBox_s(gbText)
+            *This_vt\ApplyCommonAttributes(*gb, node, *targetWindow)
+            *createdComp = *gb
+  
+          Case "TREEVIEW", "TREE"
+            Protected *tv.UI_TreeView_vt = New_UI_TreeView_void()
+            *This_vt\ApplyCommonAttributes(*tv, node, *targetWindow)
+            *createdComp = *tv
+  
+          Case "DATEPICKER", "DATE"
+            Protected dpMask.s = GetXMLAttribute(node, "Mask")
+            If dpMask = "" : dpMask = "%dd/%mm/%yyyy" : EndIf
+            Protected *dp.UI_DatePicker_vt = New_UI_DatePicker_s(dpMask)
+            *This_vt\ApplyCommonAttributes(*dp, node, *targetWindow)
+            *createdComp = *dp
+  
+          Case "TABCONTROL", "PANEL"
+            Protected *tc.UI_TabControl_vt = New_UI_TabControl_void()
+            *This_vt\ApplyCommonAttributes(*tc, node, *targetWindow)
+            *createdComp = *tc
+            Protected *tabNode = ChildXMLNode(node)
+            While *tabNode
+              If XMLNodeType(*tabNode) = #PB_XML_Normal And (UCase(GetXMLNodeName(*tabNode)) = "TAB" Or UCase(GetXMLNodeName(*tabNode)) = "ITEM")
+                Protected tabTitle.s = GetXMLAttribute(*tabNode, "Title")
+                If tabTitle = "" : tabTitle = GetXMLAttribute(*tabNode, "Text") : EndIf
+                *tc\AddTab(tabTitle)
+              EndIf
+              *tabNode = NextXMLNode(*tabNode)
+            Wend
   
         EndSelect
   
@@ -5713,6 +6800,76 @@ DataSection
     Data.i @UI_Gadget_OnCustomEvent()
     Data.i @UI_CheckBox_IsChecked()
     Data.i @UI_CheckBox_SetChecked()
+  UI_RadioButton_VTable_Data:
+    Data.i @UI_Component_SetDataContext()
+    Data.i @UI_Component_GetDataContext()
+    Data.i @UI_Component_GetID()
+    Data.i @UI_Component_GetHandle()
+    Data.i @UI_Component_GetTag()
+    Data.i @UI_Component_SetTag()
+    Data.i @UI_Component_GetX()
+    Data.i @UI_Component_SetX()
+    Data.i @UI_Component_GetY()
+    Data.i @UI_Component_SetY()
+    Data.i @UI_Component_GetWidth()
+    Data.i @UI_Component_SetWidth()
+    Data.i @UI_Component_GetHeight()
+    Data.i @UI_Component_SetHeight()
+    Data.i @UI_Component_SetAutoWidth()
+    Data.i @UI_Component_SetAutoHeight()
+    Data.i @UI_Component_HasExplicitWidth()
+    Data.i @UI_Component_HasExplicitHeight()
+    Data.i @UI_Component_SetLocation()
+    Data.i @UI_Component_SetSize()
+    Data.i @UI_Gadget_SetPosition()
+    Data.i @UI_Component_IsVisible()
+    Data.i @UI_Component_GetVisible()
+    Data.i @UI_Gadget_SetVisible()
+    Data.i @UI_Component_IsEnabled()
+    Data.i @UI_Component_GetEnabled()
+    Data.i @UI_Gadget_SetEnabled()
+    Data.i @UI_Component_GetUserData()
+    Data.i @UI_Component_SetUserData()
+    Data.i @UI_Component_SetMargin()
+    Data.i @UI_Component_SetMarginAll()
+    Data.i @UI_Component_GetMarginLeft()
+    Data.i @UI_Component_GetMarginTop()
+    Data.i @UI_Component_GetMarginRight()
+    Data.i @UI_Component_GetMarginBottom()
+    Data.i @UI_Component_SetHorizontalAlignment()
+    Data.i @UI_Component_GetHorizontalAlignment()
+    Data.i @UI_Component_SetVerticalAlignment()
+    Data.i @UI_Component_GetVerticalAlignment()
+    Data.i @UI_Component_SetMinWidth()
+    Data.i @UI_Component_GetMinWidth()
+    Data.i @UI_Component_SetMaxWidth()
+    Data.i @UI_Component_GetMaxWidth()
+    Data.i @UI_Component_SetMinHeight()
+    Data.i @UI_Component_GetMinHeight()
+    Data.i @UI_Component_SetMaxHeight()
+    Data.i @UI_Component_GetMaxHeight()
+    Data.i @UI_Component_GetDesiredWidth()
+    Data.i @UI_Component_GetDesiredHeight()
+    Data.i @UI_Component_Arrange()
+    Data.i @UI_Gadget_GetText()
+    Data.i @UI_Gadget_SetText()
+    Data.i @UI_Gadget_SetToolTip()
+    Data.i @UI_Gadget_GetToolTip()
+    Data.i @UI_Gadget_SetColor()
+    Data.i @UI_Gadget_GetColor()
+    Data.i @UI_Gadget_SetFont()
+    Data.i @UI_Gadget_SetFocus()
+    Data.i @UI_RadioButton_Free()
+    Data.i @UI_Gadget_OnClick()
+    Data.i @UI_Gadget_OnChange()
+    Data.i @UI_Gadget_OnFocus()
+    Data.i @UI_Gadget_OnLostFocus()
+    Data.i @UI_Gadget_OnRightClick()
+    Data.i @UI_Gadget_OnCustomEvent()
+    Data.i @UI_RadioButton_IsChecked()
+    Data.i @UI_RadioButton_SetChecked()
+    Data.i @UI_RadioButton_GetGroup()
+    Data.i @UI_RadioButton_SetGroup()
   UI_ProgressBar_VTable_Data:
     Data.i @UI_Component_SetDataContext()
     Data.i @UI_Component_GetDataContext()
@@ -5920,6 +7077,514 @@ DataSection
     Data.i @UI_ComboBox_SetSelectedIndex()
     Data.i @UI_ComboBox_GetSelectedItem()
     Data.i @UI_ComboBox_Clear()
+  UI_SpinBox_VTable_Data:
+    Data.i @UI_Component_SetDataContext()
+    Data.i @UI_Component_GetDataContext()
+    Data.i @UI_Component_GetID()
+    Data.i @UI_Component_GetHandle()
+    Data.i @UI_Component_GetTag()
+    Data.i @UI_Component_SetTag()
+    Data.i @UI_Component_GetX()
+    Data.i @UI_Component_SetX()
+    Data.i @UI_Component_GetY()
+    Data.i @UI_Component_SetY()
+    Data.i @UI_Component_GetWidth()
+    Data.i @UI_Component_SetWidth()
+    Data.i @UI_Component_GetHeight()
+    Data.i @UI_Component_SetHeight()
+    Data.i @UI_Component_SetAutoWidth()
+    Data.i @UI_Component_SetAutoHeight()
+    Data.i @UI_Component_HasExplicitWidth()
+    Data.i @UI_Component_HasExplicitHeight()
+    Data.i @UI_Component_SetLocation()
+    Data.i @UI_Component_SetSize()
+    Data.i @UI_Gadget_SetPosition()
+    Data.i @UI_Component_IsVisible()
+    Data.i @UI_Component_GetVisible()
+    Data.i @UI_Gadget_SetVisible()
+    Data.i @UI_Component_IsEnabled()
+    Data.i @UI_Component_GetEnabled()
+    Data.i @UI_Gadget_SetEnabled()
+    Data.i @UI_Component_GetUserData()
+    Data.i @UI_Component_SetUserData()
+    Data.i @UI_Component_SetMargin()
+    Data.i @UI_Component_SetMarginAll()
+    Data.i @UI_Component_GetMarginLeft()
+    Data.i @UI_Component_GetMarginTop()
+    Data.i @UI_Component_GetMarginRight()
+    Data.i @UI_Component_GetMarginBottom()
+    Data.i @UI_Component_SetHorizontalAlignment()
+    Data.i @UI_Component_GetHorizontalAlignment()
+    Data.i @UI_Component_SetVerticalAlignment()
+    Data.i @UI_Component_GetVerticalAlignment()
+    Data.i @UI_Component_SetMinWidth()
+    Data.i @UI_Component_GetMinWidth()
+    Data.i @UI_Component_SetMaxWidth()
+    Data.i @UI_Component_GetMaxWidth()
+    Data.i @UI_Component_SetMinHeight()
+    Data.i @UI_Component_GetMinHeight()
+    Data.i @UI_Component_SetMaxHeight()
+    Data.i @UI_Component_GetMaxHeight()
+    Data.i @UI_Component_GetDesiredWidth()
+    Data.i @UI_Component_GetDesiredHeight()
+    Data.i @UI_Component_Arrange()
+    Data.i @UI_Gadget_GetText()
+    Data.i @UI_Gadget_SetText()
+    Data.i @UI_Gadget_SetToolTip()
+    Data.i @UI_Gadget_GetToolTip()
+    Data.i @UI_Gadget_SetColor()
+    Data.i @UI_Gadget_GetColor()
+    Data.i @UI_Gadget_SetFont()
+    Data.i @UI_Gadget_SetFocus()
+    Data.i @UI_SpinBox_Free()
+    Data.i @UI_Gadget_OnClick()
+    Data.i @UI_Gadget_OnChange()
+    Data.i @UI_Gadget_OnFocus()
+    Data.i @UI_Gadget_OnLostFocus()
+    Data.i @UI_Gadget_OnRightClick()
+    Data.i @UI_Gadget_OnCustomEvent()
+    Data.i @UI_SpinBox_GetValue()
+    Data.i @UI_SpinBox_SetValue()
+    Data.i @UI_SpinBox_GetMin()
+    Data.i @UI_SpinBox_GetMax()
+    Data.i @UI_SpinBox_SetRange()
+  UI_Editor_VTable_Data:
+    Data.i @UI_Component_SetDataContext()
+    Data.i @UI_Component_GetDataContext()
+    Data.i @UI_Component_GetID()
+    Data.i @UI_Component_GetHandle()
+    Data.i @UI_Component_GetTag()
+    Data.i @UI_Component_SetTag()
+    Data.i @UI_Component_GetX()
+    Data.i @UI_Component_SetX()
+    Data.i @UI_Component_GetY()
+    Data.i @UI_Component_SetY()
+    Data.i @UI_Component_GetWidth()
+    Data.i @UI_Component_SetWidth()
+    Data.i @UI_Component_GetHeight()
+    Data.i @UI_Component_SetHeight()
+    Data.i @UI_Component_SetAutoWidth()
+    Data.i @UI_Component_SetAutoHeight()
+    Data.i @UI_Component_HasExplicitWidth()
+    Data.i @UI_Component_HasExplicitHeight()
+    Data.i @UI_Component_SetLocation()
+    Data.i @UI_Component_SetSize()
+    Data.i @UI_Gadget_SetPosition()
+    Data.i @UI_Component_IsVisible()
+    Data.i @UI_Component_GetVisible()
+    Data.i @UI_Gadget_SetVisible()
+    Data.i @UI_Component_IsEnabled()
+    Data.i @UI_Component_GetEnabled()
+    Data.i @UI_Gadget_SetEnabled()
+    Data.i @UI_Component_GetUserData()
+    Data.i @UI_Component_SetUserData()
+    Data.i @UI_Component_SetMargin()
+    Data.i @UI_Component_SetMarginAll()
+    Data.i @UI_Component_GetMarginLeft()
+    Data.i @UI_Component_GetMarginTop()
+    Data.i @UI_Component_GetMarginRight()
+    Data.i @UI_Component_GetMarginBottom()
+    Data.i @UI_Component_SetHorizontalAlignment()
+    Data.i @UI_Component_GetHorizontalAlignment()
+    Data.i @UI_Component_SetVerticalAlignment()
+    Data.i @UI_Component_GetVerticalAlignment()
+    Data.i @UI_Component_SetMinWidth()
+    Data.i @UI_Component_GetMinWidth()
+    Data.i @UI_Component_SetMaxWidth()
+    Data.i @UI_Component_GetMaxWidth()
+    Data.i @UI_Component_SetMinHeight()
+    Data.i @UI_Component_GetMinHeight()
+    Data.i @UI_Component_SetMaxHeight()
+    Data.i @UI_Component_GetMaxHeight()
+    Data.i @UI_Component_GetDesiredWidth()
+    Data.i @UI_Component_GetDesiredHeight()
+    Data.i @UI_Component_Arrange()
+    Data.i @UI_Gadget_GetText()
+    Data.i @UI_Gadget_SetText()
+    Data.i @UI_Gadget_SetToolTip()
+    Data.i @UI_Gadget_GetToolTip()
+    Data.i @UI_Gadget_SetColor()
+    Data.i @UI_Gadget_GetColor()
+    Data.i @UI_Gadget_SetFont()
+    Data.i @UI_Gadget_SetFocus()
+    Data.i @UI_Editor_Free()
+    Data.i @UI_Gadget_OnClick()
+    Data.i @UI_Gadget_OnChange()
+    Data.i @UI_Gadget_OnFocus()
+    Data.i @UI_Gadget_OnLostFocus()
+    Data.i @UI_Gadget_OnRightClick()
+    Data.i @UI_Gadget_OnCustomEvent()
+    Data.i @UI_Editor_AddLine()
+    Data.i @UI_Editor_Clear()
+    Data.i @UI_Editor_SetReadOnly()
+    Data.i @UI_Editor_GetReadOnly()
+    Data.i @UI_Editor_SetWordWrap()
+    Data.i @UI_Editor_GetWordWrap()
+  UI_ListView_VTable_Data:
+    Data.i @UI_Component_SetDataContext()
+    Data.i @UI_Component_GetDataContext()
+    Data.i @UI_Component_GetID()
+    Data.i @UI_Component_GetHandle()
+    Data.i @UI_Component_GetTag()
+    Data.i @UI_Component_SetTag()
+    Data.i @UI_Component_GetX()
+    Data.i @UI_Component_SetX()
+    Data.i @UI_Component_GetY()
+    Data.i @UI_Component_SetY()
+    Data.i @UI_Component_GetWidth()
+    Data.i @UI_Component_SetWidth()
+    Data.i @UI_Component_GetHeight()
+    Data.i @UI_Component_SetHeight()
+    Data.i @UI_Component_SetAutoWidth()
+    Data.i @UI_Component_SetAutoHeight()
+    Data.i @UI_Component_HasExplicitWidth()
+    Data.i @UI_Component_HasExplicitHeight()
+    Data.i @UI_Component_SetLocation()
+    Data.i @UI_Component_SetSize()
+    Data.i @UI_Gadget_SetPosition()
+    Data.i @UI_Component_IsVisible()
+    Data.i @UI_Component_GetVisible()
+    Data.i @UI_Gadget_SetVisible()
+    Data.i @UI_Component_IsEnabled()
+    Data.i @UI_Component_GetEnabled()
+    Data.i @UI_Gadget_SetEnabled()
+    Data.i @UI_Component_GetUserData()
+    Data.i @UI_Component_SetUserData()
+    Data.i @UI_Component_SetMargin()
+    Data.i @UI_Component_SetMarginAll()
+    Data.i @UI_Component_GetMarginLeft()
+    Data.i @UI_Component_GetMarginTop()
+    Data.i @UI_Component_GetMarginRight()
+    Data.i @UI_Component_GetMarginBottom()
+    Data.i @UI_Component_SetHorizontalAlignment()
+    Data.i @UI_Component_GetHorizontalAlignment()
+    Data.i @UI_Component_SetVerticalAlignment()
+    Data.i @UI_Component_GetVerticalAlignment()
+    Data.i @UI_Component_SetMinWidth()
+    Data.i @UI_Component_GetMinWidth()
+    Data.i @UI_Component_SetMaxWidth()
+    Data.i @UI_Component_GetMaxWidth()
+    Data.i @UI_Component_SetMinHeight()
+    Data.i @UI_Component_GetMinHeight()
+    Data.i @UI_Component_SetMaxHeight()
+    Data.i @UI_Component_GetMaxHeight()
+    Data.i @UI_Component_GetDesiredWidth()
+    Data.i @UI_Component_GetDesiredHeight()
+    Data.i @UI_Component_Arrange()
+    Data.i @UI_Gadget_GetText()
+    Data.i @UI_Gadget_SetText()
+    Data.i @UI_Gadget_SetToolTip()
+    Data.i @UI_Gadget_GetToolTip()
+    Data.i @UI_Gadget_SetColor()
+    Data.i @UI_Gadget_GetColor()
+    Data.i @UI_Gadget_SetFont()
+    Data.i @UI_Gadget_SetFocus()
+    Data.i @UI_ListView_Free()
+    Data.i @UI_Gadget_OnClick()
+    Data.i @UI_Gadget_OnChange()
+    Data.i @UI_Gadget_OnFocus()
+    Data.i @UI_Gadget_OnLostFocus()
+    Data.i @UI_Gadget_OnRightClick()
+    Data.i @UI_Gadget_OnCustomEvent()
+    Data.i @UI_ListView_AddItem()
+    Data.i @UI_ListView_InsertItem()
+    Data.i @UI_ListView_RemoveItem()
+    Data.i @UI_ListView_ClearItems()
+    Data.i @UI_ListView_GetItemText()
+    Data.i @UI_ListView_SetItemText()
+    Data.i @UI_ListView_GetItemCount()
+    Data.i @UI_ListView_GetSelectedIndex()
+    Data.i @UI_ListView_SetSelectedIndex()
+    Data.i @UI_ListView_GetSelectedText()
+  UI_TreeView_VTable_Data:
+    Data.i @UI_Component_SetDataContext()
+    Data.i @UI_Component_GetDataContext()
+    Data.i @UI_Component_GetID()
+    Data.i @UI_Component_GetHandle()
+    Data.i @UI_Component_GetTag()
+    Data.i @UI_Component_SetTag()
+    Data.i @UI_Component_GetX()
+    Data.i @UI_Component_SetX()
+    Data.i @UI_Component_GetY()
+    Data.i @UI_Component_SetY()
+    Data.i @UI_Component_GetWidth()
+    Data.i @UI_Component_SetWidth()
+    Data.i @UI_Component_GetHeight()
+    Data.i @UI_Component_SetHeight()
+    Data.i @UI_Component_SetAutoWidth()
+    Data.i @UI_Component_SetAutoHeight()
+    Data.i @UI_Component_HasExplicitWidth()
+    Data.i @UI_Component_HasExplicitHeight()
+    Data.i @UI_Component_SetLocation()
+    Data.i @UI_Component_SetSize()
+    Data.i @UI_Gadget_SetPosition()
+    Data.i @UI_Component_IsVisible()
+    Data.i @UI_Component_GetVisible()
+    Data.i @UI_Gadget_SetVisible()
+    Data.i @UI_Component_IsEnabled()
+    Data.i @UI_Component_GetEnabled()
+    Data.i @UI_Gadget_SetEnabled()
+    Data.i @UI_Component_GetUserData()
+    Data.i @UI_Component_SetUserData()
+    Data.i @UI_Component_SetMargin()
+    Data.i @UI_Component_SetMarginAll()
+    Data.i @UI_Component_GetMarginLeft()
+    Data.i @UI_Component_GetMarginTop()
+    Data.i @UI_Component_GetMarginRight()
+    Data.i @UI_Component_GetMarginBottom()
+    Data.i @UI_Component_SetHorizontalAlignment()
+    Data.i @UI_Component_GetHorizontalAlignment()
+    Data.i @UI_Component_SetVerticalAlignment()
+    Data.i @UI_Component_GetVerticalAlignment()
+    Data.i @UI_Component_SetMinWidth()
+    Data.i @UI_Component_GetMinWidth()
+    Data.i @UI_Component_SetMaxWidth()
+    Data.i @UI_Component_GetMaxWidth()
+    Data.i @UI_Component_SetMinHeight()
+    Data.i @UI_Component_GetMinHeight()
+    Data.i @UI_Component_SetMaxHeight()
+    Data.i @UI_Component_GetMaxHeight()
+    Data.i @UI_Component_GetDesiredWidth()
+    Data.i @UI_Component_GetDesiredHeight()
+    Data.i @UI_Component_Arrange()
+    Data.i @UI_Gadget_GetText()
+    Data.i @UI_Gadget_SetText()
+    Data.i @UI_Gadget_SetToolTip()
+    Data.i @UI_Gadget_GetToolTip()
+    Data.i @UI_Gadget_SetColor()
+    Data.i @UI_Gadget_GetColor()
+    Data.i @UI_Gadget_SetFont()
+    Data.i @UI_Gadget_SetFocus()
+    Data.i @UI_TreeView_Free()
+    Data.i @UI_Gadget_OnClick()
+    Data.i @UI_Gadget_OnChange()
+    Data.i @UI_Gadget_OnFocus()
+    Data.i @UI_Gadget_OnLostFocus()
+    Data.i @UI_Gadget_OnRightClick()
+    Data.i @UI_Gadget_OnCustomEvent()
+    Data.i @UI_TreeView_AddItem()
+    Data.i @UI_TreeView_AddChildItem()
+    Data.i @UI_TreeView_InsertItem()
+    Data.i @UI_TreeView_RemoveItem()
+    Data.i @UI_TreeView_ClearItems()
+    Data.i @UI_TreeView_GetItemText()
+    Data.i @UI_TreeView_SetItemText()
+    Data.i @UI_TreeView_GetItemCount()
+    Data.i @UI_TreeView_GetSelectedIndex()
+    Data.i @UI_TreeView_SetSelectedIndex()
+    Data.i @UI_TreeView_GetItemSubLevel()
+    Data.i @UI_TreeView_Expand()
+    Data.i @UI_TreeView_Collapse()
+  UI_DatePicker_VTable_Data:
+    Data.i @UI_Component_SetDataContext()
+    Data.i @UI_Component_GetDataContext()
+    Data.i @UI_Component_GetID()
+    Data.i @UI_Component_GetHandle()
+    Data.i @UI_Component_GetTag()
+    Data.i @UI_Component_SetTag()
+    Data.i @UI_Component_GetX()
+    Data.i @UI_Component_SetX()
+    Data.i @UI_Component_GetY()
+    Data.i @UI_Component_SetY()
+    Data.i @UI_Component_GetWidth()
+    Data.i @UI_Component_SetWidth()
+    Data.i @UI_Component_GetHeight()
+    Data.i @UI_Component_SetHeight()
+    Data.i @UI_Component_SetAutoWidth()
+    Data.i @UI_Component_SetAutoHeight()
+    Data.i @UI_Component_HasExplicitWidth()
+    Data.i @UI_Component_HasExplicitHeight()
+    Data.i @UI_Component_SetLocation()
+    Data.i @UI_Component_SetSize()
+    Data.i @UI_Gadget_SetPosition()
+    Data.i @UI_Component_IsVisible()
+    Data.i @UI_Component_GetVisible()
+    Data.i @UI_Gadget_SetVisible()
+    Data.i @UI_Component_IsEnabled()
+    Data.i @UI_Component_GetEnabled()
+    Data.i @UI_Gadget_SetEnabled()
+    Data.i @UI_Component_GetUserData()
+    Data.i @UI_Component_SetUserData()
+    Data.i @UI_Component_SetMargin()
+    Data.i @UI_Component_SetMarginAll()
+    Data.i @UI_Component_GetMarginLeft()
+    Data.i @UI_Component_GetMarginTop()
+    Data.i @UI_Component_GetMarginRight()
+    Data.i @UI_Component_GetMarginBottom()
+    Data.i @UI_Component_SetHorizontalAlignment()
+    Data.i @UI_Component_GetHorizontalAlignment()
+    Data.i @UI_Component_SetVerticalAlignment()
+    Data.i @UI_Component_GetVerticalAlignment()
+    Data.i @UI_Component_SetMinWidth()
+    Data.i @UI_Component_GetMinWidth()
+    Data.i @UI_Component_SetMaxWidth()
+    Data.i @UI_Component_GetMaxWidth()
+    Data.i @UI_Component_SetMinHeight()
+    Data.i @UI_Component_GetMinHeight()
+    Data.i @UI_Component_SetMaxHeight()
+    Data.i @UI_Component_GetMaxHeight()
+    Data.i @UI_Component_GetDesiredWidth()
+    Data.i @UI_Component_GetDesiredHeight()
+    Data.i @UI_Component_Arrange()
+    Data.i @UI_Gadget_GetText()
+    Data.i @UI_Gadget_SetText()
+    Data.i @UI_Gadget_SetToolTip()
+    Data.i @UI_Gadget_GetToolTip()
+    Data.i @UI_Gadget_SetColor()
+    Data.i @UI_Gadget_GetColor()
+    Data.i @UI_Gadget_SetFont()
+    Data.i @UI_Gadget_SetFocus()
+    Data.i @UI_DatePicker_Free()
+    Data.i @UI_Gadget_OnClick()
+    Data.i @UI_Gadget_OnChange()
+    Data.i @UI_Gadget_OnFocus()
+    Data.i @UI_Gadget_OnLostFocus()
+    Data.i @UI_Gadget_OnRightClick()
+    Data.i @UI_Gadget_OnCustomEvent()
+    Data.i @UI_DatePicker_GetDate()
+    Data.i @UI_DatePicker_SetDate()
+    Data.i @UI_DatePicker_GetFormattedDate()
+  UI_GroupBox_VTable_Data:
+    Data.i @UI_Component_SetDataContext()
+    Data.i @UI_Component_GetDataContext()
+    Data.i @UI_Component_GetID()
+    Data.i @UI_Component_GetHandle()
+    Data.i @UI_Component_GetTag()
+    Data.i @UI_Component_SetTag()
+    Data.i @UI_Component_GetX()
+    Data.i @UI_Component_SetX()
+    Data.i @UI_Component_GetY()
+    Data.i @UI_Component_SetY()
+    Data.i @UI_Component_GetWidth()
+    Data.i @UI_Component_SetWidth()
+    Data.i @UI_Component_GetHeight()
+    Data.i @UI_Component_SetHeight()
+    Data.i @UI_Component_SetAutoWidth()
+    Data.i @UI_Component_SetAutoHeight()
+    Data.i @UI_Component_HasExplicitWidth()
+    Data.i @UI_Component_HasExplicitHeight()
+    Data.i @UI_Component_SetLocation()
+    Data.i @UI_Component_SetSize()
+    Data.i @UI_Gadget_SetPosition()
+    Data.i @UI_Component_IsVisible()
+    Data.i @UI_Component_GetVisible()
+    Data.i @UI_Gadget_SetVisible()
+    Data.i @UI_Component_IsEnabled()
+    Data.i @UI_Component_GetEnabled()
+    Data.i @UI_Gadget_SetEnabled()
+    Data.i @UI_Component_GetUserData()
+    Data.i @UI_Component_SetUserData()
+    Data.i @UI_Component_SetMargin()
+    Data.i @UI_Component_SetMarginAll()
+    Data.i @UI_Component_GetMarginLeft()
+    Data.i @UI_Component_GetMarginTop()
+    Data.i @UI_Component_GetMarginRight()
+    Data.i @UI_Component_GetMarginBottom()
+    Data.i @UI_Component_SetHorizontalAlignment()
+    Data.i @UI_Component_GetHorizontalAlignment()
+    Data.i @UI_Component_SetVerticalAlignment()
+    Data.i @UI_Component_GetVerticalAlignment()
+    Data.i @UI_Component_SetMinWidth()
+    Data.i @UI_Component_GetMinWidth()
+    Data.i @UI_Component_SetMaxWidth()
+    Data.i @UI_Component_GetMaxWidth()
+    Data.i @UI_Component_SetMinHeight()
+    Data.i @UI_Component_GetMinHeight()
+    Data.i @UI_Component_SetMaxHeight()
+    Data.i @UI_Component_GetMaxHeight()
+    Data.i @UI_Component_GetDesiredWidth()
+    Data.i @UI_Component_GetDesiredHeight()
+    Data.i @UI_Component_Arrange()
+    Data.i @UI_Gadget_GetText()
+    Data.i @UI_Gadget_SetText()
+    Data.i @UI_Gadget_SetToolTip()
+    Data.i @UI_Gadget_GetToolTip()
+    Data.i @UI_Gadget_SetColor()
+    Data.i @UI_Gadget_GetColor()
+    Data.i @UI_Gadget_SetFont()
+    Data.i @UI_Gadget_SetFocus()
+    Data.i @UI_GroupBox_Free()
+    Data.i @UI_Gadget_OnClick()
+    Data.i @UI_Gadget_OnChange()
+    Data.i @UI_Gadget_OnFocus()
+    Data.i @UI_Gadget_OnLostFocus()
+    Data.i @UI_Gadget_OnRightClick()
+    Data.i @UI_Gadget_OnCustomEvent()
+  UI_TabControl_VTable_Data:
+    Data.i @UI_Component_SetDataContext()
+    Data.i @UI_Component_GetDataContext()
+    Data.i @UI_Component_GetID()
+    Data.i @UI_Component_GetHandle()
+    Data.i @UI_Component_GetTag()
+    Data.i @UI_Component_SetTag()
+    Data.i @UI_Component_GetX()
+    Data.i @UI_Component_SetX()
+    Data.i @UI_Component_GetY()
+    Data.i @UI_Component_SetY()
+    Data.i @UI_Component_GetWidth()
+    Data.i @UI_Component_SetWidth()
+    Data.i @UI_Component_GetHeight()
+    Data.i @UI_Component_SetHeight()
+    Data.i @UI_Component_SetAutoWidth()
+    Data.i @UI_Component_SetAutoHeight()
+    Data.i @UI_Component_HasExplicitWidth()
+    Data.i @UI_Component_HasExplicitHeight()
+    Data.i @UI_Component_SetLocation()
+    Data.i @UI_Component_SetSize()
+    Data.i @UI_Gadget_SetPosition()
+    Data.i @UI_Component_IsVisible()
+    Data.i @UI_Component_GetVisible()
+    Data.i @UI_Gadget_SetVisible()
+    Data.i @UI_Component_IsEnabled()
+    Data.i @UI_Component_GetEnabled()
+    Data.i @UI_Gadget_SetEnabled()
+    Data.i @UI_Component_GetUserData()
+    Data.i @UI_Component_SetUserData()
+    Data.i @UI_Component_SetMargin()
+    Data.i @UI_Component_SetMarginAll()
+    Data.i @UI_Component_GetMarginLeft()
+    Data.i @UI_Component_GetMarginTop()
+    Data.i @UI_Component_GetMarginRight()
+    Data.i @UI_Component_GetMarginBottom()
+    Data.i @UI_Component_SetHorizontalAlignment()
+    Data.i @UI_Component_GetHorizontalAlignment()
+    Data.i @UI_Component_SetVerticalAlignment()
+    Data.i @UI_Component_GetVerticalAlignment()
+    Data.i @UI_Component_SetMinWidth()
+    Data.i @UI_Component_GetMinWidth()
+    Data.i @UI_Component_SetMaxWidth()
+    Data.i @UI_Component_GetMaxWidth()
+    Data.i @UI_Component_SetMinHeight()
+    Data.i @UI_Component_GetMinHeight()
+    Data.i @UI_Component_SetMaxHeight()
+    Data.i @UI_Component_GetMaxHeight()
+    Data.i @UI_Component_GetDesiredWidth()
+    Data.i @UI_Component_GetDesiredHeight()
+    Data.i @UI_Component_Arrange()
+    Data.i @UI_Gadget_GetText()
+    Data.i @UI_Gadget_SetText()
+    Data.i @UI_Gadget_SetToolTip()
+    Data.i @UI_Gadget_GetToolTip()
+    Data.i @UI_Gadget_SetColor()
+    Data.i @UI_Gadget_GetColor()
+    Data.i @UI_Gadget_SetFont()
+    Data.i @UI_Gadget_SetFocus()
+    Data.i @UI_TabControl_Free()
+    Data.i @UI_Gadget_OnClick()
+    Data.i @UI_Gadget_OnChange()
+    Data.i @UI_Gadget_OnFocus()
+    Data.i @UI_Gadget_OnLostFocus()
+    Data.i @UI_Gadget_OnRightClick()
+    Data.i @UI_Gadget_OnCustomEvent()
+    Data.i @UI_TabControl_AddTab()
+    Data.i @UI_TabControl_AddTabWithIcon()
+    Data.i @UI_TabControl_OpenTab()
+    Data.i @UI_TabControl_CloseTab()
+    Data.i @UI_TabControl_GetCurrentTab()
+    Data.i @UI_TabControl_SetCurrentTab()
+    Data.i @UI_TabControl_GetTabCount()
+    Data.i @UI_TabControl_GetTabText()
+    Data.i @UI_TabControl_SetTabText()
   UI_ToggleSwitch_VTable_Data:
     Data.i @UI_Component_SetDataContext()
     Data.i @UI_Component_GetDataContext()
@@ -6746,6 +8411,49 @@ Procedure Free_UI_CheckBox(*obj.UI_CheckBox_Inst)
   EndIf
 EndProcedure
 
+Procedure.i New_UI_RadioButton_s(text_p.s)
+  Protected *obj.UI_RadioButton_Inst = AllocateStructure(UI_RadioButton_Inst)
+  If *obj
+    *obj\VTable = ?UI_RadioButton_VTable_Data
+    UI_RadioButton_Init_s(*obj, text_p)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure.i New_UI_RadioButton_s_b(text_p.s, checked_p.b)
+  Protected *obj.UI_RadioButton_Inst = AllocateStructure(UI_RadioButton_Inst)
+  If *obj
+    *obj\VTable = ?UI_RadioButton_VTable_Data
+    UI_RadioButton_Init_s_b(*obj, text_p, checked_p)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure.i New_UI_RadioButton_s_i_i_b(text_p.s, w_p.i, h_p.i, checked_p.b)
+  Protected *obj.UI_RadioButton_Inst = AllocateStructure(UI_RadioButton_Inst)
+  If *obj
+    *obj\VTable = ?UI_RadioButton_VTable_Data
+    UI_RadioButton_Init_s_i_i_b(*obj, text_p, w_p, h_p, checked_p)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure.i New_UI_RadioButton_i_i_i_i_s_b(x_p.i, y_p.i, w_p.i, h_p.i, text_p.s, checked_p.b)
+  Protected *obj.UI_RadioButton_Inst = AllocateStructure(UI_RadioButton_Inst)
+  If *obj
+    *obj\VTable = ?UI_RadioButton_VTable_Data
+    UI_RadioButton_Init_i_i_i_i_s_b(*obj, x_p, y_p, w_p, h_p, text_p, checked_p)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure Free_UI_RadioButton(*obj.UI_RadioButton_Inst)
+  If *obj
+    UI_RadioButton_Free(*obj)
+    FreeStructure(*obj)
+  EndIf
+EndProcedure
+
 Procedure.i New_UI_ProgressBar_void()
   Protected *obj.UI_ProgressBar_Inst = AllocateStructure(UI_ProgressBar_Inst)
   If *obj
@@ -6871,6 +8579,262 @@ EndProcedure
 Procedure Free_UI_ComboBox(*obj.UI_ComboBox_Inst)
   If *obj
     UI_ComboBox_Free(*obj)
+    FreeStructure(*obj)
+  EndIf
+EndProcedure
+
+Procedure.i New_UI_SpinBox_void()
+  Protected *obj.UI_SpinBox_Inst = AllocateStructure(UI_SpinBox_Inst)
+  If *obj
+    *obj\VTable = ?UI_SpinBox_VTable_Data
+    UI_SpinBox_Init_void(*obj)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure.i New_UI_SpinBox_i_i(min_p.i, max_p.i)
+  Protected *obj.UI_SpinBox_Inst = AllocateStructure(UI_SpinBox_Inst)
+  If *obj
+    *obj\VTable = ?UI_SpinBox_VTable_Data
+    UI_SpinBox_Init_i_i(*obj, min_p, max_p)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure.i New_UI_SpinBox_i_i_i(min_p.i, max_p.i, current_p.i)
+  Protected *obj.UI_SpinBox_Inst = AllocateStructure(UI_SpinBox_Inst)
+  If *obj
+    *obj\VTable = ?UI_SpinBox_VTable_Data
+    UI_SpinBox_Init_i_i_i(*obj, min_p, max_p, current_p)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure.i New_UI_SpinBox_i_i_i_i_i(min_p.i, max_p.i, current_p.i, w_p.i, h_p.i)
+  Protected *obj.UI_SpinBox_Inst = AllocateStructure(UI_SpinBox_Inst)
+  If *obj
+    *obj\VTable = ?UI_SpinBox_VTable_Data
+    UI_SpinBox_Init_i_i_i_i_i(*obj, min_p, max_p, current_p, w_p, h_p)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure Free_UI_SpinBox(*obj.UI_SpinBox_Inst)
+  If *obj
+    UI_SpinBox_Free(*obj)
+    FreeStructure(*obj)
+  EndIf
+EndProcedure
+
+Procedure.i New_UI_Editor_void()
+  Protected *obj.UI_Editor_Inst = AllocateStructure(UI_Editor_Inst)
+  If *obj
+    *obj\VTable = ?UI_Editor_VTable_Data
+    UI_Editor_Init_void(*obj)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure.i New_UI_Editor_i_i(w_p.i, h_p.i)
+  Protected *obj.UI_Editor_Inst = AllocateStructure(UI_Editor_Inst)
+  If *obj
+    *obj\VTable = ?UI_Editor_VTable_Data
+    UI_Editor_Init_i_i(*obj, w_p, h_p)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure.i New_UI_Editor_s_i_i(text_p.s, w_p.i, h_p.i)
+  Protected *obj.UI_Editor_Inst = AllocateStructure(UI_Editor_Inst)
+  If *obj
+    *obj\VTable = ?UI_Editor_VTable_Data
+    UI_Editor_Init_s_i_i(*obj, text_p, w_p, h_p)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure.i New_UI_Editor_i_i_i_i_s_i(x_p.i, y_p.i, w_p.i, h_p.i, text_p.s, flags_p.i)
+  Protected *obj.UI_Editor_Inst = AllocateStructure(UI_Editor_Inst)
+  If *obj
+    *obj\VTable = ?UI_Editor_VTable_Data
+    UI_Editor_Init_i_i_i_i_s_i(*obj, x_p, y_p, w_p, h_p, text_p, flags_p)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure Free_UI_Editor(*obj.UI_Editor_Inst)
+  If *obj
+    UI_Editor_Free(*obj)
+    FreeStructure(*obj)
+  EndIf
+EndProcedure
+
+Procedure.i New_UI_ListView_void()
+  Protected *obj.UI_ListView_Inst = AllocateStructure(UI_ListView_Inst)
+  If *obj
+    *obj\VTable = ?UI_ListView_VTable_Data
+    UI_ListView_Init_void(*obj)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure.i New_UI_ListView_i_i(w_p.i, h_p.i)
+  Protected *obj.UI_ListView_Inst = AllocateStructure(UI_ListView_Inst)
+  If *obj
+    *obj\VTable = ?UI_ListView_VTable_Data
+    UI_ListView_Init_i_i(*obj, w_p, h_p)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure.i New_UI_ListView_i_i_i_i_i(x_p.i, y_p.i, w_p.i, h_p.i, flags_p.i)
+  Protected *obj.UI_ListView_Inst = AllocateStructure(UI_ListView_Inst)
+  If *obj
+    *obj\VTable = ?UI_ListView_VTable_Data
+    UI_ListView_Init_i_i_i_i_i(*obj, x_p, y_p, w_p, h_p, flags_p)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure Free_UI_ListView(*obj.UI_ListView_Inst)
+  If *obj
+    UI_ListView_Free(*obj)
+    FreeStructure(*obj)
+  EndIf
+EndProcedure
+
+Procedure.i New_UI_TreeView_void()
+  Protected *obj.UI_TreeView_Inst = AllocateStructure(UI_TreeView_Inst)
+  If *obj
+    *obj\VTable = ?UI_TreeView_VTable_Data
+    UI_TreeView_Init_void(*obj)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure.i New_UI_TreeView_i_i(w_p.i, h_p.i)
+  Protected *obj.UI_TreeView_Inst = AllocateStructure(UI_TreeView_Inst)
+  If *obj
+    *obj\VTable = ?UI_TreeView_VTable_Data
+    UI_TreeView_Init_i_i(*obj, w_p, h_p)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure.i New_UI_TreeView_i_i_i_i_i(x_p.i, y_p.i, w_p.i, h_p.i, flags_p.i)
+  Protected *obj.UI_TreeView_Inst = AllocateStructure(UI_TreeView_Inst)
+  If *obj
+    *obj\VTable = ?UI_TreeView_VTable_Data
+    UI_TreeView_Init_i_i_i_i_i(*obj, x_p, y_p, w_p, h_p, flags_p)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure Free_UI_TreeView(*obj.UI_TreeView_Inst)
+  If *obj
+    UI_TreeView_Free(*obj)
+    FreeStructure(*obj)
+  EndIf
+EndProcedure
+
+Procedure.i New_UI_DatePicker_void()
+  Protected *obj.UI_DatePicker_Inst = AllocateStructure(UI_DatePicker_Inst)
+  If *obj
+    *obj\VTable = ?UI_DatePicker_VTable_Data
+    UI_DatePicker_Init_void(*obj)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure.i New_UI_DatePicker_s(mask_p.s)
+  Protected *obj.UI_DatePicker_Inst = AllocateStructure(UI_DatePicker_Inst)
+  If *obj
+    *obj\VTable = ?UI_DatePicker_VTable_Data
+    UI_DatePicker_Init_s(*obj, mask_p)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure.i New_UI_DatePicker_i_s(dateVal_p.i, mask_p.s)
+  Protected *obj.UI_DatePicker_Inst = AllocateStructure(UI_DatePicker_Inst)
+  If *obj
+    *obj\VTable = ?UI_DatePicker_VTable_Data
+    UI_DatePicker_Init_i_s(*obj, dateVal_p, mask_p)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure.i New_UI_DatePicker_i_s_i_i(dateVal_p.i, mask_p.s, w_p.i, h_p.i)
+  Protected *obj.UI_DatePicker_Inst = AllocateStructure(UI_DatePicker_Inst)
+  If *obj
+    *obj\VTable = ?UI_DatePicker_VTable_Data
+    UI_DatePicker_Init_i_s_i_i(*obj, dateVal_p, mask_p, w_p, h_p)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure Free_UI_DatePicker(*obj.UI_DatePicker_Inst)
+  If *obj
+    UI_DatePicker_Free(*obj)
+    FreeStructure(*obj)
+  EndIf
+EndProcedure
+
+Procedure.i New_UI_GroupBox_s(caption_p.s)
+  Protected *obj.UI_GroupBox_Inst = AllocateStructure(UI_GroupBox_Inst)
+  If *obj
+    *obj\VTable = ?UI_GroupBox_VTable_Data
+    UI_GroupBox_Init_s(*obj, caption_p)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure.i New_UI_GroupBox_s_i_i(caption_p.s, w_p.i, h_p.i)
+  Protected *obj.UI_GroupBox_Inst = AllocateStructure(UI_GroupBox_Inst)
+  If *obj
+    *obj\VTable = ?UI_GroupBox_VTable_Data
+    UI_GroupBox_Init_s_i_i(*obj, caption_p, w_p, h_p)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure.i New_UI_GroupBox_i_i_i_i_s_i(x_p.i, y_p.i, w_p.i, h_p.i, caption_p.s, flags_p.i)
+  Protected *obj.UI_GroupBox_Inst = AllocateStructure(UI_GroupBox_Inst)
+  If *obj
+    *obj\VTable = ?UI_GroupBox_VTable_Data
+    UI_GroupBox_Init_i_i_i_i_s_i(*obj, x_p, y_p, w_p, h_p, caption_p, flags_p)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure Free_UI_GroupBox(*obj.UI_GroupBox_Inst)
+  If *obj
+    UI_GroupBox_Free(*obj)
+    FreeStructure(*obj)
+  EndIf
+EndProcedure
+
+Procedure.i New_UI_TabControl_void()
+  Protected *obj.UI_TabControl_Inst = AllocateStructure(UI_TabControl_Inst)
+  If *obj
+    *obj\VTable = ?UI_TabControl_VTable_Data
+    UI_TabControl_Init_void(*obj)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure.i New_UI_TabControl_i_i(w_p.i, h_p.i)
+  Protected *obj.UI_TabControl_Inst = AllocateStructure(UI_TabControl_Inst)
+  If *obj
+    *obj\VTable = ?UI_TabControl_VTable_Data
+    UI_TabControl_Init_i_i(*obj, w_p, h_p)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure Free_UI_TabControl(*obj.UI_TabControl_Inst)
+  If *obj
+    UI_TabControl_Free(*obj)
     FreeStructure(*obj)
   EndIf
 EndProcedure
@@ -7455,6 +9419,15 @@ EndProcedure
 
 
 ; ============================================================================
+; PureBasic OOP GUI Framework - RadioButton.pbi
+; Radio / Option Button (OptionGadget) wrapper
+; Author:      MicrodevWeb
+; ============================================================================
+
+
+
+
+; ============================================================================
 ; PureBasic OOP GUI Framework - ProgressBar.pbi
 ; Standard ProgressBar wrapper with Multi-Constructors
 ; Author:      MicrodevWeb
@@ -7475,6 +9448,69 @@ EndProcedure
 ; ============================================================================
 ; PureBasic OOP GUI Framework - ComboBox.pbi
 ; Standard ComboBox wrapper with Multi-Constructors
+; Author:      MicrodevWeb
+; ============================================================================
+
+
+
+
+; ============================================================================
+; PureBasic OOP GUI Framework - SpinBox.pbi
+; Numeric Up/Down Spinner (SpinGadget) wrapper
+; Author:      MicrodevWeb
+; ============================================================================
+
+
+
+
+; ============================================================================
+; PureBasic OOP GUI Framework - Editor.pbi
+; Multiline Text Editor / EditorGadget wrapper
+; Author:      MicrodevWeb
+; ============================================================================
+
+
+
+
+; ============================================================================
+; PureBasic OOP GUI Framework - ListView.pbi
+; Simple ListBox / ListViewGadget wrapper
+; Author:      MicrodevWeb
+; ============================================================================
+
+
+
+
+; ============================================================================
+; PureBasic OOP GUI Framework - TreeView.pbi
+; Hierarchical Tree (TreeGadget) wrapper
+; Author:      MicrodevWeb
+; ============================================================================
+
+
+
+
+; ============================================================================
+; PureBasic OOP GUI Framework - DatePicker.pbi
+; Date Selection (DateGadget) wrapper
+; Author:      MicrodevWeb
+; ============================================================================
+
+
+
+
+; ============================================================================
+; PureBasic OOP GUI Framework - GroupBox.pbi
+; Frame / GroupBox (FrameGadget) wrapper
+; Author:      MicrodevWeb
+; ============================================================================
+
+
+
+
+; ============================================================================
+; PureBasic OOP GUI Framework - TabControl.pbi
+; Tabbed Panel (PanelGadget) wrapper
 ; Author:      MicrodevWeb
 ; ============================================================================
 
@@ -7530,6 +9566,11 @@ EndProcedure
 ; 2. Command Name Constants
 ; These match Click="CommandName" in the View and Case "..." in ViewModel
 ; ----------------------------------------------------------------------------
+
+; IDE Options = PureBasic 6.40 (Windows - x64)
+; CursorPosition = 11
+; EnableXP
+; DPIAware
 ; ============================================================================
 ; PureBasic OOP MVVM - SimpleViewModel.pbi
 ; Simple ViewModel for testing MVVM DataBinding and Commands
