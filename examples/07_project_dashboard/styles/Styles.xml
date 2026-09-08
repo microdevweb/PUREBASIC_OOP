@@ -1,0 +1,190 @@
+<ResourceDictionary>
+  <!-- ===================================================================== -->
+  <!-- PureBasic OOP - Styles Déclaratifs WPF & Micro-Animations 60 FPS      -->
+  <!-- Fichier : styles/Styles.xml                                           -->
+  <!-- ===================================================================== -->
+
+  <!-- 1. Style Implicite par défaut pour tous les CanvasButton -->
+  <Style TargetType="CanvasButton">
+    <Setter Property="CornerRadius" Value="6"/>
+    <Setter Property="BorderThickness" Value="1"/>
+    <Setter Property="FontName" Value="Segoe UI"/>
+    <Setter Property="FontSize" Value="10"/>
+    <Setter Property="Background" Value="#FFFFFF"/>
+    <Setter Property="Foreground" Value="#1E293B"/>
+    <Setter Property="BorderColor" Value="#CBD5E1"/>
+    
+    <Trigger Property="IsMouseOver" Value="True">
+      <Setter Property="Background" Value="#F8FAFC"/>
+      <Setter Property="BorderColor" Value="#94A3B8"/>
+      <Setter Property="Scale" Value="1.03"/>
+    </Trigger>
+    <Trigger Property="IsPressed" Value="True">
+      <Setter Property="Background" Value="#E2E8F0"/>
+      <Setter Property="Scale" Value="0.97"/>
+    </Trigger>
+  </Style>
+
+  <!-- 2. Style Implicite pour tous les CanvasTextBox -->
+  <Style TargetType="CanvasTextBox">
+    <Setter Property="CornerRadius" Value="6"/>
+    <Setter Property="BorderThickness" Value="1"/>
+    <Setter Property="Background" Value="#FFFFFF"/>
+    <Setter Property="Foreground" Value="#0F172A"/>
+    <Setter Property="BorderColor" Value="#CBD5E1"/>
+    <Setter Property="FontName" Value="Segoe UI"/>
+    <Setter Property="FontSize" Value="10"/>
+  </Style>
+
+  <!-- 3. Navigation Bar : Bouton Normal Sidebar Sombre -->
+  <Style x:Key="NavButton" TargetType="CanvasButton">
+    <Setter Property="CornerRadius" Value="6"/>
+    <Setter Property="BorderThickness" Value="0"/>
+    <Setter Property="BorderLeftThickness" Value="0"/>
+    <Setter Property="Background" Value="#18181B"/>
+    <Setter Property="Foreground" Value="#94A3B8"/>
+    <Setter Property="BorderColor" Value="#18181B"/>
+    <Setter Property="FontName" Value="Segoe UI"/>
+    <Setter Property="FontSize" Value="10"/>
+    <Setter Property="FontBold" Value="False"/>
+    <Setter Property="HAlign" Value="Left"/>
+    <Setter Property="Padding" Value="16,0"/>
+
+    <Trigger Property="IsMouseOver" Value="True">
+      <Setter Property="Background" Value="#27272A"/>
+      <Setter Property="Foreground" Value="#F8FAFC"/>
+      <Setter Property="Scale" Value="1.01"/>
+    </Trigger>
+    <Trigger Property="IsPressed" Value="True">
+      <Setter Property="Background" Value="#18181B"/>
+      <Setter Property="Scale" Value="0.98"/>
+    </Trigger>
+  </Style>
+
+  <!-- 4. Navigation Bar : Bouton Actif Sélectionné (Barre bleue latérale) -->
+  <Style x:Key="NavButtonActive" TargetType="CanvasButton" BasedOn="NavButton">
+    <Setter Property="Background" Value="#27272A"/>
+    <Setter Property="Foreground" Value="#FFFFFF"/>
+    <Setter Property="FontBold" Value="True"/>
+    <Setter Property="BorderLeftThickness" Value="4"/>
+    <Setter Property="BorderLeftColor" Value="#2563EB"/>
+
+    <Trigger Property="IsMouseOver" Value="True">
+      <Setter Property="Background" Value="#3F3F46"/>
+      <Setter Property="BorderLeftColor" Value="#3B82F6"/>
+      <Setter Property="Scale" Value="1.01"/>
+    </Trigger>
+    <Trigger Property="IsPressed" Value="True">
+      <Setter Property="Background" Value="#27272A"/>
+      <Setter Property="Scale" Value="0.98"/>
+    </Trigger>
+  </Style>
+
+  <!-- 5. Navigation Bar : Bouton Menu Hamburger -->
+  <Style x:Key="NavHamburger" TargetType="CanvasButton">
+    <Setter Property="CornerRadius" Value="6"/>
+    <Setter Property="BorderThickness" Value="0"/>
+    <Setter Property="Background" Value="#18181B"/>
+    <Setter Property="Foreground" Value="#E2E8F0"/>
+    <Setter Property="FontSize" Value="14"/>
+    <Setter Property="FontBold" Value="True"/>
+
+    <Trigger Property="IsMouseOver" Value="True">
+      <Setter Property="Background" Value="#27272A"/>
+      <Setter Property="Scale" Value="1.05"/>
+    </Trigger>
+    <Trigger Property="IsPressed" Value="True">
+      <Setter Property="Background" Value="#18181B"/>
+      <Setter Property="Scale" Value="0.95"/>
+    </Trigger>
+  </Style>
+
+  <!-- 6. Bouton Primaire Bleu Indigo (+ Add New Project, Save Changes) -->
+  <Style x:Key="PrimaryButton" TargetType="CanvasButton">
+    <Setter Property="CornerRadius" Value="6"/>
+    <Setter Property="BorderThickness" Value="1"/>
+    <Setter Property="Background" Value="#0066CC"/>
+    <Setter Property="Foreground" Value="#FFFFFF"/>
+    <Setter Property="BorderColor" Value="#0052A3"/>
+    <Setter Property="FontName" Value="Segoe UI"/>
+    <Setter Property="FontSize" Value="10"/>
+    <Setter Property="FontBold" Value="True"/>
+
+    <Trigger Property="IsMouseOver" Value="True">
+      <Setter Property="Background" Value="#1D78D6"/>
+      <Setter Property="BorderColor" Value="#3B82F6"/>
+      <Setter Property="Scale" Value="1.04"/>
+    </Trigger>
+    <Trigger Property="IsPressed" Value="True">
+      <Setter Property="Background" Value="#004D99"/>
+      <Setter Property="Scale" Value="0.96"/>
+    </Trigger>
+  </Style>
+
+  <!-- 7. Bouton Contour Neutre (Generate Report, Cancel) -->
+  <Style x:Key="OutlineButton" TargetType="CanvasButton">
+    <Setter Property="CornerRadius" Value="6"/>
+    <Setter Property="BorderThickness" Value="1"/>
+    <Setter Property="Background" Value="#FFFFFF"/>
+    <Setter Property="Foreground" Value="#1E293B"/>
+    <Setter Property="BorderColor" Value="#CBD5E1"/>
+    <Setter Property="FontName" Value="Segoe UI"/>
+    <Setter Property="FontSize" Value="10"/>
+    <Setter Property="FontBold" Value="False"/>
+
+    <Trigger Property="IsMouseOver" Value="True">
+      <Setter Property="Background" Value="#F8FAFC"/>
+      <Setter Property="BorderColor" Value="#94A3B8"/>
+      <Setter Property="Scale" Value="1.03"/>
+    </Trigger>
+    <Trigger Property="IsPressed" Value="True">
+      <Setter Property="Background" Value="#E2E8F0"/>
+      <Setter Property="Scale" Value="0.97"/>
+    </Trigger>
+  </Style>
+
+  <!-- 8. Bouton Danger Contour Rouge (Delete) -->
+  <Style x:Key="DangerButton" TargetType="CanvasButton">
+    <Setter Property="CornerRadius" Value="6"/>
+    <Setter Property="BorderThickness" Value="1"/>
+    <Setter Property="Background" Value="#FFFFFF"/>
+    <Setter Property="Foreground" Value="#DC2626"/>
+    <Setter Property="BorderColor" Value="#EF4444"/>
+    <Setter Property="FontName" Value="Segoe UI"/>
+    <Setter Property="FontSize" Value="10"/>
+    <Setter Property="FontBold" Value="False"/>
+
+    <Trigger Property="IsMouseOver" Value="True">
+      <Setter Property="Background" Value="#FEE2E2"/>
+      <Setter Property="BorderColor" Value="#DC2626"/>
+      <Setter Property="Scale" Value="1.03"/>
+    </Trigger>
+    <Trigger Property="IsPressed" Value="True">
+      <Setter Property="Background" Value="#FECACA"/>
+      <Setter Property="Scale" Value="0.97"/>
+    </Trigger>
+  </Style>
+
+  <!-- 9. Barre de Recherche Arrondie (SearchBox) -->
+  <Style x:Key="SearchBox" TargetType="CanvasTextBox">
+    <Setter Property="CornerRadius" Value="16"/>
+    <Setter Property="BorderThickness" Value="1"/>
+    <Setter Property="Background" Value="#FFFFFF"/>
+    <Setter Property="Foreground" Value="#0F172A"/>
+    <Setter Property="BorderColor" Value="#E2E8F0"/>
+    <Setter Property="FontName" Value="Segoe UI"/>
+    <Setter Property="FontSize" Value="9"/>
+  </Style>
+
+  <!-- 10. Champs de Saisie de Formulaire (FormInput) -->
+  <Style x:Key="FormInput" TargetType="CanvasTextBox">
+    <Setter Property="CornerRadius" Value="6"/>
+    <Setter Property="BorderThickness" Value="1"/>
+    <Setter Property="Background" Value="#FFFFFF"/>
+    <Setter Property="Foreground" Value="#0F172A"/>
+    <Setter Property="BorderColor" Value="#CBD5E1"/>
+    <Setter Property="FontName" Value="Segoe UI"/>
+    <Setter Property="FontSize" Value="10"/>
+  </Style>
+
+</ResourceDictionary>

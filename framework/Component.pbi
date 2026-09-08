@@ -335,6 +335,26 @@ Namespace UI {
     ; Virtual Animation callback for high-performance transitions
     Public Method OnAnimationTick(propName.s, value.f) {
     }
+
+    ; Virtual Visual Styling base methods
+    Public Method SetBackground(col.i) {
+    }
+
+    Public Method.i GetBackground() {
+      ProcedureReturn 0
+    }
+
+    Public Method SetBorderColor(col.i) {
+    }
+
+    Public Method SetBorderThickness(th.i) {
+    }
+
+    Public Method SetCornerRadius(cr.i) {
+    }
+
+    Public Method Free() {
+    }
   }
 
 }

@@ -285,6 +285,24 @@ Namespace UI {
       EndIf
     }
 
+    Public Method ApplyStyle(*s.UI::Style) {
+      Super\ApplyStyle(*s)
+      If Not *s : ProcedureReturn : EndIf
+      Protected count.i = *s\GetSetterCount()
+      Protected i.i
+      For i = 0 To count - 1
+        Protected prop.s = UCase(Trim(*s\GetSetterProperty(i)))
+        Protected val.s = Trim(*s\GetSetterValue(i))
+        If prop = "TEXTALIGNMENT" Or prop = "HALIGN"
+          If UCase(val) = "LEFT" : This\textAlignment = 1
+          ElseIf UCase(val) = "RIGHT" : This\textAlignment = 2
+          ElseIf UCase(val) = "CENTER" : This\textAlignment = 0
+          EndIf
+        EndIf
+      Next
+      This\Redraw()
+    }
+
   }
 
 }

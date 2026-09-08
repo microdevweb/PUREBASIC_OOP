@@ -54,6 +54,8 @@ Namespace UI {
     Protected pressedBorderColor.i
     Protected borderThickness.i
     Protected cornerRadius.i
+    Protected borderLeftThickness.i
+    Protected borderLeftColor.i
 
     ; Padding
     Protected paddingLeft.i
@@ -85,6 +87,8 @@ Namespace UI {
     Protected basePressedBorderColor.i
     Protected baseBorderThickness.i
     Protected baseCornerRadius.i
+    Protected baseBorderLeftThickness.i
+    Protected baseBorderLeftColor.i
     Protected baseScale.f
 
     ; --- Initialisation des valeurs par défaut ---
@@ -117,6 +121,8 @@ Namespace UI {
       This\pressedBorderColor = RGB(0, 90, 180)
       This\borderThickness = 1
       This\cornerRadius = 4
+      This\borderLeftThickness = 0
+      This\borderLeftColor = 0
 
       This\paddingLeft = 8
       This\paddingTop = 4
@@ -136,6 +142,8 @@ Namespace UI {
       This\basePressedBorderColor = This\pressedBorderColor
       This\baseBorderThickness = This\borderThickness
       This\baseCornerRadius = This\cornerRadius
+      This\baseBorderLeftThickness = 0
+      This\baseBorderLeftColor = 0
       This\baseScale = 1.0
     }
 
@@ -425,6 +433,24 @@ Namespace UI {
       This\Redraw()
     }
 
+    Public Method.i GetBorderLeftThickness() {
+      ProcedureReturn This\borderLeftThickness
+    }
+
+    Public Method SetBorderLeftThickness(thickness_p.i) {
+      This\borderLeftThickness = thickness_p
+      This\Redraw()
+    }
+
+    Public Method.i GetBorderLeftColor() {
+      ProcedureReturn This\borderLeftColor
+    }
+
+    Public Method SetBorderLeftColor(color_p.i) {
+      This\borderLeftColor = color_p
+      This\Redraw()
+    }
+
     ; --- Padding Interne ---
 
     Public Method SetPadding(l_p.i, t_p.i, r_p.i, b_p.i) {
@@ -546,6 +572,14 @@ Namespace UI {
           Box(drawX, drawY, drawW, drawH, curBg)
         }
       }
+
+      ; Bordure d'accentuation latérale gauche (ex: indicateur d'onglet actif WPF)
+      If (This\borderLeftThickness > 0)
+        Protected scaledBLT.i = DesktopScaledX(This\borderLeftThickness)
+        Protected curBLCol.i = This\borderLeftColor
+        If curBLCol = 0 : curBLCol = curBorder : EndIf
+        Box(drawX, drawY, scaledBLT, drawH, curBLCol)
+      EndIf
     }
 
     Public Method DrawFocusRing(w_p.i, h_p.i) {
@@ -785,8 +819,36 @@ Namespace UI {
             This\pressedBorderColor = UI_ParseColor(val, This\pressedBorderColor)
           Case "BORDERTHICKNESS"
             This\borderThickness = Val(val)
+          Case "BORDERLEFTTHICKNESS"
+            This\borderLeftThickness = Val(val)
+          Case "BORDERLEFTCOLOR"
+            This\borderLeftColor = UI_ParseColor(val, This\borderLeftColor)
           Case "CORNERRADIUS"
             This\cornerRadius = Val(val)
+          Case "PADDINGLEFT"
+            This\paddingLeft = Val(val)
+          Case "PADDINGRIGHT"
+            This\paddingRight = Val(val)
+          Case "PADDINGTOP"
+            This\paddingTop = Val(val)
+          Case "PADDINGBOTTOM"
+            This\paddingBottom = Val(val)
+          Case "PADDING"
+            Protected pCountVal.i = CountString(val, ",") + 1
+            If pCountVal = 1
+              Protected pvSingle.i = Val(val)
+              This\paddingLeft = pvSingle : This\paddingRight = pvSingle : This\paddingTop = pvSingle : This\paddingBottom = pvSingle
+            ElseIf pCountVal = 2
+              This\paddingLeft = Val(StringField(val, 1, ","))
+              This\paddingRight = This\paddingLeft
+              This\paddingTop = Val(StringField(val, 2, ","))
+              This\paddingBottom = This\paddingTop
+            ElseIf pCountVal >= 4
+              This\paddingLeft = Val(StringField(val, 1, ","))
+              This\paddingTop = Val(StringField(val, 2, ","))
+              This\paddingRight = Val(StringField(val, 3, ","))
+              This\paddingBottom = Val(StringField(val, 4, ","))
+            EndIf
           Case "SCALE"
             This\currentScale = ValF(val)
             This\targetScale = This\currentScale
@@ -823,6 +885,8 @@ Namespace UI {
       This\basePressedForeground = This\pressedForeground
       This\basePressedBorderColor = This\pressedBorderColor
       This\baseBorderThickness = This\borderThickness
+      This\baseBorderLeftThickness = This\borderLeftThickness
+      This\baseBorderLeftColor = This\borderLeftColor
       This\baseCornerRadius = This\cornerRadius
       This\baseScale = This\currentScale
 
@@ -851,6 +915,8 @@ Namespace UI {
       This\pressedBorderColor = This\basePressedBorderColor
       This\cornerRadius = This\baseCornerRadius
       This\borderThickness = This\baseBorderThickness
+      This\borderLeftThickness = This\baseBorderLeftThickness
+      This\borderLeftColor = This\baseBorderLeftColor
 
       ; 2. Parcourir les triggers et activer ceux dont la condition est remplie
       Protected tCount.i = This\style\GetTriggerCount()
@@ -903,6 +969,10 @@ Namespace UI {
                 This\cornerRadius = Val(val)
               Case "BORDERTHICKNESS"
                 This\borderThickness = Val(val)
+              Case "BORDERLEFTTHICKNESS"
+                This\borderLeftThickness = Val(val)
+              Case "BORDERLEFTCOLOR"
+                This\borderLeftColor = UI_ParseColor(val, This\borderLeftColor)
               Case "SCALE"
                 hasScaleTrigger = #True
                 Protected targetSc.f = ValF(val)

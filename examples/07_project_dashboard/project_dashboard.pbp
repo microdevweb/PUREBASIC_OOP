@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://www.purebasic.com/namespace" version="1.0" creator="PureBasic 6.40 (Windows - x64)">
+  <section name="config">
+    <options closefiles="1" openmode="0" name="Project Dashboard - Modern UI"/>
+  </section>
+  <section name="data">
+    <explorer view="views\" pattern="0"/>
+    <log show="1"/>
+    <lastopen date="2026-09-08 10:50" user="u237685" host="CSL0111"/>
+  </section>
+  <section name="files">
+    <file name="main.pb">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="1" sortindex="1" panelstate="++"/>
+      <fingerprint md5="f3b4fdd57668ee6d1368c2dff199ba8f"/>
+    </file>
+    <file name="views\ProjectDashboardView.pbi">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="1" sortindex="2" panelstate="++"/>
+      <fingerprint md5="1b30175063617843bd00e029d18a65ca"/>
+    </file>
+    <file name="views\ProjectDashboardView.xml">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="1" sortindex="3" panelstate="++"/>
+      <fingerprint md5="312b2057e03de6783db8a8a5f0debd86"/>
+    </file>
+    <file name="styles\Styles.xml">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="0" sortindex="4" panelstate="++"/>
+      <fingerprint md5="7d235373d2a74622f3d73b4f18221ddd"/>
+    </file>
+    <file name="viewmodels\ProjectDashboardViewModel.pbi">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="0" sortindex="5" panelstate="++"/>
+      <fingerprint md5="830008b17f923fad733a7bec3d2c6301"/>
+    </file>
+    <file name="models\ProjectModel.pbi">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="0" sortindex="6" panelstate="++"/>
+      <fingerprint md5="3f76a2e8389451f60adf486db4b2db9a"/>
+    </file>
+    <file name="..\..\framework\UI.pbi">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="0" sortindex="7" panelstate="++"/>
+      <fingerprint md5="b3475f03ba1cafc2018b2201f8b920fc"/>
+    </file>
+    <file name="..\..\framework\Component.pbi">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="0" sortindex="8" panelstate="++"/>
+      <fingerprint md5="0f93d638774155665cca47a937488a2e"/>
+    </file>
+    <file name="..\..\framework\Gadget.pbi">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="0" sortindex="9" panelstate="++"/>
+      <fingerprint md5="f8510f1a008d7bca9951a9e4d7e5bcfc"/>
+    </file>
+    <file name="..\..\framework\Window.pbi">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="0" sortindex="10" panelstate="++"/>
+      <fingerprint md5="e3634b57eff23a579e642be5a4033a3a"/>
+    </file>
+    <file name="..\..\framework\Application.pbi">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="0" sortindex="11" panelstate="++"/>
+      <fingerprint md5="e68654a092255e7adfc0821288311504"/>
+    </file>
+    <file name="..\..\framework\CanvasControl.pbi">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="0" sortindex="12" panelstate="++"/>
+      <fingerprint md5="a94345cdfc304919e230096b8b8f0470"/>
+    </file>
+    <file name="..\..\framework\CustomGadget.pbi">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="0" sortindex="13" panelstate="++"/>
+      <fingerprint md5="d7624df5683b4eaf484f82f92b1b4b50"/>
+    </file>
+    <file name="..\..\framework\XMLLoader.pbi">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="0" sortindex="14" panelstate="++"/>
+      <fingerprint md5="329321fe10d1fa7c9920877fd929a1ff"/>
+    </file>
+    <file name="..\..\framework\animation\AnimationEngine.pbi">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="0" sortindex="15" panelstate="++"/>
+      <fingerprint md5="3791ca286d946e24e8916a082c963dc3"/>
+    </file>
+    <file name="..\..\framework\style\Style.pbi">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="0" sortindex="16" panelstate="++"/>
+      <fingerprint md5="e218deeea028e2479c76de3bd7977757"/>
+    </file>
+    <file name="..\..\framework\style\ResourceDictionary.pbi">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="0" sortindex="17" panelstate="++"/>
+      <fingerprint md5="af76327270f5af0cdaa89be9b0586104"/>
+    </file>
+    <file name="..\..\framework\controls\CanvasButton.pbi">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="0" sortindex="18" panelstate="++"/>
+      <fingerprint md5="6343ee6d3bd80ef3374ee2a4e0fa9daa"/>
+    </file>
+    <file name="..\..\framework\controls\CanvasText.pbi">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="0" sortindex="19" panelstate="++"/>
+      <fingerprint md5="733266a8c0a67d345cdf6681fd6feffc"/>
+    </file>
+    <file name="..\..\framework\controls\CanvasTextBox.pbi">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="0" sortindex="20" panelstate="++"/>
+      <fingerprint md5="ccfba242d949ee86e4fbcf9e4045acd6"/>
+    </file>
+    <file name="..\..\framework\controls\CanvasTree.pbi">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="0" sortindex="21" panelstate="++"/>
+      <fingerprint md5="c2439cfd7c5123f84832f9835071c8c6"/>
+    </file>
+    <file name="..\..\framework\controls\Canvas.pbi">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="0" sortindex="22" panelstate="++"/>
+      <fingerprint md5="f51effb271415e503311d757612a1a61"/>
+    </file>
+    <file name="..\..\framework\layout\Container.pbi">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="0" sortindex="23" panelstate="++"/>
+      <fingerprint md5="b6f12a88603a1bae43108e6469caf583"/>
+    </file>
+    <file name="..\..\framework\layout\StackPanel.pbi">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="0" sortindex="24" panelstate="++"/>
+      <fingerprint md5="87c4455977fd5cc178da59e839e7776d"/>
+    </file>
+    <file name="..\..\framework\layout\DockPanel.pbi">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="0" sortindex="25" panelstate="++"/>
+      <fingerprint md5="0496a24be92451c9b215760e606f2dd5"/>
+    </file>
+    <file name="..\..\framework\layout\Grid.pbi">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="0" sortindex="26" panelstate="++"/>
+      <fingerprint md5="ede9f1842d55053fb38153cabb7659dc"/>
+    </file>
+    <file name="..\..\framework\controls\Button.pbi">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="0" sortindex="27" panelstate="++"/>
+      <fingerprint md5="f072831c0af6aa7e579322d16bc361e7"/>
+    </file>
+    <file name="..\..\framework\controls\TextBox.pbi">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="0" sortindex="28" panelstate="++"/>
+      <fingerprint md5="a6d3b7c3e53c15fd813dc21e03064a4c"/>
+    </file>
+    <file name="..\..\framework\controls\Label.pbi">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="0" sortindex="29" panelstate="++"/>
+      <fingerprint md5="3b0825322b33b25b4c777550787aaf16"/>
+    </file>
+    <file name="..\..\framework\controls\CheckBox.pbi">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="0" sortindex="30" panelstate="++"/>
+      <fingerprint md5="40cbf4b29e7b0e41f4bf4f5402dda2f5"/>
+    </file>
+    <file name="..\..\framework\controls\RadioButton.pbi">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="0" sortindex="31" panelstate="++"/>
+      <fingerprint md5="18dd5678a88b669ee47f29fb2e347e0a"/>
+    </file>
+    <file name="..\..\framework\controls\ProgressBar.pbi">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="0" sortindex="32" panelstate="++"/>
+      <fingerprint md5="411829a7597025f63757cce7456491d6"/>
+    </file>
+    <file name="..\..\framework\controls\Slider.pbi">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="0" sortindex="33" panelstate="++"/>
+      <fingerprint md5="93bcf46cd300e03f191847cb82e768a5"/>
+    </file>
+    <file name="..\..\framework\controls\ComboBox.pbi">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="0" sortindex="34" panelstate="++"/>
+      <fingerprint md5="b61fe15b950306936e827479244ad9aa"/>
+    </file>
+    <file name="..\..\framework\controls\SpinBox.pbi">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="0" sortindex="35" panelstate="++"/>
+      <fingerprint md5="2906cd1c34026d51cf3bc5a95a773d09"/>
+    </file>
+    <file name="..\..\framework\controls\Editor.pbi">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="0" sortindex="36" panelstate="++"/>
+      <fingerprint md5="f3a7670d25c16e56ce0f1c5f4eff8119"/>
+    </file>
+    <file name="..\..\framework\controls\ListView.pbi">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="0" sortindex="37" panelstate="++"/>
+      <fingerprint md5="9104eb7a7643300057f04c24ea19202b"/>
+    </file>
+    <file name="..\..\framework\controls\TreeView.pbi">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="0" sortindex="38" panelstate="++"/>
+      <fingerprint md5="9e77fa82faa0ec5bc1265c86465e29da"/>
+    </file>
+    <file name="..\..\framework\controls\DatePicker.pbi">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="0" sortindex="39" panelstate="++"/>
+      <fingerprint md5="cb5439af4e78e970b0c29ef5d8f670e3"/>
+    </file>
+    <file name="..\..\framework\controls\GroupBox.pbi">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="0" sortindex="40" panelstate="++"/>
+      <fingerprint md5="39d494fc082c0172f1839ee97c20d700"/>
+    </file>
+    <file name="..\..\framework\controls\TabControl.pbi">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="0" sortindex="41" panelstate="++"/>
+      <fingerprint md5="fe077fa03dead9843c009e0cd9634a03"/>
+    </file>
+    <file name="..\..\framework\controls\ToggleSwitch.pbi">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="0" sortindex="42" panelstate="++"/>
+      <fingerprint md5="2759b5f10f07a50b1dcf2d53f8595d15"/>
+    </file>
+    <file name="..\..\framework\controls\ListIcon.pbi">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="0" sortindex="43" panelstate="++"/>
+      <fingerprint md5="b4dd58945f65c636eb2b89f0ba1e1f59"/>
+    </file>
+    <file name="..\..\framework\mvvm\MVVM.pbi">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="0" sortindex="44" panelstate="++"/>
+      <fingerprint md5="8b822d07dca8716e2f1d382224a8a983"/>
+    </file>
+    <file name="..\..\framework\mvvm\ObservableObject.pbi">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="0" sortindex="45" panelstate="++"/>
+      <fingerprint md5="c32890197b3f2d424f059b36a490547f"/>
+    </file>
+    <file name="..\..\framework\mvvm\ObservableCollection.pbi">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="0" sortindex="46" panelstate="++"/>
+      <fingerprint md5="6b1b99c93be72f747f392f0b2bcd0933"/>
+    </file>
+    <file name="..\..\framework\mvvm\Property.pbi">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="0" sortindex="47" panelstate="++"/>
+      <fingerprint md5="9e60dccccff8a63f99ff5cdc00b36d6f"/>
+    </file>
+    <file name="..\..\framework\mvvm\RelayCommand.pbi">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="0" sortindex="48" panelstate="++"/>
+      <fingerprint md5="4c1535ab14095fa128c392fd85a5ba9d"/>
+    </file>
+    <file name="..\..\framework\mvvm\ViewModelBase.pbi">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="0" sortindex="49" panelstate="++"/>
+      <fingerprint md5="1f200bbd08a9ade054ebeb3a52c3d05b"/>
+    </file>
+    <file name="..\..\framework\mvvm\BindingEngine.pbi">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="0" sortindex="50" panelstate="++"/>
+      <fingerprint md5="0c1a937b31b447d24c475619920d85c0"/>
+    </file>
+  </section>
+  <section name="targets">
+    <target name="Cible par défaut" enabled="1" default="1">
+      <inputfile value="main.pb"/>
+      <outputfile value="project_dashboard.exe"/>
+      <options xpskin="1" dpiaware="1" debug="1" thread="1" optimizer="0"/>
+    </target>
+  </section>
+</project>

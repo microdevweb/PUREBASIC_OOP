@@ -135,7 +135,7 @@ Procedure UI_MVVM_RegisterBinding(*control.UI_Gadget_vt, targetProp.s, *viewMode
 
   ; Initial push from ViewModel to View
   Protected initialVal.s = *viewModel\GetValueAsString(sourceProp)
-  If initialVal <> "" And IsGadget(*control\GetID())
+  If IsGadget(*control\GetID())
     Protected tProp.s = LCase(targetProp)
     Select tProp
       Case "text", "value"

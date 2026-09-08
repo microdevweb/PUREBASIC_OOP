@@ -32,8 +32,10 @@ XIncludeFile "controls/ToggleSwitch.pbi"
 Namespace UI {
 
   Class XMLLoader {
+    Protected currentXmlDir.s
 
     Public Method Init() {
+      This\currentXmlDir = ""
     }
 
     Public Method Free() {
@@ -144,6 +146,36 @@ Namespace UI {
             Wend
 
             *resDict\AddStyle(*style)
+          ElseIf childTag = "RESOURCEDICTIONARY"
+            Protected srcPath.s = GetXMLAttribute(*child, "Source")
+            If srcPath = "" : srcPath = GetXMLAttribute(*child, "source") : EndIf
+            If srcPath <> ""
+              Protected fullSrcPath.s = srcPath
+              If This\currentXmlDir <> "" And FileSize(fullSrcPath) <= 0
+                fullSrcPath = This\currentXmlDir + srcPath
+              EndIf
+              If FileSize(fullSrcPath) <= 0 And FileSize(GetPathPart(ProgramFilename()) + srcPath) > 0
+                fullSrcPath = GetPathPart(ProgramFilename()) + srcPath
+              EndIf
+              If FileSize(fullSrcPath) <= 0 And FileSize("styles/" + srcPath) > 0
+                fullSrcPath = "styles/" + srcPath
+              EndIf
+              If FileSize(fullSrcPath) > 0
+                Protected extXml.i = LoadXML(#PB_Any, fullSrcPath)
+                If extXml And XMLStatus(extXml) = #PB_XML_Success
+                  Protected *extRoot = MainXMLNode(extXml)
+                  If *extRoot
+                    This\ParseResources(*extRoot, *targetWindow)
+                  EndIf
+                  FreeXML(extXml)
+                EndIf
+              EndIf
+            Else
+              ; Dictionnaire inline
+              This\ParseResources(*child, *targetWindow)
+            EndIf
+          ElseIf childTag = "RESOURCEDICTIONARY.MERGEDDICTIONARIES"
+            This\ParseResources(*child, *targetWindow)
           EndIf
         EndIf
         *child = NextXMLNode(*child)
@@ -153,11 +185,13 @@ Namespace UI {
     ; ------------------------------------------------------------------------
     ; Helper: Apply CanvasControl styling tokens (WPF Hover, Pressed, Colors, Typo)
     ; ------------------------------------------------------------------------
-    Protected Method ApplyCanvasControlAttributes(*ctrl.UI::CanvasControl, node.i, *targetWindow.UI::Window) {
+    Protected Method ApplyCanvasControlAttributes(*ctrl.UI::CanvasControl, node.i, *targetWindow.UI::Window, *parentContainer.UI::Layouts::Container = 0) {
       If Not *ctrl : ProcedureReturn : EndIf
 
-      ; Hériter de la couleur de fond de la fenêtre
-      If *targetWindow
+      ; Hériter de la couleur de fond du conteneur parent ou de la fenêtre
+      If *parentContainer And *parentContainer\GetBackground() <> 0
+        *ctrl\SetParentBackground(*parentContainer\GetBackground())
+      ElseIf *targetWindow
         *ctrl\SetParentBackground(*targetWindow\GetBackgroundColor())
       EndIf
 
@@ -238,6 +272,16 @@ Namespace UI {
       Protected thickStr.s = GetXMLAttribute(node, "BorderThickness")
       If thickStr <> ""
         *ctrl\SetBorderThickness(Val(thickStr))
+      EndIf
+
+      Protected borderLeftThickStr.s = GetXMLAttribute(node, "BorderLeftThickness")
+      If borderLeftThickStr <> ""
+        *ctrl\SetBorderLeftThickness(Val(borderLeftThickStr))
+      EndIf
+
+      Protected borderLeftColorStr.s = GetXMLAttribute(node, "BorderLeftColor")
+      If borderLeftColorStr <> ""
+        *ctrl\SetBorderLeftColor(This\ParseColor(borderLeftColorStr, *ctrl\GetBorderLeftColor()))
       EndIf
 
       Protected radStr.s = GetXMLAttribute(node, "CornerRadius")
@@ -368,6 +412,25 @@ Namespace UI {
       If enStr = "FALSE" Or enStr = "0"
         *comp\SetEnabled(#False)
       EndIf
+
+      ; Visual Styling (Background, Border, CornerRadius for Container and Controls)
+      Protected bgVal.s = GetXMLAttribute(node, "Background")
+      If bgVal = "" : bgVal = GetXMLAttribute(node, "Bg") : EndIf
+      If bgVal <> "" And Left(bgVal, 1) <> "{"
+        *comp\SetBackground(This\ParseColor(bgVal, *comp\GetBackground()))
+      EndIf
+
+      Protected bcVal.s = GetXMLAttribute(node, "BorderColor")
+      If bcVal = "" : bcVal = GetXMLAttribute(node, "BorderBrush") : EndIf
+      If bcVal <> ""
+        *comp\SetBorderColor(This\ParseColor(bcVal, 0))
+      EndIf
+
+      Protected btVal.s = GetXMLAttribute(node, "BorderThickness")
+      If btVal <> "" : *comp\SetBorderThickness(Val(btVal)) : EndIf
+
+      Protected crVal.s = GetXMLAttribute(node, "CornerRadius")
+      If crVal <> "" : *comp\SetCornerRadius(Val(crVal)) : EndIf
 
       ; MVVM DataBindings
       This\ApplyDataBindings(*comp, node, *targetWindow)
@@ -678,11 +741,15 @@ Namespace UI {
               Protected *gChild.UI::Component = This\ParseNode(*gChildNode, *targetWindow, *grid)
               If *gChild
                 Protected rowVal.i = Val(GetXMLAttribute(*gChildNode, "Row"))
+                If rowVal = 0 : rowVal = Val(GetXMLAttribute(*gChildNode, "Grid.Row")) : EndIf
                 Protected colVal.i = Val(GetXMLAttribute(*gChildNode, "Col"))
                 If colVal = 0 : colVal = Val(GetXMLAttribute(*gChildNode, "Column")) : EndIf
+                If colVal = 0 : colVal = Val(GetXMLAttribute(*gChildNode, "Grid.Column")) : EndIf
                 Protected rowSpan.i = Val(GetXMLAttribute(*gChildNode, "RowSpan"))
+                If rowSpan <= 0 : rowSpan = Val(GetXMLAttribute(*gChildNode, "Grid.RowSpan")) : EndIf
                 If rowSpan <= 0 : rowSpan = 1 : EndIf
                 Protected colSpan.i = Val(GetXMLAttribute(*gChildNode, "ColSpan"))
+                If colSpan <= 0 : colSpan = Val(GetXMLAttribute(*gChildNode, "Grid.ColumnSpan")) : EndIf
                 If colSpan <= 0 : colSpan = 1 : EndIf
 
                 *grid\SetCellSpan(*gChild, rowVal, colVal, rowSpan, colSpan)
@@ -712,6 +779,29 @@ Namespace UI {
               EndIf
             EndIf
             *cntChildNode = NextXMLNode(*cntChildNode)
+          Wend
+
+        Case "BORDER"
+          Protected *border.UI::Layouts::Container = New UI::Layouts::Container()
+          Protected bPadStr.s = GetXMLAttribute(node, "Padding")
+          If bPadStr <> ""
+            Protected bpL.INTEGER, bpT.INTEGER, bpR.INTEGER, bpB.INTEGER
+            This\ParseBoxValues(bPadStr, @bpL, @bpT, @bpR, @bpB)
+            *border\SetPadding(bpL\i, bpT\i, bpR\i, bpB\i)
+          EndIf
+
+          This\ApplyCommonAttributes(*border, node, *targetWindow)
+          *createdComp = *border
+
+          Protected *bChildNode = ChildXMLNode(node)
+          While *bChildNode
+            If XMLNodeType(*bChildNode) = #PB_XML_Normal
+              Protected *bChild.UI::Component = This\ParseNode(*bChildNode, *targetWindow, *border)
+              If *bChild
+                *border\AddChild(*bChild)
+              EndIf
+            EndIf
+            *bChildNode = NextXMLNode(*bChildNode)
           Wend
 
         ; ====================================================================
@@ -987,8 +1077,18 @@ Namespace UI {
           Protected btnRad.s = GetXMLAttribute(node, "CornerRadius")
           If btnRad <> "" : *cbtn\SetCornerRadius(Val(btnRad)) : EndIf
 
+          Protected btnAlignStr.s = UCase(Trim(GetXMLAttribute(node, "HAlign")))
+          If btnAlignStr = "" : btnAlignStr = UCase(Trim(GetXMLAttribute(node, "TextAlignment"))) : EndIf
+          If btnAlignStr = "LEFT"
+            *cbtn\SetTextAlignment(1)
+          ElseIf btnAlignStr = "RIGHT"
+            *cbtn\SetTextAlignment(2)
+          ElseIf btnAlignStr = "CENTER"
+            *cbtn\SetTextAlignment(0)
+          EndIf
+
           This\ApplyCommonAttributes(*cbtn, node, *targetWindow)
-          This\ApplyCanvasControlAttributes(*cbtn, node, *targetWindow)
+          This\ApplyCanvasControlAttributes(*cbtn, node, *targetWindow, *parentContainer)
           *createdComp = *cbtn
 
         Case "CANVASTEXT"
@@ -996,7 +1096,9 @@ Namespace UI {
           If ctxtText = "" : ctxtText = GetXMLAttribute(node, "text") : EndIf
           If ctxtText = "" : ctxtText = GetXMLNodeText(node) : EndIf
           Protected *ctxt.UI::CanvasText = New UI::CanvasText()
-          If ctxtText <> "" : *ctxt\SetText(ctxtText) : EndIf
+          If ctxtText <> "" And Left(ctxtText, 1) <> "{"
+            *ctxt\SetText(ctxtText)
+          EndIf
 
           Protected ctxthAlignStr.s = UCase(Trim(GetXMLAttribute(node, "HAlign")))
           If ctxthAlignStr = "" : ctxthAlignStr = UCase(Trim(GetXMLAttribute(node, "TextAlignment"))) : EndIf
@@ -1022,7 +1124,7 @@ Namespace UI {
           If ctxtTrans = "FALSE" Or ctxtTrans = "0" : *ctxt\SetTransparent(#False) : EndIf
 
           This\ApplyCommonAttributes(*ctxt, node, *targetWindow)
-          This\ApplyCanvasControlAttributes(*ctxt, node, *targetWindow)
+          This\ApplyCanvasControlAttributes(*ctxt, node, *targetWindow, *parentContainer)
           *createdComp = *ctxt
 
         Case "CANVASTEXTBOX"
@@ -1032,7 +1134,9 @@ Namespace UI {
           If ctbPH = "" : ctbPH = GetXMLAttribute(node, "placeholder") : EndIf
 
           Protected *ctb.UI::CanvasTextBox = New UI::CanvasTextBox()
-          If ctbText <> "" : *ctb\SetText(ctbText) : EndIf
+          If ctbText <> "" And Left(ctbText, 1) <> "{"
+            *ctb\SetText(ctbText)
+          EndIf
           If ctbPH <> "" : *ctb\SetPlaceholder(ctbPH) : EndIf
 
           Protected ctbPHCol.s = GetXMLAttribute(node, "PlaceholderColor")
@@ -1056,7 +1160,7 @@ Namespace UI {
           If ctbMaxLStr <> "" : *ctb\SetMaxLength(Val(ctbMaxLStr)) : EndIf
 
           This\ApplyCommonAttributes(*ctb, node, *targetWindow)
-          This\ApplyCanvasControlAttributes(*ctb, node, *targetWindow)
+          This\ApplyCanvasControlAttributes(*ctb, node, *targetWindow, *parentContainer)
           *createdComp = *ctb
 
       EndSelect
@@ -1080,6 +1184,8 @@ Namespace UI {
       If FileSize(actualPath) <= 0
         ProcedureReturn #False
       EndIf
+
+      This\currentXmlDir = GetPathPart(actualPath)
 
       Protected xmlHandle.i = LoadXML(#PB_Any, actualPath)
       If Not xmlHandle Or XMLStatus(xmlHandle) <> #PB_XML_Success

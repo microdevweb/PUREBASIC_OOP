@@ -1,0 +1,7 @@
+OpenWindow(0, 100, 100, 600, 400, "Test Container", #PB_Window_SystemMenu)
+SetWindowColor(0, RGB(248, 250, 252))
+c = ContainerGadget(#PB_Any, 0, 0, 200, 400, #PB_Container_BorderLess)
+SetGadgetColor(c, #PB_Gadget_BackColor, RGB($18, $18, $1B))
+CloseGadgetList()
+Delay(200)
+CloseWindow(0)

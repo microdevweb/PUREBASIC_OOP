@@ -1,4 +1,4 @@
-﻿; ============================================================================
+; ============================================================================
 ; PureBasic OOP GUI Framework - Grid.pbi
 ; 2D Flexible Grid layout panel with star sizing and row/column span
 ; Author:      MicrodevWeb
@@ -90,6 +90,10 @@ Namespace UI::Layouts {
 
     Public Method Arrange(nx.i, ny.i, nw.i, nh.i) {
       This\SetPosition(nx, ny, nw, nh)
+      If (This\bgGadgetId And IsGadget(This\bgGadgetId)) {
+        ResizeGadget(This\bgGadgetId, nx, ny, nw, nh)
+        This\DrawBackground(nw, nh)
+      }
       If This\id And IsGadget(This\id)
         ResizeGadget(This\id, nx, ny, nw, nh)
       EndIf
