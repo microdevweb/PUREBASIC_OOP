@@ -222,6 +222,7 @@ Interface UI_Window_vt Extends UI_Component_vt
   RegisterControl(name_p.s, *ctrl.UI_Component_vt)
   FindControl.i(name_p.s)
   SetBackgroundColor(col_p.i)
+  GetBackgroundColor.i()
   LoadView.b(xmlPath.s, *dataContext_p)
   LoadViewFromString.b(xmlContent.s, *dataContext_p)
   Close()
@@ -305,6 +306,8 @@ Interface UI_CanvasControl_vt Extends UI_Gadget_vt
   OnInput(char_p.i)
   OnLeftDoubleClick(mx_p.i, my_p.i)
   SetTypography(fontName_p.s, fontSize_p.i, bold_p.b)
+  SetParentBackground(col_p.i)
+  GetParentBackground.i()
 EndInterface
 
 Interface UI_CustomGadget_vt Extends UI_CanvasControl_vt
@@ -757,6 +760,7 @@ Structure UI_Window_Inst Extends UI_Component_Inst
   title.s
   flags.i
   parentID.i
+  backgroundColor.i
   Map *namedControls.UI_Component_vt()
   *rootContent.UI_Component_vt
 EndStructure
@@ -793,6 +797,7 @@ Structure UI_CanvasControl_Inst Extends UI_Gadget_Inst
   paddingRight.i
   paddingBottom.i
   ownedFont.i
+  parentBackground.i
 EndStructure
 
 Structure UI_CustomGadget_Inst Extends UI_CanvasControl_Inst
@@ -1169,6 +1174,7 @@ Declare.i UI_Window_FindControl(*This.UI_Window_Inst, name_p.s)
 Declare UI_Window_SetDataContext(*This.UI_Window_Inst, *dc)
 Declare.i UI_Window_GetDataContext(*This.UI_Window_Inst)
 Declare UI_Window_SetBackgroundColor(*This.UI_Window_Inst, col_p.i)
+Declare.i UI_Window_GetBackgroundColor(*This.UI_Window_Inst)
 Declare.b UI_Window_LoadView(*This.UI_Window_Inst, xmlPath.s, *dataContext_p)
 Declare.b UI_Window_LoadViewFromString(*This.UI_Window_Inst, xmlContent.s, *dataContext_p)
 Declare UI_Window_Close(*This.UI_Window_Inst)
@@ -1262,6 +1268,9 @@ Declare UI_CanvasControl_OnInput(*This.UI_CanvasControl_Inst, char_p.i)
 Declare UI_CanvasControl_OnLeftDoubleClick(*This.UI_CanvasControl_Inst, mx_p.i, my_p.i)
 Declare UI_CanvasControl_OnCustomEvent(*This.UI_CanvasControl_Inst, eventType_p.i)
 Declare UI_CanvasControl_SetTypography(*This.UI_CanvasControl_Inst, fontName_p.s, fontSize_p.i, bold_p.b)
+Declare UI_CanvasControl_SetParentBackground(*This.UI_CanvasControl_Inst, col_p.i)
+Declare.i UI_CanvasControl_GetParentBackground(*This.UI_CanvasControl_Inst)
+Declare UI_CanvasControl_Arrange(*This.UI_CanvasControl_Inst, nx.i, ny.i, nw.i, nh.i)
 Declare UI_CanvasControl_Free(*This.UI_CanvasControl_Inst)
 Declare UI_CustomGadget_Init_void(*This.UI_CustomGadget_Inst)
 Declare UI_CustomGadget_Init_i_i(*This.UI_CustomGadget_Inst, w_p.i, h_p.i)
@@ -2623,9 +2632,18 @@ EndProcedure
 
 Procedure UI_Window_SetBackgroundColor(*This.UI_Window_Inst, col_p.i)
   Protected *This_vt.UI_Window_vt = *This
+        *This\backgroundColor = col_p
   If (*This\id And IsWindow(*This\id))
           SetWindowColor(*This\id, col_p)
   EndIf
+EndProcedure
+
+Procedure.i UI_Window_GetBackgroundColor(*This.UI_Window_Inst)
+  Protected *This_vt.UI_Window_vt = *This
+        If *This\backgroundColor = 0
+          ProcedureReturn RGB(248, 249, 250)
+        EndIf
+        ProcedureReturn *This\backgroundColor
 EndProcedure
 
 Procedure.b UI_Window_LoadView(*This.UI_Window_Inst, xmlPath.s, *dataContext_p)
@@ -2881,6 +2899,7 @@ Procedure UI_CanvasControl_InitDefaults(*This.UI_CanvasControl_Inst)
         *This\mouseY = 0
         *This\text = ""
         *This\ownedFont = 0
+        *This\parentBackground = RGB(241, 245, 249) ; Fond par défaut du thème clair / fenêtre
   
         ; Palette par défaut moderne (Light)
         *This\background = RGB(255, 255, 255)
@@ -3293,6 +3312,10 @@ EndProcedure
 
 Procedure UI_CanvasControl_DrawControlBackground(*This.UI_CanvasControl_Inst, w_p.i, h_p.i)
   Protected *This_vt.UI_CanvasControl_vt = *This
+        ; Effacer l'arriere-plan du canvas avec la couleur du conteneur parent
+        ; pour eviter les artefacts carres autour des coins arrondis
+        Box(0, 0, w_p, h_p, *This\parentBackground)
+  
         Protected curBg.i = *This_vt\GetCurrentBackgroundColor()
         Protected curBorder.i = *This_vt\GetCurrentBorderColor()
         Protected scaledRadius.i = DesktopScaledX(*This\cornerRadius)
@@ -3475,6 +3498,26 @@ Procedure UI_CanvasControl_SetTypography(*This.UI_CanvasControl_Inst, fontName_p
           *This\fontID = FontID(newFont)
           *This_vt\Redraw()
         EndIf
+EndProcedure
+
+Procedure UI_CanvasControl_SetParentBackground(*This.UI_CanvasControl_Inst, col_p.i)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        *This\parentBackground = col_p
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure.i UI_CanvasControl_GetParentBackground(*This.UI_CanvasControl_Inst)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        ProcedureReturn *This\parentBackground
+EndProcedure
+
+Procedure UI_CanvasControl_Arrange(*This.UI_CanvasControl_Inst, nx.i, ny.i, nw.i, nh.i)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        *This_vt\SetPosition(nx, ny, nw, nh)
+  If (*This\id And IsGadget(*This\id))
+          ResizeGadget(*This\id, nx, ny, nw, nh)
+  EndIf
+        *This_vt\Redraw()
 EndProcedure
 
 Procedure UI_CanvasControl_Free(*This.UI_CanvasControl_Inst)
@@ -6705,8 +6748,8 @@ Procedure UI_CanvasText_OnPaint(*This.UI_CanvasText_Inst, w_p.i, h_p.i)
         If (Not *This\isTransparent) Or *This\borderThickness > 0
           *This_vt\DrawControlBackground(w_p, h_p)
         Else
-          ; Effacement avec la couleur de fond de base
-          Box(0, 0, w_p, h_p, *This\background)
+          ; Effacement avec la couleur du conteneur parent
+          Box(0, 0, w_p, h_p, *This\parentBackground)
         EndIf
   
         ; 2. Police
@@ -8801,6 +8844,11 @@ Procedure UI_XMLLoader_ApplyCanvasControlAttributes(*This.UI_XMLLoader_Inst, *ct
   Protected *This_vt.UI_XMLLoader_vt = *This
         If Not *ctrl : ProcedureReturn : EndIf
   
+        ; Hériter de la couleur de fond de la fenêtre
+        If *targetWindow
+          *ctrl\SetParentBackground(*targetWindow\GetBackgroundColor())
+        EndIf
+  
         ; 1. Normal Colors & Background
         Protected bgStr.s = GetXMLAttribute(node, "Background")
         If bgStr = "" : bgStr = GetXMLAttribute(node, "Bg") : EndIf
@@ -9794,6 +9842,7 @@ DataSection
     Data.i @UI_Window_RegisterControl()
     Data.i @UI_Window_FindControl()
     Data.i @UI_Window_SetBackgroundColor()
+    Data.i @UI_Window_GetBackgroundColor()
     Data.i @UI_Window_LoadView()
     Data.i @UI_Window_LoadViewFromString()
     Data.i @UI_Window_Close()
@@ -11436,7 +11485,7 @@ DataSection
     Data.i @UI_Component_GetMaxHeight()
     Data.i @UI_Component_GetDesiredWidth()
     Data.i @UI_Component_GetDesiredHeight()
-    Data.i @UI_Component_Arrange()
+    Data.i @UI_CanvasControl_Arrange()
     Data.i @UI_CanvasControl_GetText()
     Data.i @UI_CanvasControl_SetText()
     Data.i @UI_Gadget_SetToolTip()
@@ -11520,6 +11569,8 @@ DataSection
     Data.i @UI_CanvasControl_OnInput()
     Data.i @UI_CanvasControl_OnLeftDoubleClick()
     Data.i @UI_CanvasControl_SetTypography()
+    Data.i @UI_CanvasControl_SetParentBackground()
+    Data.i @UI_CanvasControl_GetParentBackground()
     Data.i @UI_CanvasButton_SetDefaultStyle()
     Data.i @UI_CanvasButton_SetPrimaryStyle()
     Data.i @UI_CanvasButton_SetSuccessStyle()
@@ -11581,7 +11632,7 @@ DataSection
     Data.i @UI_Component_GetMaxHeight()
     Data.i @UI_Component_GetDesiredWidth()
     Data.i @UI_Component_GetDesiredHeight()
-    Data.i @UI_Component_Arrange()
+    Data.i @UI_CanvasControl_Arrange()
     Data.i @UI_CanvasControl_GetText()
     Data.i @UI_CanvasControl_SetText()
     Data.i @UI_Gadget_SetToolTip()
@@ -11665,6 +11716,8 @@ DataSection
     Data.i @UI_CanvasControl_OnInput()
     Data.i @UI_CanvasControl_OnLeftDoubleClick()
     Data.i @UI_CanvasControl_SetTypography()
+    Data.i @UI_CanvasControl_SetParentBackground()
+    Data.i @UI_CanvasControl_GetParentBackground()
     Data.i @UI_CanvasText_SetAlignment()
     Data.i @UI_CanvasText_SetEllipsis()
     Data.i @UI_CanvasText_GetEllipsis()
@@ -11721,7 +11774,7 @@ DataSection
     Data.i @UI_Component_GetMaxHeight()
     Data.i @UI_Component_GetDesiredWidth()
     Data.i @UI_Component_GetDesiredHeight()
-    Data.i @UI_Component_Arrange()
+    Data.i @UI_CanvasControl_Arrange()
     Data.i @UI_CanvasControl_GetText()
     Data.i @UI_CanvasTextBox_SetText()
     Data.i @UI_Gadget_SetToolTip()
@@ -11805,6 +11858,8 @@ DataSection
     Data.i @UI_CanvasTextBox_OnInput()
     Data.i @UI_CanvasTextBox_OnLeftDoubleClick()
     Data.i @UI_CanvasControl_SetTypography()
+    Data.i @UI_CanvasControl_SetParentBackground()
+    Data.i @UI_CanvasControl_GetParentBackground()
     Data.i @UI_CanvasTextBox_InitTextBoxDefaults()
     Data.i @UI_CanvasTextBox_GetPlaceholder()
     Data.i @UI_CanvasTextBox_SetPlaceholder()
@@ -11887,7 +11942,7 @@ DataSection
     Data.i @UI_Component_GetMaxHeight()
     Data.i @UI_Component_GetDesiredWidth()
     Data.i @UI_Component_GetDesiredHeight()
-    Data.i @UI_Component_Arrange()
+    Data.i @UI_CanvasControl_Arrange()
     Data.i @UI_CanvasControl_GetText()
     Data.i @UI_CanvasControl_SetText()
     Data.i @UI_Gadget_SetToolTip()
@@ -11971,6 +12026,8 @@ DataSection
     Data.i @UI_CanvasControl_OnInput()
     Data.i @UI_CanvasControl_OnLeftDoubleClick()
     Data.i @UI_CanvasControl_SetTypography()
+    Data.i @UI_CanvasControl_SetParentBackground()
+    Data.i @UI_CanvasControl_GetParentBackground()
   UI_ListIcon_VTable_Data:
     Data.i @UI_Component_SetDataContext()
     Data.i @UI_Component_GetDataContext()
@@ -12220,7 +12277,7 @@ DataSection
     Data.i @UI_Component_GetMaxHeight()
     Data.i @UI_Component_GetDesiredWidth()
     Data.i @UI_Component_GetDesiredHeight()
-    Data.i @UI_Component_Arrange()
+    Data.i @UI_CanvasControl_Arrange()
     Data.i @UI_CanvasControl_GetText()
     Data.i @UI_CanvasControl_SetText()
     Data.i @UI_Gadget_SetToolTip()
@@ -12304,6 +12361,8 @@ DataSection
     Data.i @UI_CanvasControl_OnInput()
     Data.i @UI_CanvasControl_OnLeftDoubleClick()
     Data.i @UI_CanvasControl_SetTypography()
+    Data.i @UI_CanvasControl_SetParentBackground()
+    Data.i @UI_CanvasControl_GetParentBackground()
     Data.i @UI_CanvasTree_GetRoot()
     Data.i @UI_CanvasTree_GetSelectedNode()
     Data.i @UI_CanvasTree_SetSelectedNode()

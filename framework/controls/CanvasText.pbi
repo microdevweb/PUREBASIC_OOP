@@ -171,8 +171,8 @@ Namespace UI {
       If (Not This\isTransparent) Or This\borderThickness > 0
         This\DrawControlBackground(w_p, h_p)
       Else
-        ; Effacement avec la couleur de fond de base
-        Box(0, 0, w_p, h_p, This\background)
+        ; Effacement avec la couleur du conteneur parent
+        Box(0, 0, w_p, h_p, This\parentBackground)
       EndIf
 
       ; 2. Police

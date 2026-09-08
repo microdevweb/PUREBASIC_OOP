@@ -98,7 +98,7 @@ def capture_window_for_pid(pid, output_png, wait_sec=2.0, kill_after=True):
 
         print(f"[CAPTURE] Window found: HWND={target_hwnd}, Title='{target_title}'")
         win32gui.ShowWindow(target_hwnd, win32con.SW_RESTORE)
-        win32gui.SetForegroundWindow(target_hwnd)
+        win32gui.SetWindowPos(target_hwnd, win32con.HWND_TOPMOST, 0, 0, 0, 0, win32con.SWP_NOMOVE | win32con.SWP_NOSIZE)
         time.sleep(0.5)
 
         rect = win32gui.GetWindowRect(target_hwnd)

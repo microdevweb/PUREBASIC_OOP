@@ -100,6 +100,11 @@ Namespace UI {
     Protected Method ApplyCanvasControlAttributes(*ctrl.UI::CanvasControl, node.i, *targetWindow.UI::Window) {
       If Not *ctrl : ProcedureReturn : EndIf
 
+      ; Hériter de la couleur de fond de la fenêtre
+      If *targetWindow
+        *ctrl\SetParentBackground(*targetWindow\GetBackgroundColor())
+      EndIf
+
       ; 1. Normal Colors & Background
       Protected bgStr.s = GetXMLAttribute(node, "Background")
       If bgStr = "" : bgStr = GetXMLAttribute(node, "Bg") : EndIf

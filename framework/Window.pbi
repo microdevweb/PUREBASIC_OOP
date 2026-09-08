@@ -13,6 +13,7 @@ Namespace UI {
     Protected title.s
     Protected flags.i
     Protected parentID.i
+    Protected backgroundColor.i
     Protected Map *namedControls.UI::Component()
 
     ; ------------------------------------------------------------------------
@@ -255,9 +256,17 @@ Namespace UI {
     }
 
     Public Method SetBackgroundColor(col_p.i) {
+      This\backgroundColor = col_p
       If (This\id And IsWindow(This\id)) {
         SetWindowColor(This\id, col_p)
       }
+    }
+
+    Public Method.i GetBackgroundColor() {
+      If This\backgroundColor = 0
+        ProcedureReturn RGB(248, 249, 250)
+      EndIf
+      ProcedureReturn This\backgroundColor
     }
 
     Public Method.b LoadView(xmlPath.s, *dataContext_p = 0) {

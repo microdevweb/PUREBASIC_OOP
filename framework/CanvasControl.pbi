@@ -63,6 +63,9 @@ Namespace UI {
     ; Typographie autonome
     Protected ownedFont.i
 
+    ; Arrière-plan du conteneur parent (pour transparence et coins arrondis propres)
+    Protected parentBackground.i
+
     ; --- Initialisation des valeurs par défaut ---
     Protected Method InitDefaults() {
       This\visualState = #UI_VisualState_Normal
@@ -73,6 +76,7 @@ Namespace UI {
       This\mouseY = 0
       This\text = ""
       This\ownedFont = 0
+      This\parentBackground = RGB(241, 245, 249) ; Fond par défaut du thème clair / fenêtre
 
       ; Palette par défaut moderne (Light)
       This\background = RGB(255, 255, 255)
@@ -449,6 +453,10 @@ Namespace UI {
     ; --- Helpers Graphiques Intégrés ---
 
     Public Method DrawControlBackground(w_p.i, h_p.i) {
+      ; Effacer l'arriere-plan du canvas avec la couleur du conteneur parent
+      ; pour eviter les artefacts carres autour des coins arrondis
+      Box(0, 0, w_p, h_p, This\parentBackground)
+
       Protected curBg.i = This\GetCurrentBackgroundColor()
       Protected curBorder.i = This\GetCurrentBorderColor()
       Protected scaledRadius.i = DesktopScaledX(This\cornerRadius)
@@ -623,6 +631,24 @@ Namespace UI {
         This\fontID = FontID(newFont)
         This\Redraw()
       EndIf
+    }
+
+    Public Method SetParentBackground(col_p.i) {
+      This\parentBackground = col_p
+      This\Redraw()
+    }
+
+    Public Method.i GetParentBackground() {
+      ProcedureReturn This\parentBackground
+    }
+
+    ; Virtual Layout Arrange method: redessine imperativement le canvas des que sa taille reelle est fixee
+    Public Method Arrange(nx.i, ny.i, nw.i, nh.i) {
+      This\SetPosition(nx, ny, nw, nh)
+      If (This\id And IsGadget(This\id)) {
+        ResizeGadget(This\id, nx, ny, nw, nh)
+      }
+      This\Redraw()
     }
 
     ; --- Nettoyage ---
