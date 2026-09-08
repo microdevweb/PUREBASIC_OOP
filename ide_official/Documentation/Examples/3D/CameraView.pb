@@ -107,7 +107,7 @@ Procedure onde2D(*o.tonde)
       For i = 0 To \lv: \tonde(i) = \ct * \lv*Sin((2 * i * #PI)/\lv ): Next
       For i = 0 To \GoNb - 1: \gocp(i) = i * (\lv / \GoNb): \mx(i) = 0: \my(i) = 0: Next
     ElseIf \cpt<500
-      ; arrivée des perturbations
+      ; arrivÃ©e des perturbations
       If \ef<4
       For i = 0 To \GoNb - 1
         If \gocp(i) = 0
@@ -177,7 +177,7 @@ o\dy= 128     ;                    "           "
 o\lv = 8*2    ;largeur des vagues (valeur minimum: 8) 
 o\ct = 64*2   ;hauteur des vagues
 o\ef = 1      ;effets [F1/F2/F3/F4]
-o\GoNb = 8    ;nombre de "gouttes" simultanées
+o\GoNb = 8    ;nombre de "gouttes" simultanÃ©es
 
 modif=1  
 cpt=0   

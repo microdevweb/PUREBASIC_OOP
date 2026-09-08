@@ -10,7 +10,7 @@ Namespace Dashboard {
   Class ProjectDashboardViewModel Extends MVVM::ViewModelBase {
     Public *model.Dashboard::ProjectModel
     
-    ; Propriétés Observables DataBound Ã  l'interface
+    ; PropriÃ©tÃ©s Observables DataBound Ã  l'interface
     Public *ProjectName.MVVM::StringProperty
     Public *StartDate.MVVM::StringProperty
     Public *EndDate.MVVM::StringProperty
@@ -26,7 +26,7 @@ Namespace Dashboard {
 
       This\*model = New Dashboard::ProjectModel()
 
-      ; Enregistrement des propriétés observables
+      ; Enregistrement des propriÃ©tÃ©s observables
       This\*ProjectName        = This\BindString("ProjectName", This\*model\GetName())
       This\*StartDate          = This\BindString("StartDate", This\*model\GetStartDate())
       This\*EndDate            = This\BindString("EndDate", This\*model\GetEndDate())
@@ -79,7 +79,7 @@ Namespace Dashboard {
           This\*StartDate\SetValue("")
           This\*EndDate\SetValue("")
           This\*Description\SetValue("")
-          This\*StatusNotification\SetValue("ðŸ—‘ Données du projet réinitialisées.")
+          This\*StatusNotification\SetValue("ðŸ—‘ DonnÃ©es du projet rÃ©initialisÃ©es.")
           ProcedureReturn #True
 
         ; Action : Ajouter un nouveau projet

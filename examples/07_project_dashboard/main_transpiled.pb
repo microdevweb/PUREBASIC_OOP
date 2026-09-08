@@ -11458,7 +11458,7 @@ Procedure Dashboard_ProjectDashboardViewModel_Init(*This.Dashboard_ProjectDashbo
   
         *This\model = New_Dashboard_ProjectModel()
   
-        ; Enregistrement des propri�t�s observables
+        ; Enregistrement des propriétés observables
         *This\ProjectName        = *This_vt\BindString("ProjectName", *This\model\GetName())
         *This\StartDate          = *This_vt\BindString("StartDate", *This\model\GetStartDate())
         *This\EndDate            = *This_vt\BindString("EndDate", *This\model\GetEndDate())
@@ -11512,7 +11512,7 @@ Procedure.b Dashboard_ProjectDashboardViewModel_OnCommand(*This.Dashboard_Projec
             *This\StartDate\SetValue("")
             *This\EndDate\SetValue("")
             *This\Description\SetValue("")
-            *This\StatusNotification\SetValue("🗑 Donn�es du projet r�initialis�es.")
+            *This\StatusNotification\SetValue("🗑 Données du projet réinitialisées.")
             ProcedureReturn #True
   
           ; Action : Ajouter un nouveau projet
@@ -16899,17 +16899,17 @@ EnableExplicit
 ; 2. Instanciation de l'Application PureBasic OOP
 Define *app.UI_Application_vt = New_UI_Application_s("Project Dashboard - [WPF_ModernUI_App]")
 
-; 3. Instanciation du ViewModel (�tat r�actif et logique m�tier)
+; 3. Instanciation du ViewModel (état réactif et logique métier)
 Define *vm.Dashboard_ProjectDashboardViewModel_vt = New_Dashboard_ProjectDashboardViewModel()
 
 ; 4. Instanciation de la Vue (Injection du ViewModel en DataContext)
 Define *view.Dashboard_ProjectDashboardView_vt = New_Dashboard_ProjectDashboardView(*vm)
 
-; 5. D�finition de la fen�tre principale et lancement de la boucle d'�v�nements
+; 5. Définition de la fenêtre principale et lancement de la boucle d'événements
 *app\SetMainWindow(*view)
 *app\Run_void()
 
-; 6. Lib�ration propre
+; 6. Libération propre
 *view\Free()
 *vm\Free()
 *app\Free()
