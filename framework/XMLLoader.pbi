@@ -95,6 +95,62 @@ Namespace UI {
     }
 
     ; ------------------------------------------------------------------------
+    ; Helper: Parse WPF/XAML <Window.Resources> or <Resources> Styles & Triggers
+    ; ------------------------------------------------------------------------
+    Protected Method ParseResources(resNode.i, *targetWindow.UI::Window) {
+      If Not *targetWindow : ProcedureReturn : EndIf
+      Protected *resDict.UI::ResourceDictionary = *targetWindow\GetResources()
+      If Not *resDict : ProcedureReturn : EndIf
+
+      Protected *child = ChildXMLNode(resNode)
+      While *child
+        If XMLNodeType(*child) = #PB_XML_Normal
+          Protected childTag.s = UCase(GetXMLNodeName(*child))
+          If childTag = "STYLE"
+            Protected targetType.s = GetXMLAttribute(*child, "TargetType")
+            Protected keyStr.s = GetXMLAttribute(*child, "x:Key")
+            If keyStr = "" : keyStr = GetXMLAttribute(*child, "Key") : EndIf
+            Protected basedOnStr.s = GetXMLAttribute(*child, "BasedOn")
+
+            Protected *style.UI::Style = New UI::Style(targetType, keyStr, basedOnStr)
+
+            ; Parcourir les Setters et Triggers du Style
+            Protected *propNode = ChildXMLNode(*child)
+            While *propNode
+              If XMLNodeType(*propNode) = #PB_XML_Normal
+                Protected propTag.s = UCase(GetXMLNodeName(*propNode))
+                If propTag = "SETTER"
+                  Protected sProp.s = GetXMLAttribute(*propNode, "Property")
+                  Protected sVal.s = GetXMLAttribute(*propNode, "Value")
+                  *style\AddSetter(sProp, sVal)
+                ElseIf propTag = "TRIGGER"
+                  Protected tProp.s = GetXMLAttribute(*propNode, "Property")
+                  Protected tVal.s = GetXMLAttribute(*propNode, "Value")
+                  Protected trigIdx.i = *style\AddTrigger(tProp, tVal)
+
+                  ; Setters du trigger
+                  Protected *tChild = ChildXMLNode(*propNode)
+                  While *tChild
+                    If XMLNodeType(*tChild) = #PB_XML_Normal And UCase(GetXMLNodeName(*tChild)) = "SETTER"
+                      Protected tsProp.s = GetXMLAttribute(*tChild, "Property")
+                      Protected tsVal.s = GetXMLAttribute(*tChild, "Value")
+                      *style\AddTriggerSetter(trigIdx, tsProp, tsVal)
+                    EndIf
+                    *tChild = NextXMLNode(*tChild)
+                  Wend
+                EndIf
+              EndIf
+              *propNode = NextXMLNode(*propNode)
+            Wend
+
+            *resDict\AddStyle(*style)
+          EndIf
+        EndIf
+        *child = NextXMLNode(*child)
+      Wend
+    }
+
+    ; ------------------------------------------------------------------------
     ; Helper: Apply CanvasControl styling tokens (WPF Hover, Pressed, Colors, Typo)
     ; ------------------------------------------------------------------------
     Protected Method ApplyCanvasControlAttributes(*ctrl.UI::CanvasControl, node.i, *targetWindow.UI::Window) {
@@ -103,6 +159,25 @@ Namespace UI {
       ; Hériter de la couleur de fond de la fenêtre
       If *targetWindow
         *ctrl\SetParentBackground(*targetWindow\GetBackgroundColor())
+      EndIf
+
+      ; 0. Recherche et application du Style WPF (nommé ou implicite par TargetType)
+      If *targetWindow
+        Protected *resDict.UI::ResourceDictionary = *targetWindow\GetResources()
+        If *resDict
+          Protected *styleToApply.UI::Style = 0
+          Protected styleKey.s = GetXMLAttribute(node, "Style")
+          If styleKey <> ""
+            *styleToApply = *resDict\GetStyle(styleKey)
+          Else
+            Protected nodeTypeName.s = GetXMLNodeName(node)
+            *styleToApply = *resDict\GetImplicitStyle(nodeTypeName)
+          EndIf
+
+          If *styleToApply
+            *ctrl\ApplyStyle(*styleToApply)
+          EndIf
+        EndIf
       EndIf
 
       ; 1. Normal Colors & Background
@@ -259,6 +334,7 @@ Namespace UI {
       Protected hAlignStr.s = UCase(Trim(GetXMLAttribute(node, "HorizontalAlignment")))
       If hAlignStr = "" : hAlignStr = UCase(Trim(GetXMLAttribute(node, "horizontalAlignment"))) : EndIf
       If hAlignStr = "" : hAlignStr = UCase(Trim(GetXMLAttribute(node, "Align"))) : EndIf
+      If hAlignStr = "" : hAlignStr = UCase(Trim(GetXMLAttribute(node, "HAlign"))) : EndIf
       If hAlignStr <> ""
         Select hAlignStr
           Case "LEFT"    : *comp\SetHorizontalAlignment(#UI_Align_Left)
@@ -471,10 +547,15 @@ Namespace UI {
           Protected *childNode = ChildXMLNode(node)
           While *childNode
             If XMLNodeType(*childNode) = #PB_XML_Normal
-              Protected *rootChild.UI::Component = This\ParseNode(*childNode, *targetWindow, 0)
-              If *rootChild And *targetWindow
-                *targetWindow\SetContent(*rootChild)
-                Break
+              Protected cTag.s = UCase(GetXMLNodeName(*childNode))
+              If cTag = "WINDOW.RESOURCES" Or cTag = "RESOURCES"
+                This\ParseResources(*childNode, *targetWindow)
+              Else
+                Protected *rootChild.UI::Component = This\ParseNode(*childNode, *targetWindow, 0)
+                If *rootChild And *targetWindow
+                  *targetWindow\SetContent(*rootChild)
+                  Break
+                EndIf
               EndIf
             EndIf
             *childNode = NextXMLNode(*childNode)

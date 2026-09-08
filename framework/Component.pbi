@@ -331,6 +331,10 @@ Namespace UI {
         ResizeGadget(This\id, nx, ny, nw, nh)
       }
     }
+
+    ; Virtual Animation callback for high-performance transitions
+    Public Method OnAnimationTick(propName.s, value.f) {
+    }
   }
 
 }

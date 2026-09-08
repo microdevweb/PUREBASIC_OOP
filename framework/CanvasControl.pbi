@@ -9,6 +9,7 @@
 
 XIncludeFile "Gadget.pbi"
 XIncludeFile "Application.pbi"
+XIncludeFile "style/Style.pbi"
 
 ; ----------------------------------------------------------------------------
 ; Visual States (WPF VisualStateManager style)
@@ -66,6 +67,26 @@ Namespace UI {
     ; Arrière-plan du conteneur parent (pour transparence et coins arrondis propres)
     Protected parentBackground.i
 
+    ; Propriétés d'animation et de micro-interactions fluides
+    Protected currentScale.f
+    Protected targetScale.f
+    Protected animateHoverScale.b
+
+    ; Moteur de Styles et Triggers Déclaratifs (WPF/XAML)
+    Protected *style.UI::Style
+    Protected baseBackground.i
+    Protected baseForeground.i
+    Protected baseBorderColor.i
+    Protected baseHoverBackground.i
+    Protected baseHoverForeground.i
+    Protected baseHoverBorderColor.i
+    Protected basePressedBackground.i
+    Protected basePressedForeground.i
+    Protected basePressedBorderColor.i
+    Protected baseBorderThickness.i
+    Protected baseCornerRadius.i
+    Protected baseScale.f
+
     ; --- Initialisation des valeurs par défaut ---
     Protected Method InitDefaults() {
       This\visualState = #UI_VisualState_Normal
@@ -77,6 +98,9 @@ Namespace UI {
       This\text = ""
       This\ownedFont = 0
       This\parentBackground = RGB(241, 245, 249) ; Fond par défaut du thème clair / fenêtre
+      This\currentScale = 1.0
+      This\targetScale = 1.0
+      This\animateHoverScale = #False
 
       ; Palette par défaut moderne (Light)
       This\background = RGB(255, 255, 255)
@@ -98,6 +122,21 @@ Namespace UI {
       This\paddingTop = 4
       This\paddingRight = 8
       This\paddingBottom = 4
+
+      ; Enregistrement des valeurs de base pour les triggers
+      This\style = 0
+      This\baseBackground = This\background
+      This\baseForeground = This\foreground
+      This\baseBorderColor = This\borderColor
+      This\baseHoverBackground = This\hoverBackground
+      This\baseHoverForeground = This\hoverForeground
+      This\baseHoverBorderColor = This\hoverBorderColor
+      This\basePressedBackground = This\pressedBackground
+      This\basePressedForeground = This\pressedForeground
+      This\basePressedBorderColor = This\pressedBorderColor
+      This\baseBorderThickness = This\borderThickness
+      This\baseCornerRadius = This\cornerRadius
+      This\baseScale = 1.0
     }
 
     ; Constructeur 1: Par défaut (100x30)
@@ -191,6 +230,9 @@ Namespace UI {
       } ElseIf (This\isFocused) {
         newState = #UI_VisualState_Focused
       }
+
+      ; Application des triggers WPF actifs selon le nouvel état
+      This\ApplyStyleTriggers()
 
       If (oldState <> newState) {
         This\visualState = newState
@@ -462,27 +504,46 @@ Namespace UI {
       Protected scaledRadius.i = DesktopScaledX(This\cornerRadius)
       Protected scaledThick.i = DesktopScaledX(This\borderThickness)
 
+      Protected curMarginX.i = 0
+      Protected curMarginY.i = 0
+
+      If (This\animateHoverScale)
+        Protected baseM.f = 2.0
+        Protected delta.f = (This\currentScale - 1.0) / 0.05
+        Protected mF.f = baseM - (delta * baseM)
+        If mF < 0.0 : mF = 0.0 : ElseIf mF > 4.0 : mF = 4.0 : EndIf
+        curMarginX = DesktopScaledX(Round(mF, #PB_Round_Nearest))
+        curMarginY = DesktopScaledY(Round(mF, #PB_Round_Nearest))
+      EndIf
+
+      Protected drawX.i = curMarginX
+      Protected drawY.i = curMarginY
+      Protected drawW.i = w_p - (curMarginX * 2)
+      Protected drawH.i = h_p - (curMarginY * 2)
+      If drawW < 4 : drawW = 4 : EndIf
+      If drawH < 4 : drawH = 4 : EndIf
+
       If (scaledRadius > 0) {
         ; Fond arrondi avec bordure
         If (scaledThick > 0) {
-          RoundBox(0, 0, w_p, h_p, scaledRadius, scaledRadius, curBorder)
-          If (w_p > scaledThick * 2 And h_p > scaledThick * 2) {
+          RoundBox(drawX, drawY, drawW, drawH, scaledRadius, scaledRadius, curBorder)
+          If (drawW > scaledThick * 2 And drawH > scaledThick * 2) {
             Protected innerR.i = scaledRadius - scaledThick
             If innerR < 0 : innerR = 0 : EndIf
-            RoundBox(scaledThick, scaledThick, w_p - (scaledThick * 2), h_p - (scaledThick * 2), innerR, innerR, curBg)
+            RoundBox(drawX + scaledThick, drawY + scaledThick, drawW - (scaledThick * 2), drawH - (scaledThick * 2), innerR, innerR, curBg)
           }
         } Else {
-          RoundBox(0, 0, w_p, h_p, scaledRadius, scaledRadius, curBg)
+          RoundBox(drawX, drawY, drawW, drawH, scaledRadius, scaledRadius, curBg)
         }
       } Else {
         ; Rectangle standard avec bordure
         If (scaledThick > 0) {
-          Box(0, 0, w_p, h_p, curBorder)
-          If (w_p > scaledThick * 2 And h_p > scaledThick * 2) {
-            Box(scaledThick, scaledThick, w_p - (scaledThick * 2), h_p - (scaledThick * 2), curBg)
+          Box(drawX, drawY, drawW, drawH, curBorder)
+          If (drawW > scaledThick * 2 And drawH > scaledThick * 2) {
+            Box(drawX + scaledThick, drawY + scaledThick, drawW - (scaledThick * 2), drawH - (scaledThick * 2), curBg)
           }
         } Else {
-          Box(0, 0, w_p, h_p, curBg)
+          Box(drawX, drawY, drawW, drawH, curBg)
         }
       }
     }
@@ -515,22 +576,40 @@ Namespace UI {
     Public Method OnMouseEnter() {
       This\isHovered = #True
       This\UpdateVisualState()
+      If (This\animateHoverScale) {
+        UI_InitAnimationEngine()
+        UI_GlobalAnimEngine\StartFloatAnimation(This, "Scale", This\currentScale, 1.05, 120, #UI_ANIM_EASING_EASEOUT_QUAD)
+      }
     }
 
     Public Method OnMouseLeave() {
       This\isHovered = #False
       This\isPressed = #False
       This\UpdateVisualState()
+      If (This\animateHoverScale) {
+        UI_InitAnimationEngine()
+        UI_GlobalAnimEngine\StartFloatAnimation(This, "Scale", This\currentScale, 1.00, 160, #UI_ANIM_EASING_EASEOUT_CUBIC)
+      }
     }
 
     Public Method OnMouseDown(mx_p.i, my_p.i, button_p.i) {
       This\isPressed = #True
       This\UpdateVisualState()
+      If (This\animateHoverScale) {
+        UI_InitAnimationEngine()
+        UI_GlobalAnimEngine\StartFloatAnimation(This, "Scale", This\currentScale, 0.96, 70, #UI_ANIM_EASING_EASEOUT_QUAD)
+      }
     }
 
     Public Method OnMouseUp(mx_p.i, my_p.i, button_p.i) {
       This\isPressed = #False
       This\UpdateVisualState()
+      If (This\animateHoverScale) {
+        UI_InitAnimationEngine()
+        Protected targetSc.f = 1.00
+        If (This\isHovered) : targetSc = 1.05 : EndIf
+        UI_GlobalAnimEngine\StartFloatAnimation(This, "Scale", This\currentScale, targetSc, 120, #UI_ANIM_EASING_EASEOUT_BACK)
+      }
     }
 
     Public Method OnMouseMove(mx_p.i, my_p.i) {
@@ -649,6 +728,200 @@ Namespace UI {
         ResizeGadget(This\id, nx, ny, nw, nh)
       }
       This\Redraw()
+    }
+
+    ; Micro-Animations Callbacks & Settings
+    Public Method OnAnimationTick(propName.s, value.f) {
+      If propName = "Scale"
+        This\currentScale = value
+        This\Redraw()
+      EndIf
+    }
+
+    Public Method SetAnimateHoverScale(enable_p.b) {
+      This\animateHoverScale = enable_p
+    }
+
+    Public Method.b IsAnimateHoverScale() {
+      ProcedureReturn This\animateHoverScale
+    }
+
+    ; --- Intégration du Système de Styles & Triggers Déclaratifs (WPF/XAML) ---
+
+    Public Method ApplyStyle(*s.UI::Style) {
+      If Not *s : ProcedureReturn : EndIf
+      This\style = *s
+
+      Protected fontNameStr.s = ""
+      Protected fontSizeVal.i = 0
+      Protected fontBoldVal.b = #False
+      Protected hasTypography.b = #False
+
+      ; Appliquer les Setters de base définis dans le Style
+      Protected count.i = *s\GetSetterCount()
+      Protected i.i
+      For i = 0 To count - 1
+        Protected prop.s = UCase(Trim(*s\GetSetterProperty(i)))
+        Protected val.s = Trim(*s\GetSetterValue(i))
+
+        Select prop
+          Case "BACKGROUND", "BG"
+            This\background = UI_ParseColor(val, This\background)
+          Case "FOREGROUND", "FG"
+            This\foreground = UI_ParseColor(val, This\foreground)
+          Case "BORDERCOLOR"
+            This\borderColor = UI_ParseColor(val, This\borderColor)
+          Case "HOVERBACKGROUND", "HOVERBG"
+            This\hoverBackground = UI_ParseColor(val, This\hoverBackground)
+          Case "HOVERFOREGROUND", "HOVERFG"
+            This\hoverForeground = UI_ParseColor(val, This\hoverForeground)
+          Case "HOVERBORDERCOLOR"
+            This\hoverBorderColor = UI_ParseColor(val, This\hoverBorderColor)
+          Case "PRESSEDBACKGROUND", "PRESSEDBG"
+            This\pressedBackground = UI_ParseColor(val, This\pressedBackground)
+          Case "PRESSEDFOREGROUND", "PRESSEDFG"
+            This\pressedForeground = UI_ParseColor(val, This\pressedForeground)
+          Case "PRESSEDBORDERCOLOR"
+            This\pressedBorderColor = UI_ParseColor(val, This\pressedBorderColor)
+          Case "BORDERTHICKNESS"
+            This\borderThickness = Val(val)
+          Case "CORNERRADIUS"
+            This\cornerRadius = Val(val)
+          Case "SCALE"
+            This\currentScale = ValF(val)
+            This\targetScale = This\currentScale
+          Case "ANIMATEHOVERSCALE"
+            If UCase(val) = "TRUE" Or val = "1"
+              This\animateHoverScale = #True
+            Else
+              This\animateHoverScale = #False
+            EndIf
+          Case "FONTNAME", "FONTFAMILY"
+            fontNameStr = val
+            hasTypography = #True
+          Case "FONTSIZE"
+            fontSizeVal = Val(val)
+            hasTypography = #True
+          Case "FONTBOLD", "FONTWEIGHT"
+            If UCase(val) = "TRUE" Or UCase(val) = "BOLD" Or val = "1"
+              fontBoldVal = #True
+            Else
+              fontBoldVal = #False
+            EndIf
+            hasTypography = #True
+        EndSelect
+      Next
+
+      ; Mémorisation des valeurs appliquées comme référence de base pour les triggers
+      This\baseBackground = This\background
+      This\baseForeground = This\foreground
+      This\baseBorderColor = This\borderColor
+      This\baseHoverBackground = This\hoverBackground
+      This\baseHoverForeground = This\hoverForeground
+      This\baseHoverBorderColor = This\hoverBorderColor
+      This\basePressedBackground = This\pressedBackground
+      This\basePressedForeground = This\pressedForeground
+      This\basePressedBorderColor = This\pressedBorderColor
+      This\baseBorderThickness = This\borderThickness
+      This\baseCornerRadius = This\cornerRadius
+      This\baseScale = This\currentScale
+
+      If hasTypography
+        If fontNameStr = "" : fontNameStr = "Segoe UI" : EndIf
+        If fontSizeVal <= 0 : fontSizeVal = 10 : EndIf
+        This\SetTypography(fontNameStr, fontSizeVal, fontBoldVal)
+      EndIf
+
+      This\ApplyStyleTriggers()
+      This\Redraw()
+    }
+
+    Public Method ApplyStyleTriggers() {
+      If Not This\style : ProcedureReturn : EndIf
+
+      ; 1. Rétablir les valeurs de base
+      This\background = This\baseBackground
+      This\foreground = This\baseForeground
+      This\borderColor = This\baseBorderColor
+      This\hoverBackground = This\baseHoverBackground
+      This\hoverForeground = This\baseHoverForeground
+      This\hoverBorderColor = This\baseHoverBorderColor
+      This\pressedBackground = This\basePressedBackground
+      This\pressedForeground = This\basePressedForeground
+      This\pressedBorderColor = This\basePressedBorderColor
+      This\cornerRadius = This\baseCornerRadius
+      This\borderThickness = This\baseBorderThickness
+
+      ; 2. Parcourir les triggers et activer ceux dont la condition est remplie
+      Protected tCount.i = This\style\GetTriggerCount()
+      Protected t.i, s.i
+      Protected hasScaleTrigger.b = #False
+
+      For t = 0 To tCount - 1
+        Protected tProp.s = UCase(Trim(This\style\GetTriggerProperty(t)))
+        Protected tVal.s = UCase(Trim(This\style\GetTriggerValue(t)))
+        Protected isTriggerActive.b = #False
+
+        Select tProp
+          Case "ISMOUSEOVER"
+            If (tVal = "TRUE" And This\isHovered) Or (tVal = "FALSE" And Not This\isHovered)
+              isTriggerActive = #True
+            EndIf
+          Case "ISPRESSED"
+            If (tVal = "TRUE" And This\isPressed) Or (tVal = "FALSE" And Not This\isPressed)
+              isTriggerActive = #True
+            EndIf
+          Case "ISFOCUSED"
+            If (tVal = "TRUE" And This\isFocused) Or (tVal = "FALSE" And Not This\isFocused)
+              isTriggerActive = #True
+            EndIf
+        EndSelect
+
+        If (isTriggerActive)
+          Protected sCount.i = This\style\GetTriggerSetterCount(t)
+          For s = 0 To sCount - 1
+            Protected prop.s = UCase(Trim(This\style\GetTriggerSetterProperty(t, s)))
+            Protected val.s = Trim(This\style\GetTriggerSetterValue(t, s))
+
+            Select prop
+              Case "BACKGROUND", "BG"
+                Protected parsedBg.i = UI_ParseColor(val, This\background)
+                This\background = parsedBg
+                If tProp = "ISMOUSEOVER" : This\hoverBackground = parsedBg : EndIf
+                If tProp = "ISPRESSED"   : This\pressedBackground = parsedBg : EndIf
+              Case "FOREGROUND", "FG"
+                Protected parsedFg.i = UI_ParseColor(val, This\foreground)
+                This\foreground = parsedFg
+                If tProp = "ISMOUSEOVER" : This\hoverForeground = parsedFg : EndIf
+                If tProp = "ISPRESSED"   : This\pressedForeground = parsedFg : EndIf
+              Case "BORDERCOLOR"
+                Protected parsedBrd.i = UI_ParseColor(val, This\borderColor)
+                This\borderColor = parsedBrd
+                If tProp = "ISMOUSEOVER" : This\hoverBorderColor = parsedBrd : EndIf
+                If tProp = "ISPRESSED"   : This\pressedBorderColor = parsedBrd : EndIf
+              Case "CORNERRADIUS"
+                This\cornerRadius = Val(val)
+              Case "BORDERTHICKNESS"
+                This\borderThickness = Val(val)
+              Case "SCALE"
+                hasScaleTrigger = #True
+                Protected targetSc.f = ValF(val)
+                UI_InitAnimationEngine()
+                UI_GlobalAnimEngine\StartFloatAnimation(This, "Scale", This\currentScale, targetSc, 120, #UI_ANIM_EASING_EASEOUT_QUAD)
+            EndSelect
+          Next
+        EndIf
+      Next
+
+      ; Si aucun trigger Scale n'est actif, et qu'on a bougé de l'échelle de base, retour fluide
+      If (Not hasScaleTrigger) And (Not This\isHovered) And (Not This\isPressed) And This\currentScale <> This\baseScale
+        UI_InitAnimationEngine()
+        UI_GlobalAnimEngine\StartFloatAnimation(This, "Scale", This\currentScale, This\baseScale, 150, #UI_ANIM_EASING_EASEOUT_CUBIC)
+      EndIf
+    }
+
+    Public Method.i GetStyle() {
+      ProcedureReturn This\style
     }
 
     ; --- Nettoyage ---

@@ -26,6 +26,7 @@ Namespace UI {
       This\iconImage = 0
       This\iconSpacing = 6
       This\textAlignment = 0
+      This\animateHoverScale = #True
       This\SetDefaultStyle()
       This\Redraw()
     }
@@ -39,6 +40,7 @@ Namespace UI {
       This\iconImage = 0
       This\iconSpacing = 6
       This\textAlignment = 0
+      This\animateHoverScale = #True
       This\SetDefaultStyle()
       This\Redraw()
     }
@@ -52,6 +54,7 @@ Namespace UI {
       This\iconImage = 0
       This\iconSpacing = 6
       This\textAlignment = 0
+      This\animateHoverScale = #True
       This\SetDefaultStyle()
       This\Redraw()
     }
@@ -65,6 +68,7 @@ Namespace UI {
       This\iconImage = 0
       This\iconSpacing = 6
       This\textAlignment = 0
+      This\animateHoverScale = #True
       This\SetDefaultStyle()
       This\Redraw()
     }
@@ -276,7 +280,8 @@ Namespace UI {
       ; 5. Dessin du texte
       If This\text <> ""
         Protected txtY.i = (h_p - txtH) / 2
-        DrawText(startX, txtY, This\text, fg, This\GetCurrentBackgroundColor())
+        DrawingMode(#PB_2DDrawing_Transparent)
+        DrawText(startX, txtY, This\text, fg)
       EndIf
     }
 

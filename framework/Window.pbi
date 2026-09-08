@@ -6,6 +6,7 @@
 
 XIncludeFile "Component.pbi"
 XIncludeFile "Gadget.pbi"
+XIncludeFile "style/ResourceDictionary.pbi"
 
 Namespace UI {
 
@@ -14,6 +15,7 @@ Namespace UI {
     Protected flags.i
     Protected parentID.i
     Protected backgroundColor.i
+    Protected *resources.UI::ResourceDictionary
     Protected Map *namedControls.UI::Component()
 
     ; ------------------------------------------------------------------------
@@ -299,6 +301,13 @@ Namespace UI {
     ; 3. Window Lifecycle & Event Handlers
     ; ------------------------------------------------------------------------
 
+    Public Method.i GetResources() {
+      If Not This\resources
+        This\resources = New UI::ResourceDictionary()
+      EndIf
+      ProcedureReturn This\resources
+    }
+
     Public Method Close() {
       If (This\id And IsWindow(This\id)) {
         UI_UnregisterWindow(This\id)
@@ -309,6 +318,10 @@ Namespace UI {
 
     Public Method Free() {
       This\Close()
+      If This\resources
+        This\resources\Free()
+        This\resources = 0
+      EndIf
     }
 
     Public Method.b OnClose() {

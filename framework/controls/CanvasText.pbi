@@ -109,12 +109,45 @@ Namespace UI {
       This\Redraw()
     }
 
-    Public Method.i GetHorizontalAlignment() {
+    Public Method.i GetTextHorizontalAlignment() {
       ProcedureReturn This\hAlign
     }
 
-    Public Method.i GetVerticalAlignment() {
+    Public Method.i GetTextVerticalAlignment() {
       ProcedureReturn This\vAlign
+    }
+
+    ; Mesure précise et dynamique de la largeur du texte vectoriel
+    Public Method.i GetDesiredWidth() {
+      If This\hasExplicitWidth And This\width > 0
+        ProcedureReturn This\width
+      EndIf
+      If This\text <> "" And This\id And IsGadget(This\id)
+        Protected tw.i = 0
+        If StartDrawing(CanvasOutput(This\id))
+          If This\fontID : DrawingFont(This\fontID) : EndIf
+          tw = TextWidth(This\text) + DesktopScaledX(This\paddingLeft + This\paddingRight) + 8
+          StopDrawing()
+        EndIf
+        If tw > 0 : ProcedureReturn tw : EndIf
+      EndIf
+      ProcedureReturn This\desiredWidth
+    }
+
+    Public Method.i GetDesiredHeight() {
+      If This\hasExplicitHeight And This\height > 0
+        ProcedureReturn This\height
+      EndIf
+      If This\text <> "" And This\id And IsGadget(This\id)
+        Protected th.i = 0
+        If StartDrawing(CanvasOutput(This\id))
+          If This\fontID : DrawingFont(This\fontID) : EndIf
+          th = TextHeight(This\text) + DesktopScaledY(This\paddingTop + This\paddingBottom) + 4
+          StopDrawing()
+        EndIf
+        If th > 0 : ProcedureReturn th : EndIf
+      EndIf
+      ProcedureReturn This\desiredHeight
     }
 
     Public Method SetEllipsis(enabled_p.b) {
@@ -215,7 +248,12 @@ Namespace UI {
       EndSelect
 
       Protected fg.i = This\GetCurrentForegroundColor()
-      DrawText(posX, posY, dispText, fg, This\background)
+      If (This\isTransparent)
+        DrawingMode(#PB_2DDrawing_Transparent)
+        DrawText(posX, posY, dispText, fg)
+      Else
+        DrawText(posX, posY, dispText, fg, This\background)
+      EndIf
     }
 
   }

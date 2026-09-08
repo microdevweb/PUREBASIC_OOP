@@ -14910,7 +14910,7 @@ EndProcedure
 ; ----------------------------------------------------------------------------
 
 ; ============================================================================
-; Demo XML Declarative WPF CanvasControls
+; Demo WPF Styles & Micro-Animations Showcase
 ; ============================================================================
 
 ; ============================================================================
@@ -15715,13 +15715,13 @@ EndProcedure
 ; Window & Application Dispatcher
 
 
-Procedure RunXmlApp()
+Procedure RunWpfStylesApp()
   Protected *app.UI_Application_vt = New_UI_Application_void()
   Protected *win.UI_Window_vt = New_UI_Window_void()
 
-  Protected xmlPath.s = "demo_canvas_xml.xml"
+  Protected xmlPath.s = "demo_wpf_styles.xml"
   If FileSize(xmlPath) <= 0
-    xmlPath = "tests/demo_canvas_xml.xml"
+    xmlPath = "tests/demo_wpf_styles.xml"
   EndIf
 
   Protected *loader.UI_XMLLoader_vt = New_UI_XMLLoader()
@@ -15737,4 +15737,4 @@ Procedure RunXmlApp()
   *app\Free()
 EndProcedure
 
-RunXmlApp()
+RunWpfStylesApp()

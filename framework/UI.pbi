@@ -6,6 +6,9 @@
 
 XIncludeFile "Component.pbi"
 XIncludeFile "Gadget.pbi"
+XIncludeFile "animation/AnimationEngine.pbi"
+XIncludeFile "style/Style.pbi"
+XIncludeFile "style/ResourceDictionary.pbi"
 XIncludeFile "CanvasControl.pbi"
 XIncludeFile "CustomGadget.pbi"
 

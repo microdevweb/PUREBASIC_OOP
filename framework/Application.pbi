@@ -82,7 +82,12 @@ Namespace UI {
       Protected ev.i, evGadget.i, evWin.i, evType.i
 
       While (This\isRunning And MapSize(UI_WindowMap()) > 0) {
-        ev = WaitWindowEvent()
+        If (UI_HasActiveAnimations())
+          ev = WaitWindowEvent(16)
+          UI_UpdateAnimations()
+        Else
+          ev = WaitWindowEvent()
+        EndIf
         evWin = EventWindow()
         evType = EventType()
 
