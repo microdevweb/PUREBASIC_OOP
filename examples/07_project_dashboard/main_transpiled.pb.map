@@ -1,6 +1,6 @@
 ﻿# PBO_SOURCEMAP_V1
-SOURCE:C:\PB\PB_PROJECT\PB_OOP_WORKSPACE\PUREBASIC_OOP_WORKSPACE\examples\07_project_dashboard\main.pb
-TARGET:C:\PB\PB_PROJECT\PB_OOP_WORKSPACE\PUREBASIC_OOP_WORKSPACE\examples\07_project_dashboard\main_transpiled.pb
+SOURCE:c:\PB\PB_PROJECT\PB_OOP_WORKSPACE\PUREBASIC_OOP_WORKSPACE\examples\07_project_dashboard\main.pb
+TARGET:c:\PB\PB_PROJECT\PB_OOP_WORKSPACE\PUREBASIC_OOP_WORKSPACE\examples\07_project_dashboard\main_transpiled.pb
 MAP:
 15:7
 16:8

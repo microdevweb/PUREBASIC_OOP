@@ -5,6 +5,9 @@
 
 EnableExplicit
 
+#OOP_PROJECT_DIR = "c:\PB\PB_PROJECT\PB_OOP_WORKSPACE\PUREBASIC_OOP_WORKSPACE\"
+#OOP_WORKSPACE_DIR = "C:\PB\PB_PROJECT\PB_OOP_WORKSPACE\PUREBASIC_OOP_WORKSPACE\"
+
 ; ----------------------------------------------------------------------------
 ; 0.5 GLOBAL TYPE DECLARATIONS, STRUCTURES & CONSTANTS
 ; ----------------------------------------------------------------------------

@@ -5,6 +5,9 @@
 
 EnableExplicit
 
+#OOP_PROJECT_DIR = "c:\PB\PB_PROJECT\PB_OOP_WORKSPACE\PUREBASIC_OOP_WORKSPACE\"
+#OOP_WORKSPACE_DIR = "C:\PB\PB_PROJECT\PB_OOP_WORKSPACE\PUREBASIC_OOP_WORKSPACE\"
+
 ; ----------------------------------------------------------------------------
 ; 0.5 GLOBAL TYPE DECLARATIONS, STRUCTURES & CONSTANTS
 ; ----------------------------------------------------------------------------
@@ -44,6 +47,33 @@ Structure UI_GridItem
   rowSpan.i
   colSpan.i
 EndStructure
+#UI_ANIM_EASING_LINEAR       = 0
+#UI_ANIM_EASING_EASEOUT_QUAD  = 1
+#UI_ANIM_EASING_EASEOUT_CUBIC = 2
+#UI_ANIM_EASING_EASEOUT_BACK  = 3
+#UI_ANIM_EASING_EASEINOUT_QUAD = 4
+Structure UI_ActiveAnimation
+  *control.UI_Component_vt
+  propType.i          ; 1: Float (Scale/Opacity), 2: Color (Background/Border)
+  startVal.f
+  targetVal.f
+  currentVal.f
+  startColor.i
+  targetColor.i
+  startTime.q
+  durationMs.i
+  easingType.i
+  isCompleted.b
+EndStructure
+Structure UI_StyleSetter
+  property.s
+  value.s
+EndStructure
+Structure UI_StyleTrigger
+  property.s
+  value.s
+  List setters.UI_StyleSetter()
+EndStructure
 Macro UI_RegisterGadget(id_p, g_p)
   If (id_p >= 0 And g_p)
     UI_GadgetMap(Str(id_p)) = g_p
@@ -67,6 +97,11 @@ Macro UI_UnregisterWindow(id_p)
     DeleteMapElement(UI_WindowMap(), Str(id_p))
   EndIf
 EndMacro
+#UI_VisualState_Normal   = 0
+#UI_VisualState_Hover    = 1
+#UI_VisualState_Pressed  = 2
+#UI_VisualState_Focused  = 3
+#UI_VisualState_Disabled = 4
 Structure UI_PropertyObserver
   *observer
   *callback
@@ -103,6 +138,22 @@ EndStructure
 #UI_GridUnit_Pixel = 0
 #UI_GridUnit_Auto  = 1
 #UI_GridUnit_Star  = 2
+#UI_TextAlign_Left    = 0
+#UI_TextAlign_Center  = 1
+#UI_TextAlign_Right   = 2
+#UI_TextAlign_Top     = 0
+#UI_TextAlign_Middle  = 1
+#UI_TextAlign_Bottom  = 2
+Structure UI_TreeNodeButton
+  id.i
+  icon.i
+  *callback
+  tooltip.s
+  tag.s
+  x.i
+  y.i
+  size.i
+EndStructure
 #PROP_CLICK_MESSAGE      = "ClickMessage"
 #PROP_STATUS_TEXT        = "StatusText"
 #PROP_CLICK_COUNT        = "ClickCount"
@@ -167,6 +218,13 @@ Interface UI_Component_vt
   GetDesiredWidth.i()
   GetDesiredHeight.i()
   Arrange(nx.i, ny.i, nw.i, nh.i)
+  OnAnimationTick(propName.s, value.f)
+  SetBackground(col.i)
+  GetBackground.i()
+  SetBorderColor(col.i)
+  SetBorderThickness(th.i)
+  SetCornerRadius(cr.i)
+  Free()
 EndInterface
 
 Interface UI_Gadget_vt Extends UI_Component_vt
@@ -178,13 +236,64 @@ Interface UI_Gadget_vt Extends UI_Component_vt
   GetColor.i(colorType.i)
   SetFont(font.i)
   SetFocus()
-  Free()
+  GetState.i()
+  SetState(state.i)
+  IsChecked.b()
+  SetChecked(c.b)
+  IsHovered.b()
+  IsPressed.b()
+  SetForeground(color.i)
+  Redraw()
   OnClick()
   OnChange()
   OnFocus()
   OnLostFocus()
   OnRightClick()
   OnCustomEvent(eventType.i)
+EndInterface
+
+Interface UI_AnimationEngine_vt
+  Free()
+  ApplyEasing.f(t.f, easing.i)
+  LerpFloat.f(vStart.f, vEnd.f, t.f)
+  LerpColor.i(cStart.i, cEnd.i, t.f)
+  StartFloatAnimation(*ctrl.UI_Component_vt, key_p.s, fromVal.f, toVal.f, durationMs_p.i, easing_p.i)
+  HasActiveAnimations.b()
+  Update()
+EndInterface
+
+Interface UI_Style_vt
+  Free()
+  GetTargetType.s()
+  SetTargetType(t_p.s)
+  GetKey.s()
+  SetKey(k_p.s)
+  GetBasedOn.s()
+  SetBasedOn(b_p.s)
+  AddSetter(prop_p.s, val_p.s)
+  GetSetterCount.i()
+  GetSetterProperty.s(idx.i)
+  GetSetterValue.s(idx.i)
+  FindSetterValue.s(prop_p.s, defaultVal.s)
+  HasSetter.b(prop_p.s)
+  AddTrigger.i(prop_p.s, val_p.s)
+  AddTriggerSetter(triggerIdx.i, prop_p.s, val_p.s)
+  GetTriggerCount.i()
+  GetTriggerProperty.s(triggerIdx.i)
+  GetTriggerValue.s(triggerIdx.i)
+  GetTriggerSetterCount.i(triggerIdx.i)
+  GetTriggerSetterProperty.s(triggerIdx.i, setterIdx.i)
+  GetTriggerSetterValue.s(triggerIdx.i, setterIdx.i)
+  MergeBaseStyle(*baseStyle.UI_Style_vt)
+EndInterface
+
+Interface UI_ResourceDictionary_vt
+  Free()
+  AddStyle(*style.UI_Style_vt)
+  GetStyle.i(key_p.s)
+  GetImplicitStyle.i(targetType_p.s)
+  HasStyle.b(key_p.s)
+  Clear()
 EndInterface
 
 Interface UI_Window_vt Extends UI_Component_vt
@@ -199,10 +308,12 @@ Interface UI_Window_vt Extends UI_Component_vt
   GetContent.i()
   RegisterControl(name_p.s, *ctrl.UI_Component_vt)
   FindControl.i(name_p.s)
+  SetBackgroundColor(col_p.i)
+  GetBackgroundColor.i()
   LoadView.b(xmlPath.s, *dataContext_p)
   LoadViewFromString.b(xmlContent.s, *dataContext_p)
+  GetResources.i()
   Close()
-  Free()
   OnClose.b()
   OnResize(newW.i, newH.i)
   OnMove(newX.i, newY.i)
@@ -222,15 +333,76 @@ Interface UI_Application_vt
   Free()
 EndInterface
 
-Interface UI_CustomGadget_vt Extends UI_Gadget_vt
-  OnPaint(w.i, h.i)
-  Redraw()
+Interface UI_CanvasControl_vt Extends UI_Gadget_vt
+  InitDefaults()
+  ScaleX.i(val_p.i)
+  ScaleY.i(val_p.i)
+  GetDpiScale.f()
+  GetVisualState.i()
+  UpdateVisualState()
+  OnVisualStateChanged(oldState_p.i, newState_p.i)
+  IsMouseOver.b()
+  SetIsHovered(state_p.b)
+  SetIsPressed(state_p.b)
+  IsFocused.b()
+  SetIsFocused(state_p.b)
+  GetForeground.i()
+  GetHoverBackground.i()
+  SetHoverBackground(color_p.i)
+  GetHoverForeground.i()
+  SetHoverForeground(color_p.i)
+  GetPressedBackground.i()
+  SetPressedBackground(color_p.i)
+  GetPressedForeground.i()
+  SetPressedForeground(color_p.i)
+  GetDisabledBackground.i()
+  SetDisabledBackground(color_p.i)
+  GetDisabledForeground.i()
+  SetDisabledForeground(color_p.i)
+  GetBorderColor.i()
+  GetHoverBorderColor.i()
+  SetHoverBorderColor(color_p.i)
+  GetPressedBorderColor.i()
+  SetPressedBorderColor(color_p.i)
+  GetBorderThickness.i()
+  GetCornerRadius.i()
+  SetBorder(color_p.i, thickness_p.i, radius_p.i)
+  GetBorderLeftThickness.i()
+  SetBorderLeftThickness(thickness_p.i)
+  GetBorderLeftColor.i()
+  SetBorderLeftColor(color_p.i)
+  SetPadding(l_p.i, t_p.i, r_p.i, b_p.i)
+  GetPaddingLeft.i()
+  GetPaddingTop.i()
+  GetPaddingRight.i()
+  GetPaddingBottom.i()
+  GetCurrentBackgroundColor.i()
+  GetCurrentForegroundColor.i()
+  GetCurrentBorderColor.i()
+  DrawControlBackground(w_p.i, h_p.i)
+  DrawFocusRing(w_p.i, h_p.i)
+  OnPaint(w_p.i, h_p.i)
   OnMouseEnter()
   OnMouseLeave()
-  OnMouseDown(mx.i, my.i, button.i)
-  OnMouseUp(mx.i, my.i, button.i)
-  OnMouseMove(mx.i, my.i)
-  OnKeyDown(key.i)
+  OnMouseDown(mx_p.i, my_p.i, button_p.i)
+  OnMouseUp(mx_p.i, my_p.i, button_p.i)
+  OnMouseMove(mx_p.i, my_p.i)
+  OnMouseWheel(delta_p.i)
+  OnKeyDown(key_p.i)
+  OnKeyUp(key_p.i)
+  OnInput(char_p.i)
+  OnLeftDoubleClick(mx_p.i, my_p.i)
+  SetTypography(fontName_p.s, fontSize_p.i, bold_p.b)
+  SetParentBackground(col_p.i)
+  GetParentBackground.i()
+  SetAnimateHoverScale(enable_p.b)
+  IsAnimateHoverScale.b()
+  ApplyStyle(*s.UI_Style_vt)
+  ApplyStyleTriggers()
+  GetStyle.i()
+EndInterface
+
+Interface UI_CustomGadget_vt Extends UI_CanvasControl_vt
 EndInterface
 
 Interface MVVM_ObservableObject_vt
@@ -340,6 +512,9 @@ Interface MVVM_BindingEngine_vt
 EndInterface
 
 Interface UI_Layouts_Container_vt Extends UI_Component_vt
+  EnsureBgGadget()
+  SetBorder(col.i, thick.i, radius.i)
+  DrawBackground(nw.i, nh.i)
   SetPadding(l.i, t.i, r.i, b.i)
   SetPaddingAll(p.i)
   GetPaddingLeft.i()
@@ -389,13 +564,9 @@ Interface UI_Label_vt Extends UI_Gadget_vt
 EndInterface
 
 Interface UI_CheckBox_vt Extends UI_Gadget_vt
-  IsChecked.b()
-  SetChecked(checked.b)
 EndInterface
 
 Interface UI_RadioButton_vt Extends UI_Gadget_vt
-  IsChecked.b()
-  SetChecked(state_p.b)
   GetGroup.i()
   SetGroup(grp.i)
 EndInterface
@@ -485,9 +656,67 @@ Interface UI_TabControl_vt Extends UI_Gadget_vt
   SetTabText(tabIndex_p.i, text_p.s)
 EndInterface
 
+Interface UI_CanvasButton_vt Extends UI_CanvasControl_vt
+  SetDefaultStyle()
+  SetPrimaryStyle()
+  SetSuccessStyle()
+  SetDangerStyle()
+  SetDarkStyle()
+  SetOutlineStyle(baseColor_p.i)
+  SetGhostStyle(baseColor_p.i)
+  SetIcon_i(img_p.i)
+  SetIcon_i_i(img_p.i, spacing_p.i)
+  GetIcon.i()
+  SetTextAlignment(align_p.i)
+EndInterface
+
+Interface UI_CanvasText_vt Extends UI_CanvasControl_vt
+  SetAlignment(horizontal_p.i, vertical_p.i)
+  GetTextHorizontalAlignment.i()
+  GetTextVerticalAlignment.i()
+  SetEllipsis(enabled_p.b)
+  GetEllipsis.b()
+  SetTransparent(transparent_p.b)
+  IsTransparent.b()
+  FormatDisplayText.s(availWidth_p.i)
+EndInterface
+
+Interface UI_CanvasTextBox_vt Extends UI_CanvasControl_vt
+  InitTextBoxDefaults()
+  GetPlaceholder.s()
+  SetPlaceholder(ph_p.s)
+  GetPlaceholderColor.i()
+  SetPlaceholderColor(col_p.i)
+  IsPassword.b()
+  SetIsPassword(pw_p.b)
+  IsReadOnly.b()
+  SetReadOnly(ro_p.b)
+  GetMaxLength.i()
+  SetMaxLength(len_p.i)
+  GetActiveBorderColor.i()
+  SetActiveBorderColor(col_p.i)
+  GetSelectionColor.i()
+  SetSelectionColor(col_p.i)
+  GetCursorPosition.i()
+  SetCursorPosition(pos_p.i)
+  GetDisplayText.s()
+  HasSelection.b()
+  GetSelectionBounds(*minOut.INTEGER, *maxOut.INTEGER)
+  ClearSelection()
+  SelectAll()
+  DeleteSelection()
+  InsertText(str_p.s)
+  DeleteBackward()
+  DeleteForward()
+  Copy()
+  Cut()
+  Paste()
+  OnSubmit()
+  CharPosFromMouseX.i(targetX_p.i)
+  EnsureCursorVisible(availW_p.i)
+EndInterface
+
 Interface UI_ToggleSwitch_vt Extends UI_CustomGadget_vt
-  IsChecked.b()
-  SetChecked(state.b)
 EndInterface
 
 Interface UI_ListIcon_vt Extends UI_Gadget_vt
@@ -504,12 +733,85 @@ Interface UI_ListIcon_vt Extends UI_Gadget_vt
   GetItemData.i(item.i)
 EndInterface
 
+Interface UI_Canvas_vt Extends UI_Gadget_vt
+EndInterface
+
+Interface UI_TreeNode_vt
+  GetText.s()
+  SetText(text_p.s)
+  GetTag.s()
+  SetTag(tag_p.s)
+  GetIcon.i()
+  SetIcon(icon_p.i)
+  GetDataContext.i()
+  SetDataContext(data_p.i)
+  IsExpanded.b()
+  SetExpanded(state_p.b)
+  IsChecked.b()
+  SetChecked(state_p.b)
+  IsSelected.b()
+  SetSelected(state_p.b)
+  HasCheckBox.b()
+  SetHasCheckBox(state_p.b)
+  GetParent.i()
+  SetParent(*parent_p.UI_TreeNode_vt)
+  AddChild(*child_p.UI_TreeNode_vt)
+  RemoveChild(*child_p.UI_TreeNode_vt)
+  GetChildCount.i()
+  GetChild.i(index_p.i)
+  AddButton(id_p.i, icon_p.i, *callback_p, tooltip_p.s, tag_p.s)
+  GetButtonCount.i()
+  SetButtonPos(index_p.i, x_p.i, y_p.i, size_p.i)
+  GetButtonId.i(index_p.i)
+  GetButtonIcon.i(index_p.i)
+  GetButtonCallback.i(index_p.i)
+  SetRenderLayout(y_p.i, h_p.i, w_p.i, level_p.i, expX_p.i, expY_p.i, expSize_p.i, chkX_p.i, chkY_p.i, chkSize_p.i)
+  GetRenderY.i()
+  GetRenderH.i()
+  HitTestExpand.b(x_p.i, y_p.i)
+  HitTestCheck.b(x_p.i, y_p.i)
+  HitTestButton.i(x_p.i, y_p.i)
+  ExpandAll()
+  CollapseAll()
+  Free()
+EndInterface
+
+Interface UI_CanvasTree_vt Extends UI_CustomGadget_vt
+  GetRoot.i()
+  GetSelectedNode.i()
+  SetSelectedNode(*node_p.UI_TreeNode_vt)
+  SetShowCheckBoxes(show_p.b)
+  GetShowCheckBoxes.b()
+  SetShowLines(show_p.b)
+  GetShowLines.b()
+  SetLineHeight(h_p.i)
+  GetLineHeight.i()
+  SetIndentWidth(w_p.i)
+  SetDarkMode(enable_p.b)
+  SetColors(bg_p.i, fg_p.i, selBg_p.i, selFg_p.i, line_p.i)
+  SetOnSelect(*callback_p)
+  SetOnExpand(*callback_p)
+  SetOnCheck(*callback_p)
+  SetOnButtonClick(*callback_p)
+  AddNode.i(*parent_p.UI_TreeNode_vt, text_p.s, icon_p.i, tag_p.s)
+  Clear()
+  ExpandAll()
+  CollapseAll()
+  PopulateFlatList(*parent_p.UI_TreeNode_vt)
+  RebuildVisibleList()
+  EnsureVisible(*node_p.UI_TreeNode_vt)
+EndInterface
+
 Interface UI_XMLLoader_vt
   Free()
   ParseBoxValues(valStr.s, *outL.INTEGER, *outT.INTEGER, *outR.INTEGER, *outB.INTEGER)
+  ParseColor.i(colorStr.s, defaultColor.i)
+  ParseResources(resNode.i, *targetWindow.UI_Window_vt)
+  ApplyCanvasControlAttributes(*ctrl.UI_CanvasControl_vt, node.i, *targetWindow.UI_Window_vt, *parentContainer.UI_Layouts_Container_vt)
   ApplyCommonAttributes(*comp.UI_Component_vt, node.i, *targetWindow.UI_Window_vt)
   ParseBindingExpression.b(attrVal.s, *outPropName.STRING, *outMode.INTEGER)
   ApplyDataBindings(*comp.UI_Component_vt, node.i, *targetWindow.UI_Window_vt)
+  ParseCanvasTreeNodes(*tree.UI_CanvasTree_vt, *parentNode.UI_TreeNode_vt, xmlNode.i)
   ParseNode.i(node.i, *targetWindow.UI_Window_vt, *parentContainer.UI_Layouts_Container_vt)
   LoadFromFile.b(xmlPath.s, *targetWindow.UI_Window_vt)
   LoadFromString.b(xmlContent.s, *targetWindow.UI_Window_vt)
@@ -559,10 +861,34 @@ Structure UI_Gadget_Inst Extends UI_Component_Inst
   fontID.i
 EndStructure
 
+Structure UI_AnimationEngine_Inst
+  *VTable.UI_AnimationEngine_vt
+  Map activeAnimations.UI_ActiveAnimation()
+  isRunning.b
+  lastTick.q
+EndStructure
+
+Structure UI_Style_Inst
+  *VTable.UI_Style_vt
+  targetType.s
+  key.s
+  basedOn.s
+  List setters.UI_StyleSetter()
+  List triggers.UI_StyleTrigger()
+EndStructure
+
+Structure UI_ResourceDictionary_Inst
+  *VTable.UI_ResourceDictionary_vt
+  Map *styles.UI_Style_vt()
+  Map *implicitStyles.UI_Style_vt()
+EndStructure
+
 Structure UI_Window_Inst Extends UI_Component_Inst
   title.s
   flags.i
   parentID.i
+  backgroundColor.i
+  *resources.UI_ResourceDictionary_vt
   Map *namedControls.UI_Component_vt()
   *rootContent.UI_Component_vt
 EndStructure
@@ -573,11 +899,56 @@ Structure UI_Application_Inst
   *mainWindow.UI_Window_vt
 EndStructure
 
-Structure UI_CustomGadget_Inst Extends UI_Gadget_Inst
+Structure UI_CanvasControl_Inst Extends UI_Gadget_Inst
+  visualState.i
   isHovered.b
   isPressed.b
+  isFocused.b
   mouseX.i
   mouseY.i
+  text.s
+  background.i
+  foreground.i
+  hoverBackground.i
+  hoverForeground.i
+  pressedBackground.i
+  pressedForeground.i
+  disabledBackground.i
+  disabledForeground.i
+  borderColor.i
+  hoverBorderColor.i
+  pressedBorderColor.i
+  borderThickness.i
+  cornerRadius.i
+  borderLeftThickness.i
+  borderLeftColor.i
+  paddingLeft.i
+  paddingTop.i
+  paddingRight.i
+  paddingBottom.i
+  ownedFont.i
+  parentBackground.i
+  currentScale.f
+  targetScale.f
+  animateHoverScale.b
+  *style.UI_Style_vt
+  baseBackground.i
+  baseForeground.i
+  baseBorderColor.i
+  baseHoverBackground.i
+  baseHoverForeground.i
+  baseHoverBorderColor.i
+  basePressedBackground.i
+  basePressedForeground.i
+  basePressedBorderColor.i
+  baseBorderThickness.i
+  baseCornerRadius.i
+  baseBorderLeftThickness.i
+  baseBorderLeftColor.i
+  baseScale.f
+EndStructure
+
+Structure UI_CustomGadget_Inst Extends UI_CanvasControl_Inst
 EndStructure
 
 Structure MVVM_ObservableObject_Inst
@@ -638,6 +1009,12 @@ Structure UI_Layouts_Container_Inst Extends UI_Component_Inst
   paddingTop.i
   paddingRight.i
   paddingBottom.i
+  bgGadgetId.i
+  backgroundColor.i
+  borderColor.i
+  borderThickness.i
+  cornerRadius.i
+  hasBackground.b
 EndStructure
 
 Structure UI_Layouts_StackPanel_Inst Extends UI_Layouts_Container_Inst
@@ -709,6 +1086,37 @@ EndStructure
 Structure UI_TabControl_Inst Extends UI_Gadget_Inst
 EndStructure
 
+Structure UI_CanvasButton_Inst Extends UI_CanvasControl_Inst
+  iconImage.i
+  iconSpacing.i
+  textAlignment.i
+EndStructure
+
+Structure UI_CanvasText_Inst Extends UI_CanvasControl_Inst
+  hAlign.i
+  vAlign.i
+  showEllipsis.b
+  isTransparent.b
+EndStructure
+
+Structure UI_CanvasTextBox_Inst Extends UI_CanvasControl_Inst
+  placeholder.s
+  placeholderColor.i
+  isPassword.b
+  passwordChar.s
+  isReadOnly.b
+  maxLength.i
+  cursorPos.i
+  selStart.i
+  selEnd.i
+  isSelecting.b
+  scrollOffset.i
+  caretHeight.i
+  activeBorderColor.i
+  selectionColor.i
+  selectionTextColor.i
+EndStructure
+
 Structure UI_ToggleSwitch_Inst Extends UI_CustomGadget_Inst
   isChecked.b
   activeColor.i
@@ -718,8 +1126,71 @@ EndStructure
 Structure UI_ListIcon_Inst Extends UI_Gadget_Inst
 EndStructure
 
+Structure UI_Canvas_Inst Extends UI_Gadget_Inst
+EndStructure
+
+Structure UI_TreeNode_Inst
+  *VTable.UI_TreeNode_vt
+  text.s
+  tag.s
+  dataContext.i
+  icon.i
+  isExpanded.b
+  isChecked.b
+  isSelected.b
+  hasCheckBox.b
+  *parent.UI_TreeNode_vt
+  List *children.UI_TreeNode_vt()
+  List buttons.UI_TreeNodeButton()
+  renderY.i
+  renderH.i
+  level.i
+  expandX.i
+  expandY.i
+  expandSize.i
+  checkX.i
+  checkY.i
+  checkSize.i
+  rowW.i
+EndStructure
+
+Structure UI_CanvasTree_Inst Extends UI_CustomGadget_Inst
+  *rootNode.UI_TreeNode_vt
+  *selectedNode.UI_TreeNode_vt
+  *hoveredNode.UI_TreeNode_vt
+  hoveredElementType.i
+  hoveredButtonId.i
+  showCheckBoxes.b
+  showLines.b
+  lineHeight.i
+  indentWidth.i
+  scrollY.i
+  maxScrollY.i
+  totalContentHeight.i
+  isDraggingThumb.b
+  dragStartY.i
+  dragStartScrollY.i
+  bgColor.i
+  fgColor.i
+  lineColor.i
+  selectBgColor.i
+  selectFgColor.i
+  hoverBgColor.i
+  chevronColor.i
+  checkColor.i
+  checkBgColor.i
+  scrollbarBgColor.i
+  scrollbarThumbColor.i
+  *onSelectCallback
+  *onExpandCallback
+  *onCheckCallback
+  *onButtonClickCallback
+  List *visibleNodes.UI_TreeNode_vt()
+EndStructure
+
 Structure UI_XMLLoader_Inst
   *VTable.UI_XMLLoader_vt
+  currentXmlDir.s
 EndStructure
 
 Structure Demo_ViewModels_SimpleViewModel_Inst Extends MVVM_ViewModelBase_Inst
@@ -736,6 +1207,11 @@ EndStructure
 ; 2.5 GLOBAL VARIABLES, MAPS, LISTS & FORWARD DECLARATIONS
 ; ----------------------------------------------------------------------------
 
+Declare UI_InitAnimationEngine()
+Declare.b UI_HasActiveAnimations()
+Declare UI_UpdateAnimations()
+Global UI_GlobalAnimEngine.UI_AnimationEngine_vt
+Declare.i UI_ParseColor(colorStr.s, defaultColor.i = 0)
 Global NewMap UI_GadgetMap.i()
 Global NewMap UI_WindowMap.i()
 Declare UI_GlobalSizeCallback()
@@ -806,6 +1282,13 @@ Declare.i UI_Component_GetMaxHeight(*This.UI_Component_Inst)
 Declare.i UI_Component_GetDesiredWidth(*This.UI_Component_Inst)
 Declare.i UI_Component_GetDesiredHeight(*This.UI_Component_Inst)
 Declare UI_Component_Arrange(*This.UI_Component_Inst, nx.i, ny.i, nw.i, nh.i)
+Declare UI_Component_OnAnimationTick(*This.UI_Component_Inst, propName.s, value.f)
+Declare UI_Component_SetBackground(*This.UI_Component_Inst, col.i)
+Declare.i UI_Component_GetBackground(*This.UI_Component_Inst)
+Declare UI_Component_SetBorderColor(*This.UI_Component_Inst, col.i)
+Declare UI_Component_SetBorderThickness(*This.UI_Component_Inst, th.i)
+Declare UI_Component_SetCornerRadius(*This.UI_Component_Inst, cr.i)
+Declare UI_Component_Free(*This.UI_Component_Inst)
 Declare UI_Gadget_Init(*This.UI_Gadget_Inst)
 Declare.s UI_Gadget_GetText(*This.UI_Gadget_Inst)
 Declare UI_Gadget_SetText(*This.UI_Gadget_Inst, t.s)
@@ -819,12 +1302,60 @@ Declare.i UI_Gadget_GetColor(*This.UI_Gadget_Inst, colorType.i)
 Declare UI_Gadget_SetFont(*This.UI_Gadget_Inst, font.i)
 Declare UI_Gadget_SetFocus(*This.UI_Gadget_Inst)
 Declare UI_Gadget_Free(*This.UI_Gadget_Inst)
+Declare.i UI_Gadget_GetState(*This.UI_Gadget_Inst)
+Declare UI_Gadget_SetState(*This.UI_Gadget_Inst, state.i)
+Declare.b UI_Gadget_IsChecked(*This.UI_Gadget_Inst)
+Declare UI_Gadget_SetChecked(*This.UI_Gadget_Inst, c.b)
+Declare.b UI_Gadget_IsHovered(*This.UI_Gadget_Inst)
+Declare.b UI_Gadget_IsPressed(*This.UI_Gadget_Inst)
+Declare UI_Gadget_SetBackground(*This.UI_Gadget_Inst, color.i)
+Declare UI_Gadget_SetForeground(*This.UI_Gadget_Inst, color.i)
+Declare UI_Gadget_Redraw(*This.UI_Gadget_Inst)
 Declare UI_Gadget_OnClick(*This.UI_Gadget_Inst)
 Declare UI_Gadget_OnChange(*This.UI_Gadget_Inst)
 Declare UI_Gadget_OnFocus(*This.UI_Gadget_Inst)
 Declare UI_Gadget_OnLostFocus(*This.UI_Gadget_Inst)
 Declare UI_Gadget_OnRightClick(*This.UI_Gadget_Inst)
 Declare UI_Gadget_OnCustomEvent(*This.UI_Gadget_Inst, eventType.i)
+Declare UI_AnimationEngine_Init(*This.UI_AnimationEngine_Inst)
+Declare UI_AnimationEngine_Free(*This.UI_AnimationEngine_Inst)
+Declare.f UI_AnimationEngine_ApplyEasing(*This.UI_AnimationEngine_Inst, t.f, easing.i)
+Declare.f UI_AnimationEngine_LerpFloat(*This.UI_AnimationEngine_Inst, vStart.f, vEnd.f, t.f)
+Declare.i UI_AnimationEngine_LerpColor(*This.UI_AnimationEngine_Inst, cStart.i, cEnd.i, t.f)
+Declare UI_AnimationEngine_StartFloatAnimation(*This.UI_AnimationEngine_Inst, *ctrl.UI_Component_vt, key_p.s, fromVal.f, toVal.f, durationMs_p.i, easing_p.i)
+Declare.b UI_AnimationEngine_HasActiveAnimations(*This.UI_AnimationEngine_Inst)
+Declare UI_AnimationEngine_Update(*This.UI_AnimationEngine_Inst)
+Declare UI_Style_Init_void(*This.UI_Style_Inst)
+Declare UI_Style_Init_s_s_s(*This.UI_Style_Inst, targetType_p.s, key_p.s, basedOn_p.s)
+Declare UI_Style_Free(*This.UI_Style_Inst)
+Declare.s UI_Style_GetTargetType(*This.UI_Style_Inst)
+Declare UI_Style_SetTargetType(*This.UI_Style_Inst, t_p.s)
+Declare.s UI_Style_GetKey(*This.UI_Style_Inst)
+Declare UI_Style_SetKey(*This.UI_Style_Inst, k_p.s)
+Declare.s UI_Style_GetBasedOn(*This.UI_Style_Inst)
+Declare UI_Style_SetBasedOn(*This.UI_Style_Inst, b_p.s)
+Declare UI_Style_AddSetter(*This.UI_Style_Inst, prop_p.s, val_p.s)
+Declare.i UI_Style_GetSetterCount(*This.UI_Style_Inst)
+Declare.s UI_Style_GetSetterProperty(*This.UI_Style_Inst, idx.i)
+Declare.s UI_Style_GetSetterValue(*This.UI_Style_Inst, idx.i)
+Declare.s UI_Style_FindSetterValue(*This.UI_Style_Inst, prop_p.s, defaultVal.s)
+Declare.b UI_Style_HasSetter(*This.UI_Style_Inst, prop_p.s)
+Declare.i UI_Style_AddTrigger(*This.UI_Style_Inst, prop_p.s, val_p.s)
+Declare UI_Style_AddTriggerSetter(*This.UI_Style_Inst, triggerIdx.i, prop_p.s, val_p.s)
+Declare.i UI_Style_GetTriggerCount(*This.UI_Style_Inst)
+Declare.s UI_Style_GetTriggerProperty(*This.UI_Style_Inst, triggerIdx.i)
+Declare.s UI_Style_GetTriggerValue(*This.UI_Style_Inst, triggerIdx.i)
+Declare.i UI_Style_GetTriggerSetterCount(*This.UI_Style_Inst, triggerIdx.i)
+Declare.s UI_Style_GetTriggerSetterProperty(*This.UI_Style_Inst, triggerIdx.i, setterIdx.i)
+Declare.s UI_Style_GetTriggerSetterValue(*This.UI_Style_Inst, triggerIdx.i, setterIdx.i)
+Declare UI_Style_MergeBaseStyle(*This.UI_Style_Inst, *baseStyle.UI_Style_vt)
+Declare UI_ResourceDictionary_Init(*This.UI_ResourceDictionary_Inst)
+Declare UI_ResourceDictionary_Free(*This.UI_ResourceDictionary_Inst)
+Declare UI_ResourceDictionary_AddStyle(*This.UI_ResourceDictionary_Inst, *style.UI_Style_vt)
+Declare.i UI_ResourceDictionary_GetStyle(*This.UI_ResourceDictionary_Inst, key_p.s)
+Declare.i UI_ResourceDictionary_GetImplicitStyle(*This.UI_ResourceDictionary_Inst, targetType_p.s)
+Declare.b UI_ResourceDictionary_HasStyle(*This.UI_ResourceDictionary_Inst, key_p.s)
+Declare UI_ResourceDictionary_Clear(*This.UI_ResourceDictionary_Inst)
 Declare UI_Window_CreateWindowInternal(*This.UI_Window_Inst, title_p.s, x_p.i, y_p.i, w_p.i, h_p.i, flags_p.i, parent_p.i)
 Declare UI_Window_Init_void(*This.UI_Window_Inst)
 Declare UI_Window_Init_s(*This.UI_Window_Inst, title_p.s)
@@ -858,8 +1389,11 @@ Declare UI_Window_RegisterControl(*This.UI_Window_Inst, name_p.s, *ctrl.UI_Compo
 Declare.i UI_Window_FindControl(*This.UI_Window_Inst, name_p.s)
 Declare UI_Window_SetDataContext(*This.UI_Window_Inst, *dc)
 Declare.i UI_Window_GetDataContext(*This.UI_Window_Inst)
+Declare UI_Window_SetBackgroundColor(*This.UI_Window_Inst, col_p.i)
+Declare.i UI_Window_GetBackgroundColor(*This.UI_Window_Inst)
 Declare.b UI_Window_LoadView(*This.UI_Window_Inst, xmlPath.s, *dataContext_p)
 Declare.b UI_Window_LoadViewFromString(*This.UI_Window_Inst, xmlContent.s, *dataContext_p)
+Declare.i UI_Window_GetResources(*This.UI_Window_Inst)
 Declare UI_Window_Close(*This.UI_Window_Inst)
 Declare UI_Window_Free(*This.UI_Window_Inst)
 Declare.b UI_Window_OnClose(*This.UI_Window_Inst)
@@ -878,18 +1412,97 @@ Declare UI_Application_Run_void(*This.UI_Application_Inst)
 Declare UI_Application_Run_p(*This.UI_Application_Inst, *mainWin_p.UI_Window_vt)
 Declare UI_Application_Quit(*This.UI_Application_Inst)
 Declare UI_Application_Free(*This.UI_Application_Inst)
+Declare UI_CanvasControl_InitDefaults(*This.UI_CanvasControl_Inst)
+Declare UI_CanvasControl_Init_void(*This.UI_CanvasControl_Inst)
+Declare UI_CanvasControl_Init_i_i(*This.UI_CanvasControl_Inst, w_p.i, h_p.i)
+Declare UI_CanvasControl_Init_i_i_i_i(*This.UI_CanvasControl_Inst, x_p.i, y_p.i, w_p.i, h_p.i)
+Declare UI_CanvasControl_Init_i_i_i_i_i(*This.UI_CanvasControl_Inst, x_p.i, y_p.i, w_p.i, h_p.i, flags_p.i)
+Declare.i UI_CanvasControl_ScaleX(*This.UI_CanvasControl_Inst, val_p.i)
+Declare.i UI_CanvasControl_ScaleY(*This.UI_CanvasControl_Inst, val_p.i)
+Declare.f UI_CanvasControl_GetDpiScale(*This.UI_CanvasControl_Inst)
+Declare.i UI_CanvasControl_GetVisualState(*This.UI_CanvasControl_Inst)
+Declare UI_CanvasControl_UpdateVisualState(*This.UI_CanvasControl_Inst)
+Declare UI_CanvasControl_OnVisualStateChanged(*This.UI_CanvasControl_Inst, oldState_p.i, newState_p.i)
+Declare.b UI_CanvasControl_IsHovered(*This.UI_CanvasControl_Inst)
+Declare.b UI_CanvasControl_IsMouseOver(*This.UI_CanvasControl_Inst)
+Declare UI_CanvasControl_SetIsHovered(*This.UI_CanvasControl_Inst, state_p.b)
+Declare.b UI_CanvasControl_IsPressed(*This.UI_CanvasControl_Inst)
+Declare UI_CanvasControl_SetIsPressed(*This.UI_CanvasControl_Inst, state_p.b)
+Declare.b UI_CanvasControl_IsFocused(*This.UI_CanvasControl_Inst)
+Declare UI_CanvasControl_SetIsFocused(*This.UI_CanvasControl_Inst, state_p.b)
+Declare UI_CanvasControl_SetEnabled(*This.UI_CanvasControl_Inst, e.b)
+Declare.s UI_CanvasControl_GetText(*This.UI_CanvasControl_Inst)
+Declare UI_CanvasControl_SetText(*This.UI_CanvasControl_Inst, text_p.s)
+Declare.i UI_CanvasControl_GetBackground(*This.UI_CanvasControl_Inst)
+Declare UI_CanvasControl_SetBackground(*This.UI_CanvasControl_Inst, color_p.i)
+Declare.i UI_CanvasControl_GetForeground(*This.UI_CanvasControl_Inst)
+Declare UI_CanvasControl_SetForeground(*This.UI_CanvasControl_Inst, color_p.i)
+Declare.i UI_CanvasControl_GetHoverBackground(*This.UI_CanvasControl_Inst)
+Declare UI_CanvasControl_SetHoverBackground(*This.UI_CanvasControl_Inst, color_p.i)
+Declare.i UI_CanvasControl_GetHoverForeground(*This.UI_CanvasControl_Inst)
+Declare UI_CanvasControl_SetHoverForeground(*This.UI_CanvasControl_Inst, color_p.i)
+Declare.i UI_CanvasControl_GetPressedBackground(*This.UI_CanvasControl_Inst)
+Declare UI_CanvasControl_SetPressedBackground(*This.UI_CanvasControl_Inst, color_p.i)
+Declare.i UI_CanvasControl_GetPressedForeground(*This.UI_CanvasControl_Inst)
+Declare UI_CanvasControl_SetPressedForeground(*This.UI_CanvasControl_Inst, color_p.i)
+Declare.i UI_CanvasControl_GetDisabledBackground(*This.UI_CanvasControl_Inst)
+Declare UI_CanvasControl_SetDisabledBackground(*This.UI_CanvasControl_Inst, color_p.i)
+Declare.i UI_CanvasControl_GetDisabledForeground(*This.UI_CanvasControl_Inst)
+Declare UI_CanvasControl_SetDisabledForeground(*This.UI_CanvasControl_Inst, color_p.i)
+Declare.i UI_CanvasControl_GetBorderColor(*This.UI_CanvasControl_Inst)
+Declare UI_CanvasControl_SetBorderColor(*This.UI_CanvasControl_Inst, color_p.i)
+Declare.i UI_CanvasControl_GetHoverBorderColor(*This.UI_CanvasControl_Inst)
+Declare UI_CanvasControl_SetHoverBorderColor(*This.UI_CanvasControl_Inst, color_p.i)
+Declare.i UI_CanvasControl_GetPressedBorderColor(*This.UI_CanvasControl_Inst)
+Declare UI_CanvasControl_SetPressedBorderColor(*This.UI_CanvasControl_Inst, color_p.i)
+Declare.i UI_CanvasControl_GetBorderThickness(*This.UI_CanvasControl_Inst)
+Declare UI_CanvasControl_SetBorderThickness(*This.UI_CanvasControl_Inst, thickness_p.i)
+Declare.i UI_CanvasControl_GetCornerRadius(*This.UI_CanvasControl_Inst)
+Declare UI_CanvasControl_SetCornerRadius(*This.UI_CanvasControl_Inst, radius_p.i)
+Declare UI_CanvasControl_SetBorder(*This.UI_CanvasControl_Inst, color_p.i, thickness_p.i, radius_p.i)
+Declare.i UI_CanvasControl_GetBorderLeftThickness(*This.UI_CanvasControl_Inst)
+Declare UI_CanvasControl_SetBorderLeftThickness(*This.UI_CanvasControl_Inst, thickness_p.i)
+Declare.i UI_CanvasControl_GetBorderLeftColor(*This.UI_CanvasControl_Inst)
+Declare UI_CanvasControl_SetBorderLeftColor(*This.UI_CanvasControl_Inst, color_p.i)
+Declare UI_CanvasControl_SetPadding(*This.UI_CanvasControl_Inst, l_p.i, t_p.i, r_p.i, b_p.i)
+Declare.i UI_CanvasControl_GetPaddingLeft(*This.UI_CanvasControl_Inst)
+Declare.i UI_CanvasControl_GetPaddingTop(*This.UI_CanvasControl_Inst)
+Declare.i UI_CanvasControl_GetPaddingRight(*This.UI_CanvasControl_Inst)
+Declare.i UI_CanvasControl_GetPaddingBottom(*This.UI_CanvasControl_Inst)
+Declare.i UI_CanvasControl_GetCurrentBackgroundColor(*This.UI_CanvasControl_Inst)
+Declare.i UI_CanvasControl_GetCurrentForegroundColor(*This.UI_CanvasControl_Inst)
+Declare.i UI_CanvasControl_GetCurrentBorderColor(*This.UI_CanvasControl_Inst)
+Declare UI_CanvasControl_DrawControlBackground(*This.UI_CanvasControl_Inst, w_p.i, h_p.i)
+Declare UI_CanvasControl_DrawFocusRing(*This.UI_CanvasControl_Inst, w_p.i, h_p.i)
+Declare UI_CanvasControl_Redraw(*This.UI_CanvasControl_Inst)
+Declare UI_CanvasControl_OnMouseEnter(*This.UI_CanvasControl_Inst)
+Declare UI_CanvasControl_OnMouseLeave(*This.UI_CanvasControl_Inst)
+Declare UI_CanvasControl_OnMouseDown(*This.UI_CanvasControl_Inst, mx_p.i, my_p.i, button_p.i)
+Declare UI_CanvasControl_OnMouseUp(*This.UI_CanvasControl_Inst, mx_p.i, my_p.i, button_p.i)
+Declare UI_CanvasControl_OnMouseMove(*This.UI_CanvasControl_Inst, mx_p.i, my_p.i)
+Declare UI_CanvasControl_OnMouseWheel(*This.UI_CanvasControl_Inst, delta_p.i)
+Declare UI_CanvasControl_OnKeyDown(*This.UI_CanvasControl_Inst, key_p.i)
+Declare UI_CanvasControl_OnKeyUp(*This.UI_CanvasControl_Inst, key_p.i)
+Declare UI_CanvasControl_OnFocus(*This.UI_CanvasControl_Inst)
+Declare UI_CanvasControl_OnLostFocus(*This.UI_CanvasControl_Inst)
+Declare UI_CanvasControl_OnInput(*This.UI_CanvasControl_Inst, char_p.i)
+Declare UI_CanvasControl_OnLeftDoubleClick(*This.UI_CanvasControl_Inst, mx_p.i, my_p.i)
+Declare UI_CanvasControl_OnCustomEvent(*This.UI_CanvasControl_Inst, eventType_p.i)
+Declare UI_CanvasControl_SetTypography(*This.UI_CanvasControl_Inst, fontName_p.s, fontSize_p.i, bold_p.b)
+Declare UI_CanvasControl_SetParentBackground(*This.UI_CanvasControl_Inst, col_p.i)
+Declare.i UI_CanvasControl_GetParentBackground(*This.UI_CanvasControl_Inst)
+Declare UI_CanvasControl_Arrange(*This.UI_CanvasControl_Inst, nx.i, ny.i, nw.i, nh.i)
+Declare UI_CanvasControl_OnAnimationTick(*This.UI_CanvasControl_Inst, propName.s, value.f)
+Declare UI_CanvasControl_SetAnimateHoverScale(*This.UI_CanvasControl_Inst, enable_p.b)
+Declare.b UI_CanvasControl_IsAnimateHoverScale(*This.UI_CanvasControl_Inst)
+Declare UI_CanvasControl_ApplyStyle(*This.UI_CanvasControl_Inst, *s.UI_Style_vt)
+Declare UI_CanvasControl_ApplyStyleTriggers(*This.UI_CanvasControl_Inst)
+Declare.i UI_CanvasControl_GetStyle(*This.UI_CanvasControl_Inst)
+Declare UI_CanvasControl_Free(*This.UI_CanvasControl_Inst)
 Declare UI_CustomGadget_Init_void(*This.UI_CustomGadget_Inst)
 Declare UI_CustomGadget_Init_i_i(*This.UI_CustomGadget_Inst, w_p.i, h_p.i)
 Declare UI_CustomGadget_Init_i_i_i_i(*This.UI_CustomGadget_Inst, x_p.i, y_p.i, w_p.i, h_p.i)
 Declare UI_CustomGadget_Init_i_i_i_i_i(*This.UI_CustomGadget_Inst, x_p.i, y_p.i, w_p.i, h_p.i, flags_p.i)
-Declare UI_CustomGadget_Redraw(*This.UI_CustomGadget_Inst)
-Declare UI_CustomGadget_OnMouseEnter(*This.UI_CustomGadget_Inst)
-Declare UI_CustomGadget_OnMouseLeave(*This.UI_CustomGadget_Inst)
-Declare UI_CustomGadget_OnMouseDown(*This.UI_CustomGadget_Inst, mx.i, my.i, button.i)
-Declare UI_CustomGadget_OnMouseUp(*This.UI_CustomGadget_Inst, mx.i, my.i, button.i)
-Declare UI_CustomGadget_OnMouseMove(*This.UI_CustomGadget_Inst, mx.i, my.i)
-Declare UI_CustomGadget_OnKeyDown(*This.UI_CustomGadget_Inst, key.i)
-Declare UI_CustomGadget_OnCustomEvent(*This.UI_CustomGadget_Inst, eventType.i)
 Declare UI_CustomGadget_Free(*This.UI_CustomGadget_Inst)
 Declare MVVM_ObservableObject_Init(*This.MVVM_ObservableObject_Inst)
 Declare MVVM_ObservableObject_Free(*This.MVVM_ObservableObject_Inst)
@@ -984,6 +1597,14 @@ Declare MVVM_BindingEngine_UnregisterAll(*This.MVVM_BindingEngine_Inst, *targetO
 Declare UI_Layouts_Container_Init_void(*This.UI_Layouts_Container_Inst)
 Declare UI_Layouts_Container_Init_i_i(*This.UI_Layouts_Container_Inst, w_p.i, h_p.i)
 Declare UI_Layouts_Container_Init_i_i_i_i(*This.UI_Layouts_Container_Inst, x_p.i, y_p.i, w_p.i, h_p.i)
+Declare UI_Layouts_Container_EnsureBgGadget(*This.UI_Layouts_Container_Inst)
+Declare UI_Layouts_Container_SetBackground(*This.UI_Layouts_Container_Inst, col.i)
+Declare.i UI_Layouts_Container_GetBackground(*This.UI_Layouts_Container_Inst)
+Declare UI_Layouts_Container_SetBorderColor(*This.UI_Layouts_Container_Inst, col.i)
+Declare UI_Layouts_Container_SetBorderThickness(*This.UI_Layouts_Container_Inst, th.i)
+Declare UI_Layouts_Container_SetCornerRadius(*This.UI_Layouts_Container_Inst, cr.i)
+Declare UI_Layouts_Container_SetBorder(*This.UI_Layouts_Container_Inst, col.i, thick.i, radius.i)
+Declare UI_Layouts_Container_DrawBackground(*This.UI_Layouts_Container_Inst, nw.i, nh.i)
 Declare UI_Layouts_Container_SetPadding(*This.UI_Layouts_Container_Inst, l.i, t.i, r.i, b.i)
 Declare UI_Layouts_Container_SetPaddingAll(*This.UI_Layouts_Container_Inst, p.i)
 Declare.i UI_Layouts_Container_GetPaddingLeft(*This.UI_Layouts_Container_Inst)
@@ -998,6 +1619,7 @@ Declare UI_Layouts_Container_SetWidth(*This.UI_Layouts_Container_Inst, nw.i)
 Declare UI_Layouts_Container_SetHeight(*This.UI_Layouts_Container_Inst, nh.i)
 Declare UI_Layouts_Container_SetSize(*This.UI_Layouts_Container_Inst, nw.i, nh.i)
 Declare UI_Layouts_Container_UpdateLayout(*This.UI_Layouts_Container_Inst)
+Declare UI_Layouts_Container_Free(*This.UI_Layouts_Container_Inst)
 Declare UI_Layouts_Container_Arrange(*This.UI_Layouts_Container_Inst, nx.i, ny.i, nw.i, nh.i)
 Declare UI_Layouts_StackPanel_Init_void(*This.UI_Layouts_StackPanel_Inst)
 Declare UI_Layouts_StackPanel_Init_i(*This.UI_Layouts_StackPanel_Inst, orient.i)
@@ -1019,6 +1641,7 @@ Declare UI_Layouts_DockPanel_AddDockChild(*This.UI_Layouts_DockPanel_Inst, *chil
 Declare UI_Layouts_DockPanel_SetDock(*This.UI_Layouts_DockPanel_Inst, *child.UI_Component_vt, dockType.i)
 Declare.i UI_Layouts_DockPanel_GetDock(*This.UI_Layouts_DockPanel_Inst, *child.UI_Component_vt)
 Declare UI_Layouts_DockPanel_Arrange(*This.UI_Layouts_DockPanel_Inst, nx.i, ny.i, nw.i, nh.i)
+Declare UI_Layouts_DockPanel_Free(*This.UI_Layouts_DockPanel_Inst)
 Declare UI_Layouts_Grid_Init_void(*This.UI_Layouts_Grid_Inst)
 Declare UI_Layouts_Grid_Init_i_i(*This.UI_Layouts_Grid_Inst, w_p.i, h_p.i)
 Declare UI_Layouts_Grid_ParseDefinition(*This.UI_Layouts_Grid_Inst, *outDef.UI_GridDef, defStr.s)
@@ -1027,6 +1650,7 @@ Declare UI_Layouts_Grid_AddColumn(*This.UI_Layouts_Grid_Inst, defStr.s)
 Declare UI_Layouts_Grid_SetCell(*This.UI_Layouts_Grid_Inst, *child.UI_Component_vt, r.i, c.i)
 Declare UI_Layouts_Grid_SetCellSpan(*This.UI_Layouts_Grid_Inst, *child.UI_Component_vt, r.i, c.i, rSpan.i, cSpan.i)
 Declare UI_Layouts_Grid_Arrange(*This.UI_Layouts_Grid_Inst, nx.i, ny.i, nw.i, nh.i)
+Declare UI_Layouts_Grid_Free(*This.UI_Layouts_Grid_Inst)
 Declare UI_Button_Init_s(*This.UI_Button_Inst, text_p.s)
 Declare UI_Button_Init_s_i_i(*This.UI_Button_Inst, text_p.s, w_p.i, h_p.i)
 Declare UI_Button_Init_i_i_i_i_s(*This.UI_Button_Inst, x_p.i, y_p.i, w_p.i, h_p.i, text_p.s)
@@ -1162,6 +1786,86 @@ Declare.i UI_TabControl_GetTabCount(*This.UI_TabControl_Inst)
 Declare.s UI_TabControl_GetTabText(*This.UI_TabControl_Inst, tabIndex_p.i)
 Declare UI_TabControl_SetTabText(*This.UI_TabControl_Inst, tabIndex_p.i, text_p.s)
 Declare UI_TabControl_Free(*This.UI_TabControl_Inst)
+Declare UI_CanvasButton_Init_void(*This.UI_CanvasButton_Inst)
+Declare UI_CanvasButton_Init_s(*This.UI_CanvasButton_Inst, text_p.s)
+Declare UI_CanvasButton_Init_s_i_i(*This.UI_CanvasButton_Inst, text_p.s, w_p.i, h_p.i)
+Declare UI_CanvasButton_Init_i_i_i_i_s(*This.UI_CanvasButton_Inst, x_p.i, y_p.i, w_p.i, h_p.i, text_p.s)
+Declare UI_CanvasButton_SetDefaultStyle(*This.UI_CanvasButton_Inst)
+Declare UI_CanvasButton_SetPrimaryStyle(*This.UI_CanvasButton_Inst)
+Declare UI_CanvasButton_SetSuccessStyle(*This.UI_CanvasButton_Inst)
+Declare UI_CanvasButton_SetDangerStyle(*This.UI_CanvasButton_Inst)
+Declare UI_CanvasButton_SetDarkStyle(*This.UI_CanvasButton_Inst)
+Declare UI_CanvasButton_SetOutlineStyle(*This.UI_CanvasButton_Inst, baseColor_p.i)
+Declare UI_CanvasButton_SetGhostStyle(*This.UI_CanvasButton_Inst, baseColor_p.i)
+Declare UI_CanvasButton_SetIcon_i(*This.UI_CanvasButton_Inst, img_p.i)
+Declare UI_CanvasButton_SetIcon_i_i(*This.UI_CanvasButton_Inst, img_p.i, spacing_p.i)
+Declare.i UI_CanvasButton_GetIcon(*This.UI_CanvasButton_Inst)
+Declare UI_CanvasButton_SetTextAlignment(*This.UI_CanvasButton_Inst, align_p.i)
+Declare UI_CanvasButton_OnPaint(*This.UI_CanvasButton_Inst, w_p.i, h_p.i)
+Declare UI_CanvasButton_ApplyStyle(*This.UI_CanvasButton_Inst, *s.UI_Style_vt)
+Declare UI_CanvasText_Init_void(*This.UI_CanvasText_Inst)
+Declare UI_CanvasText_Init_s(*This.UI_CanvasText_Inst, text_p.s)
+Declare UI_CanvasText_Init_s_i_i(*This.UI_CanvasText_Inst, text_p.s, w_p.i, h_p.i)
+Declare UI_CanvasText_Init_i_i_i_i_s(*This.UI_CanvasText_Inst, x_p.i, y_p.i, w_p.i, h_p.i, text_p.s)
+Declare UI_CanvasText_SetAlignment(*This.UI_CanvasText_Inst, horizontal_p.i, vertical_p.i)
+Declare.i UI_CanvasText_GetTextHorizontalAlignment(*This.UI_CanvasText_Inst)
+Declare.i UI_CanvasText_GetTextVerticalAlignment(*This.UI_CanvasText_Inst)
+Declare.i UI_CanvasText_GetDesiredWidth(*This.UI_CanvasText_Inst)
+Declare.i UI_CanvasText_GetDesiredHeight(*This.UI_CanvasText_Inst)
+Declare UI_CanvasText_SetEllipsis(*This.UI_CanvasText_Inst, enabled_p.b)
+Declare.b UI_CanvasText_GetEllipsis(*This.UI_CanvasText_Inst)
+Declare UI_CanvasText_SetTransparent(*This.UI_CanvasText_Inst, transparent_p.b)
+Declare.b UI_CanvasText_IsTransparent(*This.UI_CanvasText_Inst)
+Declare.s UI_CanvasText_FormatDisplayText(*This.UI_CanvasText_Inst, availWidth_p.i)
+Declare UI_CanvasText_OnPaint(*This.UI_CanvasText_Inst, w_p.i, h_p.i)
+Declare UI_CanvasTextBox_InitTextBoxDefaults(*This.UI_CanvasTextBox_Inst)
+Declare UI_CanvasTextBox_Init_void(*This.UI_CanvasTextBox_Inst)
+Declare UI_CanvasTextBox_Init_s(*This.UI_CanvasTextBox_Inst, placeholder_p.s)
+Declare UI_CanvasTextBox_Init_s_i_i(*This.UI_CanvasTextBox_Inst, placeholder_p.s, w_p.i, h_p.i)
+Declare UI_CanvasTextBox_Init_i_i_i_i_s(*This.UI_CanvasTextBox_Inst, x_p.i, y_p.i, w_p.i, h_p.i, placeholder_p.s)
+Declare UI_CanvasTextBox_Init_i_i_i_i_s_b(*This.UI_CanvasTextBox_Inst, x_p.i, y_p.i, w_p.i, h_p.i, placeholder_p.s, isPassword_p.b)
+Declare.s UI_CanvasTextBox_GetPlaceholder(*This.UI_CanvasTextBox_Inst)
+Declare UI_CanvasTextBox_SetPlaceholder(*This.UI_CanvasTextBox_Inst, ph_p.s)
+Declare.i UI_CanvasTextBox_GetPlaceholderColor(*This.UI_CanvasTextBox_Inst)
+Declare UI_CanvasTextBox_SetPlaceholderColor(*This.UI_CanvasTextBox_Inst, col_p.i)
+Declare.b UI_CanvasTextBox_IsPassword(*This.UI_CanvasTextBox_Inst)
+Declare UI_CanvasTextBox_SetIsPassword(*This.UI_CanvasTextBox_Inst, pw_p.b)
+Declare.b UI_CanvasTextBox_IsReadOnly(*This.UI_CanvasTextBox_Inst)
+Declare UI_CanvasTextBox_SetReadOnly(*This.UI_CanvasTextBox_Inst, ro_p.b)
+Declare.i UI_CanvasTextBox_GetMaxLength(*This.UI_CanvasTextBox_Inst)
+Declare UI_CanvasTextBox_SetMaxLength(*This.UI_CanvasTextBox_Inst, len_p.i)
+Declare.i UI_CanvasTextBox_GetActiveBorderColor(*This.UI_CanvasTextBox_Inst)
+Declare UI_CanvasTextBox_SetActiveBorderColor(*This.UI_CanvasTextBox_Inst, col_p.i)
+Declare.i UI_CanvasTextBox_GetSelectionColor(*This.UI_CanvasTextBox_Inst)
+Declare UI_CanvasTextBox_SetSelectionColor(*This.UI_CanvasTextBox_Inst, col_p.i)
+Declare.i UI_CanvasTextBox_GetCursorPosition(*This.UI_CanvasTextBox_Inst)
+Declare UI_CanvasTextBox_SetCursorPosition(*This.UI_CanvasTextBox_Inst, pos_p.i)
+Declare UI_CanvasTextBox_SetText(*This.UI_CanvasTextBox_Inst, text_p.s)
+Declare.s UI_CanvasTextBox_GetDisplayText(*This.UI_CanvasTextBox_Inst)
+Declare.b UI_CanvasTextBox_HasSelection(*This.UI_CanvasTextBox_Inst)
+Declare UI_CanvasTextBox_GetSelectionBounds(*This.UI_CanvasTextBox_Inst, *minOut.INTEGER, *maxOut.INTEGER)
+Declare UI_CanvasTextBox_ClearSelection(*This.UI_CanvasTextBox_Inst)
+Declare UI_CanvasTextBox_SelectAll(*This.UI_CanvasTextBox_Inst)
+Declare UI_CanvasTextBox_DeleteSelection(*This.UI_CanvasTextBox_Inst)
+Declare UI_CanvasTextBox_InsertText(*This.UI_CanvasTextBox_Inst, str_p.s)
+Declare UI_CanvasTextBox_DeleteBackward(*This.UI_CanvasTextBox_Inst)
+Declare UI_CanvasTextBox_DeleteForward(*This.UI_CanvasTextBox_Inst)
+Declare UI_CanvasTextBox_Copy(*This.UI_CanvasTextBox_Inst)
+Declare UI_CanvasTextBox_Cut(*This.UI_CanvasTextBox_Inst)
+Declare UI_CanvasTextBox_Paste(*This.UI_CanvasTextBox_Inst)
+Declare UI_CanvasTextBox_OnSubmit(*This.UI_CanvasTextBox_Inst)
+Declare.i UI_CanvasTextBox_CharPosFromMouseX(*This.UI_CanvasTextBox_Inst, targetX_p.i)
+Declare UI_CanvasTextBox_EnsureCursorVisible(*This.UI_CanvasTextBox_Inst, availW_p.i)
+Declare UI_CanvasTextBox_OnFocus(*This.UI_CanvasTextBox_Inst)
+Declare UI_CanvasTextBox_OnLostFocus(*This.UI_CanvasTextBox_Inst)
+Declare UI_CanvasTextBox_OnMouseDown(*This.UI_CanvasTextBox_Inst, mx_p.i, my_p.i, button_p.i)
+Declare UI_CanvasTextBox_OnMouseMove(*This.UI_CanvasTextBox_Inst, mx_p.i, my_p.i)
+Declare UI_CanvasTextBox_OnMouseUp(*This.UI_CanvasTextBox_Inst, mx_p.i, my_p.i, button_p.i)
+Declare UI_CanvasTextBox_OnLeftDoubleClick(*This.UI_CanvasTextBox_Inst, mx_p.i, my_p.i)
+Declare UI_CanvasTextBox_OnKeyDown(*This.UI_CanvasTextBox_Inst, key_p.i)
+Declare UI_CanvasTextBox_OnInput(*This.UI_CanvasTextBox_Inst, char_p.i)
+Declare UI_CanvasTextBox_OnPaint(*This.UI_CanvasTextBox_Inst, w_p.i, h_p.i)
+Declare UI_CanvasTextBox_Free(*This.UI_CanvasTextBox_Inst)
 Declare UI_ToggleSwitch_Init_void(*This.UI_ToggleSwitch_Inst)
 Declare UI_ToggleSwitch_Init_b(*This.UI_ToggleSwitch_Inst, defaultState_p.b)
 Declare UI_ToggleSwitch_Init_i_i_b(*This.UI_ToggleSwitch_Inst, w_p.i, h_p.i, defaultState_p.b)
@@ -1186,12 +1890,99 @@ Declare UI_ListIcon_Clear(*This.UI_ListIcon_Inst)
 Declare UI_ListIcon_SetItemData(*This.UI_ListIcon_Inst, item.i, value.i)
 Declare.i UI_ListIcon_GetItemData(*This.UI_ListIcon_Inst, item.i)
 Declare UI_ListIcon_Free(*This.UI_ListIcon_Inst)
+Declare UI_Canvas_Init_void(*This.UI_Canvas_Inst)
+Declare UI_Canvas_Init_i_i(*This.UI_Canvas_Inst, w_p.i, h_p.i)
+Declare UI_Canvas_Init_i_i_i_i(*This.UI_Canvas_Inst, x_p.i, y_p.i, w_p.i, h_p.i)
+Declare UI_Canvas_Init_i_i_i_i_i(*This.UI_Canvas_Inst, x_p.i, y_p.i, w_p.i, h_p.i, flags_p.i)
+Declare UI_Canvas_Free(*This.UI_Canvas_Inst)
+Declare UI_TreeNode_Init_void(*This.UI_TreeNode_Inst)
+Declare UI_TreeNode_Init_s(*This.UI_TreeNode_Inst, text_p.s)
+Declare UI_TreeNode_Init_s_i(*This.UI_TreeNode_Inst, text_p.s, icon_p.i)
+Declare UI_TreeNode_Init_s_i_s(*This.UI_TreeNode_Inst, text_p.s, icon_p.i, tag_p.s)
+Declare.s UI_TreeNode_GetText(*This.UI_TreeNode_Inst)
+Declare UI_TreeNode_SetText(*This.UI_TreeNode_Inst, text_p.s)
+Declare.s UI_TreeNode_GetTag(*This.UI_TreeNode_Inst)
+Declare UI_TreeNode_SetTag(*This.UI_TreeNode_Inst, tag_p.s)
+Declare.i UI_TreeNode_GetIcon(*This.UI_TreeNode_Inst)
+Declare UI_TreeNode_SetIcon(*This.UI_TreeNode_Inst, icon_p.i)
+Declare.i UI_TreeNode_GetDataContext(*This.UI_TreeNode_Inst)
+Declare UI_TreeNode_SetDataContext(*This.UI_TreeNode_Inst, data_p.i)
+Declare.b UI_TreeNode_IsExpanded(*This.UI_TreeNode_Inst)
+Declare UI_TreeNode_SetExpanded(*This.UI_TreeNode_Inst, state_p.b)
+Declare.b UI_TreeNode_IsChecked(*This.UI_TreeNode_Inst)
+Declare UI_TreeNode_SetChecked(*This.UI_TreeNode_Inst, state_p.b)
+Declare.b UI_TreeNode_IsSelected(*This.UI_TreeNode_Inst)
+Declare UI_TreeNode_SetSelected(*This.UI_TreeNode_Inst, state_p.b)
+Declare.b UI_TreeNode_HasCheckBox(*This.UI_TreeNode_Inst)
+Declare UI_TreeNode_SetHasCheckBox(*This.UI_TreeNode_Inst, state_p.b)
+Declare.i UI_TreeNode_GetParent(*This.UI_TreeNode_Inst)
+Declare UI_TreeNode_SetParent(*This.UI_TreeNode_Inst, *parent_p.UI_TreeNode_vt)
+Declare UI_TreeNode_AddChild(*This.UI_TreeNode_Inst, *child_p.UI_TreeNode_vt)
+Declare UI_TreeNode_RemoveChild(*This.UI_TreeNode_Inst, *child_p.UI_TreeNode_vt)
+Declare.i UI_TreeNode_GetChildCount(*This.UI_TreeNode_Inst)
+Declare.i UI_TreeNode_GetChild(*This.UI_TreeNode_Inst, index_p.i)
+Declare UI_TreeNode_AddButton(*This.UI_TreeNode_Inst, id_p.i, icon_p.i, *callback_p, tooltip_p.s, tag_p.s)
+Declare.i UI_TreeNode_GetButtonCount(*This.UI_TreeNode_Inst)
+Declare UI_TreeNode_SetButtonPos(*This.UI_TreeNode_Inst, index_p.i, x_p.i, y_p.i, size_p.i)
+Declare.i UI_TreeNode_GetButtonId(*This.UI_TreeNode_Inst, index_p.i)
+Declare.i UI_TreeNode_GetButtonIcon(*This.UI_TreeNode_Inst, index_p.i)
+Declare.i UI_TreeNode_GetButtonCallback(*This.UI_TreeNode_Inst, index_p.i)
+Declare UI_TreeNode_SetRenderLayout(*This.UI_TreeNode_Inst, y_p.i, h_p.i, w_p.i, level_p.i, expX_p.i, expY_p.i, expSize_p.i, chkX_p.i, chkY_p.i, chkSize_p.i)
+Declare.i UI_TreeNode_GetRenderY(*This.UI_TreeNode_Inst)
+Declare.i UI_TreeNode_GetRenderH(*This.UI_TreeNode_Inst)
+Declare.b UI_TreeNode_HitTestExpand(*This.UI_TreeNode_Inst, x_p.i, y_p.i)
+Declare.b UI_TreeNode_HitTestCheck(*This.UI_TreeNode_Inst, x_p.i, y_p.i)
+Declare.i UI_TreeNode_HitTestButton(*This.UI_TreeNode_Inst, x_p.i, y_p.i)
+Declare UI_TreeNode_ExpandAll(*This.UI_TreeNode_Inst)
+Declare UI_TreeNode_CollapseAll(*This.UI_TreeNode_Inst)
+Declare UI_TreeNode_Free(*This.UI_TreeNode_Inst)
+Declare UI_CanvasTree_InitDefaults(*This.UI_CanvasTree_Inst)
+Declare UI_CanvasTree_Init_void(*This.UI_CanvasTree_Inst)
+Declare UI_CanvasTree_Init_i_i(*This.UI_CanvasTree_Inst, w_p.i, h_p.i)
+Declare UI_CanvasTree_Init_i_i_i_i(*This.UI_CanvasTree_Inst, x_p.i, y_p.i, w_p.i, h_p.i)
+Declare UI_CanvasTree_Init_i_i_i_i_i(*This.UI_CanvasTree_Inst, x_p.i, y_p.i, w_p.i, h_p.i, flags_p.i)
+Declare.i UI_CanvasTree_GetRoot(*This.UI_CanvasTree_Inst)
+Declare.i UI_CanvasTree_GetSelectedNode(*This.UI_CanvasTree_Inst)
+Declare UI_CanvasTree_SetSelectedNode(*This.UI_CanvasTree_Inst, *node_p.UI_TreeNode_vt)
+Declare UI_CanvasTree_SetShowCheckBoxes(*This.UI_CanvasTree_Inst, show_p.b)
+Declare.b UI_CanvasTree_GetShowCheckBoxes(*This.UI_CanvasTree_Inst)
+Declare UI_CanvasTree_SetShowLines(*This.UI_CanvasTree_Inst, show_p.b)
+Declare.b UI_CanvasTree_GetShowLines(*This.UI_CanvasTree_Inst)
+Declare UI_CanvasTree_SetLineHeight(*This.UI_CanvasTree_Inst, h_p.i)
+Declare.i UI_CanvasTree_GetLineHeight(*This.UI_CanvasTree_Inst)
+Declare UI_CanvasTree_SetIndentWidth(*This.UI_CanvasTree_Inst, w_p.i)
+Declare UI_CanvasTree_SetFont(*This.UI_CanvasTree_Inst, fontId_p.i)
+Declare UI_CanvasTree_SetDarkMode(*This.UI_CanvasTree_Inst, enable_p.b)
+Declare UI_CanvasTree_SetColors(*This.UI_CanvasTree_Inst, bg_p.i, fg_p.i, selBg_p.i, selFg_p.i, line_p.i)
+Declare UI_CanvasTree_SetOnSelect(*This.UI_CanvasTree_Inst, *callback_p)
+Declare UI_CanvasTree_SetOnExpand(*This.UI_CanvasTree_Inst, *callback_p)
+Declare UI_CanvasTree_SetOnCheck(*This.UI_CanvasTree_Inst, *callback_p)
+Declare UI_CanvasTree_SetOnButtonClick(*This.UI_CanvasTree_Inst, *callback_p)
+Declare.i UI_CanvasTree_AddNode(*This.UI_CanvasTree_Inst, *parent_p.UI_TreeNode_vt, text_p.s, icon_p.i, tag_p.s)
+Declare UI_CanvasTree_Clear(*This.UI_CanvasTree_Inst)
+Declare UI_CanvasTree_ExpandAll(*This.UI_CanvasTree_Inst)
+Declare UI_CanvasTree_CollapseAll(*This.UI_CanvasTree_Inst)
+Declare UI_CanvasTree_PopulateFlatList(*This.UI_CanvasTree_Inst, *parent_p.UI_TreeNode_vt)
+Declare UI_CanvasTree_RebuildVisibleList(*This.UI_CanvasTree_Inst)
+Declare UI_CanvasTree_EnsureVisible(*This.UI_CanvasTree_Inst, *node_p.UI_TreeNode_vt)
+Declare UI_CanvasTree_OnPaint(*This.UI_CanvasTree_Inst, w.i, h.i)
+Declare UI_CanvasTree_OnMouseDown(*This.UI_CanvasTree_Inst, mx.i, my.i, button.i)
+Declare UI_CanvasTree_OnMouseUp(*This.UI_CanvasTree_Inst, mx.i, my.i, button.i)
+Declare UI_CanvasTree_OnMouseMove(*This.UI_CanvasTree_Inst, mx.i, my.i)
+Declare UI_CanvasTree_OnMouseLeave(*This.UI_CanvasTree_Inst)
+Declare UI_CanvasTree_OnMouseWheel(*This.UI_CanvasTree_Inst, delta_p.i)
+Declare UI_CanvasTree_OnKeyDown(*This.UI_CanvasTree_Inst, key_p.i)
+Declare UI_CanvasTree_Free(*This.UI_CanvasTree_Inst)
 Declare UI_XMLLoader_Init(*This.UI_XMLLoader_Inst)
 Declare UI_XMLLoader_Free(*This.UI_XMLLoader_Inst)
 Declare UI_XMLLoader_ParseBoxValues(*This.UI_XMLLoader_Inst, valStr.s, *outL.INTEGER, *outT.INTEGER, *outR.INTEGER, *outB.INTEGER)
+Declare.i UI_XMLLoader_ParseColor(*This.UI_XMLLoader_Inst, colorStr.s, defaultColor.i)
+Declare UI_XMLLoader_ParseResources(*This.UI_XMLLoader_Inst, resNode.i, *targetWindow.UI_Window_vt)
+Declare UI_XMLLoader_ApplyCanvasControlAttributes(*This.UI_XMLLoader_Inst, *ctrl.UI_CanvasControl_vt, node.i, *targetWindow.UI_Window_vt, *parentContainer.UI_Layouts_Container_vt)
 Declare UI_XMLLoader_ApplyCommonAttributes(*This.UI_XMLLoader_Inst, *comp.UI_Component_vt, node.i, *targetWindow.UI_Window_vt)
 Declare.b UI_XMLLoader_ParseBindingExpression(*This.UI_XMLLoader_Inst, attrVal.s, *outPropName.STRING, *outMode.INTEGER)
 Declare UI_XMLLoader_ApplyDataBindings(*This.UI_XMLLoader_Inst, *comp.UI_Component_vt, node.i, *targetWindow.UI_Window_vt)
+Declare UI_XMLLoader_ParseCanvasTreeNodes(*This.UI_XMLLoader_Inst, *tree.UI_CanvasTree_vt, *parentNode.UI_TreeNode_vt, xmlNode.i)
 Declare.i UI_XMLLoader_ParseNode(*This.UI_XMLLoader_Inst, node.i, *targetWindow.UI_Window_vt, *parentContainer.UI_Layouts_Container_vt)
 Declare.b UI_XMLLoader_LoadFromFile(*This.UI_XMLLoader_Inst, xmlPath.s, *targetWindow.UI_Window_vt)
 Declare.b UI_XMLLoader_LoadFromString(*This.UI_XMLLoader_Inst, xmlContent.s, *targetWindow.UI_Window_vt)
@@ -1200,6 +1991,13 @@ Declare.s Demo_ViewModels_SimpleViewModel_GetClickCountFormatted(*This.Demo_View
 Declare.b Demo_ViewModels_SimpleViewModel_OnCommand(*This.Demo_ViewModels_SimpleViewModel_Inst, cmd.s, *param)
 Declare Demo_Views_SimpleView_Init(*This.Demo_Views_SimpleView_Inst, *vm.Demo_ViewModels_SimpleViewModel_vt)
 
+Declare.i New_UI_AnimationEngine()
+Declare Free_UI_AnimationEngine(*obj.UI_AnimationEngine_Inst)
+Declare.i New_UI_Style_void()
+Declare.i New_UI_Style_s_s_s(targetType_p.s, key_p.s, basedOn_p.s)
+Declare Free_UI_Style(*obj.UI_Style_Inst)
+Declare.i New_UI_ResourceDictionary()
+Declare Free_UI_ResourceDictionary(*obj.UI_ResourceDictionary_Inst)
 Declare.i New_UI_Window_void()
 Declare.i New_UI_Window_s(title_p.s)
 Declare.i New_UI_Window_s_i_i(title_p.s, w_p.i, h_p.i)
@@ -1317,6 +2115,22 @@ Declare Free_UI_GroupBox(*obj.UI_GroupBox_Inst)
 Declare.i New_UI_TabControl_void()
 Declare.i New_UI_TabControl_i_i(w_p.i, h_p.i)
 Declare Free_UI_TabControl(*obj.UI_TabControl_Inst)
+Declare.i New_UI_CanvasButton_void()
+Declare.i New_UI_CanvasButton_s(text_p.s)
+Declare.i New_UI_CanvasButton_s_i_i(text_p.s, w_p.i, h_p.i)
+Declare.i New_UI_CanvasButton_i_i_i_i_s(x_p.i, y_p.i, w_p.i, h_p.i, text_p.s)
+Declare Free_UI_CanvasButton(*obj.UI_CanvasButton_Inst)
+Declare.i New_UI_CanvasText_void()
+Declare.i New_UI_CanvasText_s(text_p.s)
+Declare.i New_UI_CanvasText_s_i_i(text_p.s, w_p.i, h_p.i)
+Declare.i New_UI_CanvasText_i_i_i_i_s(x_p.i, y_p.i, w_p.i, h_p.i, text_p.s)
+Declare Free_UI_CanvasText(*obj.UI_CanvasText_Inst)
+Declare.i New_UI_CanvasTextBox_void()
+Declare.i New_UI_CanvasTextBox_s(placeholder_p.s)
+Declare.i New_UI_CanvasTextBox_s_i_i(placeholder_p.s, w_p.i, h_p.i)
+Declare.i New_UI_CanvasTextBox_i_i_i_i_s(x_p.i, y_p.i, w_p.i, h_p.i, placeholder_p.s)
+Declare.i New_UI_CanvasTextBox_i_i_i_i_s_b(x_p.i, y_p.i, w_p.i, h_p.i, placeholder_p.s, isPassword_p.b)
+Declare Free_UI_CanvasTextBox(*obj.UI_CanvasTextBox_Inst)
 Declare.i New_UI_ToggleSwitch_void()
 Declare.i New_UI_ToggleSwitch_b(defaultState_p.b)
 Declare.i New_UI_ToggleSwitch_i_i_b(w_p.i, h_p.i, defaultState_p.b)
@@ -1327,6 +2141,21 @@ Declare.i New_UI_ListIcon_s_i_i(title_p.s, colWidth_p.i, flags_p.i)
 Declare.i New_UI_ListIcon_i_i_i_i_s_i(x_p.i, y_p.i, w_p.i, h_p.i, title_p.s, colWidth_p.i)
 Declare.i New_UI_ListIcon_i_i_i_i_s_i_i(x_p.i, y_p.i, w_p.i, h_p.i, title_p.s, colWidth_p.i, flags_p.i)
 Declare Free_UI_ListIcon(*obj.UI_ListIcon_Inst)
+Declare.i New_UI_Canvas_void()
+Declare.i New_UI_Canvas_i_i(w_p.i, h_p.i)
+Declare.i New_UI_Canvas_i_i_i_i(x_p.i, y_p.i, w_p.i, h_p.i)
+Declare.i New_UI_Canvas_i_i_i_i_i(x_p.i, y_p.i, w_p.i, h_p.i, flags_p.i)
+Declare Free_UI_Canvas(*obj.UI_Canvas_Inst)
+Declare.i New_UI_TreeNode_void()
+Declare.i New_UI_TreeNode_s(text_p.s)
+Declare.i New_UI_TreeNode_s_i(text_p.s, icon_p.i)
+Declare.i New_UI_TreeNode_s_i_s(text_p.s, icon_p.i, tag_p.s)
+Declare Free_UI_TreeNode(*obj.UI_TreeNode_Inst)
+Declare.i New_UI_CanvasTree_void()
+Declare.i New_UI_CanvasTree_i_i(w_p.i, h_p.i)
+Declare.i New_UI_CanvasTree_i_i_i_i(x_p.i, y_p.i, w_p.i, h_p.i)
+Declare.i New_UI_CanvasTree_i_i_i_i_i(x_p.i, y_p.i, w_p.i, h_p.i, flags_p.i)
+Declare Free_UI_CanvasTree(*obj.UI_CanvasTree_Inst)
 Declare.i New_UI_XMLLoader()
 Declare Free_UI_XMLLoader(*obj.UI_XMLLoader_Inst)
 Declare.i New_Demo_ViewModels_SimpleViewModel()
@@ -1635,6 +2464,35 @@ Procedure UI_Component_Arrange(*This.UI_Component_Inst, nx.i, ny.i, nw.i, nh.i)
   EndIf
 EndProcedure
 
+Procedure UI_Component_OnAnimationTick(*This.UI_Component_Inst, propName.s, value.f)
+  Protected *This_vt.UI_Component_vt = *This
+EndProcedure
+
+Procedure UI_Component_SetBackground(*This.UI_Component_Inst, col.i)
+  Protected *This_vt.UI_Component_vt = *This
+EndProcedure
+
+Procedure.i UI_Component_GetBackground(*This.UI_Component_Inst)
+  Protected *This_vt.UI_Component_vt = *This
+        ProcedureReturn 0
+EndProcedure
+
+Procedure UI_Component_SetBorderColor(*This.UI_Component_Inst, col.i)
+  Protected *This_vt.UI_Component_vt = *This
+EndProcedure
+
+Procedure UI_Component_SetBorderThickness(*This.UI_Component_Inst, th.i)
+  Protected *This_vt.UI_Component_vt = *This
+EndProcedure
+
+Procedure UI_Component_SetCornerRadius(*This.UI_Component_Inst, cr.i)
+  Protected *This_vt.UI_Component_vt = *This
+EndProcedure
+
+Procedure UI_Component_Free(*This.UI_Component_Inst)
+  Protected *This_vt.UI_Component_vt = *This
+EndProcedure
+
 Procedure UI_Gadget_Init(*This.UI_Gadget_Inst)
   Protected *This_vt.UI_Gadget_vt = *This
         UI_Component_Init(*This)
@@ -1727,9 +2585,63 @@ EndProcedure
 Procedure UI_Gadget_Free(*This.UI_Gadget_Inst)
   Protected *This_vt.UI_Gadget_vt = *This
   If (*This\id And IsGadget(*This\id))
+          UI_UnregisterGadget(*This\id)
           FreeGadget(*This\id)
           *This\id = 0
   EndIf
+        CompilerIf Defined(UI_MVVM_UnregisterAll, #PB_Procedure)
+          UI_MVVM_UnregisterAll(*This)
+        CompilerEndIf
+EndProcedure
+
+Procedure.i UI_Gadget_GetState(*This.UI_Gadget_Inst)
+  Protected *This_vt.UI_Gadget_vt = *This
+  If (*This\id And IsGadget(*This\id))
+          ProcedureReturn GetGadgetState(*This\id)
+  EndIf
+        ProcedureReturn 0
+EndProcedure
+
+Procedure UI_Gadget_SetState(*This.UI_Gadget_Inst, state.i)
+  Protected *This_vt.UI_Gadget_vt = *This
+  If (*This\id And IsGadget(*This\id))
+          SetGadgetState(*This\id, state)
+  EndIf
+EndProcedure
+
+Procedure.b UI_Gadget_IsChecked(*This.UI_Gadget_Inst)
+  Protected *This_vt.UI_Gadget_vt = *This
+        ProcedureReturn Bool(*This_vt\GetState() <> 0)
+EndProcedure
+
+Procedure UI_Gadget_SetChecked(*This.UI_Gadget_Inst, c.b)
+  Protected *This_vt.UI_Gadget_vt = *This
+        *This_vt\SetState(c)
+EndProcedure
+
+Procedure.b UI_Gadget_IsHovered(*This.UI_Gadget_Inst)
+  Protected *This_vt.UI_Gadget_vt = *This
+        ProcedureReturn #False
+EndProcedure
+
+Procedure.b UI_Gadget_IsPressed(*This.UI_Gadget_Inst)
+  Protected *This_vt.UI_Gadget_vt = *This
+        ProcedureReturn #False
+EndProcedure
+
+Procedure UI_Gadget_SetBackground(*This.UI_Gadget_Inst, color.i)
+  Protected *This_vt.UI_Gadget_vt = *This
+        *This_vt\SetColor(#PB_Gadget_BackColor, color)
+EndProcedure
+
+Procedure UI_Gadget_SetForeground(*This.UI_Gadget_Inst, color.i)
+  Protected *This_vt.UI_Gadget_vt = *This
+        *This_vt\SetColor(#PB_Gadget_FrontColor, color)
+EndProcedure
+
+Procedure UI_Gadget_Redraw(*This.UI_Gadget_Inst)
+  Protected *This_vt.UI_Gadget_vt = *This
+        ; Virtual method overridden by Canvas controls
 EndProcedure
 
 Procedure UI_Gadget_OnClick(*This.UI_Gadget_Inst)
@@ -1754,6 +2666,433 @@ EndProcedure
 
 Procedure UI_Gadget_OnCustomEvent(*This.UI_Gadget_Inst, eventType.i)
   Protected *This_vt.UI_Gadget_vt = *This
+EndProcedure
+
+Procedure UI_AnimationEngine_Init(*This.UI_AnimationEngine_Inst)
+  Protected *This_vt.UI_AnimationEngine_vt = *This
+        *This\isRunning = #False
+        *This\lastTick = ElapsedMilliseconds()
+EndProcedure
+
+Procedure UI_AnimationEngine_Free(*This.UI_AnimationEngine_Inst)
+  Protected *This_vt.UI_AnimationEngine_vt = *This
+        ClearMap(*This\activeAnimations())
+        *This\isRunning = #False
+EndProcedure
+
+Procedure.f UI_AnimationEngine_ApplyEasing(*This.UI_AnimationEngine_Inst, t.f, easing.i)
+  Protected *This_vt.UI_AnimationEngine_vt = *This
+        If t <= 0.0 : ProcedureReturn 0.0 : EndIf
+        If t >= 1.0 : ProcedureReturn 1.0 : EndIf
+  
+        Select easing
+          Case #UI_ANIM_EASING_EASEOUT_QUAD:
+            ; 1 - (1 - t)^2
+            Protected inv.f = 1.0 - t
+            ProcedureReturn 1.0 - (inv * inv)
+  
+          Case #UI_ANIM_EASING_EASEOUT_CUBIC:
+            ; 1 - (1 - t)^3
+            Protected inv3.f = 1.0 - t
+            ProcedureReturn 1.0 - (inv3 * inv3 * inv3)
+  
+          Case #UI_ANIM_EASING_EASEOUT_BACK:
+            ; Effet de pop / rebond doux moderne
+            Protected c1.f = 1.70158
+            Protected c3.f = c1 + 1.0
+            Protected tm.f = t - 1.0
+            ProcedureReturn 1.0 + c3 * (tm * tm * tm) + c1 * (tm * tm)
+  
+          Case #UI_ANIM_EASING_EASEINOUT_QUAD:
+            If t < 0.5
+              ProcedureReturn 2.0 * t * t
+            Else
+              Protected invHalf.f = -2.0 * t + 2.0
+              ProcedureReturn 1.0 - (invHalf * invHalf) / 2.0
+            EndIf
+  
+          Default: ; Linear
+            ProcedureReturn t
+        EndSelect
+EndProcedure
+
+Procedure.f UI_AnimationEngine_LerpFloat(*This.UI_AnimationEngine_Inst, vStart.f, vEnd.f, t.f)
+  Protected *This_vt.UI_AnimationEngine_vt = *This
+        ProcedureReturn vStart + (vEnd - vStart) * t
+EndProcedure
+
+Procedure.i UI_AnimationEngine_LerpColor(*This.UI_AnimationEngine_Inst, cStart.i, cEnd.i, t.f)
+  Protected *This_vt.UI_AnimationEngine_vt = *This
+        If t <= 0.0 : ProcedureReturn cStart : EndIf
+        If t >= 1.0 : ProcedureReturn cEnd : EndIf
+  
+        Protected r1.i = Red(cStart),   g1.i = Green(cStart), b1.i = Blue(cStart)
+        Protected r2.i = Red(cEnd),     g2.i = Green(cEnd),   b2.i = Blue(cEnd)
+  
+        Protected r.i = r1 + (r2 - r1) * t
+        Protected g.i = g1 + (g2 - g1) * t
+        Protected b.i = b1 + (b2 - b1) * t
+  
+        If r < 0 : r = 0 : ElseIf r > 255 : r = 255 : EndIf
+        If g < 0 : g = 0 : ElseIf g > 255 : g = 255 : EndIf
+        If b < 0 : b = 0 : ElseIf b > 255 : b = 255 : EndIf
+  
+        ProcedureReturn RGB(r, g, b)
+EndProcedure
+
+Procedure UI_AnimationEngine_StartFloatAnimation(*This.UI_AnimationEngine_Inst, *ctrl.UI_Component_vt, key_p.s, fromVal.f, toVal.f, durationMs_p.i, easing_p.i)
+  Protected *This_vt.UI_AnimationEngine_vt = *This
+        If Not *ctrl : ProcedureReturn : EndIf
+        Protected animKey.s = Str(*ctrl) + "_" + key_p
+  
+        *This\activeAnimations(animKey)\control = *ctrl
+        *This\activeAnimations(animKey)\propType = 1
+        *This\activeAnimations(animKey)\startVal = fromVal
+        *This\activeAnimations(animKey)\targetVal = toVal
+        *This\activeAnimations(animKey)\currentVal = fromVal
+        *This\activeAnimations(animKey)\startTime = ElapsedMilliseconds()
+        *This\activeAnimations(animKey)\durationMs = durationMs_p
+        *This\activeAnimations(animKey)\easingType = easing_p
+        *This\activeAnimations(animKey)\isCompleted = #False
+        *This\isRunning = #True
+EndProcedure
+
+Procedure.b UI_AnimationEngine_HasActiveAnimations(*This.UI_AnimationEngine_Inst)
+  Protected *This_vt.UI_AnimationEngine_vt = *This
+        ProcedureReturn Bool(MapSize(*This\activeAnimations()) > 0)
+EndProcedure
+
+Procedure UI_AnimationEngine_Update(*This.UI_AnimationEngine_Inst)
+  Protected *This_vt.UI_AnimationEngine_vt = *This
+        If MapSize(*This\activeAnimations()) = 0
+          *This\isRunning = #False
+          ProcedureReturn
+        EndIf
+  
+        Protected now.q = ElapsedMilliseconds()
+        Protected NewList toRemove.s()
+  
+        ForEach *This\activeAnimations()
+          Protected *anim.UI_ActiveAnimation = @*This\activeAnimations()
+          Protected elapsed.i = now - *anim\startTime
+          Protected progress.f = elapsed / *anim\durationMs
+  
+          If progress >= 1.0
+            progress = 1.0
+            *anim\isCompleted = #True
+          EndIf
+  
+          Protected easedT.f = *This_vt\ApplyEasing(progress, *anim\easingType)
+  
+          If *anim\propType = 1 ; Float (Scale)
+            *anim\currentVal = *This_vt\LerpFloat(*anim\startVal, *anim\targetVal, easedT)
+            ; Dispatch value to Canvas control
+            If *anim\control
+              *anim\control\OnAnimationTick("Scale", *anim\currentVal)
+            EndIf
+          EndIf
+  
+          If *anim\isCompleted
+            AddElement(toRemove())
+            toRemove() = MapKey(*This\activeAnimations())
+          EndIf
+        Next
+  
+        ForEach toRemove()
+          DeleteMapElement(*This\activeAnimations(), toRemove())
+        Next
+  
+        If MapSize(*This\activeAnimations()) = 0
+          *This\isRunning = #False
+        EndIf
+EndProcedure
+
+Procedure UI_Style_Init_void(*This.UI_Style_Inst)
+  Protected *This_vt.UI_Style_vt = *This
+        *This\targetType = ""
+        *This\key = ""
+        *This\basedOn = ""
+        ClearList(*This\setters())
+        ClearList(*This\triggers())
+EndProcedure
+
+Procedure UI_Style_Init_s_s_s(*This.UI_Style_Inst, targetType_p.s, key_p.s, basedOn_p.s)
+  Protected *This_vt.UI_Style_vt = *This
+        *This\targetType = targetType_p
+        *This\key = key_p
+        *This\basedOn = basedOn_p
+        ClearList(*This\setters())
+        ClearList(*This\triggers())
+EndProcedure
+
+Procedure UI_Style_Free(*This.UI_Style_Inst)
+  Protected *This_vt.UI_Style_vt = *This
+        ClearList(*This\setters())
+        ForEach *This\triggers()
+          ClearList(*This\triggers()\setters())
+        Next
+        ClearList(*This\triggers())
+EndProcedure
+
+Procedure.s UI_Style_GetTargetType(*This.UI_Style_Inst)
+  Protected *This_vt.UI_Style_vt = *This
+        ProcedureReturn *This\targetType
+EndProcedure
+
+Procedure UI_Style_SetTargetType(*This.UI_Style_Inst, t_p.s)
+  Protected *This_vt.UI_Style_vt = *This
+        *This\targetType = t_p
+EndProcedure
+
+Procedure.s UI_Style_GetKey(*This.UI_Style_Inst)
+  Protected *This_vt.UI_Style_vt = *This
+        ProcedureReturn *This\key
+EndProcedure
+
+Procedure UI_Style_SetKey(*This.UI_Style_Inst, k_p.s)
+  Protected *This_vt.UI_Style_vt = *This
+        *This\key = k_p
+EndProcedure
+
+Procedure.s UI_Style_GetBasedOn(*This.UI_Style_Inst)
+  Protected *This_vt.UI_Style_vt = *This
+        ProcedureReturn *This\basedOn
+EndProcedure
+
+Procedure UI_Style_SetBasedOn(*This.UI_Style_Inst, b_p.s)
+  Protected *This_vt.UI_Style_vt = *This
+        *This\basedOn = b_p
+EndProcedure
+
+Procedure UI_Style_AddSetter(*This.UI_Style_Inst, prop_p.s, val_p.s)
+  Protected *This_vt.UI_Style_vt = *This
+        ; Replace if already exists, otherwise add
+        ForEach *This\setters()
+          If UCase(*This\setters()\property) = UCase(prop_p)
+            *This\setters()\value = val_p
+            ProcedureReturn
+          EndIf
+        Next
+        AddElement(*This\setters())
+        *This\setters()\property = prop_p
+        *This\setters()\value = val_p
+EndProcedure
+
+Procedure.i UI_Style_GetSetterCount(*This.UI_Style_Inst)
+  Protected *This_vt.UI_Style_vt = *This
+        ProcedureReturn ListSize(*This\setters())
+EndProcedure
+
+Procedure.s UI_Style_GetSetterProperty(*This.UI_Style_Inst, idx.i)
+  Protected *This_vt.UI_Style_vt = *This
+        If SelectElement(*This\setters(), idx)
+          ProcedureReturn *This\setters()\property
+        EndIf
+        ProcedureReturn ""
+EndProcedure
+
+Procedure.s UI_Style_GetSetterValue(*This.UI_Style_Inst, idx.i)
+  Protected *This_vt.UI_Style_vt = *This
+        If SelectElement(*This\setters(), idx)
+          ProcedureReturn *This\setters()\value
+        EndIf
+        ProcedureReturn ""
+EndProcedure
+
+Procedure.s UI_Style_FindSetterValue(*This.UI_Style_Inst, prop_p.s, defaultVal.s)
+  Protected *This_vt.UI_Style_vt = *This
+        ForEach *This\setters()
+          If UCase(*This\setters()\property) = UCase(prop_p)
+            ProcedureReturn *This\setters()\value
+          EndIf
+        Next
+        ProcedureReturn defaultVal
+EndProcedure
+
+Procedure.b UI_Style_HasSetter(*This.UI_Style_Inst, prop_p.s)
+  Protected *This_vt.UI_Style_vt = *This
+        ForEach *This\setters()
+          If UCase(*This\setters()\property) = UCase(prop_p)
+            ProcedureReturn #True
+          EndIf
+        Next
+        ProcedureReturn #False
+EndProcedure
+
+Procedure.i UI_Style_AddTrigger(*This.UI_Style_Inst, prop_p.s, val_p.s)
+  Protected *This_vt.UI_Style_vt = *This
+        Protected idx.i = AddElement(*This\triggers())
+        *This\triggers()\property = prop_p
+        *This\triggers()\value = val_p
+        ClearList(*This\triggers()\setters())
+        ProcedureReturn ListIndex(*This\triggers())
+EndProcedure
+
+Procedure UI_Style_AddTriggerSetter(*This.UI_Style_Inst, triggerIdx.i, prop_p.s, val_p.s)
+  Protected *This_vt.UI_Style_vt = *This
+        If SelectElement(*This\triggers(), triggerIdx)
+          AddElement(*This\triggers()\setters())
+          *This\triggers()\setters()\property = prop_p
+          *This\triggers()\setters()\value = val_p
+        EndIf
+EndProcedure
+
+Procedure.i UI_Style_GetTriggerCount(*This.UI_Style_Inst)
+  Protected *This_vt.UI_Style_vt = *This
+        ProcedureReturn ListSize(*This\triggers())
+EndProcedure
+
+Procedure.s UI_Style_GetTriggerProperty(*This.UI_Style_Inst, triggerIdx.i)
+  Protected *This_vt.UI_Style_vt = *This
+        If SelectElement(*This\triggers(), triggerIdx)
+          ProcedureReturn *This\triggers()\property
+        EndIf
+        ProcedureReturn ""
+EndProcedure
+
+Procedure.s UI_Style_GetTriggerValue(*This.UI_Style_Inst, triggerIdx.i)
+  Protected *This_vt.UI_Style_vt = *This
+        If SelectElement(*This\triggers(), triggerIdx)
+          ProcedureReturn *This\triggers()\value
+        EndIf
+        ProcedureReturn ""
+EndProcedure
+
+Procedure.i UI_Style_GetTriggerSetterCount(*This.UI_Style_Inst, triggerIdx.i)
+  Protected *This_vt.UI_Style_vt = *This
+        If SelectElement(*This\triggers(), triggerIdx)
+          ProcedureReturn ListSize(*This\triggers()\setters())
+        EndIf
+        ProcedureReturn 0
+EndProcedure
+
+Procedure.s UI_Style_GetTriggerSetterProperty(*This.UI_Style_Inst, triggerIdx.i, setterIdx.i)
+  Protected *This_vt.UI_Style_vt = *This
+        If SelectElement(*This\triggers(), triggerIdx)
+          If SelectElement(*This\triggers()\setters(), setterIdx)
+            ProcedureReturn *This\triggers()\setters()\property
+          EndIf
+        EndIf
+        ProcedureReturn ""
+EndProcedure
+
+Procedure.s UI_Style_GetTriggerSetterValue(*This.UI_Style_Inst, triggerIdx.i, setterIdx.i)
+  Protected *This_vt.UI_Style_vt = *This
+        If SelectElement(*This\triggers(), triggerIdx)
+          If SelectElement(*This\triggers()\setters(), setterIdx)
+            ProcedureReturn *This\triggers()\setters()\value
+          EndIf
+        EndIf
+        ProcedureReturn ""
+EndProcedure
+
+Procedure UI_Style_MergeBaseStyle(*This.UI_Style_Inst, *baseStyle.UI_Style_vt)
+  Protected *This_vt.UI_Style_vt = *This
+        If Not *baseStyle : ProcedureReturn : EndIf
+  
+        ; 1. Copy parent style Setters that are not overridden here
+        Protected bCount.i = *baseStyle\GetSetterCount()
+        Protected i.i
+        For i = 0 To bCount - 1
+          Protected bProp.s = *baseStyle\GetSetterProperty(i)
+          Protected bVal.s = *baseStyle\GetSetterValue(i)
+          If Not *This_vt\HasSetter(bProp)
+            *This_vt\AddSetter(bProp, bVal)
+          EndIf
+        Next
+  
+        ; 2. Copy parent style Triggers
+        Protected tCount.i = *baseStyle\GetTriggerCount()
+        Protected t.i, s.i
+        For t = 0 To tCount - 1
+          Protected tProp.s = *baseStyle\GetTriggerProperty(t)
+          Protected tVal.s = *baseStyle\GetTriggerValue(t)
+          Protected newTrigIdx.i = *This_vt\AddTrigger(tProp, tVal)
+          Protected sCount.i = *baseStyle\GetTriggerSetterCount(t)
+          For s = 0 To sCount - 1
+            *This_vt\AddTriggerSetter(newTrigIdx, *baseStyle\GetTriggerSetterProperty(t, s), *baseStyle\GetTriggerSetterValue(t, s))
+          Next
+        Next
+EndProcedure
+
+Procedure UI_ResourceDictionary_Init(*This.UI_ResourceDictionary_Inst)
+  Protected *This_vt.UI_ResourceDictionary_vt = *This
+        ClearMap(*This\styles())
+        ClearMap(*This\implicitStyles())
+EndProcedure
+
+Procedure UI_ResourceDictionary_Free(*This.UI_ResourceDictionary_Inst)
+  Protected *This_vt.UI_ResourceDictionary_vt = *This
+        ForEach *This\styles()
+          If *This\styles()
+            *This\styles()\Free()
+          EndIf
+        Next
+        ClearMap(*This\styles())
+  
+        ForEach *This\implicitStyles()
+          If *This\implicitStyles()
+            *This\implicitStyles()\Free()
+          EndIf
+        Next
+        ClearMap(*This\implicitStyles())
+EndProcedure
+
+Procedure UI_ResourceDictionary_AddStyle(*This.UI_ResourceDictionary_Inst, *style.UI_Style_vt)
+  Protected *This_vt.UI_ResourceDictionary_vt = *This
+        If Not *style : ProcedureReturn : EndIf
+  
+        ; Resolve potential inheritance (BasedOn)
+        Protected basedOnKey.s = *style\GetBasedOn()
+        If basedOnKey <> ""
+          Protected *base.UI_Style_vt = *This_vt\GetStyle(basedOnKey)
+          If *base
+            *style\MergeBaseStyle(*base)
+          EndIf
+        EndIf
+  
+        Protected keyStr.s = *style\GetKey()
+        If keyStr <> ""
+          *This\styles(UCase(keyStr)) = *style
+        ElseIf *style\GetTargetType() <> ""
+          ; Implicit style linked to component name (e.g. TargetType="CanvasButton")
+          *This\implicitStyles(UCase(*style\GetTargetType())) = *style
+        EndIf
+EndProcedure
+
+Procedure.i UI_ResourceDictionary_GetStyle(*This.UI_ResourceDictionary_Inst, key_p.s)
+  Protected *This_vt.UI_ResourceDictionary_vt = *This
+        Protected normKey.s = UCase(Trim(key_p))
+        ; Support XAML syntaxes "{StaticResource PrimaryButton}" or "PrimaryButton"
+        If Left(normKey, 16) = "{STATICRESOURCE "
+          normKey = Trim(Mid(normKey, 17))
+          If Right(normKey, 1) = "}" : normKey = Left(normKey, Len(normKey) - 1) : EndIf
+        EndIf
+  
+        If FindMapElement(*This\styles(), normKey)
+          ProcedureReturn *This\styles(normKey)
+        EndIf
+        ProcedureReturn 0
+EndProcedure
+
+Procedure.i UI_ResourceDictionary_GetImplicitStyle(*This.UI_ResourceDictionary_Inst, targetType_p.s)
+  Protected *This_vt.UI_ResourceDictionary_vt = *This
+        Protected normType.s = UCase(Trim(targetType_p))
+        If FindMapElement(*This\implicitStyles(), normType)
+          ProcedureReturn *This\implicitStyles(normType)
+        EndIf
+        ProcedureReturn 0
+EndProcedure
+
+Procedure.b UI_ResourceDictionary_HasStyle(*This.UI_ResourceDictionary_Inst, key_p.s)
+  Protected *This_vt.UI_ResourceDictionary_vt = *This
+        ProcedureReturn Bool(*This_vt\GetStyle(key_p) <> 0)
+EndProcedure
+
+Procedure UI_ResourceDictionary_Clear(*This.UI_ResourceDictionary_Inst)
+  Protected *This_vt.UI_ResourceDictionary_vt = *This
+        ClearMap(*This\styles())
+        ClearMap(*This\implicitStyles())
 EndProcedure
 
 Procedure UI_Window_CreateWindowInternal(*This.UI_Window_Inst, title_p.s, x_p.i, y_p.i, w_p.i, h_p.i, flags_p.i, parent_p.i)
@@ -2008,6 +3347,22 @@ Procedure.i UI_Window_GetDataContext(*This.UI_Window_Inst)
         ProcedureReturn *This\dataContext
 EndProcedure
 
+Procedure UI_Window_SetBackgroundColor(*This.UI_Window_Inst, col_p.i)
+  Protected *This_vt.UI_Window_vt = *This
+        *This\backgroundColor = col_p
+  If (*This\id And IsWindow(*This\id))
+          SetWindowColor(*This\id, col_p)
+  EndIf
+EndProcedure
+
+Procedure.i UI_Window_GetBackgroundColor(*This.UI_Window_Inst)
+  Protected *This_vt.UI_Window_vt = *This
+        If *This\backgroundColor = 0
+          ProcedureReturn RGB(248, 249, 250)
+        EndIf
+        ProcedureReturn *This\backgroundColor
+EndProcedure
+
 Procedure.b UI_Window_LoadView(*This.UI_Window_Inst, xmlPath.s, *dataContext_p)
   Protected *This_vt.UI_Window_vt = *This
   If (*dataContext_p)
@@ -2036,6 +3391,14 @@ Procedure.b UI_Window_LoadViewFromString(*This.UI_Window_Inst, xmlContent.s, *da
         ProcedureReturn res
 EndProcedure
 
+Procedure.i UI_Window_GetResources(*This.UI_Window_Inst)
+  Protected *This_vt.UI_Window_vt = *This
+        If Not *This\resources
+          *This\resources = New_UI_ResourceDictionary()
+        EndIf
+        ProcedureReturn *This\resources
+EndProcedure
+
 Procedure UI_Window_Close(*This.UI_Window_Inst)
   Protected *This_vt.UI_Window_vt = *This
   If (*This\id And IsWindow(*This\id))
@@ -2048,6 +3411,18 @@ EndProcedure
 Procedure UI_Window_Free(*This.UI_Window_Inst)
   Protected *This_vt.UI_Window_vt = *This
         *This_vt\Close()
+        If *This\rootContent
+          *This\rootContent\Free()
+          *This\rootContent = 0
+        EndIf
+        If *This\resources
+          *This\resources\Free()
+          *This\resources = 0
+        EndIf
+        ClearMap(*This\namedControls())
+        CompilerIf Defined(UI_MVVM_UnregisterAll, #PB_Procedure)
+          UI_MVVM_UnregisterAll(*This)
+        CompilerEndIf
 EndProcedure
 
 Procedure.b UI_Window_OnClose(*This.UI_Window_Inst)
@@ -2121,7 +3496,12 @@ Procedure UI_Application_Run_void(*This.UI_Application_Inst)
         Protected ev.i, evGadget.i, evWin.i, evType.i
   
   While (*This\isRunning And MapSize(UI_WindowMap()) > 0)
-          ev = WaitWindowEvent()
+          If (UI_HasActiveAnimations())
+            ev = WaitWindowEvent(16)
+            UI_UpdateAnimations()
+          Else
+            ev = WaitWindowEvent()
+          EndIf
           evWin = EventWindow()
           evType = EventType()
   
@@ -2249,15 +3629,76 @@ EndProcedure
 Procedure UI_Application_Free(*This.UI_Application_Inst)
   Protected *This_vt.UI_Application_vt = *This
         *This_vt\Quit()
+        CompilerIf Defined(UI_ShutdownAnimationEngine, #PB_Procedure)
+          UI_ShutdownAnimationEngine()
+        CompilerEndIf
+        ClearMap(UI_WindowMap())
+        ClearMap(UI_GadgetMap())
 EndProcedure
 
-Procedure UI_CustomGadget_Init_void(*This.UI_CustomGadget_Inst)
-  Protected *This_vt.UI_CustomGadget_vt = *This
+Procedure UI_CanvasControl_InitDefaults(*This.UI_CanvasControl_Inst)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        *This\visualState = #UI_VisualState_Normal
+        *This\isHovered = #False
+        *This\isPressed = #False
+        *This\isFocused = #False
+        *This\mouseX = 0
+        *This\mouseY = 0
+        *This\text = ""
+        *This\ownedFont = 0
+        *This\parentBackground = RGB(241, 245, 249) ; Default light theme / window background
+        *This\currentScale = 1.0
+        *This\targetScale = 1.0
+        *This\animateHoverScale = #False
+  
+        ; Modern default palette (Light)
+        *This\background = RGB(255, 255, 255)
+        *This\foreground = RGB(33, 37, 41)
+        *This\hoverBackground = RGB(242, 246, 250)
+        *This\hoverForeground = RGB(0, 102, 204)
+        *This\pressedBackground = RGB(204, 232, 255)
+        *This\pressedForeground = RGB(0, 90, 180)
+        *This\disabledBackground = RGB(240, 240, 240)
+        *This\disabledForeground = RGB(160, 160, 160)
+  
+        *This\borderColor = RGB(218, 224, 233)
+        *This\hoverBorderColor = RGB(0, 120, 215)
+        *This\pressedBorderColor = RGB(0, 90, 180)
+        *This\borderThickness = 1
+        *This\cornerRadius = 4
+        *This\borderLeftThickness = 0
+        *This\borderLeftColor = 0
+  
+        *This\paddingLeft = 8
+        *This\paddingTop = 4
+        *This\paddingRight = 8
+        *This\paddingBottom = 4
+  
+        ; Store base values for triggers
+        *This\style = 0
+        *This\baseBackground = *This\background
+        *This\baseForeground = *This\foreground
+        *This\baseBorderColor = *This\borderColor
+        *This\baseHoverBackground = *This\hoverBackground
+        *This\baseHoverForeground = *This\hoverForeground
+        *This\baseHoverBorderColor = *This\hoverBorderColor
+        *This\basePressedBackground = *This\pressedBackground
+        *This\basePressedForeground = *This\pressedForeground
+        *This\basePressedBorderColor = *This\pressedBorderColor
+        *This\baseBorderThickness = *This\borderThickness
+        *This\baseCornerRadius = *This\cornerRadius
+        *This\baseBorderLeftThickness = 0
+        *This\baseBorderLeftColor = 0
+        *This\baseScale = 1.0
+EndProcedure
+
+Procedure UI_CanvasControl_Init_void(*This.UI_CanvasControl_Inst)
+  Protected *This_vt.UI_CanvasControl_vt = *This
         UI_Gadget_Init(*This)
         *This\x = 0 : *This\y = 0 : *This\width = 100 : *This\height = 30
         *This\desiredWidth = 100 : *This\desiredHeight = 30
         *This\isVisible = #True : *This\isEnabled = #True
-        *This\isHovered = #False : *This\isPressed = #False
+        *This_vt\InitDefaults()
         *This\id = CanvasGadget(#PB_Any, 0, 0, 100, 30, #PB_Canvas_Keyboard)
   If (*This\id)
           UI_RegisterGadget(*This\id, *This)
@@ -2265,13 +3706,13 @@ Procedure UI_CustomGadget_Init_void(*This.UI_CustomGadget_Inst)
   EndIf
 EndProcedure
 
-Procedure UI_CustomGadget_Init_i_i(*This.UI_CustomGadget_Inst, w_p.i, h_p.i)
-  Protected *This_vt.UI_CustomGadget_vt = *This
+Procedure UI_CanvasControl_Init_i_i(*This.UI_CanvasControl_Inst, w_p.i, h_p.i)
+  Protected *This_vt.UI_CanvasControl_vt = *This
         UI_Gadget_Init(*This)
         *This\x = 0 : *This\y = 0 : *This\width = w_p : *This\height = h_p
         *This\desiredWidth = w_p : *This\desiredHeight = h_p
         *This\isVisible = #True : *This\isEnabled = #True
-        *This\isHovered = #False : *This\isPressed = #False
+        *This_vt\InitDefaults()
         *This\id = CanvasGadget(#PB_Any, 0, 0, w_p, h_p, #PB_Canvas_Keyboard)
   If (*This\id)
           UI_RegisterGadget(*This\id, *This)
@@ -2279,13 +3720,13 @@ Procedure UI_CustomGadget_Init_i_i(*This.UI_CustomGadget_Inst, w_p.i, h_p.i)
   EndIf
 EndProcedure
 
-Procedure UI_CustomGadget_Init_i_i_i_i(*This.UI_CustomGadget_Inst, x_p.i, y_p.i, w_p.i, h_p.i)
-  Protected *This_vt.UI_CustomGadget_vt = *This
+Procedure UI_CanvasControl_Init_i_i_i_i(*This.UI_CanvasControl_Inst, x_p.i, y_p.i, w_p.i, h_p.i)
+  Protected *This_vt.UI_CanvasControl_vt = *This
         UI_Gadget_Init(*This)
         *This\x = x_p : *This\y = y_p : *This\width = w_p : *This\height = h_p
         *This\desiredWidth = w_p : *This\desiredHeight = h_p
         *This\isVisible = #True : *This\isEnabled = #True
-        *This\isHovered = #False : *This\isPressed = #False
+        *This_vt\InitDefaults()
         *This\id = CanvasGadget(#PB_Any, x_p, y_p, w_p, h_p, #PB_Canvas_Keyboard)
   If (*This\id)
           UI_RegisterGadget(*This\id, *This)
@@ -2293,13 +3734,13 @@ Procedure UI_CustomGadget_Init_i_i_i_i(*This.UI_CustomGadget_Inst, x_p.i, y_p.i,
   EndIf
 EndProcedure
 
-Procedure UI_CustomGadget_Init_i_i_i_i_i(*This.UI_CustomGadget_Inst, x_p.i, y_p.i, w_p.i, h_p.i, flags_p.i)
-  Protected *This_vt.UI_CustomGadget_vt = *This
+Procedure UI_CanvasControl_Init_i_i_i_i_i(*This.UI_CanvasControl_Inst, x_p.i, y_p.i, w_p.i, h_p.i, flags_p.i)
+  Protected *This_vt.UI_CanvasControl_vt = *This
         UI_Gadget_Init(*This)
         *This\x = x_p : *This\y = y_p : *This\width = w_p : *This\height = h_p
         *This\desiredWidth = w_p : *This\desiredHeight = h_p
         *This\isVisible = #True : *This\isEnabled = #True
-        *This\isHovered = #False : *This\isPressed = #False
+        *This_vt\InitDefaults()
         *This\id = CanvasGadget(#PB_Any, x_p, y_p, w_p, h_p, flags_p | #PB_Canvas_Keyboard)
   If (*This\id)
           UI_RegisterGadget(*This\id, *This)
@@ -2307,8 +3748,438 @@ Procedure UI_CustomGadget_Init_i_i_i_i_i(*This.UI_CustomGadget_Inst, x_p.i, y_p.
   EndIf
 EndProcedure
 
-Procedure UI_CustomGadget_Redraw(*This.UI_CustomGadget_Inst)
-  Protected *This_vt.UI_CustomGadget_vt = *This
+Procedure.i UI_CanvasControl_ScaleX(*This.UI_CanvasControl_Inst, val_p.i)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        ProcedureReturn DesktopScaledX(val_p)
+EndProcedure
+
+Procedure.i UI_CanvasControl_ScaleY(*This.UI_CanvasControl_Inst, val_p.i)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        ProcedureReturn DesktopScaledY(val_p)
+EndProcedure
+
+Procedure.f UI_CanvasControl_GetDpiScale(*This.UI_CanvasControl_Inst)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        Protected sc.f = DesktopResolutionX()
+        If sc <= 0.0 : sc = 1.0 : EndIf
+        ProcedureReturn sc
+EndProcedure
+
+Procedure.i UI_CanvasControl_GetVisualState(*This.UI_CanvasControl_Inst)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        ProcedureReturn *This\visualState
+EndProcedure
+
+Procedure UI_CanvasControl_UpdateVisualState(*This.UI_CanvasControl_Inst)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        Protected oldState.i = *This\visualState
+        Protected newState.i = #UI_VisualState_Normal
+  
+  If (Not *This\isEnabled)
+          newState = #UI_VisualState_Disabled
+  ElseIf (*This\isPressed)
+          newState = #UI_VisualState_Pressed
+  ElseIf (*This\isHovered)
+          newState = #UI_VisualState_Hover
+  ElseIf (*This\isFocused)
+          newState = #UI_VisualState_Focused
+  EndIf
+  
+        ; Apply active WPF triggers for the new state
+        *This_vt\ApplyStyleTriggers()
+  
+  If (oldState <> newState)
+          *This\visualState = newState
+          *This_vt\OnVisualStateChanged(oldState, newState)
+          *This_vt\Redraw()
+  EndIf
+EndProcedure
+
+Procedure UI_CanvasControl_OnVisualStateChanged(*This.UI_CanvasControl_Inst, oldState_p.i, newState_p.i)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+EndProcedure
+
+Procedure.b UI_CanvasControl_IsHovered(*This.UI_CanvasControl_Inst)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        ProcedureReturn *This\isHovered
+EndProcedure
+
+Procedure.b UI_CanvasControl_IsMouseOver(*This.UI_CanvasControl_Inst)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        ProcedureReturn *This\isHovered
+EndProcedure
+
+Procedure UI_CanvasControl_SetIsHovered(*This.UI_CanvasControl_Inst, state_p.b)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+  If (*This\isHovered <> state_p)
+          *This\isHovered = state_p
+          *This_vt\UpdateVisualState()
+  EndIf
+EndProcedure
+
+Procedure.b UI_CanvasControl_IsPressed(*This.UI_CanvasControl_Inst)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        ProcedureReturn *This\isPressed
+EndProcedure
+
+Procedure UI_CanvasControl_SetIsPressed(*This.UI_CanvasControl_Inst, state_p.b)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+  If (*This\isPressed <> state_p)
+          *This\isPressed = state_p
+          *This_vt\UpdateVisualState()
+  EndIf
+EndProcedure
+
+Procedure.b UI_CanvasControl_IsFocused(*This.UI_CanvasControl_Inst)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        ProcedureReturn *This\isFocused
+EndProcedure
+
+Procedure UI_CanvasControl_SetIsFocused(*This.UI_CanvasControl_Inst, state_p.b)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+  If (*This\isFocused <> state_p)
+          *This\isFocused = state_p
+          *This_vt\UpdateVisualState()
+  EndIf
+EndProcedure
+
+Procedure UI_CanvasControl_SetEnabled(*This.UI_CanvasControl_Inst, e.b)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        UI_Gadget_SetEnabled(*This, e.b)
+        *This_vt\UpdateVisualState()
+EndProcedure
+
+Procedure.s UI_CanvasControl_GetText(*This.UI_CanvasControl_Inst)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        ProcedureReturn *This\text
+EndProcedure
+
+Procedure UI_CanvasControl_SetText(*This.UI_CanvasControl_Inst, text_p.s)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        *This\text = text_p
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure.i UI_CanvasControl_GetBackground(*This.UI_CanvasControl_Inst)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        ProcedureReturn *This\background
+EndProcedure
+
+Procedure UI_CanvasControl_SetBackground(*This.UI_CanvasControl_Inst, color_p.i)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        *This\background = color_p
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure.i UI_CanvasControl_GetForeground(*This.UI_CanvasControl_Inst)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        ProcedureReturn *This\foreground
+EndProcedure
+
+Procedure UI_CanvasControl_SetForeground(*This.UI_CanvasControl_Inst, color_p.i)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        *This\foreground = color_p
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure.i UI_CanvasControl_GetHoverBackground(*This.UI_CanvasControl_Inst)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        ProcedureReturn *This\hoverBackground
+EndProcedure
+
+Procedure UI_CanvasControl_SetHoverBackground(*This.UI_CanvasControl_Inst, color_p.i)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        *This\hoverBackground = color_p
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure.i UI_CanvasControl_GetHoverForeground(*This.UI_CanvasControl_Inst)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        ProcedureReturn *This\hoverForeground
+EndProcedure
+
+Procedure UI_CanvasControl_SetHoverForeground(*This.UI_CanvasControl_Inst, color_p.i)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        *This\hoverForeground = color_p
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure.i UI_CanvasControl_GetPressedBackground(*This.UI_CanvasControl_Inst)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        ProcedureReturn *This\pressedBackground
+EndProcedure
+
+Procedure UI_CanvasControl_SetPressedBackground(*This.UI_CanvasControl_Inst, color_p.i)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        *This\pressedBackground = color_p
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure.i UI_CanvasControl_GetPressedForeground(*This.UI_CanvasControl_Inst)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        ProcedureReturn *This\pressedForeground
+EndProcedure
+
+Procedure UI_CanvasControl_SetPressedForeground(*This.UI_CanvasControl_Inst, color_p.i)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        *This\pressedForeground = color_p
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure.i UI_CanvasControl_GetDisabledBackground(*This.UI_CanvasControl_Inst)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        ProcedureReturn *This\disabledBackground
+EndProcedure
+
+Procedure UI_CanvasControl_SetDisabledBackground(*This.UI_CanvasControl_Inst, color_p.i)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        *This\disabledBackground = color_p
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure.i UI_CanvasControl_GetDisabledForeground(*This.UI_CanvasControl_Inst)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        ProcedureReturn *This\disabledForeground
+EndProcedure
+
+Procedure UI_CanvasControl_SetDisabledForeground(*This.UI_CanvasControl_Inst, color_p.i)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        *This\disabledForeground = color_p
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure.i UI_CanvasControl_GetBorderColor(*This.UI_CanvasControl_Inst)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        ProcedureReturn *This\borderColor
+EndProcedure
+
+Procedure UI_CanvasControl_SetBorderColor(*This.UI_CanvasControl_Inst, color_p.i)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        *This\borderColor = color_p
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure.i UI_CanvasControl_GetHoverBorderColor(*This.UI_CanvasControl_Inst)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        ProcedureReturn *This\hoverBorderColor
+EndProcedure
+
+Procedure UI_CanvasControl_SetHoverBorderColor(*This.UI_CanvasControl_Inst, color_p.i)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        *This\hoverBorderColor = color_p
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure.i UI_CanvasControl_GetPressedBorderColor(*This.UI_CanvasControl_Inst)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        ProcedureReturn *This\pressedBorderColor
+EndProcedure
+
+Procedure UI_CanvasControl_SetPressedBorderColor(*This.UI_CanvasControl_Inst, color_p.i)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        *This\pressedBorderColor = color_p
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure.i UI_CanvasControl_GetBorderThickness(*This.UI_CanvasControl_Inst)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        ProcedureReturn *This\borderThickness
+EndProcedure
+
+Procedure UI_CanvasControl_SetBorderThickness(*This.UI_CanvasControl_Inst, thickness_p.i)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        *This\borderThickness = thickness_p
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure.i UI_CanvasControl_GetCornerRadius(*This.UI_CanvasControl_Inst)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        ProcedureReturn *This\cornerRadius
+EndProcedure
+
+Procedure UI_CanvasControl_SetCornerRadius(*This.UI_CanvasControl_Inst, radius_p.i)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        *This\cornerRadius = radius_p
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure UI_CanvasControl_SetBorder(*This.UI_CanvasControl_Inst, color_p.i, thickness_p.i, radius_p.i)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        *This\borderColor = color_p
+        *This\borderThickness = thickness_p
+        *This\cornerRadius = radius_p
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure.i UI_CanvasControl_GetBorderLeftThickness(*This.UI_CanvasControl_Inst)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        ProcedureReturn *This\borderLeftThickness
+EndProcedure
+
+Procedure UI_CanvasControl_SetBorderLeftThickness(*This.UI_CanvasControl_Inst, thickness_p.i)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        *This\borderLeftThickness = thickness_p
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure.i UI_CanvasControl_GetBorderLeftColor(*This.UI_CanvasControl_Inst)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        ProcedureReturn *This\borderLeftColor
+EndProcedure
+
+Procedure UI_CanvasControl_SetBorderLeftColor(*This.UI_CanvasControl_Inst, color_p.i)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        *This\borderLeftColor = color_p
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure UI_CanvasControl_SetPadding(*This.UI_CanvasControl_Inst, l_p.i, t_p.i, r_p.i, b_p.i)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        *This\paddingLeft = l_p
+        *This\paddingTop = t_p
+        *This\paddingRight = r_p
+        *This\paddingBottom = b_p
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure.i UI_CanvasControl_GetPaddingLeft(*This.UI_CanvasControl_Inst)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        ProcedureReturn *This\paddingLeft
+EndProcedure
+
+Procedure.i UI_CanvasControl_GetPaddingTop(*This.UI_CanvasControl_Inst)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        ProcedureReturn *This\paddingTop
+EndProcedure
+
+Procedure.i UI_CanvasControl_GetPaddingRight(*This.UI_CanvasControl_Inst)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        ProcedureReturn *This\paddingRight
+EndProcedure
+
+Procedure.i UI_CanvasControl_GetPaddingBottom(*This.UI_CanvasControl_Inst)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        ProcedureReturn *This\paddingBottom
+EndProcedure
+
+Procedure.i UI_CanvasControl_GetCurrentBackgroundColor(*This.UI_CanvasControl_Inst)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        Select (*This\visualState)
+          Case #UI_VisualState_Disabled:
+            ProcedureReturn *This\disabledBackground
+          Case #UI_VisualState_Pressed:
+            ProcedureReturn *This\pressedBackground
+          Case #UI_VisualState_Hover:
+            ProcedureReturn *This\hoverBackground
+          Default:
+            ProcedureReturn *This\background
+        EndSelect
+EndProcedure
+
+Procedure.i UI_CanvasControl_GetCurrentForegroundColor(*This.UI_CanvasControl_Inst)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        Select (*This\visualState)
+          Case #UI_VisualState_Disabled:
+            ProcedureReturn *This\disabledForeground
+          Case #UI_VisualState_Pressed:
+            ProcedureReturn *This\pressedForeground
+          Case #UI_VisualState_Hover:
+            ProcedureReturn *This\hoverForeground
+          Default:
+            ProcedureReturn *This\foreground
+        EndSelect
+EndProcedure
+
+Procedure.i UI_CanvasControl_GetCurrentBorderColor(*This.UI_CanvasControl_Inst)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        Select (*This\visualState)
+          Case #UI_VisualState_Disabled:
+            ProcedureReturn *This\disabledForeground
+          Case #UI_VisualState_Pressed:
+            ProcedureReturn *This\pressedBorderColor
+          Case #UI_VisualState_Hover:
+            ProcedureReturn *This\hoverBorderColor
+          Default:
+            ProcedureReturn *This\borderColor
+        EndSelect
+EndProcedure
+
+Procedure UI_CanvasControl_DrawControlBackground(*This.UI_CanvasControl_Inst, w_p.i, h_p.i)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        ; Clear canvas background with parent container color
+        ; Avoid square artifacts around rounded corners
+        Box(0, 0, w_p, h_p, *This\parentBackground)
+  
+        Protected curBg.i = *This_vt\GetCurrentBackgroundColor()
+        Protected curBorder.i = *This_vt\GetCurrentBorderColor()
+        Protected scaledRadius.i = DesktopScaledX(*This\cornerRadius)
+        Protected scaledThick.i = DesktopScaledX(*This\borderThickness)
+  
+        Protected curMarginX.i = 0
+        Protected curMarginY.i = 0
+  
+        If (*This\animateHoverScale)
+          Protected baseM.f = 2.0
+          Protected delta.f = (*This\currentScale - 1.0) / 0.05
+          Protected mF.f = baseM - (delta * baseM)
+          If mF < 0.0 : mF = 0.0 : ElseIf mF > 4.0 : mF = 4.0 : EndIf
+          curMarginX = DesktopScaledX(Round(mF, #PB_Round_Nearest))
+          curMarginY = DesktopScaledY(Round(mF, #PB_Round_Nearest))
+        EndIf
+  
+        Protected drawX.i = curMarginX
+        Protected drawY.i = curMarginY
+        Protected drawW.i = w_p - (curMarginX * 2)
+        Protected drawH.i = h_p - (curMarginY * 2)
+        If drawW < 4 : drawW = 4 : EndIf
+        If drawH < 4 : drawH = 4 : EndIf
+  
+  If (scaledRadius > 0)
+          ; Rounded background with border
+  If (scaledThick > 0)
+            RoundBox(drawX, drawY, drawW, drawH, scaledRadius, scaledRadius, curBorder)
+  If (drawW > scaledThick * 2 And drawH > scaledThick * 2)
+              Protected innerR.i = scaledRadius - scaledThick
+              If innerR < 0 : innerR = 0 : EndIf
+              RoundBox(drawX + scaledThick, drawY + scaledThick, drawW - (scaledThick * 2), drawH - (scaledThick * 2), innerR, innerR, curBg)
+  EndIf
+  Else
+            RoundBox(drawX, drawY, drawW, drawH, scaledRadius, scaledRadius, curBg)
+  EndIf
+  Else
+          ; Standard rectangle with border
+  If (scaledThick > 0)
+            Box(drawX, drawY, drawW, drawH, curBorder)
+  If (drawW > scaledThick * 2 And drawH > scaledThick * 2)
+              Box(drawX + scaledThick, drawY + scaledThick, drawW - (scaledThick * 2), drawH - (scaledThick * 2), curBg)
+  EndIf
+  Else
+            Box(drawX, drawY, drawW, drawH, curBg)
+  EndIf
+  EndIf
+  
+        ; Left accent border (e.g. WPF active tab indicator)
+        If (*This\borderLeftThickness > 0)
+          Protected scaledBLT.i = DesktopScaledX(*This\borderLeftThickness)
+          Protected curBLCol.i = *This\borderLeftColor
+          If curBLCol = 0 : curBLCol = curBorder : EndIf
+          Box(drawX, drawY, scaledBLT, drawH, curBLCol)
+        EndIf
+EndProcedure
+
+Procedure UI_CanvasControl_DrawFocusRing(*This.UI_CanvasControl_Inst, w_p.i, h_p.i)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+  If (*This\isFocused)
+          Protected fCol.i = RGB(0, 120, 215)
+          Protected scaledRadius.i = DesktopScaledX(*This\cornerRadius)
+          If scaledRadius > 2 : scaledRadius - 2 : EndIf
+          RoundBox(2, 2, w_p - 4, h_p - 4, scaledRadius, scaledRadius, fCol)
+          RoundBox(3, 3, w_p - 6, h_p - 6, scaledRadius, scaledRadius, *This_vt\GetCurrentBackgroundColor())
+  EndIf
+EndProcedure
+
+Procedure UI_CanvasControl_Redraw(*This.UI_CanvasControl_Inst)
+  Protected *This_vt.UI_CanvasControl_vt = *This
   If (*This\id And IsGadget(*This\id))
   If (StartDrawing(CanvasOutput(*This\id)))
             *This_vt\OnPaint(OutputWidth(), OutputHeight())
@@ -2317,80 +4188,445 @@ Procedure UI_CustomGadget_Redraw(*This.UI_CustomGadget_Inst)
   EndIf
 EndProcedure
 
-Procedure UI_CustomGadget_OnMouseEnter(*This.UI_CustomGadget_Inst)
-  Protected *This_vt.UI_CustomGadget_vt = *This
+Procedure UI_CanvasControl_OnMouseEnter(*This.UI_CanvasControl_Inst)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        *This\isHovered = #True
+        *This_vt\UpdateVisualState()
+  If (*This\animateHoverScale)
+          UI_InitAnimationEngine()
+          UI_GlobalAnimEngine\StartFloatAnimation(*This, "Scale", *This\currentScale, 1.05, 120, #UI_ANIM_EASING_EASEOUT_QUAD)
+  EndIf
 EndProcedure
 
-Procedure UI_CustomGadget_OnMouseLeave(*This.UI_CustomGadget_Inst)
-  Protected *This_vt.UI_CustomGadget_vt = *This
+Procedure UI_CanvasControl_OnMouseLeave(*This.UI_CanvasControl_Inst)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        *This\isHovered = #False
+        *This\isPressed = #False
+        *This_vt\UpdateVisualState()
+  If (*This\animateHoverScale)
+          UI_InitAnimationEngine()
+          UI_GlobalAnimEngine\StartFloatAnimation(*This, "Scale", *This\currentScale, 1.00, 160, #UI_ANIM_EASING_EASEOUT_CUBIC)
+  EndIf
 EndProcedure
 
-Procedure UI_CustomGadget_OnMouseDown(*This.UI_CustomGadget_Inst, mx.i, my.i, button.i)
-  Protected *This_vt.UI_CustomGadget_vt = *This
+Procedure UI_CanvasControl_OnMouseDown(*This.UI_CanvasControl_Inst, mx_p.i, my_p.i, button_p.i)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        *This\isPressed = #True
+        *This_vt\UpdateVisualState()
+  If (*This\animateHoverScale)
+          UI_InitAnimationEngine()
+          UI_GlobalAnimEngine\StartFloatAnimation(*This, "Scale", *This\currentScale, 0.96, 70, #UI_ANIM_EASING_EASEOUT_QUAD)
+  EndIf
 EndProcedure
 
-Procedure UI_CustomGadget_OnMouseUp(*This.UI_CustomGadget_Inst, mx.i, my.i, button.i)
-  Protected *This_vt.UI_CustomGadget_vt = *This
+Procedure UI_CanvasControl_OnMouseUp(*This.UI_CanvasControl_Inst, mx_p.i, my_p.i, button_p.i)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        *This\isPressed = #False
+        *This_vt\UpdateVisualState()
+  If (*This\animateHoverScale)
+          UI_InitAnimationEngine()
+          Protected targetSc.f = 1.00
+          If (*This\isHovered) : targetSc = 1.05 : EndIf
+          UI_GlobalAnimEngine\StartFloatAnimation(*This, "Scale", *This\currentScale, targetSc, 120, #UI_ANIM_EASING_EASEOUT_BACK)
+  EndIf
 EndProcedure
 
-Procedure UI_CustomGadget_OnMouseMove(*This.UI_CustomGadget_Inst, mx.i, my.i)
-  Protected *This_vt.UI_CustomGadget_vt = *This
+Procedure UI_CanvasControl_OnMouseMove(*This.UI_CanvasControl_Inst, mx_p.i, my_p.i)
+  Protected *This_vt.UI_CanvasControl_vt = *This
 EndProcedure
 
-Procedure UI_CustomGadget_OnKeyDown(*This.UI_CustomGadget_Inst, key.i)
-  Protected *This_vt.UI_CustomGadget_vt = *This
+Procedure UI_CanvasControl_OnMouseWheel(*This.UI_CanvasControl_Inst, delta_p.i)
+  Protected *This_vt.UI_CanvasControl_vt = *This
 EndProcedure
 
-Procedure UI_CustomGadget_OnCustomEvent(*This.UI_CustomGadget_Inst, eventType.i)
-  Protected *This_vt.UI_CustomGadget_vt = *This
-  Select (eventType)
+Procedure UI_CanvasControl_OnKeyDown(*This.UI_CanvasControl_Inst, key_p.i)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+EndProcedure
+
+Procedure UI_CanvasControl_OnKeyUp(*This.UI_CanvasControl_Inst, key_p.i)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+EndProcedure
+
+Procedure UI_CanvasControl_OnFocus(*This.UI_CanvasControl_Inst)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        *This\isFocused = #True
+        *This_vt\UpdateVisualState()
+EndProcedure
+
+Procedure UI_CanvasControl_OnLostFocus(*This.UI_CanvasControl_Inst)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        *This\isFocused = #False
+        *This_vt\UpdateVisualState()
+EndProcedure
+
+Procedure UI_CanvasControl_OnInput(*This.UI_CanvasControl_Inst, char_p.i)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+EndProcedure
+
+Procedure UI_CanvasControl_OnLeftDoubleClick(*This.UI_CanvasControl_Inst, mx_p.i, my_p.i)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+EndProcedure
+
+Procedure UI_CanvasControl_OnCustomEvent(*This.UI_CanvasControl_Inst, eventType_p.i)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        Select (eventType_p)
           Case #PB_EventType_MouseEnter:
-            *This\isHovered = #True
             *This_vt\OnMouseEnter()
-            *This_vt\Redraw()
   
           Case #PB_EventType_MouseLeave:
-            *This\isHovered = #False
-            *This\isPressed = #False
             *This_vt\OnMouseLeave()
-            *This_vt\Redraw()
   
           Case #PB_EventType_LeftButtonDown:
-            *This\isPressed = #True
             *This\mouseX = GetGadgetAttribute(*This\id, #PB_Canvas_MouseX)
             *This\mouseY = GetGadgetAttribute(*This\id, #PB_Canvas_MouseY)
             *This_vt\OnMouseDown(*This\mouseX, *This\mouseY, 1)
-            *This_vt\Redraw()
   
           Case #PB_EventType_LeftButtonUp:
             Protected wasPressed.b = *This\isPressed
-            *This\isPressed = #False
             *This\mouseX = GetGadgetAttribute(*This\id, #PB_Canvas_MouseX)
             *This\mouseY = GetGadgetAttribute(*This\id, #PB_Canvas_MouseY)
             *This_vt\OnMouseUp(*This\mouseX, *This\mouseY, 1)
   If (wasPressed)
               *This_vt\OnClick()
   EndIf
-            *This_vt\Redraw()
+  
+          Case #PB_EventType_LeftDoubleClick:
+            *This\mouseX = GetGadgetAttribute(*This\id, #PB_Canvas_MouseX)
+            *This\mouseY = GetGadgetAttribute(*This\id, #PB_Canvas_MouseY)
+            *This_vt\OnLeftDoubleClick(*This\mouseX, *This\mouseY)
   
           Case #PB_EventType_MouseMove:
             *This\mouseX = GetGadgetAttribute(*This\id, #PB_Canvas_MouseX)
             *This\mouseY = GetGadgetAttribute(*This\id, #PB_Canvas_MouseY)
             *This_vt\OnMouseMove(*This\mouseX, *This\mouseY)
-            *This_vt\Redraw()
+  
+          Case #PB_EventType_MouseWheel:
+            Protected wheelDelta.i = GetGadgetAttribute(*This\id, #PB_Canvas_WheelDelta)
+            *This_vt\OnMouseWheel(wheelDelta)
+  
+          Case #PB_EventType_Focus:
+            *This_vt\OnFocus()
+  
+          Case #PB_EventType_LostFocus:
+            *This_vt\OnLostFocus()
   
           Case #PB_EventType_KeyDown:
             *This_vt\OnKeyDown(GetGadgetAttribute(*This\id, #PB_Canvas_Key))
-            *This_vt\Redraw()
-  EndSelect
+  
+          Case #PB_EventType_KeyUp:
+            *This_vt\OnKeyUp(GetGadgetAttribute(*This\id, #PB_Canvas_Key))
+  
+          Case #PB_EventType_Input:
+            Protected inputChar.i = GetGadgetAttribute(*This\id, #PB_Canvas_Input)
+            *This_vt\OnInput(inputChar)
+        EndSelect
 EndProcedure
 
-Procedure UI_CustomGadget_Free(*This.UI_CustomGadget_Inst)
-  Protected *This_vt.UI_CustomGadget_vt = *This
+Procedure UI_CanvasControl_SetTypography(*This.UI_CanvasControl_Inst, fontName_p.s, fontSize_p.i, bold_p.b)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        Protected scaledSize.i = DesktopScaledY(fontSize_p)
+        If scaledSize < 6 : scaledSize = 6 : EndIf
+        Protected flags.i = #PB_Font_HighQuality
+        If bold_p : flags | #PB_Font_Bold : EndIf
+        Protected newFont.i = LoadFont(#PB_Any, fontName_p, scaledSize, flags)
+        If newFont
+          If *This\ownedFont And IsFont(*This\ownedFont)
+            FreeFont(*This\ownedFont)
+          EndIf
+          *This\ownedFont = newFont
+          *This\fontID = FontID(newFont)
+          *This_vt\Redraw()
+        EndIf
+EndProcedure
+
+Procedure UI_CanvasControl_SetParentBackground(*This.UI_CanvasControl_Inst, col_p.i)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        *This\parentBackground = col_p
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure.i UI_CanvasControl_GetParentBackground(*This.UI_CanvasControl_Inst)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        ProcedureReturn *This\parentBackground
+EndProcedure
+
+Procedure UI_CanvasControl_Arrange(*This.UI_CanvasControl_Inst, nx.i, ny.i, nw.i, nh.i)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        *This_vt\SetPosition(nx, ny, nw, nh)
+  If (*This\id And IsGadget(*This\id))
+          ResizeGadget(*This\id, nx, ny, nw, nh)
+  EndIf
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure UI_CanvasControl_OnAnimationTick(*This.UI_CanvasControl_Inst, propName.s, value.f)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        If propName = "Scale"
+          *This\currentScale = value
+          *This_vt\Redraw()
+        EndIf
+EndProcedure
+
+Procedure UI_CanvasControl_SetAnimateHoverScale(*This.UI_CanvasControl_Inst, enable_p.b)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        *This\animateHoverScale = enable_p
+EndProcedure
+
+Procedure.b UI_CanvasControl_IsAnimateHoverScale(*This.UI_CanvasControl_Inst)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        ProcedureReturn *This\animateHoverScale
+EndProcedure
+
+Procedure UI_CanvasControl_ApplyStyle(*This.UI_CanvasControl_Inst, *s.UI_Style_vt)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        If Not *s : ProcedureReturn : EndIf
+        *This\style = *s
+  
+        Protected fontNameStr.s = ""
+        Protected fontSizeVal.i = 0
+        Protected fontBoldVal.b = #False
+        Protected hasTypography.b = #False
+  
+        ; Apply base Setters defined in Style
+        Protected count.i = *s\GetSetterCount()
+        Protected i.i
+        For i = 0 To count - 1
+          Protected prop.s = UCase(Trim(*s\GetSetterProperty(i)))
+          Protected val.s = Trim(*s\GetSetterValue(i))
+  
+          Select prop
+            Case "BACKGROUND", "BG"
+              *This\background = UI_ParseColor(val, *This\background)
+            Case "FOREGROUND", "FG"
+              *This\foreground = UI_ParseColor(val, *This\foreground)
+            Case "BORDERCOLOR"
+              *This\borderColor = UI_ParseColor(val, *This\borderColor)
+            Case "HOVERBACKGROUND", "HOVERBG"
+              *This\hoverBackground = UI_ParseColor(val, *This\hoverBackground)
+            Case "HOVERFOREGROUND", "HOVERFG"
+              *This\hoverForeground = UI_ParseColor(val, *This\hoverForeground)
+            Case "HOVERBORDERCOLOR"
+              *This\hoverBorderColor = UI_ParseColor(val, *This\hoverBorderColor)
+            Case "PRESSEDBACKGROUND", "PRESSEDBG"
+              *This\pressedBackground = UI_ParseColor(val, *This\pressedBackground)
+            Case "PRESSEDFOREGROUND", "PRESSEDFG"
+              *This\pressedForeground = UI_ParseColor(val, *This\pressedForeground)
+            Case "PRESSEDBORDERCOLOR"
+              *This\pressedBorderColor = UI_ParseColor(val, *This\pressedBorderColor)
+            Case "BORDERTHICKNESS"
+              *This\borderThickness = Val(val)
+            Case "BORDERLEFTTHICKNESS"
+              *This\borderLeftThickness = Val(val)
+            Case "BORDERLEFTCOLOR"
+              *This\borderLeftColor = UI_ParseColor(val, *This\borderLeftColor)
+            Case "CORNERRADIUS"
+              *This\cornerRadius = Val(val)
+            Case "PADDINGLEFT"
+              *This\paddingLeft = Val(val)
+            Case "PADDINGRIGHT"
+              *This\paddingRight = Val(val)
+            Case "PADDINGTOP"
+              *This\paddingTop = Val(val)
+            Case "PADDINGBOTTOM"
+              *This\paddingBottom = Val(val)
+            Case "PADDING"
+              Protected pCountVal.i = CountString(val, ",") + 1
+              If pCountVal = 1
+                Protected pvSingle.i = Val(val)
+                *This\paddingLeft = pvSingle : *This\paddingRight = pvSingle : *This\paddingTop = pvSingle : *This\paddingBottom = pvSingle
+              ElseIf pCountVal = 2
+                *This\paddingLeft = Val(StringField(val, 1, ","))
+                *This\paddingRight = *This\paddingLeft
+                *This\paddingTop = Val(StringField(val, 2, ","))
+                *This\paddingBottom = *This\paddingTop
+              ElseIf pCountVal >= 4
+                *This\paddingLeft = Val(StringField(val, 1, ","))
+                *This\paddingTop = Val(StringField(val, 2, ","))
+                *This\paddingRight = Val(StringField(val, 3, ","))
+                *This\paddingBottom = Val(StringField(val, 4, ","))
+              EndIf
+            Case "SCALE"
+              *This\currentScale = ValF(val)
+              *This\targetScale = *This\currentScale
+            Case "ANIMATEHOVERSCALE"
+              If UCase(val) = "TRUE" Or val = "1"
+                *This\animateHoverScale = #True
+              Else
+                *This\animateHoverScale = #False
+              EndIf
+            Case "FONTNAME", "FONTFAMILY"
+              fontNameStr = val
+              hasTypography = #True
+            Case "FONTSIZE"
+              fontSizeVal = Val(val)
+              hasTypography = #True
+            Case "FONTBOLD", "FONTWEIGHT"
+              If UCase(val) = "TRUE" Or UCase(val) = "BOLD" Or val = "1"
+                fontBoldVal = #True
+              Else
+                fontBoldVal = #False
+              EndIf
+              hasTypography = #True
+          EndSelect
+        Next
+  
+        ; Store applied values as base reference for triggers
+        *This\baseBackground = *This\background
+        *This\baseForeground = *This\foreground
+        *This\baseBorderColor = *This\borderColor
+        *This\baseHoverBackground = *This\hoverBackground
+        *This\baseHoverForeground = *This\hoverForeground
+        *This\baseHoverBorderColor = *This\hoverBorderColor
+        *This\basePressedBackground = *This\pressedBackground
+        *This\basePressedForeground = *This\pressedForeground
+        *This\basePressedBorderColor = *This\pressedBorderColor
+        *This\baseBorderThickness = *This\borderThickness
+        *This\baseBorderLeftThickness = *This\borderLeftThickness
+        *This\baseBorderLeftColor = *This\borderLeftColor
+        *This\baseCornerRadius = *This\cornerRadius
+        *This\baseScale = *This\currentScale
+  
+        If hasTypography
+          If fontNameStr = "" : fontNameStr = "Segoe UI" : EndIf
+          If fontSizeVal <= 0 : fontSizeVal = 10 : EndIf
+          *This_vt\SetTypography(fontNameStr, fontSizeVal, fontBoldVal)
+        EndIf
+  
+        *This_vt\ApplyStyleTriggers()
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure UI_CanvasControl_ApplyStyleTriggers(*This.UI_CanvasControl_Inst)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        If Not *This\style : ProcedureReturn : EndIf
+  
+        ; 1. Restore base values
+        *This\background = *This\baseBackground
+        *This\foreground = *This\baseForeground
+        *This\borderColor = *This\baseBorderColor
+        *This\hoverBackground = *This\baseHoverBackground
+        *This\hoverForeground = *This\baseHoverForeground
+        *This\hoverBorderColor = *This\baseHoverBorderColor
+        *This\pressedBackground = *This\basePressedBackground
+        *This\pressedForeground = *This\basePressedForeground
+        *This\pressedBorderColor = *This\basePressedBorderColor
+        *This\cornerRadius = *This\baseCornerRadius
+        *This\borderThickness = *This\baseBorderThickness
+        *This\borderLeftThickness = *This\baseBorderLeftThickness
+        *This\borderLeftColor = *This\baseBorderLeftColor
+  
+        ; 2. Iterate triggers and activate matching ones
+        Protected tCount.i = *This\style\GetTriggerCount()
+        Protected t.i, s.i
+        Protected hasScaleTrigger.b = #False
+  
+        For t = 0 To tCount - 1
+          Protected tProp.s = UCase(Trim(*This\style\GetTriggerProperty(t)))
+          Protected tVal.s = UCase(Trim(*This\style\GetTriggerValue(t)))
+          Protected isTriggerActive.b = #False
+  
+          Select tProp
+            Case "ISMOUSEOVER"
+              If (tVal = "TRUE" And *This\isHovered) Or (tVal = "FALSE" And Not *This\isHovered)
+                isTriggerActive = #True
+              EndIf
+            Case "ISPRESSED"
+              If (tVal = "TRUE" And *This\isPressed) Or (tVal = "FALSE" And Not *This\isPressed)
+                isTriggerActive = #True
+              EndIf
+            Case "ISFOCUSED"
+              If (tVal = "TRUE" And *This\isFocused) Or (tVal = "FALSE" And Not *This\isFocused)
+                isTriggerActive = #True
+              EndIf
+          EndSelect
+  
+          If (isTriggerActive)
+            Protected sCount.i = *This\style\GetTriggerSetterCount(t)
+            For s = 0 To sCount - 1
+              Protected prop.s = UCase(Trim(*This\style\GetTriggerSetterProperty(t, s)))
+              Protected val.s = Trim(*This\style\GetTriggerSetterValue(t, s))
+  
+              Select prop
+                Case "BACKGROUND", "BG"
+                  Protected parsedBg.i = UI_ParseColor(val, *This\background)
+                  *This\background = parsedBg
+                  If tProp = "ISMOUSEOVER" : *This\hoverBackground = parsedBg : EndIf
+                  If tProp = "ISPRESSED"   : *This\pressedBackground = parsedBg : EndIf
+                Case "FOREGROUND", "FG"
+                  Protected parsedFg.i = UI_ParseColor(val, *This\foreground)
+                  *This\foreground = parsedFg
+                  If tProp = "ISMOUSEOVER" : *This\hoverForeground = parsedFg : EndIf
+                  If tProp = "ISPRESSED"   : *This\pressedForeground = parsedFg : EndIf
+                Case "BORDERCOLOR"
+                  Protected parsedBrd.i = UI_ParseColor(val, *This\borderColor)
+                  *This\borderColor = parsedBrd
+                  If tProp = "ISMOUSEOVER" : *This\hoverBorderColor = parsedBrd : EndIf
+                  If tProp = "ISPRESSED"   : *This\pressedBorderColor = parsedBrd : EndIf
+                Case "CORNERRADIUS"
+                  *This\cornerRadius = Val(val)
+                Case "BORDERTHICKNESS"
+                  *This\borderThickness = Val(val)
+                Case "BORDERLEFTTHICKNESS"
+                  *This\borderLeftThickness = Val(val)
+                Case "BORDERLEFTCOLOR"
+                  *This\borderLeftColor = UI_ParseColor(val, *This\borderLeftColor)
+                Case "SCALE"
+                  hasScaleTrigger = #True
+                  Protected targetSc.f = ValF(val)
+                  UI_InitAnimationEngine()
+                  UI_GlobalAnimEngine\StartFloatAnimation(*This, "Scale", *This\currentScale, targetSc, 120, #UI_ANIM_EASING_EASEOUT_QUAD)
+              EndSelect
+            Next
+          EndIf
+        Next
+  
+        ; If no scale trigger is active and scale changed, smoothly return to base
+        If (Not hasScaleTrigger) And (Not *This\isHovered) And (Not *This\isPressed) And *This\currentScale <> *This\baseScale
+          UI_InitAnimationEngine()
+          UI_GlobalAnimEngine\StartFloatAnimation(*This, "Scale", *This\currentScale, *This\baseScale, 150, #UI_ANIM_EASING_EASEOUT_CUBIC)
+        EndIf
+EndProcedure
+
+Procedure.i UI_CanvasControl_GetStyle(*This.UI_CanvasControl_Inst)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        ProcedureReturn *This\style
+EndProcedure
+
+Procedure UI_CanvasControl_Free(*This.UI_CanvasControl_Inst)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+  If (*This\ownedFont And IsFont(*This\ownedFont))
+          FreeFont(*This\ownedFont)
+          *This\ownedFont = 0
+  EndIf
   If (*This\id)
           UI_UnregisterGadget(*This\id)
           UI_Gadget_Free(*This)
   EndIf
+EndProcedure
+
+Procedure UI_CustomGadget_Init_void(*This.UI_CustomGadget_Inst)
+  Protected *This_vt.UI_CustomGadget_vt = *This
+        UI_CanvasControl_Init_void(*This)
+EndProcedure
+
+Procedure UI_CustomGadget_Init_i_i(*This.UI_CustomGadget_Inst, w_p.i, h_p.i)
+  Protected *This_vt.UI_CustomGadget_vt = *This
+        UI_CanvasControl_Init_i_i(*This, w_p, h_p)
+EndProcedure
+
+Procedure UI_CustomGadget_Init_i_i_i_i(*This.UI_CustomGadget_Inst, x_p.i, y_p.i, w_p.i, h_p.i)
+  Protected *This_vt.UI_CustomGadget_vt = *This
+        UI_CanvasControl_Init_i_i_i_i(*This, x_p, y_p, w_p, h_p)
+EndProcedure
+
+Procedure UI_CustomGadget_Init_i_i_i_i_i(*This.UI_CustomGadget_Inst, x_p.i, y_p.i, w_p.i, h_p.i, flags_p.i)
+  Protected *This_vt.UI_CustomGadget_vt = *This
+        UI_CanvasControl_Init_i_i_i_i_i(*This, x_p, y_p, w_p, h_p, flags_p)
+EndProcedure
+
+Procedure UI_CustomGadget_Free(*This.UI_CustomGadget_Inst)
+  Protected *This_vt.UI_CustomGadget_vt = *This
+        UI_CanvasControl_Free(*This)
 EndProcedure
 
 Procedure MVVM_ObservableObject_Init(*This.MVVM_ObservableObject_Inst)
@@ -2852,6 +5088,9 @@ Procedure MVVM_ViewModelBase_Free(*This.MVVM_ViewModelBase_Inst)
           EndIf
         Next
         ClearMap(*This\commands())
+        CompilerIf Defined(UI_MVVM_UnregisterAll, #PB_Procedure)
+          UI_MVVM_UnregisterAll(*This)
+        CompilerEndIf
         MVVM_ObservableObject_Free(*This)
 EndProcedure
 
@@ -3076,6 +5315,12 @@ Procedure UI_Layouts_Container_Init_void(*This.UI_Layouts_Container_Inst)
         *This\paddingBottom = 0
         *This\horizontalAlignment = #UI_Align_Stretch
         *This\verticalAlignment = #UI_Align_VStretch
+        *This\bgGadgetId = 0
+        *This\backgroundColor = 0
+        *This\borderColor = 0
+        *This\borderThickness = 0
+        *This\cornerRadius = 0
+        *This\hasBackground = #False
 EndProcedure
 
 Procedure UI_Layouts_Container_Init_i_i(*This.UI_Layouts_Container_Inst, w_p.i, h_p.i)
@@ -3089,6 +5334,12 @@ Procedure UI_Layouts_Container_Init_i_i(*This.UI_Layouts_Container_Inst, w_p.i, 
         *This\paddingBottom = 0
         *This\horizontalAlignment = #UI_Align_Stretch
         *This\verticalAlignment = #UI_Align_VStretch
+        *This\bgGadgetId = 0
+        *This\backgroundColor = 0
+        *This\borderColor = 0
+        *This\borderThickness = 0
+        *This\cornerRadius = 0
+        *This\hasBackground = #False
 EndProcedure
 
 Procedure UI_Layouts_Container_Init_i_i_i_i(*This.UI_Layouts_Container_Inst, x_p.i, y_p.i, w_p.i, h_p.i)
@@ -3102,6 +5353,101 @@ Procedure UI_Layouts_Container_Init_i_i_i_i(*This.UI_Layouts_Container_Inst, x_p
         *This\paddingBottom = 0
         *This\horizontalAlignment = #UI_Align_Stretch
         *This\verticalAlignment = #UI_Align_VStretch
+        *This\bgGadgetId = 0
+        *This\backgroundColor = 0
+        *This\borderColor = 0
+        *This\borderThickness = 0
+        *This\cornerRadius = 0
+        *This\hasBackground = #False
+EndProcedure
+
+Procedure UI_Layouts_Container_EnsureBgGadget(*This.UI_Layouts_Container_Inst)
+  Protected *This_vt.UI_Layouts_Container_vt = *This
+  If (*This\bgGadgetId = 0)
+          *This\bgGadgetId = CanvasGadget(#PB_Any, 0, 0, 10, 10)
+  If (*This\bgGadgetId)
+            DisableGadget(*This\bgGadgetId, #True)
+  EndIf
+  EndIf
+EndProcedure
+
+Procedure UI_Layouts_Container_SetBackground(*This.UI_Layouts_Container_Inst, col.i)
+  Protected *This_vt.UI_Layouts_Container_vt = *This
+        *This\backgroundColor = col
+        *This\hasBackground = #True
+        *This_vt\EnsureBgGadget()
+        *This_vt\DrawBackground(*This\width, *This\height)
+EndProcedure
+
+Procedure.i UI_Layouts_Container_GetBackground(*This.UI_Layouts_Container_Inst)
+  Protected *This_vt.UI_Layouts_Container_vt = *This
+        ProcedureReturn *This\backgroundColor
+EndProcedure
+
+Procedure UI_Layouts_Container_SetBorderColor(*This.UI_Layouts_Container_Inst, col.i)
+  Protected *This_vt.UI_Layouts_Container_vt = *This
+        *This\borderColor = col
+        *This\hasBackground = #True
+        *This_vt\EnsureBgGadget()
+        *This_vt\DrawBackground(*This\width, *This\height)
+EndProcedure
+
+Procedure UI_Layouts_Container_SetBorderThickness(*This.UI_Layouts_Container_Inst, th.i)
+  Protected *This_vt.UI_Layouts_Container_vt = *This
+        *This\borderThickness = th
+        *This\hasBackground = #True
+        *This_vt\EnsureBgGadget()
+        *This_vt\DrawBackground(*This\width, *This\height)
+EndProcedure
+
+Procedure UI_Layouts_Container_SetCornerRadius(*This.UI_Layouts_Container_Inst, cr.i)
+  Protected *This_vt.UI_Layouts_Container_vt = *This
+        *This\cornerRadius = cr
+        *This\hasBackground = #True
+        *This_vt\EnsureBgGadget()
+        *This_vt\DrawBackground(*This\width, *This\height)
+EndProcedure
+
+Procedure UI_Layouts_Container_SetBorder(*This.UI_Layouts_Container_Inst, col.i, thick.i, radius.i)
+  Protected *This_vt.UI_Layouts_Container_vt = *This
+        *This\borderColor = col
+        *This\borderThickness = thick
+        *This\cornerRadius = radius
+        *This\hasBackground = #True
+        *This_vt\EnsureBgGadget()
+        *This_vt\DrawBackground(*This\width, *This\height)
+EndProcedure
+
+Procedure UI_Layouts_Container_DrawBackground(*This.UI_Layouts_Container_Inst, nw.i, nh.i)
+  Protected *This_vt.UI_Layouts_Container_vt = *This
+  If (*This\hasBackground And *This\bgGadgetId And IsGadget(*This\bgGadgetId) And nw > 0 And nh > 0)
+  If (StartDrawing(CanvasOutput(*This\bgGadgetId)))
+            Protected sRadius.i = DesktopScaledX(*This\cornerRadius)
+            Protected sThick.i = DesktopScaledX(*This\borderThickness)
+  If (sRadius > 0)
+  If (sThick > 0)
+                RoundBox(0, 0, nw, nh, sRadius, sRadius, *This\borderColor)
+  If (nw > sThick * 2 And nh > sThick * 2)
+                  Protected inR.i = sRadius - sThick
+                  If inR < 0 : inR = 0 : EndIf
+                  RoundBox(sThick, sThick, nw - (sThick * 2), nh - (sThick * 2), inR, inR, *This\backgroundColor)
+  EndIf
+  Else
+                RoundBox(0, 0, nw, nh, sRadius, sRadius, *This\backgroundColor)
+  EndIf
+  Else
+  If (sThick > 0)
+                Box(0, 0, nw, nh, *This\borderColor)
+  If (nw > sThick * 2 And nh > sThick * 2)
+                  Box(sThick, sThick, nw - (sThick * 2), nh - (sThick * 2), *This\backgroundColor)
+  EndIf
+  Else
+                Box(0, 0, nw, nh, *This\backgroundColor)
+  EndIf
+  EndIf
+            StopDrawing()
+  EndIf
+  EndIf
 EndProcedure
 
 Procedure UI_Layouts_Container_SetPadding(*This.UI_Layouts_Container_Inst, l.i, t.i, r.i, b.i)
@@ -3200,12 +5546,32 @@ Procedure UI_Layouts_Container_UpdateLayout(*This.UI_Layouts_Container_Inst)
         EndIf
 EndProcedure
 
+Procedure UI_Layouts_Container_Free(*This.UI_Layouts_Container_Inst)
+  Protected *This_vt.UI_Layouts_Container_vt = *This
+        ForEach *This\children()
+          Protected *child.UI_Component_vt = *This\children()
+          If *child
+            *child\Free()
+          EndIf
+        Next
+        ClearList(*This\children())
+  If (*This\bgGadgetId And IsGadget(*This\bgGadgetId))
+          FreeGadget(*This\bgGadgetId)
+          *This\bgGadgetId = 0
+  EndIf
+        UI_Component_Free(*This)
+EndProcedure
+
 Procedure UI_Layouts_Container_Arrange(*This.UI_Layouts_Container_Inst, nx.i, ny.i, nw.i, nh.i)
   Protected *This_vt.UI_Layouts_Container_vt = *This
         *This_vt\SetPosition(nx, ny, nw, nh)
-        If *This\id And IsGadget(*This\id)
+  If (*This\bgGadgetId And IsGadget(*This\bgGadgetId))
+          ResizeGadget(*This\bgGadgetId, nx, ny, nw, nh)
+          *This_vt\DrawBackground(nw, nh)
+  EndIf
+  If (*This\id And IsGadget(*This\id))
           ResizeGadget(*This\id, nx, ny, nw, nh)
-        EndIf
+  EndIf
   
         Protected innerX.i = nx + *This\paddingLeft
         Protected innerY.i = ny + *This\paddingTop
@@ -3372,6 +5738,10 @@ EndProcedure
 Procedure UI_Layouts_StackPanel_Arrange(*This.UI_Layouts_StackPanel_Inst, nx.i, ny.i, nw.i, nh.i)
   Protected *This_vt.UI_Layouts_StackPanel_vt = *This
         *This_vt\SetPosition(nx, ny, nw, nh)
+  If (*This\bgGadgetId And IsGadget(*This\bgGadgetId))
+          ResizeGadget(*This\bgGadgetId, nx, ny, nw, nh)
+          *This_vt\DrawBackground(nw, nh)
+  EndIf
         If *This\id And IsGadget(*This\id)
           ResizeGadget(*This\id, nx, ny, nw, nh)
         EndIf
@@ -3527,6 +5897,10 @@ EndProcedure
 Procedure UI_Layouts_DockPanel_Arrange(*This.UI_Layouts_DockPanel_Inst, nx.i, ny.i, nw.i, nh.i)
   Protected *This_vt.UI_Layouts_DockPanel_vt = *This
         *This_vt\SetPosition(nx, ny, nw, nh)
+  If (*This\bgGadgetId And IsGadget(*This\bgGadgetId))
+          ResizeGadget(*This\bgGadgetId, nx, ny, nw, nh)
+          *This_vt\DrawBackground(nw, nh)
+  EndIf
         If *This\id And IsGadget(*This\id)
           ResizeGadget(*This\id, nx, ny, nw, nh)
         EndIf
@@ -3613,6 +5987,12 @@ Procedure UI_Layouts_DockPanel_Arrange(*This.UI_Layouts_DockPanel_Inst, nx.i, ny
         Next
 EndProcedure
 
+Procedure UI_Layouts_DockPanel_Free(*This.UI_Layouts_DockPanel_Inst)
+  Protected *This_vt.UI_Layouts_DockPanel_vt = *This
+        ClearList(*This\items())
+        UI_Layouts_Container_Free(*This)
+EndProcedure
+
 Procedure UI_Layouts_Grid_Init_void(*This.UI_Layouts_Grid_Inst)
   Protected *This_vt.UI_Layouts_Grid_vt = *This
         UI_Layouts_Container_Init_void(*This)
@@ -3693,6 +6073,10 @@ EndProcedure
 Procedure UI_Layouts_Grid_Arrange(*This.UI_Layouts_Grid_Inst, nx.i, ny.i, nw.i, nh.i)
   Protected *This_vt.UI_Layouts_Grid_vt = *This
         *This_vt\SetPosition(nx, ny, nw, nh)
+  If (*This\bgGadgetId And IsGadget(*This\bgGadgetId))
+          ResizeGadget(*This\bgGadgetId, nx, ny, nw, nh)
+          *This_vt\DrawBackground(nw, nh)
+  EndIf
         If *This\id And IsGadget(*This\id)
           ResizeGadget(*This\id, nx, ny, nw, nh)
         EndIf
@@ -3859,6 +6243,14 @@ Procedure UI_Layouts_Grid_Arrange(*This.UI_Layouts_Grid_Inst, nx.i, ny.i, nw.i, 
             *childG\Arrange(targetX, targetY, targetW, targetH)
           EndIf
         Next
+EndProcedure
+
+Procedure UI_Layouts_Grid_Free(*This.UI_Layouts_Grid_Inst)
+  Protected *This_vt.UI_Layouts_Grid_vt = *This
+        ClearList(*This\rows())
+        ClearList(*This\cols())
+        ClearList(*This\items())
+        UI_Layouts_Container_Free(*This)
 EndProcedure
 
 Procedure UI_Button_Init_s(*This.UI_Button_Inst, text_p.s)
@@ -5165,6 +7557,1197 @@ Procedure UI_TabControl_Free(*This.UI_TabControl_Inst)
   EndIf
 EndProcedure
 
+Procedure UI_CanvasButton_Init_void(*This.UI_CanvasButton_Inst)
+  Protected *This_vt.UI_CanvasButton_vt = *This
+        UI_CanvasControl_Init_i_i(*This, 100, 32)
+        *This\text = "Button"
+        *This\cornerRadius = 6
+        *This\borderThickness = 1
+        *This\iconImage = 0
+        *This\iconSpacing = 6
+        *This\textAlignment = 0
+        *This\animateHoverScale = #True
+        *This_vt\SetDefaultStyle()
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure UI_CanvasButton_Init_s(*This.UI_CanvasButton_Inst, text_p.s)
+  Protected *This_vt.UI_CanvasButton_vt = *This
+        UI_CanvasControl_Init_i_i(*This, 100, 32)
+        *This\text = text_p
+        *This\cornerRadius = 6
+        *This\borderThickness = 1
+        *This\iconImage = 0
+        *This\iconSpacing = 6
+        *This\textAlignment = 0
+        *This\animateHoverScale = #True
+        *This_vt\SetDefaultStyle()
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure UI_CanvasButton_Init_s_i_i(*This.UI_CanvasButton_Inst, text_p.s, w_p.i, h_p.i)
+  Protected *This_vt.UI_CanvasButton_vt = *This
+        UI_CanvasControl_Init_i_i(*This, w_p, h_p)
+        *This\text = text_p
+        *This\cornerRadius = 6
+        *This\borderThickness = 1
+        *This\iconImage = 0
+        *This\iconSpacing = 6
+        *This\textAlignment = 0
+        *This\animateHoverScale = #True
+        *This_vt\SetDefaultStyle()
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure UI_CanvasButton_Init_i_i_i_i_s(*This.UI_CanvasButton_Inst, x_p.i, y_p.i, w_p.i, h_p.i, text_p.s)
+  Protected *This_vt.UI_CanvasButton_vt = *This
+        UI_CanvasControl_Init_i_i_i_i(*This, x_p, y_p, w_p, h_p)
+        *This\text = text_p
+        *This\cornerRadius = 6
+        *This\borderThickness = 1
+        *This\iconImage = 0
+        *This\iconSpacing = 6
+        *This\textAlignment = 0
+        *This\animateHoverScale = #True
+        *This_vt\SetDefaultStyle()
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure UI_CanvasButton_SetDefaultStyle(*This.UI_CanvasButton_Inst)
+  Protected *This_vt.UI_CanvasButton_vt = *This
+        *This\background = RGB(243, 244, 246)
+        *This\foreground = RGB(17, 24, 39)
+        *This\hoverBackground = RGB(229, 231, 235)
+        *This\hoverForeground = RGB(17, 24, 39)
+        *This\pressedBackground = RGB(209, 213, 219)
+        *This\pressedForeground = RGB(17, 24, 39)
+        *This\disabledBackground = RGB(243, 244, 246)
+        *This\disabledForeground = RGB(156, 163, 175)
+  
+        *This\borderColor = RGB(209, 213, 219)
+        *This\hoverBorderColor = RGB(156, 163, 175)
+        *This\pressedBorderColor = RGB(107, 114, 128)
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure UI_CanvasButton_SetPrimaryStyle(*This.UI_CanvasButton_Inst)
+  Protected *This_vt.UI_CanvasButton_vt = *This
+        *This\background = RGB(37, 99, 235)       ; Blue 600
+        *This\foreground = RGB(255, 255, 255)
+        *This\hoverBackground = RGB(29, 78, 216)   ; Blue 700
+        *This\hoverForeground = RGB(255, 255, 255)
+        *This\pressedBackground = RGB(30, 64, 175) ; Blue 800
+        *This\pressedForeground = RGB(255, 255, 255)
+        *This\disabledBackground = RGB(191, 219, 254)
+        *This\disabledForeground = RGB(255, 255, 255)
+  
+        *This\borderColor = RGB(29, 78, 216)
+        *This\hoverBorderColor = RGB(30, 64, 175)
+        *This\pressedBorderColor = RGB(23, 37, 84)
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure UI_CanvasButton_SetSuccessStyle(*This.UI_CanvasButton_Inst)
+  Protected *This_vt.UI_CanvasButton_vt = *This
+        *This\background = RGB(22, 163, 74)       ; Green 600
+        *This\foreground = RGB(255, 255, 255)
+        *This\hoverBackground = RGB(21, 128, 61)   ; Green 700
+        *This\hoverForeground = RGB(255, 255, 255)
+        *This\pressedBackground = RGB(22, 101, 52) ; Green 800
+        *This\pressedForeground = RGB(255, 255, 255)
+        *This\disabledBackground = RGB(187, 247, 208)
+        *This\disabledForeground = RGB(255, 255, 255)
+  
+        *This\borderColor = RGB(21, 128, 61)
+        *This\hoverBorderColor = RGB(22, 101, 52)
+        *This\pressedBorderColor = RGB(20, 83, 45)
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure UI_CanvasButton_SetDangerStyle(*This.UI_CanvasButton_Inst)
+  Protected *This_vt.UI_CanvasButton_vt = *This
+        *This\background = RGB(220, 38, 38)       ; Red 600
+        *This\foreground = RGB(255, 255, 255)
+        *This\hoverBackground = RGB(185, 28, 28)   ; Red 700
+        *This\hoverForeground = RGB(255, 255, 255)
+        *This\pressedBackground = RGB(153, 27, 27) ; Red 800
+        *This\pressedForeground = RGB(255, 255, 255)
+        *This\disabledBackground = RGB(254, 202, 202)
+        *This\disabledForeground = RGB(255, 255, 255)
+  
+        *This\borderColor = RGB(185, 28, 28)
+        *This\hoverBorderColor = RGB(153, 27, 27)
+        *This\pressedBorderColor = RGB(127, 29, 29)
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure UI_CanvasButton_SetDarkStyle(*This.UI_CanvasButton_Inst)
+  Protected *This_vt.UI_CanvasButton_vt = *This
+        *This\background = RGB(30, 41, 59)        ; Slate 800
+        *This\foreground = RGB(248, 250, 252)     ; Slate 50
+        *This\hoverBackground = RGB(51, 65, 85)   ; Slate 700
+        *This\hoverForeground = RGB(255, 255, 255)
+        *This\pressedBackground = RGB(15, 23, 42) ; Slate 900
+        *This\pressedForeground = RGB(255, 255, 255)
+        *This\disabledBackground = RGB(100, 116, 139)
+        *This\disabledForeground = RGB(148, 163, 184)
+  
+        *This\borderColor = RGB(51, 65, 85)
+        *This\hoverBorderColor = RGB(71, 85, 105)
+        *This\pressedBorderColor = RGB(15, 23, 42)
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure UI_CanvasButton_SetOutlineStyle(*This.UI_CanvasButton_Inst, baseColor_p.i)
+  Protected *This_vt.UI_CanvasButton_vt = *This
+        *This\background = RGB(255, 255, 255)
+        *This\foreground = baseColor_p
+        *This\borderColor = baseColor_p
+        *This\borderThickness = 1
+  
+        ; Lightly tinted hover
+        *This\hoverBackground = RGB(241, 245, 249)
+        *This\hoverForeground = baseColor_p
+        *This\hoverBorderColor = baseColor_p
+  
+        ; Darker pressed state
+        *This\pressedBackground = RGB(226, 232, 240)
+        *This\pressedForeground = baseColor_p
+        *This\pressedBorderColor = baseColor_p
+  
+        *This\disabledBackground = RGB(255, 255, 255)
+        *This\disabledForeground = RGB(203, 213, 225)
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure UI_CanvasButton_SetGhostStyle(*This.UI_CanvasButton_Inst, baseColor_p.i)
+  Protected *This_vt.UI_CanvasButton_vt = *This
+        *This\background = RGB(255, 255, 255)
+        *This\foreground = baseColor_p
+        *This\borderColor = RGB(255, 255, 255)
+        *This\borderThickness = 0
+  
+        *This\hoverBackground = RGB(241, 245, 249)
+        *This\hoverForeground = baseColor_p
+        *This\hoverBorderColor = RGB(241, 245, 249)
+  
+        *This\pressedBackground = RGB(226, 232, 240)
+        *This\pressedForeground = baseColor_p
+        *This\pressedBorderColor = RGB(226, 232, 240)
+  
+        *This\disabledBackground = RGB(255, 255, 255)
+        *This\disabledForeground = RGB(203, 213, 225)
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure UI_CanvasButton_SetIcon_i(*This.UI_CanvasButton_Inst, img_p.i)
+  Protected *This_vt.UI_CanvasButton_vt = *This
+        *This\iconImage = img_p
+        *This\iconSpacing = 6
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure UI_CanvasButton_SetIcon_i_i(*This.UI_CanvasButton_Inst, img_p.i, spacing_p.i)
+  Protected *This_vt.UI_CanvasButton_vt = *This
+        *This\iconImage = img_p
+        *This\iconSpacing = spacing_p
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure.i UI_CanvasButton_GetIcon(*This.UI_CanvasButton_Inst)
+  Protected *This_vt.UI_CanvasButton_vt = *This
+        ProcedureReturn *This\iconImage
+EndProcedure
+
+Procedure UI_CanvasButton_SetTextAlignment(*This.UI_CanvasButton_Inst, align_p.i)
+  Protected *This_vt.UI_CanvasButton_vt = *This
+        *This\textAlignment = align_p
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure UI_CanvasButton_OnPaint(*This.UI_CanvasButton_Inst, w_p.i, h_p.i)
+  Protected *This_vt.UI_CanvasButton_vt = *This
+        ; 1. Rounded background and border based on active visual state
+        *This_vt\DrawControlBackground(w_p, h_p)
+  
+        ; 2. Focus ring if gadget has keyboard focus
+        *This_vt\DrawFocusRing(w_p, h_p)
+  
+        ; 3. Prepare font and text
+        If (*This\fontID)
+          DrawingFont(*This\fontID)
+        EndIf
+  
+        Protected fg.i = *This_vt\GetCurrentForegroundColor()
+        Protected padL.i = DesktopScaledX(*This\paddingLeft)
+        Protected padR.i = DesktopScaledX(*This\paddingRight)
+        Protected contentW.i = w_p - padL - padR
+        If contentW < 0 : contentW = 0 : EndIf
+  
+        Protected txtW.i = 0
+        Protected txtH.i = 0
+        If *This\text <> ""
+          txtW = TextWidth(*This\text)
+          txtH = TextHeight(*This\text)
+        EndIf
+  
+        Protected iconW.i = 0
+        Protected iconH.i = 0
+        Protected sp.i = 0
+        If *This\iconImage And IsImage(*This\iconImage)
+          iconW = DesktopScaledX(ImageWidth(*This\iconImage))
+          iconH = DesktopScaledY(ImageHeight(*This\iconImage))
+          If *This\text <> ""
+            sp = DesktopScaledX(*This\iconSpacing)
+          EndIf
+        EndIf
+  
+        Protected totalW.i = iconW + sp + txtW
+        Protected startX.i = padL
+  
+        Select *This\textAlignment
+          Case 0: ; Centered
+            startX = (w_p - totalW) / 2
+          Case 1: ; Gauche
+            startX = padL
+          Case 2: ; Droite
+            startX = w_p - padR - totalW
+        EndSelect
+  
+        If startX < padL : startX = padL : EndIf
+  
+        ; 4. Draw icon if present
+        If *This\iconImage And IsImage(*This\iconImage)
+          Protected iconY.i = (h_p - iconH) / 2
+          DrawAlphaImage(ImageID(*This\iconImage), startX, iconY)
+          startX + iconW + sp
+        EndIf
+  
+        ; 5. Draw text
+        If *This\text <> ""
+          Protected txtY.i = (h_p - txtH) / 2
+          DrawingMode(#PB_2DDrawing_Transparent)
+          DrawText(startX, txtY, *This\text, fg)
+        EndIf
+EndProcedure
+
+Procedure UI_CanvasButton_ApplyStyle(*This.UI_CanvasButton_Inst, *s.UI_Style_vt)
+  Protected *This_vt.UI_CanvasButton_vt = *This
+        UI_CanvasControl_ApplyStyle(*This, *s)
+        If Not *s : ProcedureReturn : EndIf
+        Protected count.i = *s\GetSetterCount()
+        Protected i.i
+        For i = 0 To count - 1
+          Protected prop.s = UCase(Trim(*s\GetSetterProperty(i)))
+          Protected val.s = Trim(*s\GetSetterValue(i))
+          If prop = "TEXTALIGNMENT" Or prop = "HALIGN"
+            If UCase(val) = "LEFT" : *This\textAlignment = 1
+            ElseIf UCase(val) = "RIGHT" : *This\textAlignment = 2
+            ElseIf UCase(val) = "CENTER" : *This\textAlignment = 0
+            EndIf
+          EndIf
+        Next
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure UI_CanvasText_Init_void(*This.UI_CanvasText_Inst)
+  Protected *This_vt.UI_CanvasText_vt = *This
+        UI_CanvasControl_Init_i_i(*This, 100, 24)
+        *This\text = ""
+        *This\hAlign = #UI_TextAlign_Left
+        *This\vAlign = #UI_TextAlign_Middle
+        *This\showEllipsis = #True
+        *This\isTransparent = #True
+        *This\borderThickness = 0
+        *This\cornerRadius = 0
+        *This\paddingLeft = 0
+        *This\paddingTop = 0
+        *This\paddingRight = 0
+        *This\paddingBottom = 0
+        *This\background = RGB(255, 255, 255)
+        *This\foreground = RGB(33, 37, 41)
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure UI_CanvasText_Init_s(*This.UI_CanvasText_Inst, text_p.s)
+  Protected *This_vt.UI_CanvasText_vt = *This
+        UI_CanvasControl_Init_i_i(*This, 100, 24)
+        *This\text = text_p
+        *This\hAlign = #UI_TextAlign_Left
+        *This\vAlign = #UI_TextAlign_Middle
+        *This\showEllipsis = #True
+        *This\isTransparent = #True
+        *This\borderThickness = 0
+        *This\cornerRadius = 0
+        *This\paddingLeft = 0
+        *This\paddingTop = 0
+        *This\paddingRight = 0
+        *This\paddingBottom = 0
+        *This\background = RGB(255, 255, 255)
+        *This\foreground = RGB(33, 37, 41)
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure UI_CanvasText_Init_s_i_i(*This.UI_CanvasText_Inst, text_p.s, w_p.i, h_p.i)
+  Protected *This_vt.UI_CanvasText_vt = *This
+        UI_CanvasControl_Init_i_i(*This, w_p, h_p)
+        *This\text = text_p
+        *This\hAlign = #UI_TextAlign_Left
+        *This\vAlign = #UI_TextAlign_Middle
+        *This\showEllipsis = #True
+        *This\isTransparent = #True
+        *This\borderThickness = 0
+        *This\cornerRadius = 0
+        *This\paddingLeft = 0
+        *This\paddingTop = 0
+        *This\paddingRight = 0
+        *This\paddingBottom = 0
+        *This\background = RGB(255, 255, 255)
+        *This\foreground = RGB(33, 37, 41)
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure UI_CanvasText_Init_i_i_i_i_s(*This.UI_CanvasText_Inst, x_p.i, y_p.i, w_p.i, h_p.i, text_p.s)
+  Protected *This_vt.UI_CanvasText_vt = *This
+        UI_CanvasControl_Init_i_i_i_i(*This, x_p, y_p, w_p, h_p)
+        *This\text = text_p
+        *This\hAlign = #UI_TextAlign_Left
+        *This\vAlign = #UI_TextAlign_Middle
+        *This\showEllipsis = #True
+        *This\isTransparent = #True
+        *This\borderThickness = 0
+        *This\cornerRadius = 0
+        *This\paddingLeft = 0
+        *This\paddingTop = 0
+        *This\paddingRight = 0
+        *This\paddingBottom = 0
+        *This\background = RGB(255, 255, 255)
+        *This\foreground = RGB(33, 37, 41)
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure UI_CanvasText_SetAlignment(*This.UI_CanvasText_Inst, horizontal_p.i, vertical_p.i)
+  Protected *This_vt.UI_CanvasText_vt = *This
+        *This\hAlign = horizontal_p
+        *This\vAlign = vertical_p
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure.i UI_CanvasText_GetTextHorizontalAlignment(*This.UI_CanvasText_Inst)
+  Protected *This_vt.UI_CanvasText_vt = *This
+        ProcedureReturn *This\hAlign
+EndProcedure
+
+Procedure.i UI_CanvasText_GetTextVerticalAlignment(*This.UI_CanvasText_Inst)
+  Protected *This_vt.UI_CanvasText_vt = *This
+        ProcedureReturn *This\vAlign
+EndProcedure
+
+Procedure.i UI_CanvasText_GetDesiredWidth(*This.UI_CanvasText_Inst)
+  Protected *This_vt.UI_CanvasText_vt = *This
+        If *This\hasExplicitWidth And *This\width > 0
+          ProcedureReturn *This\width
+        EndIf
+        If *This\text <> "" And *This\id And IsGadget(*This\id)
+          Protected tw.i = 0
+          If StartDrawing(CanvasOutput(*This\id))
+            If *This\fontID : DrawingFont(*This\fontID) : EndIf
+            tw = TextWidth(*This\text) + DesktopScaledX(*This\paddingLeft + *This\paddingRight) + 8
+            StopDrawing()
+          EndIf
+          If tw > 0 : ProcedureReturn tw : EndIf
+        EndIf
+        ProcedureReturn *This\desiredWidth
+EndProcedure
+
+Procedure.i UI_CanvasText_GetDesiredHeight(*This.UI_CanvasText_Inst)
+  Protected *This_vt.UI_CanvasText_vt = *This
+        If *This\hasExplicitHeight And *This\height > 0
+          ProcedureReturn *This\height
+        EndIf
+        If *This\text <> "" And *This\id And IsGadget(*This\id)
+          Protected th.i = 0
+          If StartDrawing(CanvasOutput(*This\id))
+            If *This\fontID : DrawingFont(*This\fontID) : EndIf
+            th = TextHeight(*This\text) + DesktopScaledY(*This\paddingTop + *This\paddingBottom) + 4
+            StopDrawing()
+          EndIf
+          If th > 0 : ProcedureReturn th : EndIf
+        EndIf
+        ProcedureReturn *This\desiredHeight
+EndProcedure
+
+Procedure UI_CanvasText_SetEllipsis(*This.UI_CanvasText_Inst, enabled_p.b)
+  Protected *This_vt.UI_CanvasText_vt = *This
+        *This\showEllipsis = enabled_p
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure.b UI_CanvasText_GetEllipsis(*This.UI_CanvasText_Inst)
+  Protected *This_vt.UI_CanvasText_vt = *This
+        ProcedureReturn *This\showEllipsis
+EndProcedure
+
+Procedure UI_CanvasText_SetTransparent(*This.UI_CanvasText_Inst, transparent_p.b)
+  Protected *This_vt.UI_CanvasText_vt = *This
+        *This\isTransparent = transparent_p
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure.b UI_CanvasText_IsTransparent(*This.UI_CanvasText_Inst)
+  Protected *This_vt.UI_CanvasText_vt = *This
+        ProcedureReturn *This\isTransparent
+EndProcedure
+
+Procedure.s UI_CanvasText_FormatDisplayText(*This.UI_CanvasText_Inst, availWidth_p.i)
+  Protected *This_vt.UI_CanvasText_vt = *This
+        If availWidth_p <= 0 : ProcedureReturn "" : EndIf
+        If TextWidth(*This\text) <= availWidth_p
+          ProcedureReturn *This\text
+        EndIf
+  
+        If (Not *This\showEllipsis)
+          ProcedureReturn *This\text
+        EndIf
+  
+        Protected dots.s = "..."
+        Protected dotsW.i = TextWidth(dots)
+        If dotsW >= availWidth_p
+          ProcedureReturn "."
+        EndIf
+  
+        Protected maxW.i = availWidth_p - dotsW
+        Protected len.i = Len(*This\text)
+        Protected sub.s = *This\text
+  
+        While (len > 0 And TextWidth(sub) > maxW)
+          len - 1
+          sub = Left(*This\text, len)
+        Wend
+  
+        ProcedureReturn sub + dots
+EndProcedure
+
+Procedure UI_CanvasText_OnPaint(*This.UI_CanvasText_Inst, w_p.i, h_p.i)
+  Protected *This_vt.UI_CanvasText_vt = *This
+        ; 1. Fond
+        If (Not *This\isTransparent) Or *This\borderThickness > 0
+          *This_vt\DrawControlBackground(w_p, h_p)
+        Else
+          ; Clear with parent container color
+          Box(0, 0, w_p, h_p, *This\parentBackground)
+        EndIf
+  
+        ; 2. Police
+        If (*This\fontID)
+          DrawingFont(*This\fontID)
+        EndIf
+  
+        If *This\text = "" : ProcedureReturn : EndIf
+  
+        Protected padL.i = DesktopScaledX(*This\paddingLeft)
+        Protected padT.i = DesktopScaledY(*This\paddingTop)
+        Protected padR.i = DesktopScaledX(*This\paddingRight)
+        Protected padB.i = DesktopScaledY(*This\paddingBottom)
+  
+        Protected availW.i = w_p - padL - padR
+        Protected availH.i = h_p - padT - padB
+        If availW < 0 : availW = 0 : EndIf
+        If availH < 0 : availH = 0 : EndIf
+  
+        Protected dispText.s = *This_vt\FormatDisplayText(availW)
+        Protected txtW.i = TextWidth(dispText)
+        Protected txtH.i = TextHeight(dispText)
+  
+        ; Calcul X selon hAlign
+        Protected posX.i = padL
+        Select (*This\hAlign)
+          Case #UI_TextAlign_Center:
+            posX = padL + (availW - txtW) / 2
+          Case #UI_TextAlign_Right:
+            posX = w_p - padR - txtW
+        EndSelect
+  
+        ; Calcul Y selon vAlign
+        Protected posY.i = padT
+        Select (*This\vAlign)
+          Case #UI_TextAlign_Middle:
+            posY = padT + (availH - txtH) / 2
+          Case #UI_TextAlign_Bottom:
+            posY = h_p - padB - txtH
+        EndSelect
+  
+        Protected fg.i = *This_vt\GetCurrentForegroundColor()
+        If (*This\isTransparent)
+          DrawingMode(#PB_2DDrawing_Transparent)
+          DrawText(posX, posY, dispText, fg)
+        Else
+          DrawText(posX, posY, dispText, fg, *This\background)
+        EndIf
+EndProcedure
+
+Procedure UI_CanvasTextBox_InitTextBoxDefaults(*This.UI_CanvasTextBox_Inst)
+  Protected *This_vt.UI_CanvasTextBox_vt = *This
+        *This\placeholder = ""
+        *This\placeholderColor = RGB(156, 163, 175) ; Tailwind gray-400
+        *This\isPassword = #False
+        *This\passwordChar = Chr(9679) ; Bullet character
+        If *This\passwordChar = "" : *This\passwordChar = "*" : EndIf
+        *This\isReadOnly = #False
+        *This\maxLength = 0
+  
+        *This\cursorPos = 0
+        *This\selStart = 0
+        *This\selEnd = 0
+        *This\isSelecting = #False
+        *This\scrollOffset = 0
+        *This\caretHeight = 16
+  
+        ; Modern WinUI 3 theme
+        *This\background = RGB(255, 255, 255)
+        *This\foreground = RGB(17, 24, 39)
+        *This\hoverBackground = RGB(255, 255, 255)
+        *This\hoverForeground = RGB(17, 24, 39)
+        *This\pressedBackground = RGB(255, 255, 255)
+        *This\pressedForeground = RGB(17, 24, 39)
+        *This\disabledBackground = RGB(243, 244, 246)
+        *This\disabledForeground = RGB(156, 163, 175)
+  
+        *This\borderColor = RGB(209, 213, 219)       ; Gray-300
+        *This\hoverBorderColor = RGB(156, 163, 175)  ; Gray-400
+        *This\pressedBorderColor = RGB(59, 130, 246) ; Blue-500
+        *This\activeBorderColor = RGB(59, 130, 246)  ; Blue-500
+        *This\borderThickness = 1
+        *This\cornerRadius = 6
+  
+        *This\selectionColor = RGB(191, 219, 254)     ; Blue-200
+        *This\selectionTextColor = RGB(17, 24, 39)   ; Dark text on light blue selection
+  
+        *This\paddingLeft = 10
+        *This\paddingTop = 6
+        *This\paddingRight = 10
+        *This\paddingBottom = 6
+  
+        ; Default typography
+        *This_vt\SetTypography("Segoe UI", 10, #False)
+EndProcedure
+
+Procedure UI_CanvasTextBox_Init_void(*This.UI_CanvasTextBox_Inst)
+  Protected *This_vt.UI_CanvasTextBox_vt = *This
+        UI_CanvasControl_Init_i_i(*This, 200, 32)
+        *This_vt\InitTextBoxDefaults()
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure UI_CanvasTextBox_Init_s(*This.UI_CanvasTextBox_Inst, placeholder_p.s)
+  Protected *This_vt.UI_CanvasTextBox_vt = *This
+        UI_CanvasControl_Init_i_i(*This, 200, 32)
+        *This_vt\InitTextBoxDefaults()
+        *This\placeholder = placeholder_p
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure UI_CanvasTextBox_Init_s_i_i(*This.UI_CanvasTextBox_Inst, placeholder_p.s, w_p.i, h_p.i)
+  Protected *This_vt.UI_CanvasTextBox_vt = *This
+        UI_CanvasControl_Init_i_i(*This, w_p, h_p)
+        *This_vt\InitTextBoxDefaults()
+        *This\placeholder = placeholder_p
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure UI_CanvasTextBox_Init_i_i_i_i_s(*This.UI_CanvasTextBox_Inst, x_p.i, y_p.i, w_p.i, h_p.i, placeholder_p.s)
+  Protected *This_vt.UI_CanvasTextBox_vt = *This
+        UI_CanvasControl_Init_i_i_i_i(*This, x_p, y_p, w_p, h_p)
+        *This_vt\InitTextBoxDefaults()
+        *This\placeholder = placeholder_p
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure UI_CanvasTextBox_Init_i_i_i_i_s_b(*This.UI_CanvasTextBox_Inst, x_p.i, y_p.i, w_p.i, h_p.i, placeholder_p.s, isPassword_p.b)
+  Protected *This_vt.UI_CanvasTextBox_vt = *This
+        UI_CanvasControl_Init_i_i_i_i(*This, x_p, y_p, w_p, h_p)
+        *This_vt\InitTextBoxDefaults()
+        *This\placeholder = placeholder_p
+        *This\isPassword = isPassword_p
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure.s UI_CanvasTextBox_GetPlaceholder(*This.UI_CanvasTextBox_Inst)
+  Protected *This_vt.UI_CanvasTextBox_vt = *This
+        ProcedureReturn *This\placeholder
+EndProcedure
+
+Procedure UI_CanvasTextBox_SetPlaceholder(*This.UI_CanvasTextBox_Inst, ph_p.s)
+  Protected *This_vt.UI_CanvasTextBox_vt = *This
+        *This\placeholder = ph_p
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure.i UI_CanvasTextBox_GetPlaceholderColor(*This.UI_CanvasTextBox_Inst)
+  Protected *This_vt.UI_CanvasTextBox_vt = *This
+        ProcedureReturn *This\placeholderColor
+EndProcedure
+
+Procedure UI_CanvasTextBox_SetPlaceholderColor(*This.UI_CanvasTextBox_Inst, col_p.i)
+  Protected *This_vt.UI_CanvasTextBox_vt = *This
+        *This\placeholderColor = col_p
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure.b UI_CanvasTextBox_IsPassword(*This.UI_CanvasTextBox_Inst)
+  Protected *This_vt.UI_CanvasTextBox_vt = *This
+        ProcedureReturn *This\isPassword
+EndProcedure
+
+Procedure UI_CanvasTextBox_SetIsPassword(*This.UI_CanvasTextBox_Inst, pw_p.b)
+  Protected *This_vt.UI_CanvasTextBox_vt = *This
+        *This\isPassword = pw_p
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure.b UI_CanvasTextBox_IsReadOnly(*This.UI_CanvasTextBox_Inst)
+  Protected *This_vt.UI_CanvasTextBox_vt = *This
+        ProcedureReturn *This\isReadOnly
+EndProcedure
+
+Procedure UI_CanvasTextBox_SetReadOnly(*This.UI_CanvasTextBox_Inst, ro_p.b)
+  Protected *This_vt.UI_CanvasTextBox_vt = *This
+        *This\isReadOnly = ro_p
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure.i UI_CanvasTextBox_GetMaxLength(*This.UI_CanvasTextBox_Inst)
+  Protected *This_vt.UI_CanvasTextBox_vt = *This
+        ProcedureReturn *This\maxLength
+EndProcedure
+
+Procedure UI_CanvasTextBox_SetMaxLength(*This.UI_CanvasTextBox_Inst, len_p.i)
+  Protected *This_vt.UI_CanvasTextBox_vt = *This
+        *This\maxLength = len_p
+EndProcedure
+
+Procedure.i UI_CanvasTextBox_GetActiveBorderColor(*This.UI_CanvasTextBox_Inst)
+  Protected *This_vt.UI_CanvasTextBox_vt = *This
+        ProcedureReturn *This\activeBorderColor
+EndProcedure
+
+Procedure UI_CanvasTextBox_SetActiveBorderColor(*This.UI_CanvasTextBox_Inst, col_p.i)
+  Protected *This_vt.UI_CanvasTextBox_vt = *This
+        *This\activeBorderColor = col_p
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure.i UI_CanvasTextBox_GetSelectionColor(*This.UI_CanvasTextBox_Inst)
+  Protected *This_vt.UI_CanvasTextBox_vt = *This
+        ProcedureReturn *This\selectionColor
+EndProcedure
+
+Procedure UI_CanvasTextBox_SetSelectionColor(*This.UI_CanvasTextBox_Inst, col_p.i)
+  Protected *This_vt.UI_CanvasTextBox_vt = *This
+        *This\selectionColor = col_p
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure.i UI_CanvasTextBox_GetCursorPosition(*This.UI_CanvasTextBox_Inst)
+  Protected *This_vt.UI_CanvasTextBox_vt = *This
+        ProcedureReturn *This\cursorPos
+EndProcedure
+
+Procedure UI_CanvasTextBox_SetCursorPosition(*This.UI_CanvasTextBox_Inst, pos_p.i)
+  Protected *This_vt.UI_CanvasTextBox_vt = *This
+        Protected tLen.i = Len(*This\text)
+        If pos_p < 0 : pos_p = 0 : EndIf
+        If pos_p > tLen : pos_p = tLen : EndIf
+        *This\cursorPos = pos_p
+        *This\selStart = pos_p
+        *This\selEnd = pos_p
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure UI_CanvasTextBox_SetText(*This.UI_CanvasTextBox_Inst, text_p.s)
+  Protected *This_vt.UI_CanvasTextBox_vt = *This
+        *This\text = text_p
+        *This\cursorPos = Len(text_p)
+        *This\selStart = *This\cursorPos
+        *This\selEnd = *This\cursorPos
+        *This\scrollOffset = 0
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure.s UI_CanvasTextBox_GetDisplayText(*This.UI_CanvasTextBox_Inst)
+  Protected *This_vt.UI_CanvasTextBox_vt = *This
+  If (*This\isPassword)
+          Protected pLen.i = Len(*This\text)
+          Protected res.s = ""
+          Protected i.i
+          For i = 1 To pLen
+            res + *This\passwordChar
+          Next i
+          ProcedureReturn res
+  EndIf
+        ProcedureReturn *This\text
+EndProcedure
+
+Procedure.b UI_CanvasTextBox_HasSelection(*This.UI_CanvasTextBox_Inst)
+  Protected *This_vt.UI_CanvasTextBox_vt = *This
+        ProcedureReturn Bool(*This\selStart <> *This\selEnd)
+EndProcedure
+
+Procedure UI_CanvasTextBox_GetSelectionBounds(*This.UI_CanvasTextBox_Inst, *minOut.INTEGER, *maxOut.INTEGER)
+  Protected *This_vt.UI_CanvasTextBox_vt = *This
+  If (*This\selStart < *This\selEnd)
+          *minOut\i = *This\selStart
+          *maxOut\i = *This\selEnd
+  Else
+          *minOut\i = *This\selEnd
+          *maxOut\i = *This\selStart
+  EndIf
+EndProcedure
+
+Procedure UI_CanvasTextBox_ClearSelection(*This.UI_CanvasTextBox_Inst)
+  Protected *This_vt.UI_CanvasTextBox_vt = *This
+        *This\selStart = *This\cursorPos
+        *This\selEnd = *This\cursorPos
+EndProcedure
+
+Procedure UI_CanvasTextBox_SelectAll(*This.UI_CanvasTextBox_Inst)
+  Protected *This_vt.UI_CanvasTextBox_vt = *This
+        *This\selStart = 0
+        *This\selEnd = Len(*This\text)
+        *This\cursorPos = *This\selEnd
+EndProcedure
+
+Procedure UI_CanvasTextBox_DeleteSelection(*This.UI_CanvasTextBox_Inst)
+  Protected *This_vt.UI_CanvasTextBox_vt = *This
+  If (*This_vt\HasSelection())
+          Protected sMin.INTEGER, sMax.INTEGER
+          *This_vt\GetSelectionBounds(@sMin, @sMax)
+          *This\text = Left(*This\text, sMin\i) + Mid(*This\text, sMax\i + 1)
+          *This\cursorPos = sMin\i
+          *This_vt\ClearSelection()
+          *This_vt\OnChange()
+          PostEvent(#PB_Event_Gadget, EventWindow(), *This\id, #PB_EventType_Change)
+  EndIf
+EndProcedure
+
+Procedure UI_CanvasTextBox_InsertText(*This.UI_CanvasTextBox_Inst, str_p.s)
+  Protected *This_vt.UI_CanvasTextBox_vt = *This
+        If (*This\isReadOnly) : ProcedureReturn : EndIf
+        If (*This_vt\HasSelection())
+          *This_vt\DeleteSelection()
+        EndIf
+  
+        Protected curLen.i = Len(*This\text)
+        Protected insLen.i = Len(str_p)
+        If (*This\maxLength > 0 And (curLen + insLen) > *This\maxLength)
+          insLen = *This\maxLength - curLen
+          If insLen <= 0 : ProcedureReturn : EndIf
+          str_p = Left(str_p, insLen)
+        EndIf
+  
+        *This\text = Left(*This\text, *This\cursorPos) + str_p + Mid(*This\text, *This\cursorPos + 1)
+        *This\cursorPos + Len(str_p)
+        *This_vt\ClearSelection()
+        *This_vt\OnChange()
+        PostEvent(#PB_Event_Gadget, EventWindow(), *This\id, #PB_EventType_Change)
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure UI_CanvasTextBox_DeleteBackward(*This.UI_CanvasTextBox_Inst)
+  Protected *This_vt.UI_CanvasTextBox_vt = *This
+        If (*This\isReadOnly) : ProcedureReturn : EndIf
+  If (*This_vt\HasSelection())
+          *This_vt\DeleteSelection()
+          *This_vt\Redraw()
+  ElseIf (*This\cursorPos > 0)
+          *This\text = Left(*This\text, *This\cursorPos - 1) + Mid(*This\text, *This\cursorPos + 1)
+          *This\cursorPos - 1
+          *This_vt\ClearSelection()
+          *This_vt\OnChange()
+          PostEvent(#PB_Event_Gadget, EventWindow(), *This\id, #PB_EventType_Change)
+          *This_vt\Redraw()
+  EndIf
+EndProcedure
+
+Procedure UI_CanvasTextBox_DeleteForward(*This.UI_CanvasTextBox_Inst)
+  Protected *This_vt.UI_CanvasTextBox_vt = *This
+        If (*This\isReadOnly) : ProcedureReturn : EndIf
+  If (*This_vt\HasSelection())
+          *This_vt\DeleteSelection()
+          *This_vt\Redraw()
+  ElseIf (*This\cursorPos < Len(*This\text))
+          *This\text = Left(*This\text, *This\cursorPos) + Mid(*This\text, *This\cursorPos + 2)
+          *This_vt\ClearSelection()
+          *This_vt\OnChange()
+          PostEvent(#PB_Event_Gadget, EventWindow(), *This\id, #PB_EventType_Change)
+          *This_vt\Redraw()
+  EndIf
+EndProcedure
+
+Procedure UI_CanvasTextBox_Copy(*This.UI_CanvasTextBox_Inst)
+  Protected *This_vt.UI_CanvasTextBox_vt = *This
+  If (*This_vt\HasSelection())
+          Protected sMin.INTEGER, sMax.INTEGER
+          *This_vt\GetSelectionBounds(@sMin, @sMax)
+          Protected selTxt.s = Mid(*This\text, sMin\i + 1, sMax\i - sMin\i)
+          If selTxt <> ""
+            SetClipboardText(selTxt)
+          EndIf
+  EndIf
+EndProcedure
+
+Procedure UI_CanvasTextBox_Cut(*This.UI_CanvasTextBox_Inst)
+  Protected *This_vt.UI_CanvasTextBox_vt = *This
+        If (*This\isReadOnly) : ProcedureReturn : EndIf
+  If (*This_vt\HasSelection())
+          *This_vt\Copy()
+          *This_vt\DeleteSelection()
+          *This_vt\Redraw()
+  EndIf
+EndProcedure
+
+Procedure UI_CanvasTextBox_Paste(*This.UI_CanvasTextBox_Inst)
+  Protected *This_vt.UI_CanvasTextBox_vt = *This
+        If (*This\isReadOnly) : ProcedureReturn : EndIf
+        Protected clip.s = GetClipboardText()
+        If clip <> ""
+          ; Remove line breaks for single-line field
+          clip = RemoveString(clip, #CR$)
+          clip = RemoveString(clip, #LF$)
+          *This_vt\InsertText(clip)
+        EndIf
+EndProcedure
+
+Procedure UI_CanvasTextBox_OnSubmit(*This.UI_CanvasTextBox_Inst)
+  Protected *This_vt.UI_CanvasTextBox_vt = *This
+EndProcedure
+
+Procedure.i UI_CanvasTextBox_CharPosFromMouseX(*This.UI_CanvasTextBox_Inst, targetX_p.i)
+  Protected *This_vt.UI_CanvasTextBox_vt = *This
+        Protected dText.s = *This_vt\GetDisplayText()
+        Protected textLen.i = Len(dText)
+        If textLen = 0 : ProcedureReturn 0 : EndIf
+  
+        Protected relativeX.i = targetX_p - *This\paddingLeft + *This\scrollOffset
+        If relativeX <= 0 : ProcedureReturn 0 : EndIf
+  
+        Protected pos.i = 0
+  If (StartDrawing(CanvasOutput(*This\id)))
+          If (*This\fontID) : DrawingFont(*This\fontID) : EndIf
+          Protected prevW.i = 0
+          Protected curW.i = 0
+          Protected i.i
+          For i = 1 To textLen
+            curW = TextWidth(Left(dText, i))
+            Protected charW.i = curW - prevW
+            If relativeX < (prevW + (charW / 2))
+              pos = i - 1
+              Break
+            ElseIf relativeX <= curW
+              pos = i
+              Break
+            EndIf
+            prevW = curW
+            pos = i
+          Next i
+          StopDrawing()
+  EndIf
+        ProcedureReturn pos
+EndProcedure
+
+Procedure UI_CanvasTextBox_EnsureCursorVisible(*This.UI_CanvasTextBox_Inst, availW_p.i)
+  Protected *This_vt.UI_CanvasTextBox_vt = *This
+        Protected dText.s = *This_vt\GetDisplayText()
+        Protected curPixX.i = TextWidth(Left(dText, *This\cursorPos))
+  
+        If (curPixX - *This\scrollOffset > availW_p - 10)
+          *This\scrollOffset = curPixX - availW_p + 15
+        ElseIf (curPixX - *This\scrollOffset < 5)
+          *This\scrollOffset = curPixX - 5
+        EndIf
+        If (*This\scrollOffset < 0)
+          *This\scrollOffset = 0
+        EndIf
+EndProcedure
+
+Procedure UI_CanvasTextBox_OnFocus(*This.UI_CanvasTextBox_Inst)
+  Protected *This_vt.UI_CanvasTextBox_vt = *This
+        UI_CanvasControl_OnFocus(*This)
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure UI_CanvasTextBox_OnLostFocus(*This.UI_CanvasTextBox_Inst)
+  Protected *This_vt.UI_CanvasTextBox_vt = *This
+        UI_CanvasControl_OnLostFocus(*This)
+        CompilerIf #PB_Compiler_OS = #PB_OS_Windows
+          If (*This\id And IsGadget(*This\id))
+            HideCaret_(GadgetID(*This\id))
+            DestroyCaret_()
+          EndIf
+        CompilerEndIf
+        *This\isSelecting = #False
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure UI_CanvasTextBox_OnMouseDown(*This.UI_CanvasTextBox_Inst, mx_p.i, my_p.i, button_p.i)
+  Protected *This_vt.UI_CanvasTextBox_vt = *This
+        UI_CanvasControl_OnMouseDown(*This, mx_p, my_p, button_p)
+        If (*This\id And IsGadget(*This\id))
+          SetActiveGadget(*This\id)
+        EndIf
+  
+        *This\cursorPos = *This_vt\CharPosFromMouseX(mx_p)
+        *This\selStart = *This\cursorPos
+        *This\selEnd = *This\cursorPos
+        *This\isSelecting = #True
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure UI_CanvasTextBox_OnMouseMove(*This.UI_CanvasTextBox_Inst, mx_p.i, my_p.i)
+  Protected *This_vt.UI_CanvasTextBox_vt = *This
+        UI_CanvasControl_OnMouseMove(*This, mx_p, my_p)
+  If (*This\isSelecting)
+          *This\cursorPos = *This_vt\CharPosFromMouseX(mx_p)
+          *This\selEnd = *This\cursorPos
+          *This_vt\Redraw()
+  EndIf
+EndProcedure
+
+Procedure UI_CanvasTextBox_OnMouseUp(*This.UI_CanvasTextBox_Inst, mx_p.i, my_p.i, button_p.i)
+  Protected *This_vt.UI_CanvasTextBox_vt = *This
+        UI_CanvasControl_OnMouseUp(*This, mx_p, my_p, button_p)
+        *This\isSelecting = #False
+EndProcedure
+
+Procedure UI_CanvasTextBox_OnLeftDoubleClick(*This.UI_CanvasTextBox_Inst, mx_p.i, my_p.i)
+  Protected *This_vt.UI_CanvasTextBox_vt = *This
+        *This_vt\SelectAll()
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure UI_CanvasTextBox_OnKeyDown(*This.UI_CanvasTextBox_Inst, key_p.i)
+  Protected *This_vt.UI_CanvasTextBox_vt = *This
+        UI_CanvasControl_OnKeyDown(*This, key_p)
+        Protected isCtrl.b = Bool(GetGadgetAttribute(*This\id, #PB_Canvas_Modifiers) & #PB_Canvas_Control)
+        Protected isShift.b = Bool(GetGadgetAttribute(*This\id, #PB_Canvas_Modifiers) & #PB_Canvas_Shift)
+  
+        Select (key_p)
+          Case #PB_Key_Back:
+            *This_vt\DeleteBackward()
+  
+          Case #PB_Key_Delete:
+            *This_vt\DeleteForward()
+  
+          Case #PB_Key_Left:
+            If isShift:
+              If (*This\cursorPos > 0)
+                *This\cursorPos - 1
+                *This\selEnd = *This\cursorPos
+              EndIf
+            Else:
+              If (*This_vt\HasSelection())
+                Protected sMinL.INTEGER, sMaxL.INTEGER
+                *This_vt\GetSelectionBounds(@sMinL, @sMaxL)
+                *This\cursorPos = sMinL\i
+                *This_vt\ClearSelection()
+              ElseIf (*This\cursorPos > 0)
+                *This\cursorPos - 1
+                *This_vt\ClearSelection()
+              EndIf
+            EndIf
+            *This_vt\Redraw()
+  
+          Case #PB_Key_Right:
+            Protected tLenR.i = Len(*This\text)
+            If isShift:
+              If (*This\cursorPos < tLenR)
+                *This\cursorPos + 1
+                *This\selEnd = *This\cursorPos
+              EndIf
+            Else:
+              If (*This_vt\HasSelection())
+                Protected sMinR.INTEGER, sMaxR.INTEGER
+                *This_vt\GetSelectionBounds(@sMinR, @sMaxR)
+                *This\cursorPos = sMaxR\i
+                *This_vt\ClearSelection()
+              ElseIf (*This\cursorPos < tLenR)
+                *This\cursorPos + 1
+                *This_vt\ClearSelection()
+              EndIf
+            EndIf
+            *This_vt\Redraw()
+  
+          Case #PB_Key_Home:
+            *This\cursorPos = 0
+            If isShift : *This\selEnd = 0 : Else : *This_vt\ClearSelection() : EndIf
+            *This_vt\Redraw()
+  
+          Case #PB_Key_End:
+            *This\cursorPos = Len(*This\text)
+            If isShift : *This\selEnd = *This\cursorPos : Else : *This_vt\ClearSelection() : EndIf
+            *This_vt\Redraw()
+  
+          Case #PB_Key_A:
+            If isCtrl
+              *This_vt\SelectAll()
+              *This_vt\Redraw()
+            EndIf
+  
+          Case #PB_Key_C:
+            If isCtrl
+              *This_vt\Copy()
+            EndIf
+  
+          Case #PB_Key_V:
+            If isCtrl
+              *This_vt\Paste()
+            EndIf
+  
+          Case #PB_Key_X:
+            If isCtrl
+              *This_vt\Cut()
+            EndIf
+  
+          Case #PB_Key_Return:
+            *This_vt\OnSubmit()
+        EndSelect
+EndProcedure
+
+Procedure UI_CanvasTextBox_OnInput(*This.UI_CanvasTextBox_Inst, char_p.i)
+  Protected *This_vt.UI_CanvasTextBox_vt = *This
+        UI_CanvasControl_OnInput(*This, char_p)
+        Protected isCtrl.b = Bool(GetGadgetAttribute(*This\id, #PB_Canvas_Modifiers) & #PB_Canvas_Control)
+        If (Not isCtrl And char_p >= 32)
+          *This_vt\InsertText(Chr(char_p))
+        EndIf
+EndProcedure
+
+Procedure UI_CanvasTextBox_OnPaint(*This.UI_CanvasTextBox_Inst, w_p.i, h_p.i)
+  Protected *This_vt.UI_CanvasTextBox_vt = *This
+        ; 1. Fond et bordure
+        *This_vt\DrawControlBackground(w_p, h_p)
+  
+        ; 2. Anneau de Focus WPF / WinUI
+        Protected scaledRad.i = DesktopScaledX(*This\cornerRadius)
+  If (*This\isFocused)
+  If (scaledRad > 0)
+            RoundBox(0, 0, w_p, h_p, scaledRad, scaledRad, *This\activeBorderColor)
+  If (w_p > 4 And h_p > 4)
+              Protected inR.i = scaledRad - 2
+              If inR < 0 : inR = 0 : EndIf
+              RoundBox(2, 2, w_p - 4, h_p - 4, inR, inR, *This_vt\GetCurrentBackgroundColor())
+  EndIf
+  Else
+            Box(0, 0, w_p, h_p, *This\activeBorderColor)
+  If (w_p > 4 And h_p > 4)
+              Box(2, 2, w_p - 4, h_p - 4, *This_vt\GetCurrentBackgroundColor())
+  EndIf
+  EndIf
+  EndIf
+  
+        ; 3. Typographie
+        If (*This\fontID)
+          DrawingFont(*This\fontID)
+        EndIf
+  
+        ; 4. Zone interieure de texte
+        Protected padL.i = DesktopScaledX(*This\paddingLeft)
+        Protected padT.i = DesktopScaledY(*This\paddingTop)
+        Protected padR.i = DesktopScaledX(*This\paddingRight)
+        Protected padB.i = DesktopScaledY(*This\paddingBottom)
+  
+        Protected availX.i = padL
+        Protected availY.i = padT
+        Protected availW.i = w_p - padL - padR
+        Protected availH.i = h_p - padT - padB
+        If availW < 10 : availW = 10 : EndIf
+        If availH < 10 : availH = 10 : EndIf
+  
+        *This\caretHeight = TextHeight("Ag")
+        If *This\caretHeight < 14 : *This\caretHeight = 14 : EndIf
+        If *This\caretHeight > availH : *This\caretHeight = availH : EndIf
+  
+        *This_vt\EnsureCursorVisible(availW)
+  
+        Protected dText.s = *This_vt\GetDisplayText()
+        Protected curPixX.i = TextWidth(Left(dText, *This\cursorPos))
+        Protected caretDrawX.i = availX + curPixX - *This\scrollOffset
+        Protected caretDrawY.i = availY + (availH - *This\caretHeight) / 2
+  
+        ; 5. Clip text to prevent overflow
+        ClipOutput(availX, availY, availW, availH)
+  
+        ; 6. Display placeholder if empty and unfocused
+  If (*This\text = "" And Not *This\isFocused And *This\placeholder <> "")
+          DrawingMode(#PB_2DDrawing_Transparent)
+          Protected phY.i = availY + (availH - TextHeight(*This\placeholder)) / 2
+          DrawText(availX, phY, *This\placeholder, *This\placeholderColor)
+  ElseIf (dText <> "")
+          Protected textY.i = availY + (availH - TextHeight(dText)) / 2
+          Protected drawX.i = availX - *This\scrollOffset
+  
+  If (*This_vt\HasSelection())
+            Protected sMin.INTEGER, sMax.INTEGER
+            *This_vt\GetSelectionBounds(@sMin, @sMax)
+            Protected preText.s = Left(dText, sMin\i)
+            Protected selText.s = Mid(dText, sMin\i + 1, sMax\i - sMin\i)
+            Protected postText.s = Mid(dText, sMax\i + 1)
+  
+            Protected preW.i = TextWidth(preText)
+            Protected selW.i = TextWidth(selText)
+  
+            ; Texte avant selection
+            If preText <> ""
+              DrawingMode(#PB_2DDrawing_Transparent)
+              DrawText(drawX, textY, preText, *This_vt\GetCurrentForegroundColor())
+            EndIf
+  
+            ; Surlignage de selection
+            Protected selX.i = drawX + preW
+            Protected selBoxY.i = textY - 1
+            Protected selBoxH.i = TextHeight(dText) + 2
+            Box(selX, selBoxY, selW, selBoxH, *This\selectionColor)
+  
+            DrawingMode(#PB_2DDrawing_Transparent)
+            DrawText(selX, textY, selText, *This\selectionTextColor)
+  
+            ; Texte apres selection
+            If postText <> ""
+              DrawingMode(#PB_2DDrawing_Transparent)
+              DrawText(selX + selW, textY, postText, *This_vt\GetCurrentForegroundColor())
+            EndIf
+  Else
+            DrawingMode(#PB_2DDrawing_Transparent)
+            DrawText(drawX, textY, dText, *This_vt\GetCurrentForegroundColor())
+  EndIf
+  EndIf
+  
+        UnclipOutput()
+  
+        ; 7. Windows system caret management
+        CompilerIf #PB_Compiler_OS = #PB_OS_Windows
+          If (*This\isFocused And Not *This_vt\HasSelection() And *This\id And IsGadget(*This\id))
+            CreateCaret_(GadgetID(*This\id), 0, 2, *This\caretHeight)
+            SetCaretPos_(caretDrawX, caretDrawY)
+            ShowCaret_(GadgetID(*This\id))
+          ElseIf (*This\id And IsGadget(*This\id))
+            HideCaret_(GadgetID(*This\id))
+            DestroyCaret_()
+          EndIf
+        CompilerEndIf
+EndProcedure
+
+Procedure UI_CanvasTextBox_Free(*This.UI_CanvasTextBox_Inst)
+  Protected *This_vt.UI_CanvasTextBox_vt = *This
+        CompilerIf #PB_Compiler_OS = #PB_OS_Windows
+          If (*This\isFocused And *This\id And IsGadget(*This\id))
+            HideCaret_(GadgetID(*This\id))
+            DestroyCaret_()
+          EndIf
+        CompilerEndIf
+        UI_CanvasControl_Free(*This)
+EndProcedure
+
 Procedure UI_ToggleSwitch_Init_void(*This.UI_ToggleSwitch_Inst)
   Protected *This_vt.UI_ToggleSwitch_vt = *This
         UI_CustomGadget_Init_i_i(*This, 50, 26)
@@ -5387,8 +8970,1111 @@ Procedure UI_ListIcon_Free(*This.UI_ListIcon_Inst)
   EndIf
 EndProcedure
 
+Procedure UI_Canvas_Init_void(*This.UI_Canvas_Inst)
+  Protected *This_vt.UI_Canvas_vt = *This
+        UI_Gadget_Init(*This)
+        *This\x = 0 : *This\y = 0 : *This\width = 200 : *This\height = 200
+        *This\desiredWidth = 200 : *This\desiredHeight = 200
+        *This\isVisible = #True : *This\isEnabled = #True
+        *This\id = CanvasGadget(#PB_Any, 0, 0, 200, 200, #PB_Canvas_Keyboard)
+  If (*This\id)
+          UI_RegisterGadget(*This\id, *This)
+  EndIf
+EndProcedure
+
+Procedure UI_Canvas_Init_i_i(*This.UI_Canvas_Inst, w_p.i, h_p.i)
+  Protected *This_vt.UI_Canvas_vt = *This
+        UI_Gadget_Init(*This)
+        *This\x = 0 : *This\y = 0 : *This\width = w_p : *This\height = h_p
+        *This\desiredWidth = w_p : *This\desiredHeight = h_p
+        *This\isVisible = #True : *This\isEnabled = #True
+        *This\id = CanvasGadget(#PB_Any, 0, 0, w_p, h_p, #PB_Canvas_Keyboard)
+  If (*This\id)
+          UI_RegisterGadget(*This\id, *This)
+  EndIf
+EndProcedure
+
+Procedure UI_Canvas_Init_i_i_i_i(*This.UI_Canvas_Inst, x_p.i, y_p.i, w_p.i, h_p.i)
+  Protected *This_vt.UI_Canvas_vt = *This
+        UI_Gadget_Init(*This)
+        *This\x = x_p : *This\y = y_p : *This\width = w_p : *This\height = h_p
+        *This\desiredWidth = w_p : *This\desiredHeight = h_p
+        *This\isVisible = #True : *This\isEnabled = #True
+        *This\id = CanvasGadget(#PB_Any, x_p, y_p, w_p, h_p, #PB_Canvas_Keyboard)
+  If (*This\id)
+          UI_RegisterGadget(*This\id, *This)
+  EndIf
+EndProcedure
+
+Procedure UI_Canvas_Init_i_i_i_i_i(*This.UI_Canvas_Inst, x_p.i, y_p.i, w_p.i, h_p.i, flags_p.i)
+  Protected *This_vt.UI_Canvas_vt = *This
+        UI_Gadget_Init(*This)
+        *This\x = x_p : *This\y = y_p : *This\width = w_p : *This\height = h_p
+        *This\desiredWidth = w_p : *This\desiredHeight = h_p
+        *This\isVisible = #True : *This\isEnabled = #True
+        *This\id = CanvasGadget(#PB_Any, x_p, y_p, w_p, h_p, flags_p)
+  If (*This\id)
+          UI_RegisterGadget(*This\id, *This)
+  EndIf
+EndProcedure
+
+Procedure UI_Canvas_Free(*This.UI_Canvas_Inst)
+  Protected *This_vt.UI_Canvas_vt = *This
+  If (*This\id)
+          UI_UnregisterGadget(*This\id)
+          UI_Gadget_Free(*This)
+  EndIf
+EndProcedure
+
+Procedure UI_TreeNode_Init_void(*This.UI_TreeNode_Inst)
+  Protected *This_vt.UI_TreeNode_vt = *This
+        *This\text = ""
+        *This\icon = 0
+        *This\tag = ""
+        *This\dataContext = 0
+        *This\isExpanded = #False
+        *This\isChecked = #False
+        *This\isSelected = #False
+        *This\hasCheckBox = #False
+        *This\parent = 0
+EndProcedure
+
+Procedure UI_TreeNode_Init_s(*This.UI_TreeNode_Inst, text_p.s)
+  Protected *This_vt.UI_TreeNode_vt = *This
+        *This\text = text_p
+        *This\icon = 0
+        *This\tag = ""
+        *This\dataContext = 0
+        *This\isExpanded = #False
+        *This\isChecked = #False
+        *This\isSelected = #False
+        *This\hasCheckBox = #False
+        *This\parent = 0
+EndProcedure
+
+Procedure UI_TreeNode_Init_s_i(*This.UI_TreeNode_Inst, text_p.s, icon_p.i)
+  Protected *This_vt.UI_TreeNode_vt = *This
+        *This\text = text_p
+        *This\icon = icon_p
+        *This\tag = ""
+        *This\dataContext = 0
+        *This\isExpanded = #False
+        *This\isChecked = #False
+        *This\isSelected = #False
+        *This\hasCheckBox = #False
+        *This\parent = 0
+EndProcedure
+
+Procedure UI_TreeNode_Init_s_i_s(*This.UI_TreeNode_Inst, text_p.s, icon_p.i, tag_p.s)
+  Protected *This_vt.UI_TreeNode_vt = *This
+        *This\text = text_p
+        *This\icon = icon_p
+        *This\tag = tag_p
+        *This\dataContext = 0
+        *This\isExpanded = #False
+        *This\isChecked = #False
+        *This\isSelected = #False
+        *This\hasCheckBox = #False
+        *This\parent = 0
+EndProcedure
+
+Procedure.s UI_TreeNode_GetText(*This.UI_TreeNode_Inst)
+  Protected *This_vt.UI_TreeNode_vt = *This
+        ProcedureReturn *This\text
+EndProcedure
+
+Procedure UI_TreeNode_SetText(*This.UI_TreeNode_Inst, text_p.s)
+  Protected *This_vt.UI_TreeNode_vt = *This
+        *This\text = text_p
+EndProcedure
+
+Procedure.s UI_TreeNode_GetTag(*This.UI_TreeNode_Inst)
+  Protected *This_vt.UI_TreeNode_vt = *This
+        ProcedureReturn *This\tag
+EndProcedure
+
+Procedure UI_TreeNode_SetTag(*This.UI_TreeNode_Inst, tag_p.s)
+  Protected *This_vt.UI_TreeNode_vt = *This
+        *This\tag = tag_p
+EndProcedure
+
+Procedure.i UI_TreeNode_GetIcon(*This.UI_TreeNode_Inst)
+  Protected *This_vt.UI_TreeNode_vt = *This
+        ProcedureReturn *This\icon
+EndProcedure
+
+Procedure UI_TreeNode_SetIcon(*This.UI_TreeNode_Inst, icon_p.i)
+  Protected *This_vt.UI_TreeNode_vt = *This
+        *This\icon = icon_p
+EndProcedure
+
+Procedure.i UI_TreeNode_GetDataContext(*This.UI_TreeNode_Inst)
+  Protected *This_vt.UI_TreeNode_vt = *This
+        ProcedureReturn *This\dataContext
+EndProcedure
+
+Procedure UI_TreeNode_SetDataContext(*This.UI_TreeNode_Inst, data_p.i)
+  Protected *This_vt.UI_TreeNode_vt = *This
+        *This\dataContext = data_p
+EndProcedure
+
+Procedure.b UI_TreeNode_IsExpanded(*This.UI_TreeNode_Inst)
+  Protected *This_vt.UI_TreeNode_vt = *This
+        ProcedureReturn *This\isExpanded
+EndProcedure
+
+Procedure UI_TreeNode_SetExpanded(*This.UI_TreeNode_Inst, state_p.b)
+  Protected *This_vt.UI_TreeNode_vt = *This
+        *This\isExpanded = state_p
+EndProcedure
+
+Procedure.b UI_TreeNode_IsChecked(*This.UI_TreeNode_Inst)
+  Protected *This_vt.UI_TreeNode_vt = *This
+        ProcedureReturn *This\isChecked
+EndProcedure
+
+Procedure UI_TreeNode_SetChecked(*This.UI_TreeNode_Inst, state_p.b)
+  Protected *This_vt.UI_TreeNode_vt = *This
+        *This\isChecked = state_p
+EndProcedure
+
+Procedure.b UI_TreeNode_IsSelected(*This.UI_TreeNode_Inst)
+  Protected *This_vt.UI_TreeNode_vt = *This
+        ProcedureReturn *This\isSelected
+EndProcedure
+
+Procedure UI_TreeNode_SetSelected(*This.UI_TreeNode_Inst, state_p.b)
+  Protected *This_vt.UI_TreeNode_vt = *This
+        *This\isSelected = state_p
+EndProcedure
+
+Procedure.b UI_TreeNode_HasCheckBox(*This.UI_TreeNode_Inst)
+  Protected *This_vt.UI_TreeNode_vt = *This
+        ProcedureReturn *This\hasCheckBox
+EndProcedure
+
+Procedure UI_TreeNode_SetHasCheckBox(*This.UI_TreeNode_Inst, state_p.b)
+  Protected *This_vt.UI_TreeNode_vt = *This
+        *This\hasCheckBox = state_p
+EndProcedure
+
+Procedure.i UI_TreeNode_GetParent(*This.UI_TreeNode_Inst)
+  Protected *This_vt.UI_TreeNode_vt = *This
+        ProcedureReturn *This\parent
+EndProcedure
+
+Procedure UI_TreeNode_SetParent(*This.UI_TreeNode_Inst, *parent_p.UI_TreeNode_vt)
+  Protected *This_vt.UI_TreeNode_vt = *This
+        *This\parent = *parent_p
+EndProcedure
+
+Procedure UI_TreeNode_AddChild(*This.UI_TreeNode_Inst, *child_p.UI_TreeNode_vt)
+  Protected *This_vt.UI_TreeNode_vt = *This
+  If (*child_p)
+          *child_p\SetParent(*This)
+          AddElement(*This\children())
+          *This\children() = *child_p
+  EndIf
+EndProcedure
+
+Procedure UI_TreeNode_RemoveChild(*This.UI_TreeNode_Inst, *child_p.UI_TreeNode_vt)
+  Protected *This_vt.UI_TreeNode_vt = *This
+  If (*child_p)
+  ForEach *This\children()
+  If (*This\children() = *child_p)
+              DeleteElement(*This\children())
+              Break
+  EndIf
+  Next
+  EndIf
+EndProcedure
+
+Procedure.i UI_TreeNode_GetChildCount(*This.UI_TreeNode_Inst)
+  Protected *This_vt.UI_TreeNode_vt = *This
+        ProcedureReturn ListSize(*This\children())
+EndProcedure
+
+Procedure.i UI_TreeNode_GetChild(*This.UI_TreeNode_Inst, index_p.i)
+  Protected *This_vt.UI_TreeNode_vt = *This
+  If (index_p >= 0 And index_p < ListSize(*This\children()))
+          SelectElement(*This\children(), index_p)
+          ProcedureReturn *This\children()
+  EndIf
+        ProcedureReturn 0
+EndProcedure
+
+Procedure UI_TreeNode_AddButton(*This.UI_TreeNode_Inst, id_p.i, icon_p.i, *callback_p, tooltip_p.s, tag_p.s)
+  Protected *This_vt.UI_TreeNode_vt = *This
+        AddElement(*This\buttons())
+        *This\buttons()\id = id_p
+        *This\buttons()\icon = icon_p
+        *This\buttons()\callback = *callback_p
+        *This\buttons()\tooltip = tooltip_p
+        *This\buttons()\tag = tag_p
+EndProcedure
+
+Procedure.i UI_TreeNode_GetButtonCount(*This.UI_TreeNode_Inst)
+  Protected *This_vt.UI_TreeNode_vt = *This
+        ProcedureReturn ListSize(*This\buttons())
+EndProcedure
+
+Procedure UI_TreeNode_SetButtonPos(*This.UI_TreeNode_Inst, index_p.i, x_p.i, y_p.i, size_p.i)
+  Protected *This_vt.UI_TreeNode_vt = *This
+  If (index_p >= 0 And index_p < ListSize(*This\buttons()))
+          SelectElement(*This\buttons(), index_p)
+          *This\buttons()\x = x_p
+          *This\buttons()\y = y_p
+          *This\buttons()\size = size_p
+  EndIf
+EndProcedure
+
+Procedure.i UI_TreeNode_GetButtonId(*This.UI_TreeNode_Inst, index_p.i)
+  Protected *This_vt.UI_TreeNode_vt = *This
+  If (index_p >= 0 And index_p < ListSize(*This\buttons()))
+          SelectElement(*This\buttons(), index_p)
+          ProcedureReturn *This\buttons()\id
+  EndIf
+        ProcedureReturn -1
+EndProcedure
+
+Procedure.i UI_TreeNode_GetButtonIcon(*This.UI_TreeNode_Inst, index_p.i)
+  Protected *This_vt.UI_TreeNode_vt = *This
+  If (index_p >= 0 And index_p < ListSize(*This\buttons()))
+          SelectElement(*This\buttons(), index_p)
+          ProcedureReturn *This\buttons()\icon
+  EndIf
+        ProcedureReturn 0
+EndProcedure
+
+Procedure.i UI_TreeNode_GetButtonCallback(*This.UI_TreeNode_Inst, index_p.i)
+  Protected *This_vt.UI_TreeNode_vt = *This
+  If (index_p >= 0 And index_p < ListSize(*This\buttons()))
+          SelectElement(*This\buttons(), index_p)
+          ProcedureReturn *This\buttons()\callback
+  EndIf
+        ProcedureReturn 0
+EndProcedure
+
+Procedure UI_TreeNode_SetRenderLayout(*This.UI_TreeNode_Inst, y_p.i, h_p.i, w_p.i, level_p.i, expX_p.i, expY_p.i, expSize_p.i, chkX_p.i, chkY_p.i, chkSize_p.i)
+  Protected *This_vt.UI_TreeNode_vt = *This
+        *This\renderY = y_p
+        *This\renderH = h_p
+        *This\rowW = w_p
+        *This\level = level_p
+        *This\expandX = expX_p
+        *This\expandY = expY_p
+        *This\expandSize = expSize_p
+        *This\checkX = chkX_p
+        *This\checkY = chkY_p
+        *This\checkSize = chkSize_p
+EndProcedure
+
+Procedure.i UI_TreeNode_GetRenderY(*This.UI_TreeNode_Inst)
+  Protected *This_vt.UI_TreeNode_vt = *This
+        ProcedureReturn *This\renderY
+EndProcedure
+
+Procedure.i UI_TreeNode_GetRenderH(*This.UI_TreeNode_Inst)
+  Protected *This_vt.UI_TreeNode_vt = *This
+        ProcedureReturn *This\renderH
+EndProcedure
+
+Procedure.b UI_TreeNode_HitTestExpand(*This.UI_TreeNode_Inst, x_p.i, y_p.i)
+  Protected *This_vt.UI_TreeNode_vt = *This
+  If (*This\expandSize > 0 And x_p >= *This\expandX And x_p <= *This\expandX + *This\expandSize And y_p >= *This\expandY And y_p <= *This\expandY + *This\expandSize)
+          ProcedureReturn #True
+  EndIf
+        ProcedureReturn #False
+EndProcedure
+
+Procedure.b UI_TreeNode_HitTestCheck(*This.UI_TreeNode_Inst, x_p.i, y_p.i)
+  Protected *This_vt.UI_TreeNode_vt = *This
+  If (*This\checkSize > 0 And x_p >= *This\checkX And x_p <= *This\checkX + *This\checkSize And y_p >= *This\checkY And y_p <= *This\checkY + *This\checkSize)
+          ProcedureReturn #True
+  EndIf
+        ProcedureReturn #False
+EndProcedure
+
+Procedure.i UI_TreeNode_HitTestButton(*This.UI_TreeNode_Inst, x_p.i, y_p.i)
+  Protected *This_vt.UI_TreeNode_vt = *This
+  ForEach *This\buttons()
+  If (x_p >= *This\buttons()\x And x_p <= *This\buttons()\x + *This\buttons()\size And y_p >= *This\buttons()\y And y_p <= *This\buttons()\y + *This\buttons()\size)
+            ProcedureReturn *This\buttons()\id
+  EndIf
+  Next
+        ProcedureReturn -1
+EndProcedure
+
+Procedure UI_TreeNode_ExpandAll(*This.UI_TreeNode_Inst)
+  Protected *This_vt.UI_TreeNode_vt = *This
+        *This\isExpanded = #True
+  ForEach *This\children()
+          Protected *c.UI_TreeNode_vt = *This\children()
+  If (*c)
+            *c\ExpandAll()
+  EndIf
+  Next
+EndProcedure
+
+Procedure UI_TreeNode_CollapseAll(*This.UI_TreeNode_Inst)
+  Protected *This_vt.UI_TreeNode_vt = *This
+        *This\isExpanded = #False
+  ForEach *This\children()
+          Protected *c.UI_TreeNode_vt = *This\children()
+  If (*c)
+            *c\CollapseAll()
+  EndIf
+  Next
+EndProcedure
+
+Procedure UI_TreeNode_Free(*This.UI_TreeNode_Inst)
+  Protected *This_vt.UI_TreeNode_vt = *This
+  ForEach *This\children()
+          Protected *c.UI_TreeNode_vt = *This\children()
+  If (*c)
+            *c\Free()
+  EndIf
+  Next
+        ClearList(*This\children())
+        ClearList(*This\buttons())
+EndProcedure
+
+Procedure UI_CanvasTree_InitDefaults(*This.UI_CanvasTree_Inst)
+  Protected *This_vt.UI_CanvasTree_vt = *This
+        *This\rootNode = New_UI_TreeNode_s("ROOT")
+        *This\selectedNode = 0
+        *This\hoveredNode = 0
+        *This\hoveredElementType = 0
+        *This\hoveredButtonId = -1
+        *This\showCheckBoxes = #False
+        *This\showLines = #True
+        *This\lineHeight = 26
+        *This\indentWidth = 20
+        *This\scrollY = 0
+        *This\maxScrollY = 0
+        *This\totalContentHeight = 0
+        *This\isDraggingThumb = #False
+        *This\onSelectCallback = 0
+        *This\onExpandCallback = 0
+        *This\onCheckCallback = 0
+        *This\onButtonClickCallback = 0
+  
+        ; Default modern light theme
+        *This\bgColor = RGB(255, 255, 255)
+        *This\fgColor = RGB(33, 37, 41)
+        *This\lineColor = RGB(225, 228, 232)
+        *This\selectBgColor = RGB(204, 232, 255)
+        *This\selectFgColor = RGB(0, 102, 204)
+        *This\hoverBgColor = RGB(242, 246, 250)
+        *This\chevronColor = RGB(110, 118, 129)
+        *This\checkColor = RGB(0, 120, 215)
+        *This\checkBgColor = RGB(255, 255, 255)
+        *This\scrollbarBgColor = RGB(245, 245, 247)
+        *This\scrollbarThumbColor = RGB(190, 192, 196)
+EndProcedure
+
+Procedure UI_CanvasTree_Init_void(*This.UI_CanvasTree_Inst)
+  Protected *This_vt.UI_CanvasTree_vt = *This
+        UI_CustomGadget_Init_i_i(*This, 250, 300)
+        *This_vt\InitDefaults()
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure UI_CanvasTree_Init_i_i(*This.UI_CanvasTree_Inst, w_p.i, h_p.i)
+  Protected *This_vt.UI_CanvasTree_vt = *This
+        UI_CustomGadget_Init_i_i(*This, w_p, h_p)
+        *This_vt\InitDefaults()
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure UI_CanvasTree_Init_i_i_i_i(*This.UI_CanvasTree_Inst, x_p.i, y_p.i, w_p.i, h_p.i)
+  Protected *This_vt.UI_CanvasTree_vt = *This
+        UI_CustomGadget_Init_i_i_i_i(*This, x_p, y_p, w_p, h_p)
+        *This_vt\InitDefaults()
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure UI_CanvasTree_Init_i_i_i_i_i(*This.UI_CanvasTree_Inst, x_p.i, y_p.i, w_p.i, h_p.i, flags_p.i)
+  Protected *This_vt.UI_CanvasTree_vt = *This
+        UI_CustomGadget_Init_i_i_i_i_i(*This, x_p, y_p, w_p, h_p, flags_p)
+        *This_vt\InitDefaults()
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure.i UI_CanvasTree_GetRoot(*This.UI_CanvasTree_Inst)
+  Protected *This_vt.UI_CanvasTree_vt = *This
+        ProcedureReturn *This\rootNode
+EndProcedure
+
+Procedure.i UI_CanvasTree_GetSelectedNode(*This.UI_CanvasTree_Inst)
+  Protected *This_vt.UI_CanvasTree_vt = *This
+        ProcedureReturn *This\selectedNode
+EndProcedure
+
+Procedure UI_CanvasTree_SetSelectedNode(*This.UI_CanvasTree_Inst, *node_p.UI_TreeNode_vt)
+  Protected *This_vt.UI_CanvasTree_vt = *This
+  If (*This\selectedNode)
+          *This\selectedNode\SetSelected(#False)
+  EndIf
+        *This\selectedNode = *node_p
+  If (*This\selectedNode)
+          *This\selectedNode\SetSelected(#True)
+  EndIf
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure UI_CanvasTree_SetShowCheckBoxes(*This.UI_CanvasTree_Inst, show_p.b)
+  Protected *This_vt.UI_CanvasTree_vt = *This
+        *This\showCheckBoxes = show_p
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure.b UI_CanvasTree_GetShowCheckBoxes(*This.UI_CanvasTree_Inst)
+  Protected *This_vt.UI_CanvasTree_vt = *This
+        ProcedureReturn *This\showCheckBoxes
+EndProcedure
+
+Procedure UI_CanvasTree_SetShowLines(*This.UI_CanvasTree_Inst, show_p.b)
+  Protected *This_vt.UI_CanvasTree_vt = *This
+        *This\showLines = show_p
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure.b UI_CanvasTree_GetShowLines(*This.UI_CanvasTree_Inst)
+  Protected *This_vt.UI_CanvasTree_vt = *This
+        ProcedureReturn *This\showLines
+EndProcedure
+
+Procedure UI_CanvasTree_SetLineHeight(*This.UI_CanvasTree_Inst, h_p.i)
+  Protected *This_vt.UI_CanvasTree_vt = *This
+  If (h_p > 10)
+          *This\lineHeight = h_p
+          *This_vt\RebuildVisibleList()
+          *This_vt\Redraw()
+  EndIf
+EndProcedure
+
+Procedure.i UI_CanvasTree_GetLineHeight(*This.UI_CanvasTree_Inst)
+  Protected *This_vt.UI_CanvasTree_vt = *This
+        ProcedureReturn *This\lineHeight
+EndProcedure
+
+Procedure UI_CanvasTree_SetIndentWidth(*This.UI_CanvasTree_Inst, w_p.i)
+  Protected *This_vt.UI_CanvasTree_vt = *This
+  If (w_p > 4)
+          *This\indentWidth = w_p
+          *This_vt\Redraw()
+  EndIf
+EndProcedure
+
+Procedure UI_CanvasTree_SetFont(*This.UI_CanvasTree_Inst, fontId_p.i)
+  Protected *This_vt.UI_CanvasTree_vt = *This
+        *This\fontID = fontId_p
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure UI_CanvasTree_SetDarkMode(*This.UI_CanvasTree_Inst, enable_p.b)
+  Protected *This_vt.UI_CanvasTree_vt = *This
+  If (enable_p)
+          *This\bgColor = RGB(30, 30, 32)
+          *This\fgColor = RGB(220, 220, 225)
+          *This\lineColor = RGB(55, 58, 64)
+          *This\selectBgColor = RGB(14, 99, 156)
+          *This\selectFgColor = RGB(255, 255, 255)
+          *This\hoverBgColor = RGB(45, 48, 54)
+          *This\chevronColor = RGB(160, 165, 175)
+          *This\checkColor = RGB(0, 122, 204)
+          *This\checkBgColor = RGB(40, 42, 46)
+          *This\scrollbarBgColor = RGB(35, 35, 38)
+          *This\scrollbarThumbColor = RGB(75, 78, 85)
+  Else
+          *This\bgColor = RGB(255, 255, 255)
+          *This\fgColor = RGB(33, 37, 41)
+          *This\lineColor = RGB(225, 228, 232)
+          *This\selectBgColor = RGB(204, 232, 255)
+          *This\selectFgColor = RGB(0, 102, 204)
+          *This\hoverBgColor = RGB(242, 246, 250)
+          *This\chevronColor = RGB(110, 118, 129)
+          *This\checkColor = RGB(0, 120, 215)
+          *This\checkBgColor = RGB(255, 255, 255)
+          *This\scrollbarBgColor = RGB(245, 245, 247)
+          *This\scrollbarThumbColor = RGB(190, 192, 196)
+  EndIf
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure UI_CanvasTree_SetColors(*This.UI_CanvasTree_Inst, bg_p.i, fg_p.i, selBg_p.i, selFg_p.i, line_p.i)
+  Protected *This_vt.UI_CanvasTree_vt = *This
+        *This\bgColor = bg_p
+        *This\fgColor = fg_p
+        *This\selectBgColor = selBg_p
+        *This\selectFgColor = selFg_p
+        *This\lineColor = line_p
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure UI_CanvasTree_SetOnSelect(*This.UI_CanvasTree_Inst, *callback_p)
+  Protected *This_vt.UI_CanvasTree_vt = *This
+        *This\onSelectCallback = *callback_p
+EndProcedure
+
+Procedure UI_CanvasTree_SetOnExpand(*This.UI_CanvasTree_Inst, *callback_p)
+  Protected *This_vt.UI_CanvasTree_vt = *This
+        *This\onExpandCallback = *callback_p
+EndProcedure
+
+Procedure UI_CanvasTree_SetOnCheck(*This.UI_CanvasTree_Inst, *callback_p)
+  Protected *This_vt.UI_CanvasTree_vt = *This
+        *This\onCheckCallback = *callback_p
+EndProcedure
+
+Procedure UI_CanvasTree_SetOnButtonClick(*This.UI_CanvasTree_Inst, *callback_p)
+  Protected *This_vt.UI_CanvasTree_vt = *This
+        *This\onButtonClickCallback = *callback_p
+EndProcedure
+
+Procedure.i UI_CanvasTree_AddNode(*This.UI_CanvasTree_Inst, *parent_p.UI_TreeNode_vt, text_p.s, icon_p.i, tag_p.s)
+  Protected *This_vt.UI_CanvasTree_vt = *This
+        Protected *targetParent.UI_TreeNode_vt = *parent_p
+  If (*targetParent = 0)
+          *targetParent = *This\rootNode
+  EndIf
+        Protected *node.UI_TreeNode_vt = New_UI_TreeNode_s_i_s(text_p, icon_p, tag_p)
+        *targetParent\AddChild(*node)
+        *This_vt\RebuildVisibleList()
+        *This_vt\Redraw()
+        ProcedureReturn *node
+EndProcedure
+
+Procedure UI_CanvasTree_Clear(*This.UI_CanvasTree_Inst)
+  Protected *This_vt.UI_CanvasTree_vt = *This
+  If (*This\rootNode)
+          *This\rootNode\Free()
+          *This\rootNode = New_UI_TreeNode_s("ROOT")
+  EndIf
+        *This\selectedNode = 0
+        *This\hoveredNode = 0
+        *This\scrollY = 0
+        *This_vt\RebuildVisibleList()
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure UI_CanvasTree_ExpandAll(*This.UI_CanvasTree_Inst)
+  Protected *This_vt.UI_CanvasTree_vt = *This
+  If (*This\rootNode)
+          *This\rootNode\ExpandAll()
+          *This_vt\RebuildVisibleList()
+          *This_vt\Redraw()
+  EndIf
+EndProcedure
+
+Procedure UI_CanvasTree_CollapseAll(*This.UI_CanvasTree_Inst)
+  Protected *This_vt.UI_CanvasTree_vt = *This
+  If (*This\rootNode)
+          *This\rootNode\CollapseAll()
+          *This_vt\RebuildVisibleList()
+          *This_vt\Redraw()
+  EndIf
+EndProcedure
+
+Procedure UI_CanvasTree_PopulateFlatList(*This.UI_CanvasTree_Inst, *parent_p.UI_TreeNode_vt)
+  Protected *This_vt.UI_CanvasTree_vt = *This
+        If Not *parent_p : ProcedureReturn : EndIf
+        Protected i.i, count.i = *parent_p\GetChildCount()
+        For i = 0 To count - 1
+          Protected *child.UI_TreeNode_vt = *parent_p\GetChild(i)
+  If (*child)
+            AddElement(*This\visibleNodes())
+            *This\visibleNodes() = *child
+  If (*child\IsExpanded() And *child\GetChildCount() > 0)
+              *This_vt\PopulateFlatList(*child)
+  EndIf
+  EndIf
+        Next
+EndProcedure
+
+Procedure UI_CanvasTree_RebuildVisibleList(*This.UI_CanvasTree_Inst)
+  Protected *This_vt.UI_CanvasTree_vt = *This
+        ClearList(*This\visibleNodes())
+        *This_vt\PopulateFlatList(*This\rootNode)
+  
+        Protected scaledLineH.i = DesktopScaledY(*This\lineHeight)
+        *This\totalContentHeight = ListSize(*This\visibleNodes()) * scaledLineH
+  
+        Protected visibleH.i = *This\height
+        If (visibleH <= 0) : visibleH = 300 : EndIf
+  If (*This\totalContentHeight > visibleH)
+          *This\maxScrollY = *This\totalContentHeight - visibleH
+  Else
+          *This\maxScrollY = 0
+          *This\scrollY = 0
+  EndIf
+  If (*This\scrollY > *This\maxScrollY)
+          *This\scrollY = *This\maxScrollY
+  EndIf
+  If (*This\scrollY < 0)
+          *This\scrollY = 0
+  EndIf
+EndProcedure
+
+Procedure UI_CanvasTree_EnsureVisible(*This.UI_CanvasTree_Inst, *node_p.UI_TreeNode_vt)
+  Protected *This_vt.UI_CanvasTree_vt = *This
+        If Not *node_p : ProcedureReturn : EndIf
+        ; Make sure parents are expanded
+        Protected *p.UI_TreeNode_vt = *node_p\GetParent()
+        While (*p And *p <> *This\rootNode)
+          *p\SetExpanded(#True)
+          *p = *p\GetParent()
+        Wend
+        *This_vt\RebuildVisibleList()
+  
+        ; Find node index in flat list
+        Protected idx.i = 0, found.b = #False
+  ForEach *This\visibleNodes()
+  If (*This\visibleNodes() = *node_p)
+            found = #True
+            Break
+  EndIf
+          idx + 1
+  Next
+  
+  If (found)
+          Protected scaledLineH.i = DesktopScaledY(*This\lineHeight)
+          Protected itemTop.i = idx * scaledLineH
+          Protected itemBottom.i = itemTop + scaledLineH
+          Protected visibleH.i = *This\height
+  
+  If (itemTop < *This\scrollY)
+            *This\scrollY = itemTop
+  ElseIf (itemBottom > *This\scrollY + visibleH)
+            *This\scrollY = itemBottom - visibleH
+  EndIf
+          *This_vt\Redraw()
+  EndIf
+EndProcedure
+
+Procedure UI_CanvasTree_OnPaint(*This.UI_CanvasTree_Inst, w.i, h.i)
+  Protected *This_vt.UI_CanvasTree_vt = *This
+        ; DPI-scaled metrics
+        Protected scaledLineH.i   = DesktopScaledY(*This\lineHeight)
+        Protected scaledIndent.i  = DesktopScaledX(*This\indentWidth)
+        Protected scaledChevron.i = DesktopScaledX(10)
+        Protected scaledCheck.i   = DesktopScaledX(14)
+        Protected scaledIcon.i    = DesktopScaledX(16)
+        Protected scaledBtn.i     = DesktopScaledX(16)
+        Protected scaledMargin.i  = DesktopScaledX(8)
+        Protected scaledBarW.i    = DesktopScaledX(8)
+  
+        ; 1. Fond principal
+        Box(0, 0, w, h, *This\bgColor)
+  
+  If (*This\fontID And IsFont(*This\fontID))
+          DrawingFont(FontID(*This\fontID))
+  EndIf
+  
+        Protected currentY.i = -*This\scrollY
+        Protected availableRowW.i = w
+  If (*This\totalContentHeight > h)
+          availableRowW = w - scaledBarW - 2
+  EndIf
+  
+        ; 2. Render visible nodes
+  ForEach *This\visibleNodes()
+          Protected *node.UI_TreeNode_vt = *This\visibleNodes()
+          If Not *node : Continue : EndIf
+  
+          ; Check visibility in vertical viewport
+  If (currentY + scaledLineH >= 0 And currentY <= h)
+            ; Calculate hierarchy level
+            Protected level.i = 0
+            Protected *parentCheck.UI_TreeNode_vt = *node\GetParent()
+            While (*parentCheck And *parentCheck <> *This\rootNode)
+              level + 1
+              *parentCheck = *parentCheck\GetParent()
+            Wend
+  
+            ; Node background (Selected or Hovered)
+            Protected rowBg.i = *This\bgColor
+            Protected rowFg.i = *This\fgColor
+  If (*node\IsSelected())
+              rowBg = *This\selectBgColor
+              rowFg = *This\selectFgColor
+              RoundBox(DesktopScaledX(2), currentY + 1, availableRowW - DesktopScaledX(4), scaledLineH - 2, 4, 4, rowBg)
+  ElseIf (*node = *This\hoveredNode And *This\hoveredElementType = 4)
+              rowBg = *This\hoverBgColor
+              RoundBox(DesktopScaledX(2), currentY + 1, availableRowW - DesktopScaledX(4), scaledLineH - 2, 4, 4, rowBg)
+  EndIf
+  
+            Protected cursorX.i = scaledMargin + (level * scaledIndent)
+            Protected midY.i = currentY + (scaledLineH / 2)
+  
+            ; 2.1 Lignes de liaison hierarchique (si activees)
+  If (*This\showLines And level > 0)
+              Protected lineStartX.i = cursorX - (scaledIndent / 2)
+              LineXY(lineStartX, currentY, lineStartX, midY, *This\lineColor)
+              LineXY(lineStartX, midY, cursorX, midY, *This\lineColor)
+  EndIf
+  
+            ; 2.2 Chevron d'expansion vectoriel (si enfants presents)
+            Protected expX.i = 0, expY.i = 0, expSize.i = 0
+  If (*node\GetChildCount() > 0)
+              expX = cursorX
+              expY = midY - (scaledChevron / 2)
+              expSize = scaledChevron
+  
+              Protected chevCol.i = *This\chevronColor
+  If (*node = *This\hoveredNode And *This\hoveredElementType = 1)
+                chevCol = *This\selectFgColor
+  EndIf
+  
+              Protected chRadius.i = scaledChevron / 2
+              Protected chCenterX.i = cursorX + chRadius
+              Protected chCenterY.i = midY
+  
+  If (*node\IsExpanded())
+                ; Down chevron (v)
+                LineXY(chCenterX - chRadius, chCenterY - (chRadius / 2), chCenterX, chCenterY + (chRadius / 2), chevCol)
+                LineXY(chCenterX, chCenterY + (chRadius / 2), chCenterX + chRadius, chCenterY - (chRadius / 2), chevCol)
+                ; Epaisseur vectorielle
+                LineXY(chCenterX - chRadius, chCenterY - (chRadius / 2) + 1, chCenterX, chCenterY + (chRadius / 2) + 1, chevCol)
+                LineXY(chCenterX, chCenterY + (chRadius / 2) + 1, chCenterX + chRadius, chCenterY - (chRadius / 2) + 1, chevCol)
+  Else
+                ; Right chevron (>)
+                LineXY(chCenterX - (chRadius / 2), chCenterY - chRadius, chCenterX + (chRadius / 2), chCenterY, chevCol)
+                LineXY(chCenterX + (chRadius / 2), chCenterY, chCenterX - (chRadius / 2), chCenterY + chRadius, chevCol)
+                ; Epaisseur vectorielle
+                LineXY(chCenterX - (chRadius / 2) + 1, chCenterY - chRadius, chCenterX + (chRadius / 2) + 1, chCenterY, chevCol)
+                LineXY(chCenterX + (chRadius / 2) + 1, chCenterY, chCenterX - (chRadius / 2) + 1, chCenterY + chRadius, chevCol)
+  EndIf
+  EndIf
+            cursorX + scaledChevron + DesktopScaledX(4)
+  
+            ; 2.3 Case a cocher (si globale ou specifique au noeud)
+            Protected chkX.i = 0, chkY.i = 0, chkSize.i = 0
+  If (*This\showCheckBoxes Or *node\HasCheckBox())
+              chkX = cursorX
+              chkY = midY - (scaledCheck / 2)
+              chkSize = scaledCheck
+  
+              ; Checkbox box
+              RoundBox(cursorX, chkY, scaledCheck, scaledCheck, 3, 3, *This\lineColor)
+              RoundBox(cursorX + 1, chkY + 1, scaledCheck - 2, scaledCheck - 2, 2, 2, *This\checkBgColor)
+  
+  If (*node\IsChecked())
+                ; Remplissage accent
+                RoundBox(cursorX + 2, chkY + 2, scaledCheck - 4, scaledCheck - 4, 2, 2, *This\checkColor)
+                ; Coche blanche
+                Protected ckMidX.i = cursorX + (scaledCheck / 2) - 1
+                Protected ckMidY.i = chkY + scaledCheck - 4
+                LineXY(cursorX + 3, midY, ckMidX, ckMidY, RGB(255, 255, 255))
+                LineXY(ckMidX, ckMidY, cursorX + scaledCheck - 3, chkY + 3, RGB(255, 255, 255))
+                LineXY(cursorX + 3, midY - 1, ckMidX, ckMidY - 1, RGB(255, 255, 255))
+                LineXY(ckMidX, ckMidY - 1, cursorX + scaledCheck - 3, chkY + 2, RGB(255, 255, 255))
+  EndIf
+              cursorX + scaledCheck + DesktopScaledX(6)
+  EndIf
+  
+            ; 2.4 Node icon (if defined)
+  If (*node\GetIcon() > 0 And IsImage(*node\GetIcon()))
+              Protected iconY.i = midY - (scaledIcon / 2)
+              DrawingMode(#PB_2DDrawing_AlphaBlend)
+              DrawImage(ImageID(*node\GetIcon()), cursorX, iconY, scaledIcon, scaledIcon)
+              DrawingMode(#PB_2DDrawing_Default)
+              cursorX + scaledIcon + DesktopScaledX(6)
+  EndIf
+  
+            ; 2.5 Node text
+            Protected txtY.i = currentY + (scaledLineH - TextHeight(*node\GetText())) / 2
+            DrawingMode(#PB_2DDrawing_Transparent)
+            DrawText(cursorX, txtY, *node\GetText(), rowFg)
+            DrawingMode(#PB_2DDrawing_Default)
+  
+            ; 2.6 Action buttons aligned to right of line
+            Protected btnCount.i = *node\GetButtonCount()
+  If (btnCount > 0)
+              Protected btnX.i = availableRowW - DesktopScaledX(6) - (btnCount * (scaledBtn + DesktopScaledX(4)))
+              Protected bIdx.i
+              For bIdx = 0 To btnCount - 1
+                Protected btnY.i = midY - (scaledBtn / 2)
+                *node\SetButtonPos(bIdx, btnX, btnY, scaledBtn)
+  
+                Protected bId.i = *node\GetButtonId(bIdx)
+                Protected bIco.i = *node\GetButtonIcon(bIdx)
+  
+                ; Survol bouton
+  If (*node = *This\hoveredNode And *This\hoveredElementType = 5 And *This\hoveredButtonId = bId)
+                  RoundBox(btnX - 2, btnY - 2, scaledBtn + 4, scaledBtn + 4, 3, 3, *This\lineColor)
+  EndIf
+  
+  If (bIco > 0 And IsImage(bIco))
+                  DrawingMode(#PB_2DDrawing_AlphaBlend)
+                  DrawImage(ImageID(bIco), btnX, btnY, scaledBtn, scaledBtn)
+                  DrawingMode(#PB_2DDrawing_Default)
+  Else
+                  ; Default vector button (circle with dot)
+                  Circle(btnX + scaledBtn / 2, midY, scaledBtn / 2 - 1, *This\chevronColor)
+  EndIf
+                btnX + scaledBtn + DesktopScaledX(4)
+              Next
+  EndIf
+  
+            ; Store render coordinates on node for hit-testing
+            *node\SetRenderLayout(currentY, scaledLineH, availableRowW, level, expX, expY, expSize, chkX, chkY, chkSize)
+  EndIf
+          currentY + scaledLineH
+  Next
+  
+        ; 3. Barre de defilement verticale virtuelle
+  If (*This\totalContentHeight > h)
+          Protected barX.i = w - scaledBarW
+          Box(barX, 0, scaledBarW, h, *This\scrollbarBgColor)
+  
+          Protected thumbH.i = (h * h) / *This\totalContentHeight
+          If (thumbH < DesktopScaledY(20)) : thumbH = DesktopScaledY(20) : EndIf
+          Protected maxThumbY.i = h - thumbH
+          Protected thumbY.i = 0
+  If (*This\maxScrollY > 0)
+            thumbY = (*This\scrollY * maxThumbY) / *This\maxScrollY
+  EndIf
+          If (thumbY < 0) : thumbY = 0 : EndIf
+          If (thumbY > maxThumbY) : thumbY = maxThumbY : EndIf
+  
+          Protected thumbCol.i = *This\scrollbarThumbColor
+  If (*This\isDraggingThumb)
+            thumbCol = *This\chevronColor
+  EndIf
+          RoundBox(barX + 1, thumbY, scaledBarW - 2, thumbH, 3, 3, thumbCol)
+  EndIf
+EndProcedure
+
+Procedure UI_CanvasTree_OnMouseDown(*This.UI_CanvasTree_Inst, mx.i, my.i, button.i)
+  Protected *This_vt.UI_CanvasTree_vt = *This
+        Protected scaledBarW.i = DesktopScaledX(8)
+        Protected barX.i = *This\width - scaledBarW
+  
+        ; Click on scrollbar
+  If (*This\totalContentHeight > *This\height And mx >= barX)
+          *This\isDraggingThumb = #True
+          *This\dragStartY = my
+          *This\dragStartScrollY = *This\scrollY
+          *This_vt\Redraw()
+          ProcedureReturn
+  EndIf
+  
+        ; Determine clicked node
+        Protected scaledLineH.i = DesktopScaledY(*This\lineHeight)
+        Protected clickedRow.i = (my + *This\scrollY) / scaledLineH
+  
+  If (clickedRow >= 0 And clickedRow < ListSize(*This\visibleNodes()))
+          SelectElement(*This\visibleNodes(), clickedRow)
+          Protected *node.UI_TreeNode_vt = *This\visibleNodes()
+  
+  If (*node)
+            ; 1. Click on expand chevron?
+  If (*node\HitTestExpand(mx, my))
+              *node\SetExpanded(1 - *node\IsExpanded())
+  If (*This\onExpandCallback)
+                CallFunctionFast(*This\onExpandCallback, *node, *node\IsExpanded())
+  EndIf
+              *This_vt\RebuildVisibleList()
+              *This_vt\Redraw()
+              ProcedureReturn
+  EndIf
+  
+            ; 2. Click on checkbox?
+  If (*node\HitTestCheck(mx, my))
+              *node\SetChecked(1 - *node\IsChecked())
+  If (*This\onCheckCallback)
+                CallFunctionFast(*This\onCheckCallback, *node, *node\IsChecked())
+  EndIf
+              *This_vt\Redraw()
+              ProcedureReturn
+  EndIf
+  
+            ; 3. Click on action button?
+            Protected hitBtnId.i = *node\HitTestButton(mx, my)
+  If (hitBtnId >= 0)
+              Protected bIdx.i, count.i = *node\GetButtonCount()
+              For bIdx = 0 To count - 1
+  If (*node\GetButtonId(bIdx) = hitBtnId)
+                  Protected *cb = *node\GetButtonCallback(bIdx)
+  If (*cb)
+                    CallFunctionFast(*cb, *node, hitBtnId)
+  EndIf
+                  Break
+  EndIf
+              Next
+  If (*This\onButtonClickCallback)
+                CallFunctionFast(*This\onButtonClickCallback, *node, hitBtnId)
+  EndIf
+              ProcedureReturn
+  EndIf
+  
+            ; 4. Click on node (Selection)
+            *This_vt\SetSelectedNode(*node)
+  If (*This\onSelectCallback)
+              CallFunctionFast(*This\onSelectCallback, *node)
+  EndIf
+            *This_vt\Redraw()
+  EndIf
+  EndIf
+EndProcedure
+
+Procedure UI_CanvasTree_OnMouseUp(*This.UI_CanvasTree_Inst, mx.i, my.i, button.i)
+  Protected *This_vt.UI_CanvasTree_vt = *This
+  If (*This\isDraggingThumb)
+          *This\isDraggingThumb = #False
+          *This_vt\Redraw()
+  EndIf
+EndProcedure
+
+Procedure UI_CanvasTree_OnMouseMove(*This.UI_CanvasTree_Inst, mx.i, my.i)
+  Protected *This_vt.UI_CanvasTree_vt = *This
+        ; Mouse wheel / scrollbar movement
+  If (*This\isDraggingThumb)
+          Protected deltaY.i = my - *This\dragStartY
+          Protected thumbH.i = (*This\height * *This\height) / *This\totalContentHeight
+          If (thumbH < DesktopScaledY(20)) : thumbH = DesktopScaledY(20) : EndIf
+          Protected maxThumbY.i = *This\height - thumbH
+  If (maxThumbY > 0)
+            Protected scrollDelta.i = (deltaY * *This\maxScrollY) / maxThumbY
+            *This\scrollY = *This\dragStartScrollY + scrollDelta
+            If (*This\scrollY < 0) : *This\scrollY = 0 : EndIf
+            If (*This\scrollY > *This\maxScrollY) : *This\scrollY = *This\maxScrollY : EndIf
+            *This_vt\Redraw()
+  EndIf
+          ProcedureReturn
+  EndIf
+  
+        ; Hover detection
+        Protected scaledLineH.i = DesktopScaledY(*This\lineHeight)
+        Protected rowIdx.i = (my + *This\scrollY) / scaledLineH
+  
+        *This\hoveredNode = 0
+        *This\hoveredElementType = 0
+        *This\hoveredButtonId = -1
+  
+  If (rowIdx >= 0 And rowIdx < ListSize(*This\visibleNodes()))
+          SelectElement(*This\visibleNodes(), rowIdx)
+          Protected *node.UI_TreeNode_vt = *This\visibleNodes()
+  If (*node)
+            *This\hoveredNode = *node
+            *This\hoveredElementType = 4 ; Default row
+  
+            ; Chevron
+  If (*node\HitTestExpand(mx, my))
+              *This\hoveredElementType = 1
+  ElseIf (*node\HitTestCheck(mx, my))
+              *This\hoveredElementType = 2
+  Else
+              Protected hBtn.i = *node\HitTestButton(mx, my)
+  If (hBtn >= 0)
+                *This\hoveredElementType = 5
+                *This\hoveredButtonId = hBtn
+  EndIf
+  EndIf
+  EndIf
+  EndIf
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure UI_CanvasTree_OnMouseLeave(*This.UI_CanvasTree_Inst)
+  Protected *This_vt.UI_CanvasTree_vt = *This
+        *This\hoveredNode = 0
+        *This\hoveredElementType = 0
+        *This\hoveredButtonId = -1
+        *This\isDraggingThumb = #False
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure UI_CanvasTree_OnMouseWheel(*This.UI_CanvasTree_Inst, delta_p.i)
+  Protected *This_vt.UI_CanvasTree_vt = *This
+        Protected stepSize.i = DesktopScaledY(*This\lineHeight) * 2
+        *This\scrollY = *This\scrollY - (delta_p * stepSize)
+        If (*This\scrollY < 0) : *This\scrollY = 0 : EndIf
+        If (*This\scrollY > *This\maxScrollY) : *This\scrollY = *This\maxScrollY : EndIf
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure UI_CanvasTree_OnKeyDown(*This.UI_CanvasTree_Inst, key_p.i)
+  Protected *This_vt.UI_CanvasTree_vt = *This
+  Select (key_p)
+          Case #PB_Shortcut_Down:
+  If (*This\selectedNode = 0)
+  If (FirstElement(*This\visibleNodes()))
+                *This_vt\SetSelectedNode(*This\visibleNodes())
+                *This_vt\EnsureVisible(*This\selectedNode)
+  EndIf
+  Else
+  ForEach *This\visibleNodes()
+  If (*This\visibleNodes() = *This\selectedNode)
+  If (NextElement(*This\visibleNodes()))
+                    *This_vt\SetSelectedNode(*This\visibleNodes())
+                    *This_vt\EnsureVisible(*This\selectedNode)
+  EndIf
+                  Break
+  EndIf
+  Next
+  EndIf
+  
+          Case #PB_Shortcut_Up:
+  If (*This\selectedNode)
+  ForEach *This\visibleNodes()
+  If (*This\visibleNodes() = *This\selectedNode)
+  If (PreviousElement(*This\visibleNodes()))
+                    *This_vt\SetSelectedNode(*This\visibleNodes())
+                    *This_vt\EnsureVisible(*This\selectedNode)
+  EndIf
+                  Break
+  EndIf
+  Next
+  EndIf
+  
+          Case #PB_Shortcut_Right:
+  If (*This\selectedNode)
+  If (*This\selectedNode\GetChildCount() > 0 And Not *This\selectedNode\IsExpanded())
+                *This\selectedNode\SetExpanded(#True)
+                *This_vt\RebuildVisibleList()
+                *This_vt\Redraw()
+  EndIf
+  EndIf
+  
+          Case #PB_Shortcut_Left:
+  If (*This\selectedNode)
+  If (*This\selectedNode\IsExpanded() And *This\selectedNode\GetChildCount() > 0)
+                *This\selectedNode\SetExpanded(#False)
+                *This_vt\RebuildVisibleList()
+                *This_vt\Redraw()
+  ElseIf (*This\selectedNode\GetParent() And *This\selectedNode\GetParent() <> *This\rootNode)
+                *This_vt\SetSelectedNode(*This\selectedNode\GetParent())
+                *This_vt\EnsureVisible(*This\selectedNode)
+  EndIf
+  EndIf
+  
+          Case #PB_Shortcut_Space:
+  If (*This\selectedNode And (*This\showCheckBoxes Or *This\selectedNode\HasCheckBox()))
+              *This\selectedNode\SetChecked(1 - *This\selectedNode\IsChecked())
+  If (*This\onCheckCallback)
+                CallFunctionFast(*This\onCheckCallback, *This\selectedNode, *This\selectedNode\IsChecked())
+  EndIf
+              *This_vt\Redraw()
+  EndIf
+  EndSelect
+EndProcedure
+
+Procedure UI_CanvasTree_Free(*This.UI_CanvasTree_Inst)
+  Protected *This_vt.UI_CanvasTree_vt = *This
+  If (*This\rootNode)
+          *This\rootNode\Free()
+          *This\rootNode = 0
+  EndIf
+        ClearList(*This\visibleNodes())
+        UI_CustomGadget_Free(*This)
+EndProcedure
+
 Procedure UI_XMLLoader_Init(*This.UI_XMLLoader_Inst)
   Protected *This_vt.UI_XMLLoader_vt = *This
+        *This\currentXmlDir = ""
 EndProcedure
 
 Procedure UI_XMLLoader_Free(*This.UI_XMLLoader_Inst)
@@ -5416,6 +10102,265 @@ Procedure UI_XMLLoader_ParseBoxValues(*This.UI_XMLLoader_Inst, valStr.s, *outL.I
           *outT\i = Val(Trim(StringField(valStr, 2, ",")))
           *outR\i = Val(Trim(StringField(valStr, 3, ",")))
           *outB\i = Val(Trim(StringField(valStr, 4, ",")))
+        EndIf
+EndProcedure
+
+Procedure.i UI_XMLLoader_ParseColor(*This.UI_XMLLoader_Inst, colorStr.s, defaultColor.i)
+  Protected *This_vt.UI_XMLLoader_vt = *This
+        colorStr = Trim(colorStr)
+        If colorStr = "" : ProcedureReturn defaultColor : EndIf
+        If Left(colorStr, 1) = "#"
+          colorStr = Mid(colorStr, 2)
+        ElseIf Left(colorStr, 2) = "0x" Or Left(colorStr, 2) = "0X"
+          colorStr = Mid(colorStr, 3)
+        ElseIf Left(colorStr, 1) = "$"
+          colorStr = Mid(colorStr, 2)
+        EndIf
+  
+        If Len(colorStr) = 6
+          Protected r.i = Val("$" + Mid(colorStr, 1, 2))
+          Protected g.i = Val("$" + Mid(colorStr, 3, 2))
+          Protected b.i = Val("$" + Mid(colorStr, 5, 2))
+          ProcedureReturn RGB(r, g, b)
+        ElseIf Len(colorStr) = 3
+          Protected r3.i = Val("$" + Mid(colorStr, 1, 1) + Mid(colorStr, 1, 1))
+          Protected g3.i = Val("$" + Mid(colorStr, 2, 1) + Mid(colorStr, 2, 1))
+          Protected b3.i = Val("$" + Mid(colorStr, 3, 1) + Mid(colorStr, 3, 1))
+          ProcedureReturn RGB(r3, g3, b3)
+        EndIf
+  
+        ProcedureReturn Val(colorStr)
+EndProcedure
+
+Procedure UI_XMLLoader_ParseResources(*This.UI_XMLLoader_Inst, resNode.i, *targetWindow.UI_Window_vt)
+  Protected *This_vt.UI_XMLLoader_vt = *This
+        If Not *targetWindow : ProcedureReturn : EndIf
+        Protected *resDict.UI_ResourceDictionary_vt = *targetWindow\GetResources()
+        If Not *resDict : ProcedureReturn : EndIf
+  
+        Protected *child = ChildXMLNode(resNode)
+        While *child
+          If XMLNodeType(*child) = #PB_XML_Normal
+            Protected childTag.s = UCase(GetXMLNodeName(*child))
+            If childTag = "STYLE"
+              Protected targetType.s = GetXMLAttribute(*child, "TargetType")
+              Protected keyStr.s = GetXMLAttribute(*child, "x:Key")
+              If keyStr = "" : keyStr = GetXMLAttribute(*child, "Key") : EndIf
+              Protected basedOnStr.s = GetXMLAttribute(*child, "BasedOn")
+  
+              Protected *style.UI_Style_vt = New_UI_Style_s_s_s(targetType, keyStr, basedOnStr)
+  
+              ; Iterate over Style Setters and Triggers
+              Protected *propNode = ChildXMLNode(*child)
+              While *propNode
+                If XMLNodeType(*propNode) = #PB_XML_Normal
+                  Protected propTag.s = UCase(GetXMLNodeName(*propNode))
+                  If propTag = "SETTER"
+                    Protected sProp.s = GetXMLAttribute(*propNode, "Property")
+                    Protected sVal.s = GetXMLAttribute(*propNode, "Value")
+                    *style\AddSetter(sProp, sVal)
+                  ElseIf propTag = "TRIGGER"
+                    Protected tProp.s = GetXMLAttribute(*propNode, "Property")
+                    Protected tVal.s = GetXMLAttribute(*propNode, "Value")
+                    Protected trigIdx.i = *style\AddTrigger(tProp, tVal)
+  
+                    ; Trigger setters
+                    Protected *tChild = ChildXMLNode(*propNode)
+                    While *tChild
+                      If XMLNodeType(*tChild) = #PB_XML_Normal And UCase(GetXMLNodeName(*tChild)) = "SETTER"
+                        Protected tsProp.s = GetXMLAttribute(*tChild, "Property")
+                        Protected tsVal.s = GetXMLAttribute(*tChild, "Value")
+                        *style\AddTriggerSetter(trigIdx, tsProp, tsVal)
+                      EndIf
+                      *tChild = NextXMLNode(*tChild)
+                    Wend
+                  EndIf
+                EndIf
+                *propNode = NextXMLNode(*propNode)
+              Wend
+  
+              *resDict\AddStyle(*style)
+            ElseIf childTag = "RESOURCEDICTIONARY"
+              Protected srcPath.s = GetXMLAttribute(*child, "Source")
+              If srcPath = "" : srcPath = GetXMLAttribute(*child, "source") : EndIf
+              If srcPath <> ""
+                Protected fullSrcPath.s = srcPath
+                If *This\currentXmlDir <> "" And FileSize(fullSrcPath) <= 0
+                  If FileSize(*This\currentXmlDir + srcPath) > 0
+                    fullSrcPath = *This\currentXmlDir + srcPath
+                  ElseIf FileSize(*This\currentXmlDir + "../" + srcPath) > 0
+                    fullSrcPath = *This\currentXmlDir + "../" + srcPath
+                  EndIf
+                EndIf
+                CompilerIf Defined(OOP_PROJECT_DIR, #PB_Constant)
+                  If FileSize(fullSrcPath) <= 0 And FileSize(#OOP_PROJECT_DIR + srcPath) > 0
+                    fullSrcPath = #OOP_PROJECT_DIR + srcPath
+                  ElseIf FileSize(fullSrcPath) <= 0 And FileSize(#OOP_PROJECT_DIR + "styles/" + GetFilePart(srcPath)) > 0
+                    fullSrcPath = #OOP_PROJECT_DIR + "styles/" + GetFilePart(srcPath)
+                  EndIf
+                CompilerEndIf
+                CompilerIf Defined(OOP_WORKSPACE_DIR, #PB_Constant)
+                  If FileSize(fullSrcPath) <= 0 And FileSize(#OOP_WORKSPACE_DIR + "examples/07_project_dashboard/" + srcPath) > 0
+                    fullSrcPath = #OOP_WORKSPACE_DIR + "examples/07_project_dashboard/" + srcPath
+                  ElseIf FileSize(fullSrcPath) <= 0 And FileSize(#OOP_WORKSPACE_DIR + "examples/07_project_dashboard/styles/" + GetFilePart(srcPath)) > 0
+                    fullSrcPath = #OOP_WORKSPACE_DIR + "examples/07_project_dashboard/styles/" + GetFilePart(srcPath)
+                  EndIf
+                CompilerEndIf
+                If FileSize(fullSrcPath) <= 0 And FileSize(GetPathPart(ProgramFilename()) + srcPath) > 0
+                  fullSrcPath = GetPathPart(ProgramFilename()) + srcPath
+                EndIf
+                If FileSize(fullSrcPath) <= 0 And FileSize("styles/" + srcPath) > 0
+                  fullSrcPath = "styles/" + srcPath
+                EndIf
+                If FileSize(fullSrcPath) > 0
+                  Protected extXml.i = LoadXML(#PB_Any, fullSrcPath)
+                  If extXml And XMLStatus(extXml) = #PB_XML_Success
+                    Protected *extRoot = MainXMLNode(extXml)
+                    If *extRoot
+                      *This_vt\ParseResources(*extRoot, *targetWindow)
+                    EndIf
+                    FreeXML(extXml)
+                  EndIf
+                EndIf
+              Else
+                ; Dictionnaire inline
+                *This_vt\ParseResources(*child, *targetWindow)
+              EndIf
+            ElseIf childTag = "RESOURCEDICTIONARY.MERGEDDICTIONARIES"
+              *This_vt\ParseResources(*child, *targetWindow)
+            EndIf
+          EndIf
+          *child = NextXMLNode(*child)
+        Wend
+EndProcedure
+
+Procedure UI_XMLLoader_ApplyCanvasControlAttributes(*This.UI_XMLLoader_Inst, *ctrl.UI_CanvasControl_vt, node.i, *targetWindow.UI_Window_vt, *parentContainer.UI_Layouts_Container_vt)
+  Protected *This_vt.UI_XMLLoader_vt = *This
+        If Not *ctrl : ProcedureReturn : EndIf
+  
+        ; Inherit background color from parent container or window
+        If *parentContainer And *parentContainer\GetBackground() <> 0
+          *ctrl\SetParentBackground(*parentContainer\GetBackground())
+        ElseIf *targetWindow
+          *ctrl\SetParentBackground(*targetWindow\GetBackgroundColor())
+        EndIf
+  
+        ; 0. Find and apply WPF Style (named or implicit by TargetType)
+        If *targetWindow
+          Protected *resDict.UI_ResourceDictionary_vt = *targetWindow\GetResources()
+          If *resDict
+            Protected *styleToApply.UI_Style_vt = 0
+            Protected styleKey.s = GetXMLAttribute(node, "Style")
+            If styleKey <> ""
+              *styleToApply = *resDict\GetStyle(styleKey)
+            Else
+              Protected nodeTypeName.s = GetXMLNodeName(node)
+              *styleToApply = *resDict\GetImplicitStyle(nodeTypeName)
+            EndIf
+  
+            If *styleToApply
+              *ctrl\ApplyStyle(*styleToApply)
+            EndIf
+          EndIf
+        EndIf
+  
+        ; 1. Normal Colors & Background
+        Protected bgStr.s = GetXMLAttribute(node, "Background")
+        If bgStr = "" : bgStr = GetXMLAttribute(node, "Bg") : EndIf
+        If bgStr <> "" And Left(bgStr, 1) <> "{"
+          *ctrl\SetBackground(*This_vt\ParseColor(bgStr, *ctrl\GetBackground()))
+        EndIf
+  
+        Protected fgStr.s = GetXMLAttribute(node, "Foreground")
+        If fgStr = "" : fgStr = GetXMLAttribute(node, "Fg") : EndIf
+        If fgStr <> "" And Left(fgStr, 1) <> "{"
+          *ctrl\SetForeground(*This_vt\ParseColor(fgStr, *ctrl\GetForeground()))
+        EndIf
+  
+        ; 2. Hover Colors (Survol souris)
+        Protected hovBgStr.s = GetXMLAttribute(node, "HoverBackground")
+        If hovBgStr = "" : hovBgStr = GetXMLAttribute(node, "HoverBg") : EndIf
+        If hovBgStr <> ""
+          *ctrl\SetHoverBackground(*This_vt\ParseColor(hovBgStr, *ctrl\GetHoverBackground()))
+        EndIf
+  
+        Protected hovFgStr.s = GetXMLAttribute(node, "HoverForeground")
+        If hovFgStr = "" : hovFgStr = GetXMLAttribute(node, "HoverFg") : EndIf
+        If hovFgStr <> ""
+          *ctrl\SetHoverForeground(*This_vt\ParseColor(hovFgStr, *ctrl\GetHoverForeground()))
+        EndIf
+  
+        Protected hovBorderStr.s = GetXMLAttribute(node, "HoverBorderColor")
+        If hovBorderStr <> ""
+          *ctrl\SetHoverBorderColor(*This_vt\ParseColor(hovBorderStr, *ctrl\GetHoverBorderColor()))
+        EndIf
+  
+        ; 3. Pressed Colors (Mouse pressed)
+        Protected prBgStr.s = GetXMLAttribute(node, "PressedBackground")
+        If prBgStr = "" : prBgStr = GetXMLAttribute(node, "PressedBg") : EndIf
+        If prBgStr <> ""
+          *ctrl\SetPressedBackground(*This_vt\ParseColor(prBgStr, *ctrl\GetPressedBackground()))
+        EndIf
+  
+        Protected prFgStr.s = GetXMLAttribute(node, "PressedForeground")
+        If prFgStr = "" : prFgStr = GetXMLAttribute(node, "PressedFg") : EndIf
+        If prFgStr <> ""
+          *ctrl\SetPressedForeground(*This_vt\ParseColor(prFgStr, *ctrl\GetPressedForeground()))
+        EndIf
+  
+        Protected prBorderStr.s = GetXMLAttribute(node, "PressedBorderColor")
+        If prBorderStr <> ""
+          *ctrl\SetPressedBorderColor(*This_vt\ParseColor(prBorderStr, *ctrl\GetPressedBorderColor()))
+        EndIf
+  
+        ; 4. Border & Geometry
+        Protected borderStr.s = GetXMLAttribute(node, "BorderColor")
+        If borderStr <> ""
+          *ctrl\SetBorderColor(*This_vt\ParseColor(borderStr, *ctrl\GetBorderColor()))
+        EndIf
+  
+        Protected thickStr.s = GetXMLAttribute(node, "BorderThickness")
+        If thickStr <> ""
+          *ctrl\SetBorderThickness(Val(thickStr))
+        EndIf
+  
+        Protected borderLeftThickStr.s = GetXMLAttribute(node, "BorderLeftThickness")
+        If borderLeftThickStr <> ""
+          *ctrl\SetBorderLeftThickness(Val(borderLeftThickStr))
+        EndIf
+  
+        Protected borderLeftColorStr.s = GetXMLAttribute(node, "BorderLeftColor")
+        If borderLeftColorStr <> ""
+          *ctrl\SetBorderLeftColor(*This_vt\ParseColor(borderLeftColorStr, *ctrl\GetBorderLeftColor()))
+        EndIf
+  
+        Protected radStr.s = GetXMLAttribute(node, "CornerRadius")
+        If radStr <> ""
+          *ctrl\SetCornerRadius(Val(radStr))
+        EndIf
+  
+        ; 5. Padding
+        Protected padStr.s = GetXMLAttribute(node, "Padding")
+        If padStr <> ""
+          Protected pL.INTEGER, pT.INTEGER, pR.INTEGER, pB.INTEGER
+          *This_vt\ParseBoxValues(padStr, @pL, @pT, @pR, @pB)
+          *ctrl\SetPadding(pL\i, pT\i, pR\i, pB\i)
+        EndIf
+  
+        ; 6. High-Fidelity Typography
+        Protected fontNameStr.s = GetXMLAttribute(node, "FontName")
+        If fontNameStr = "" : fontNameStr = GetXMLAttribute(node, "FontFamily") : EndIf
+        Protected fontSizeStr.s = GetXMLAttribute(node, "FontSize")
+        Protected fontBoldStr.s = UCase(Trim(GetXMLAttribute(node, "FontBold")))
+        If fontBoldStr = "" : fontBoldStr = UCase(Trim(GetXMLAttribute(node, "FontWeight"))) : EndIf
+        Protected isBold.b = #False
+        If fontBoldStr = "TRUE" Or fontBoldStr = "BOLD" Or fontBoldStr = "1" : isBold = #True : EndIf
+  
+        If fontNameStr <> "" Or fontSizeStr <> ""
+          If fontNameStr = "" : fontNameStr = "Segoe UI" : EndIf
+          Protected fSize.i = 10
+          If fontSizeStr <> "" : fSize = Val(fontSizeStr) : EndIf
+          *ctrl\SetTypography(fontNameStr, fSize, isBold)
         EndIf
 EndProcedure
 
@@ -5481,6 +10426,7 @@ Procedure UI_XMLLoader_ApplyCommonAttributes(*This.UI_XMLLoader_Inst, *comp.UI_C
         Protected hAlignStr.s = UCase(Trim(GetXMLAttribute(node, "HorizontalAlignment")))
         If hAlignStr = "" : hAlignStr = UCase(Trim(GetXMLAttribute(node, "horizontalAlignment"))) : EndIf
         If hAlignStr = "" : hAlignStr = UCase(Trim(GetXMLAttribute(node, "Align"))) : EndIf
+        If hAlignStr = "" : hAlignStr = UCase(Trim(GetXMLAttribute(node, "HAlign"))) : EndIf
         If hAlignStr <> ""
           Select hAlignStr
             Case "LEFT"    : *comp\SetHorizontalAlignment(#UI_Align_Left)
@@ -5514,6 +10460,25 @@ Procedure UI_XMLLoader_ApplyCommonAttributes(*This.UI_XMLLoader_Inst, *comp.UI_C
         If enStr = "FALSE" Or enStr = "0"
           *comp\SetEnabled(#False)
         EndIf
+  
+        ; Visual Styling (Background, Border, CornerRadius for Container and Controls)
+        Protected bgVal.s = GetXMLAttribute(node, "Background")
+        If bgVal = "" : bgVal = GetXMLAttribute(node, "Bg") : EndIf
+        If bgVal <> "" And Left(bgVal, 1) <> "{"
+          *comp\SetBackground(*This_vt\ParseColor(bgVal, *comp\GetBackground()))
+        EndIf
+  
+        Protected bcVal.s = GetXMLAttribute(node, "BorderColor")
+        If bcVal = "" : bcVal = GetXMLAttribute(node, "BorderBrush") : EndIf
+        If bcVal <> ""
+          *comp\SetBorderColor(*This_vt\ParseColor(bcVal, 0))
+        EndIf
+  
+        Protected btVal.s = GetXMLAttribute(node, "BorderThickness")
+        If btVal <> "" : *comp\SetBorderThickness(Val(btVal)) : EndIf
+  
+        Protected crVal.s = GetXMLAttribute(node, "CornerRadius")
+        If crVal <> "" : *comp\SetCornerRadius(Val(crVal)) : EndIf
   
         ; MVVM DataBindings
         *This_vt\ApplyDataBindings(*comp, node, *targetWindow)
@@ -5595,6 +10560,58 @@ Procedure UI_XMLLoader_ApplyDataBindings(*This.UI_XMLLoader_Inst, *comp.UI_Compo
             UI_MVVM_RegisterCommandBinding(*comp, *vm, cmdAttr)
           EndIf
         EndIf
+  
+        ; 5. Hover / MouseOver Binding
+        Protected hovAttr.s = GetXMLAttribute(node, "IsMouseOver")
+        If hovAttr = "" : hovAttr = GetXMLAttribute(node, "IsHovered") : EndIf
+        If *This_vt\ParseBindingExpression(hovAttr, @propName, @modeVal)
+          UI_MVVM_RegisterBinding(*comp, "IsMouseOver", *vm, propName\s, modeVal\i)
+        EndIf
+  
+        ; 6. Pressed Binding
+        Protected pressAttr.s = GetXMLAttribute(node, "IsPressed")
+        If *This_vt\ParseBindingExpression(pressAttr, @propName, @modeVal)
+          UI_MVVM_RegisterBinding(*comp, "IsPressed", *vm, propName\s, modeVal\i)
+        EndIf
+  
+        ; 7. Background / Foreground Binding
+        Protected bgAttr.s = GetXMLAttribute(node, "Background")
+        If *This_vt\ParseBindingExpression(bgAttr, @propName, @modeVal)
+          UI_MVVM_RegisterBinding(*comp, "Background", *vm, propName\s, modeVal\i)
+        EndIf
+        Protected fgAttr.s = GetXMLAttribute(node, "Foreground")
+        If *This_vt\ParseBindingExpression(fgAttr, @propName, @modeVal)
+          UI_MVVM_RegisterBinding(*comp, "Foreground", *vm, propName\s, modeVal\i)
+        EndIf
+EndProcedure
+
+Procedure UI_XMLLoader_ParseCanvasTreeNodes(*This.UI_XMLLoader_Inst, *tree.UI_CanvasTree_vt, *parentNode.UI_TreeNode_vt, xmlNode.i)
+  Protected *This_vt.UI_XMLLoader_vt = *This
+        Protected *childXml = ChildXMLNode(xmlNode)
+        While *childXml
+          If XMLNodeType(*childXml) = #PB_XML_Normal And (UCase(GetXMLNodeName(*childXml)) = "NODE" Or UCase(GetXMLNodeName(*childXml)) = "ITEM")
+            Protected nodeTxt.s = GetXMLAttribute(*childXml, "Text")
+            If nodeTxt = "" : nodeTxt = GetXMLAttribute(*childXml, "text") : EndIf
+            If nodeTxt = "" : nodeTxt = GetXMLNodeText(*childXml) : EndIf
+            Protected nodeTag.s = GetXMLAttribute(*childXml, "Tag")
+            If nodeTag = "" : nodeTag = GetXMLAttribute(*childXml, "tag") : EndIf
+  
+            Protected *newNode.UI_TreeNode_vt = *tree\AddNode(*parentNode, nodeTxt, 0, nodeTag)
+  
+            Protected expStr.s = UCase(Trim(GetXMLAttribute(*childXml, "Expanded")))
+            If expStr = "TRUE" Or expStr = "1" : *newNode\SetExpanded(#True) : EndIf
+  
+            Protected chkStr.s = UCase(Trim(GetXMLAttribute(*childXml, "Checked")))
+            If chkStr = "TRUE" Or chkStr = "1" : *newNode\SetChecked(#True) : EndIf
+  
+            Protected hasChkStr.s = UCase(Trim(GetXMLAttribute(*childXml, "HasCheckBox")))
+            If hasChkStr = "TRUE" Or hasChkStr = "1" : *newNode\SetHasCheckBox(#True) : EndIf
+  
+            *This_vt\ParseCanvasTreeNodes(*tree, *newNode, *childXml)
+          EndIf
+          *childXml = NextXMLNode(*childXml)
+        Wend
+        *tree\RebuildVisibleList()
 EndProcedure
 
 Procedure.i UI_XMLLoader_ParseNode(*This.UI_XMLLoader_Inst, node.i, *targetWindow.UI_Window_vt, *parentContainer.UI_Layouts_Container_vt)
@@ -5628,16 +10645,26 @@ Procedure.i UI_XMLLoader_ParseNode(*This.UI_XMLLoader_Inst, node.i, *targetWindo
                 *targetWindow\SetTitle(title)
                 *targetWindow\SetSize(winW, winH)
               EndIf
+              Protected winBgStr.s = GetXMLAttribute(node, "Background")
+              If winBgStr = "" : winBgStr = GetXMLAttribute(node, "Bg") : EndIf
+              If winBgStr <> ""
+                *targetWindow\SetBackgroundColor(*This_vt\ParseColor(winBgStr, RGB(248, 249, 250)))
+              EndIf
             EndIf
   
             ; Parse children inside Window (first container becomes root content)
             Protected *childNode = ChildXMLNode(node)
             While *childNode
               If XMLNodeType(*childNode) = #PB_XML_Normal
-                Protected *rootChild.UI_Component_vt = *This_vt\ParseNode(*childNode, *targetWindow, 0)
-                If *rootChild And *targetWindow
-                  *targetWindow\SetContent(*rootChild)
-                  Break
+                Protected cTag.s = UCase(GetXMLNodeName(*childNode))
+                If cTag = "WINDOW.RESOURCES" Or cTag = "RESOURCES"
+                  *This_vt\ParseResources(*childNode, *targetWindow)
+                Else
+                  Protected *rootChild.UI_Component_vt = *This_vt\ParseNode(*childNode, *targetWindow, 0)
+                  If *rootChild And *targetWindow
+                    *targetWindow\SetContent(*rootChild)
+                    Break
+                  EndIf
                 EndIf
               EndIf
               *childNode = NextXMLNode(*childNode)
@@ -5760,11 +10787,15 @@ Procedure.i UI_XMLLoader_ParseNode(*This.UI_XMLLoader_Inst, node.i, *targetWindo
                 Protected *gChild.UI_Component_vt = *This_vt\ParseNode(*gChildNode, *targetWindow, *grid)
                 If *gChild
                   Protected rowVal.i = Val(GetXMLAttribute(*gChildNode, "Row"))
+                  If rowVal = 0 : rowVal = Val(GetXMLAttribute(*gChildNode, "Grid.Row")) : EndIf
                   Protected colVal.i = Val(GetXMLAttribute(*gChildNode, "Col"))
                   If colVal = 0 : colVal = Val(GetXMLAttribute(*gChildNode, "Column")) : EndIf
+                  If colVal = 0 : colVal = Val(GetXMLAttribute(*gChildNode, "Grid.Column")) : EndIf
                   Protected rowSpan.i = Val(GetXMLAttribute(*gChildNode, "RowSpan"))
+                  If rowSpan <= 0 : rowSpan = Val(GetXMLAttribute(*gChildNode, "Grid.RowSpan")) : EndIf
                   If rowSpan <= 0 : rowSpan = 1 : EndIf
                   Protected colSpan.i = Val(GetXMLAttribute(*gChildNode, "ColSpan"))
+                  If colSpan <= 0 : colSpan = Val(GetXMLAttribute(*gChildNode, "Grid.ColumnSpan")) : EndIf
                   If colSpan <= 0 : colSpan = 1 : EndIf
   
                   *grid\SetCellSpan(*gChild, rowVal, colVal, rowSpan, colSpan)
@@ -5794,6 +10825,29 @@ Procedure.i UI_XMLLoader_ParseNode(*This.UI_XMLLoader_Inst, node.i, *targetWindo
                 EndIf
               EndIf
               *cntChildNode = NextXMLNode(*cntChildNode)
+            Wend
+  
+          Case "BORDER"
+            Protected *border.UI_Layouts_Container_vt = New_UI_Layouts_Container_void()
+            Protected bPadStr.s = GetXMLAttribute(node, "Padding")
+            If bPadStr <> ""
+              Protected bpL.INTEGER, bpT.INTEGER, bpR.INTEGER, bpB.INTEGER
+              *This_vt\ParseBoxValues(bPadStr, @bpL, @bpT, @bpR, @bpB)
+              *border\SetPadding(bpL\i, bpT\i, bpR\i, bpB\i)
+            EndIf
+  
+            *This_vt\ApplyCommonAttributes(*border, node, *targetWindow)
+            *createdComp = *border
+  
+            Protected *bChildNode = ChildXMLNode(node)
+            While *bChildNode
+              If XMLNodeType(*bChildNode) = #PB_XML_Normal
+                Protected *bChild.UI_Component_vt = *This_vt\ParseNode(*bChildNode, *targetWindow, *border)
+                If *bChild
+                  *border\AddChild(*bChild)
+                EndIf
+              EndIf
+              *bChildNode = NextXMLNode(*bChildNode)
             Wend
   
           ; ====================================================================
@@ -5882,12 +10936,23 @@ Procedure.i UI_XMLLoader_ParseNode(*This.UI_XMLLoader_Inst, node.i, *targetWindo
           Case "LISTICON"
             Protected colsAttr.s = GetXMLAttribute(node, "Columns")
             Protected *li.UI_ListIcon_vt = 0
+            Protected liTitle.s = "Item"
+            Protected liWidth.i = 150
             If colsAttr <> ""
               Protected firstColDef.s = StringField(colsAttr, 1, ",")
-              Protected firstColTitle.s = Trim(StringField(firstColDef, 1, ":"))
-              Protected firstColWidth.i = Val(Trim(StringField(firstColDef, 2, ":")))
-              If firstColWidth <= 0 : firstColWidth = 100 : EndIf
-              *li = New_UI_ListIcon_s_i(firstColTitle, firstColWidth)
+              liTitle = Trim(StringField(firstColDef, 1, ":"))
+              liWidth = Val(Trim(StringField(firstColDef, 2, ":")))
+              If liWidth <= 0 : liWidth = 100 : EndIf
+            Else
+              Protected firstColTitleDef.s = GetXMLAttribute(node, "FirstColumnTitle")
+              If firstColTitleDef <> "" : liTitle = firstColTitleDef : EndIf
+              Protected firstColWidthDef.i = Val(GetXMLAttribute(node, "FirstColumnWidth"))
+              If firstColWidthDef > 0 : liWidth = firstColWidthDef : EndIf
+            EndIf
+  
+            *li = New_UI_ListIcon_s_i(liTitle, liWidth)
+  
+            If colsAttr <> ""
               Protected colTotal.i = CountString(colsAttr, ",") + 1
               Protected liColIdx.i
               For liColIdx = 2 To colTotal
@@ -5897,12 +10962,6 @@ Procedure.i UI_XMLLoader_ParseNode(*This.UI_XMLLoader_Inst, node.i, *targetWindo
                 If cWidth <= 0 : cWidth = 100 : EndIf
                 *li\AddColumn(liColIdx - 1, cTitle, cWidth)
               Next
-            Else
-              Protected firstColTitleDef.s = GetXMLAttribute(node, "FirstColumnTitle")
-              If firstColTitleDef = "" : firstColTitleDef = "Item" : EndIf
-              Protected firstColWidthDef.i = Val(GetXMLAttribute(node, "FirstColumnWidth"))
-              If firstColWidthDef <= 0 : firstColWidthDef = 150 : EndIf
-              *li = New_UI_ListIcon_s_i(firstColTitleDef, firstColWidthDef)
             EndIf
   
             *This_vt\ApplyCommonAttributes(*li, node, *targetWindow)
@@ -6021,6 +11080,135 @@ Procedure.i UI_XMLLoader_ParseNode(*This.UI_XMLLoader_Inst, node.i, *targetWindo
               *tabNode = NextXMLNode(*tabNode)
             Wend
   
+          Case "CANVAS"
+            Protected *cv.UI_Canvas_vt = New_UI_Canvas_void()
+            *This_vt\ApplyCommonAttributes(*cv, node, *targetWindow)
+            *createdComp = *cv
+  
+          Case "CANVASTREE"
+            Protected *ct.UI_CanvasTree_vt = New_UI_CanvasTree_void()
+            Protected ctChkStr.s = UCase(Trim(GetXMLAttribute(node, "ShowCheckBoxes")))
+            If ctChkStr = "TRUE" Or ctChkStr = "1" : *ct\SetShowCheckBoxes(#True) : EndIf
+            Protected ctLineStr.s = UCase(Trim(GetXMLAttribute(node, "ShowLines")))
+            If ctLineStr = "FALSE" Or ctLineStr = "0" : *ct\SetShowLines(#False) : EndIf
+            Protected ctLineHStr.s = GetXMLAttribute(node, "LineHeight")
+            If ctLineHStr <> "" : *ct\SetLineHeight(Val(ctLineHStr)) : EndIf
+            Protected ctDarkStr.s = UCase(Trim(GetXMLAttribute(node, "DarkMode")))
+            If ctDarkStr = "TRUE" Or ctDarkStr = "1" : *ct\SetDarkMode(#True) : EndIf
+  
+            *This_vt\ApplyCommonAttributes(*ct, node, *targetWindow)
+            *createdComp = *ct
+  
+            ; Parse child <Node> tags recursively
+            *This_vt\ParseCanvasTreeNodes(*ct, *ct\GetRoot(), node)
+  
+          Case "CANVASBUTTON"
+            Protected cbtnText.s = GetXMLAttribute(node, "Text")
+            If cbtnText = "" : cbtnText = GetXMLAttribute(node, "text") : EndIf
+            Protected *cbtn.UI_CanvasButton_vt = New_UI_CanvasButton_void()
+            If cbtnText <> "" : *cbtn\SetText(cbtnText) : EndIf
+  
+            Protected btnVar.s = UCase(Trim(GetXMLAttribute(node, "Variant")))
+            If btnVar = "" : btnVar = UCase(Trim(GetXMLAttribute(node, "Style"))) : EndIf
+            Select btnVar
+              Case "PRIMARY" : *cbtn\SetPrimaryStyle()
+              Case "SUCCESS" : *cbtn\SetSuccessStyle()
+              Case "DANGER"  : *cbtn\SetDangerStyle()
+              Case "DARK"    : *cbtn\SetDarkStyle()
+              Case "OUTLINE" : *cbtn\SetOutlineStyle(RGB(37, 99, 235))
+              Case "GHOST"   : *cbtn\SetGhostStyle(RGB(17, 24, 39))
+              Default        : *cbtn\SetDefaultStyle()
+            EndSelect
+  
+            Protected btnRad.s = GetXMLAttribute(node, "CornerRadius")
+            If btnRad <> "" : *cbtn\SetCornerRadius(Val(btnRad)) : EndIf
+  
+            Protected btnAlignStr.s = UCase(Trim(GetXMLAttribute(node, "HAlign")))
+            If btnAlignStr = "" : btnAlignStr = UCase(Trim(GetXMLAttribute(node, "TextAlignment"))) : EndIf
+            If btnAlignStr = "LEFT"
+              *cbtn\SetTextAlignment(1)
+            ElseIf btnAlignStr = "RIGHT"
+              *cbtn\SetTextAlignment(2)
+            ElseIf btnAlignStr = "CENTER"
+              *cbtn\SetTextAlignment(0)
+            EndIf
+  
+            *This_vt\ApplyCommonAttributes(*cbtn, node, *targetWindow)
+            *This_vt\ApplyCanvasControlAttributes(*cbtn, node, *targetWindow, *parentContainer)
+            *createdComp = *cbtn
+  
+          Case "CANVASTEXT"
+            Protected ctxtText.s = GetXMLAttribute(node, "Text")
+            If ctxtText = "" : ctxtText = GetXMLAttribute(node, "text") : EndIf
+            If ctxtText = "" : ctxtText = GetXMLNodeText(node) : EndIf
+            Protected *ctxt.UI_CanvasText_vt = New_UI_CanvasText_void()
+            If ctxtText <> "" And Left(ctxtText, 1) <> "{"
+              *ctxt\SetText(ctxtText)
+            EndIf
+  
+            Protected ctxthAlignStr.s = UCase(Trim(GetXMLAttribute(node, "HAlign")))
+            If ctxthAlignStr = "" : ctxthAlignStr = UCase(Trim(GetXMLAttribute(node, "TextAlignment"))) : EndIf
+            Protected hAlignCode.i = #UI_TextAlign_Left
+            Select ctxthAlignStr
+              Case "CENTER" : hAlignCode = #UI_TextAlign_Center
+              Case "RIGHT"  : hAlignCode = #UI_TextAlign_Right
+            EndSelect
+  
+            Protected ctxtvAlignStr.s = UCase(Trim(GetXMLAttribute(node, "VAlign")))
+            Protected vAlignCode.i = #UI_TextAlign_Middle
+            Select ctxtvAlignStr
+              Case "TOP"    : vAlignCode = #UI_TextAlign_Top
+              Case "BOTTOM" : vAlignCode = #UI_TextAlign_Bottom
+            EndSelect
+  
+            *ctxt\SetAlignment(hAlignCode, vAlignCode)
+  
+            Protected ctxtEllipsis.s = UCase(Trim(GetXMLAttribute(node, "Ellipsis")))
+            If ctxtEllipsis = "FALSE" Or ctxtEllipsis = "0" : *ctxt\SetEllipsis(#False) : EndIf
+  
+            Protected ctxtTrans.s = UCase(Trim(GetXMLAttribute(node, "Transparent")))
+            If ctxtTrans = "FALSE" Or ctxtTrans = "0" : *ctxt\SetTransparent(#False) : EndIf
+  
+            *This_vt\ApplyCommonAttributes(*ctxt, node, *targetWindow)
+            *This_vt\ApplyCanvasControlAttributes(*ctxt, node, *targetWindow, *parentContainer)
+            *createdComp = *ctxt
+  
+          Case "CANVASTEXTBOX"
+            Protected ctbText.s = GetXMLAttribute(node, "Text")
+            If ctbText = "" : ctbText = GetXMLAttribute(node, "text") : EndIf
+            Protected ctbPH.s = GetXMLAttribute(node, "Placeholder")
+            If ctbPH = "" : ctbPH = GetXMLAttribute(node, "placeholder") : EndIf
+  
+            Protected *ctb.UI_CanvasTextBox_vt = New_UI_CanvasTextBox_void()
+            If ctbText <> "" And Left(ctbText, 1) <> "{"
+              *ctb\SetText(ctbText)
+            EndIf
+            If ctbPH <> "" : *ctb\SetPlaceholder(ctbPH) : EndIf
+  
+            Protected ctbPHCol.s = GetXMLAttribute(node, "PlaceholderColor")
+            If ctbPHCol <> ""
+              *ctb\SetPlaceholderColor(*This_vt\ParseColor(ctbPHCol, *ctb\GetPlaceholderColor()))
+            EndIf
+  
+            Protected ctbActCol.s = GetXMLAttribute(node, "ActiveBorderColor")
+            If ctbActCol = "" : ctbActCol = GetXMLAttribute(node, "FocusBorderColor") : EndIf
+            If ctbActCol <> ""
+              *ctb\SetActiveBorderColor(*This_vt\ParseColor(ctbActCol, *ctb\GetActiveBorderColor()))
+            EndIf
+  
+            Protected ctbPassStr.s = UCase(Trim(GetXMLAttribute(node, "IsPassword")))
+            If ctbPassStr = "TRUE" Or ctbPassStr = "1" : *ctb\SetIsPassword(#True) : EndIf
+  
+            Protected ctbROStr.s = UCase(Trim(GetXMLAttribute(node, "IsReadOnly")))
+            If ctbROStr = "TRUE" Or ctbROStr = "1" : *ctb\SetReadOnly(#True) : EndIf
+  
+            Protected ctbMaxLStr.s = GetXMLAttribute(node, "MaxLength")
+            If ctbMaxLStr <> "" : *ctb\SetMaxLength(Val(ctbMaxLStr)) : EndIf
+  
+            *This_vt\ApplyCommonAttributes(*ctb, node, *targetWindow)
+            *This_vt\ApplyCanvasControlAttributes(*ctb, node, *targetWindow, *parentContainer)
+            *createdComp = *ctb
+  
         EndSelect
   
         ProcedureReturn *createdComp
@@ -6028,13 +11216,58 @@ EndProcedure
 
 Procedure.b UI_XMLLoader_LoadFromFile(*This.UI_XMLLoader_Inst, xmlPath.s, *targetWindow.UI_Window_vt)
   Protected *This_vt.UI_XMLLoader_vt = *This
-        If FileSize(xmlPath) <= 0
+        Protected actualPath.s = xmlPath
+        If FileSize(actualPath) <= 0
+          CompilerIf Defined(OOP_PROJECT_DIR, #PB_Constant)
+            If FileSize(#OOP_PROJECT_DIR + xmlPath) > 0
+              actualPath = #OOP_PROJECT_DIR + xmlPath
+            ElseIf FileSize(#OOP_PROJECT_DIR + "views/" + GetFilePart(xmlPath)) > 0
+              actualPath = #OOP_PROJECT_DIR + "views/" + GetFilePart(xmlPath)
+            ElseIf FileSize(#OOP_PROJECT_DIR + GetFilePart(xmlPath)) > 0
+              actualPath = #OOP_PROJECT_DIR + GetFilePart(xmlPath)
+            EndIf
+          CompilerEndIf
+        EndIf
+  
+        If FileSize(actualPath) <= 0
+          CompilerIf Defined(OOP_WORKSPACE_DIR, #PB_Constant)
+            If FileSize(#OOP_WORKSPACE_DIR + xmlPath) > 0
+              actualPath = #OOP_WORKSPACE_DIR + xmlPath
+            ElseIf FileSize(#OOP_WORKSPACE_DIR + "examples/07_project_dashboard/" + xmlPath) > 0
+              actualPath = #OOP_WORKSPACE_DIR + "examples/07_project_dashboard/" + xmlPath
+            ElseIf FileSize(#OOP_WORKSPACE_DIR + "examples/07_project_dashboard/views/" + GetFilePart(xmlPath)) > 0
+              actualPath = #OOP_WORKSPACE_DIR + "examples/07_project_dashboard/views/" + GetFilePart(xmlPath)
+            EndIf
+          CompilerEndIf
+        EndIf
+  
+        If FileSize(actualPath) <= 0
+          If FileSize(GetPathPart(ProgramFilename()) + xmlPath) > 0
+            actualPath = GetPathPart(ProgramFilename()) + xmlPath
+          ElseIf FileSize(GetPathPart(ProgramFilename()) + GetFilePart(xmlPath)) > 0
+            actualPath = GetPathPart(ProgramFilename()) + GetFilePart(xmlPath)
+          ElseIf FileSize("tests/" + xmlPath) > 0
+            actualPath = "tests/" + xmlPath
+          ElseIf FileSize("examples/07_project_dashboard/" + xmlPath) > 0
+            actualPath = "examples/07_project_dashboard/" + xmlPath
+          EndIf
+        EndIf
+  
+        If FileSize(actualPath) <= 0
+          MessageRequester("PureBasic OOP - UI Error", "Impossible de charger la vue XML :" + #LF$ + xmlPath + #LF$ + #LF$ + "Fichier introuvable sur le disque.", #PB_MessageRequester_Error)
           ProcedureReturn #False
         EndIf
   
-        Protected xmlHandle.i = LoadXML(#PB_Any, xmlPath)
+        *This\currentXmlDir = GetPathPart(actualPath)
+  
+        Protected xmlHandle.i = LoadXML(#PB_Any, actualPath)
         If Not xmlHandle Or XMLStatus(xmlHandle) <> #PB_XML_Success
-          If xmlHandle : FreeXML(xmlHandle) : EndIf
+          Protected errTxt.s = "Erreur de syntaxe XML dans : " + actualPath
+          If xmlHandle
+            errTxt + #LF$ + "Ligne " + Str(XMLErrorLine(xmlHandle)) + " : " + XMLError(xmlHandle)
+            FreeXML(xmlHandle)
+          EndIf
+          MessageRequester("PureBasic OOP - Erreur XML", errTxt, #PB_MessageRequester_Error)
           ProcedureReturn #False
         EndIf
   
@@ -6158,6 +11391,44 @@ EndProcedure
 ; ----------------------------------------------------------------------------
 
 DataSection
+  UI_AnimationEngine_VTable_Data:
+    Data.i @UI_AnimationEngine_Free()
+    Data.i @UI_AnimationEngine_ApplyEasing()
+    Data.i @UI_AnimationEngine_LerpFloat()
+    Data.i @UI_AnimationEngine_LerpColor()
+    Data.i @UI_AnimationEngine_StartFloatAnimation()
+    Data.i @UI_AnimationEngine_HasActiveAnimations()
+    Data.i @UI_AnimationEngine_Update()
+  UI_Style_VTable_Data:
+    Data.i @UI_Style_Free()
+    Data.i @UI_Style_GetTargetType()
+    Data.i @UI_Style_SetTargetType()
+    Data.i @UI_Style_GetKey()
+    Data.i @UI_Style_SetKey()
+    Data.i @UI_Style_GetBasedOn()
+    Data.i @UI_Style_SetBasedOn()
+    Data.i @UI_Style_AddSetter()
+    Data.i @UI_Style_GetSetterCount()
+    Data.i @UI_Style_GetSetterProperty()
+    Data.i @UI_Style_GetSetterValue()
+    Data.i @UI_Style_FindSetterValue()
+    Data.i @UI_Style_HasSetter()
+    Data.i @UI_Style_AddTrigger()
+    Data.i @UI_Style_AddTriggerSetter()
+    Data.i @UI_Style_GetTriggerCount()
+    Data.i @UI_Style_GetTriggerProperty()
+    Data.i @UI_Style_GetTriggerValue()
+    Data.i @UI_Style_GetTriggerSetterCount()
+    Data.i @UI_Style_GetTriggerSetterProperty()
+    Data.i @UI_Style_GetTriggerSetterValue()
+    Data.i @UI_Style_MergeBaseStyle()
+  UI_ResourceDictionary_VTable_Data:
+    Data.i @UI_ResourceDictionary_Free()
+    Data.i @UI_ResourceDictionary_AddStyle()
+    Data.i @UI_ResourceDictionary_GetStyle()
+    Data.i @UI_ResourceDictionary_GetImplicitStyle()
+    Data.i @UI_ResourceDictionary_HasStyle()
+    Data.i @UI_ResourceDictionary_Clear()
   UI_Window_VTable_Data:
     Data.i @UI_Window_SetDataContext()
     Data.i @UI_Window_GetDataContext()
@@ -6209,6 +11480,13 @@ DataSection
     Data.i @UI_Component_GetDesiredWidth()
     Data.i @UI_Component_GetDesiredHeight()
     Data.i @UI_Component_Arrange()
+    Data.i @UI_Component_OnAnimationTick()
+    Data.i @UI_Component_SetBackground()
+    Data.i @UI_Component_GetBackground()
+    Data.i @UI_Component_SetBorderColor()
+    Data.i @UI_Component_SetBorderThickness()
+    Data.i @UI_Component_SetCornerRadius()
+    Data.i @UI_Window_Free()
     Data.i @UI_Window_CreateWindowInternal()
     Data.i @UI_Window_SetTitle()
     Data.i @UI_Window_GetTitle()
@@ -6220,10 +11498,12 @@ DataSection
     Data.i @UI_Window_GetContent()
     Data.i @UI_Window_RegisterControl()
     Data.i @UI_Window_FindControl()
+    Data.i @UI_Window_SetBackgroundColor()
+    Data.i @UI_Window_GetBackgroundColor()
     Data.i @UI_Window_LoadView()
     Data.i @UI_Window_LoadViewFromString()
+    Data.i @UI_Window_GetResources()
     Data.i @UI_Window_Close()
-    Data.i @UI_Window_Free()
     Data.i @UI_Window_OnClose()
     Data.i @UI_Window_OnResize()
     Data.i @UI_Window_OnMove()
@@ -6416,6 +11696,16 @@ DataSection
     Data.i @UI_Component_GetDesiredWidth()
     Data.i @UI_Component_GetDesiredHeight()
     Data.i @UI_Layouts_Container_Arrange()
+    Data.i @UI_Component_OnAnimationTick()
+    Data.i @UI_Layouts_Container_SetBackground()
+    Data.i @UI_Layouts_Container_GetBackground()
+    Data.i @UI_Layouts_Container_SetBorderColor()
+    Data.i @UI_Layouts_Container_SetBorderThickness()
+    Data.i @UI_Layouts_Container_SetCornerRadius()
+    Data.i @UI_Layouts_Container_Free()
+    Data.i @UI_Layouts_Container_EnsureBgGadget()
+    Data.i @UI_Layouts_Container_SetBorder()
+    Data.i @UI_Layouts_Container_DrawBackground()
     Data.i @UI_Layouts_Container_SetPadding()
     Data.i @UI_Layouts_Container_SetPaddingAll()
     Data.i @UI_Layouts_Container_GetPaddingLeft()
@@ -6478,6 +11768,16 @@ DataSection
     Data.i @UI_Layouts_StackPanel_GetDesiredWidth()
     Data.i @UI_Layouts_StackPanel_GetDesiredHeight()
     Data.i @UI_Layouts_StackPanel_Arrange()
+    Data.i @UI_Component_OnAnimationTick()
+    Data.i @UI_Layouts_Container_SetBackground()
+    Data.i @UI_Layouts_Container_GetBackground()
+    Data.i @UI_Layouts_Container_SetBorderColor()
+    Data.i @UI_Layouts_Container_SetBorderThickness()
+    Data.i @UI_Layouts_Container_SetCornerRadius()
+    Data.i @UI_Layouts_Container_Free()
+    Data.i @UI_Layouts_Container_EnsureBgGadget()
+    Data.i @UI_Layouts_Container_SetBorder()
+    Data.i @UI_Layouts_Container_DrawBackground()
     Data.i @UI_Layouts_Container_SetPadding()
     Data.i @UI_Layouts_Container_SetPaddingAll()
     Data.i @UI_Layouts_Container_GetPaddingLeft()
@@ -6544,6 +11844,16 @@ DataSection
     Data.i @UI_Component_GetDesiredWidth()
     Data.i @UI_Component_GetDesiredHeight()
     Data.i @UI_Layouts_DockPanel_Arrange()
+    Data.i @UI_Component_OnAnimationTick()
+    Data.i @UI_Layouts_Container_SetBackground()
+    Data.i @UI_Layouts_Container_GetBackground()
+    Data.i @UI_Layouts_Container_SetBorderColor()
+    Data.i @UI_Layouts_Container_SetBorderThickness()
+    Data.i @UI_Layouts_Container_SetCornerRadius()
+    Data.i @UI_Layouts_DockPanel_Free()
+    Data.i @UI_Layouts_Container_EnsureBgGadget()
+    Data.i @UI_Layouts_Container_SetBorder()
+    Data.i @UI_Layouts_Container_DrawBackground()
     Data.i @UI_Layouts_Container_SetPadding()
     Data.i @UI_Layouts_Container_SetPaddingAll()
     Data.i @UI_Layouts_Container_GetPaddingLeft()
@@ -6611,6 +11921,16 @@ DataSection
     Data.i @UI_Component_GetDesiredWidth()
     Data.i @UI_Component_GetDesiredHeight()
     Data.i @UI_Layouts_Grid_Arrange()
+    Data.i @UI_Component_OnAnimationTick()
+    Data.i @UI_Layouts_Container_SetBackground()
+    Data.i @UI_Layouts_Container_GetBackground()
+    Data.i @UI_Layouts_Container_SetBorderColor()
+    Data.i @UI_Layouts_Container_SetBorderThickness()
+    Data.i @UI_Layouts_Container_SetCornerRadius()
+    Data.i @UI_Layouts_Grid_Free()
+    Data.i @UI_Layouts_Container_EnsureBgGadget()
+    Data.i @UI_Layouts_Container_SetBorder()
+    Data.i @UI_Layouts_Container_DrawBackground()
     Data.i @UI_Layouts_Container_SetPadding()
     Data.i @UI_Layouts_Container_SetPaddingAll()
     Data.i @UI_Layouts_Container_GetPaddingLeft()
@@ -6678,6 +11998,13 @@ DataSection
     Data.i @UI_Component_GetDesiredWidth()
     Data.i @UI_Component_GetDesiredHeight()
     Data.i @UI_Component_Arrange()
+    Data.i @UI_Component_OnAnimationTick()
+    Data.i @UI_Gadget_SetBackground()
+    Data.i @UI_Component_GetBackground()
+    Data.i @UI_Component_SetBorderColor()
+    Data.i @UI_Component_SetBorderThickness()
+    Data.i @UI_Component_SetCornerRadius()
+    Data.i @UI_Button_Free()
     Data.i @UI_Gadget_GetText()
     Data.i @UI_Gadget_SetText()
     Data.i @UI_Gadget_SetToolTip()
@@ -6686,7 +12013,14 @@ DataSection
     Data.i @UI_Gadget_GetColor()
     Data.i @UI_Gadget_SetFont()
     Data.i @UI_Gadget_SetFocus()
-    Data.i @UI_Button_Free()
+    Data.i @UI_Gadget_GetState()
+    Data.i @UI_Gadget_SetState()
+    Data.i @UI_Gadget_IsChecked()
+    Data.i @UI_Gadget_SetChecked()
+    Data.i @UI_Gadget_IsHovered()
+    Data.i @UI_Gadget_IsPressed()
+    Data.i @UI_Gadget_SetForeground()
+    Data.i @UI_Gadget_Redraw()
     Data.i @UI_Gadget_OnClick()
     Data.i @UI_Gadget_OnChange()
     Data.i @UI_Gadget_OnFocus()
@@ -6744,6 +12078,13 @@ DataSection
     Data.i @UI_Component_GetDesiredWidth()
     Data.i @UI_Component_GetDesiredHeight()
     Data.i @UI_Component_Arrange()
+    Data.i @UI_Component_OnAnimationTick()
+    Data.i @UI_Gadget_SetBackground()
+    Data.i @UI_Component_GetBackground()
+    Data.i @UI_Component_SetBorderColor()
+    Data.i @UI_Component_SetBorderThickness()
+    Data.i @UI_Component_SetCornerRadius()
+    Data.i @UI_TextBox_Free()
     Data.i @UI_Gadget_GetText()
     Data.i @UI_Gadget_SetText()
     Data.i @UI_Gadget_SetToolTip()
@@ -6752,7 +12093,14 @@ DataSection
     Data.i @UI_Gadget_GetColor()
     Data.i @UI_Gadget_SetFont()
     Data.i @UI_Gadget_SetFocus()
-    Data.i @UI_TextBox_Free()
+    Data.i @UI_Gadget_GetState()
+    Data.i @UI_Gadget_SetState()
+    Data.i @UI_Gadget_IsChecked()
+    Data.i @UI_Gadget_SetChecked()
+    Data.i @UI_Gadget_IsHovered()
+    Data.i @UI_Gadget_IsPressed()
+    Data.i @UI_Gadget_SetForeground()
+    Data.i @UI_Gadget_Redraw()
     Data.i @UI_Gadget_OnClick()
     Data.i @UI_Gadget_OnChange()
     Data.i @UI_Gadget_OnFocus()
@@ -6813,6 +12161,13 @@ DataSection
     Data.i @UI_Component_GetDesiredWidth()
     Data.i @UI_Component_GetDesiredHeight()
     Data.i @UI_Component_Arrange()
+    Data.i @UI_Component_OnAnimationTick()
+    Data.i @UI_Gadget_SetBackground()
+    Data.i @UI_Component_GetBackground()
+    Data.i @UI_Component_SetBorderColor()
+    Data.i @UI_Component_SetBorderThickness()
+    Data.i @UI_Component_SetCornerRadius()
+    Data.i @UI_Label_Free()
     Data.i @UI_Gadget_GetText()
     Data.i @UI_Gadget_SetText()
     Data.i @UI_Gadget_SetToolTip()
@@ -6821,7 +12176,14 @@ DataSection
     Data.i @UI_Gadget_GetColor()
     Data.i @UI_Gadget_SetFont()
     Data.i @UI_Gadget_SetFocus()
-    Data.i @UI_Label_Free()
+    Data.i @UI_Gadget_GetState()
+    Data.i @UI_Gadget_SetState()
+    Data.i @UI_Gadget_IsChecked()
+    Data.i @UI_Gadget_SetChecked()
+    Data.i @UI_Gadget_IsHovered()
+    Data.i @UI_Gadget_IsPressed()
+    Data.i @UI_Gadget_SetForeground()
+    Data.i @UI_Gadget_Redraw()
     Data.i @UI_Gadget_OnClick()
     Data.i @UI_Gadget_OnChange()
     Data.i @UI_Gadget_OnFocus()
@@ -6879,6 +12241,13 @@ DataSection
     Data.i @UI_Component_GetDesiredWidth()
     Data.i @UI_Component_GetDesiredHeight()
     Data.i @UI_Component_Arrange()
+    Data.i @UI_Component_OnAnimationTick()
+    Data.i @UI_Gadget_SetBackground()
+    Data.i @UI_Component_GetBackground()
+    Data.i @UI_Component_SetBorderColor()
+    Data.i @UI_Component_SetBorderThickness()
+    Data.i @UI_Component_SetCornerRadius()
+    Data.i @UI_CheckBox_Free()
     Data.i @UI_Gadget_GetText()
     Data.i @UI_Gadget_SetText()
     Data.i @UI_Gadget_SetToolTip()
@@ -6887,15 +12256,20 @@ DataSection
     Data.i @UI_Gadget_GetColor()
     Data.i @UI_Gadget_SetFont()
     Data.i @UI_Gadget_SetFocus()
-    Data.i @UI_CheckBox_Free()
+    Data.i @UI_Gadget_GetState()
+    Data.i @UI_Gadget_SetState()
+    Data.i @UI_CheckBox_IsChecked()
+    Data.i @UI_CheckBox_SetChecked()
+    Data.i @UI_Gadget_IsHovered()
+    Data.i @UI_Gadget_IsPressed()
+    Data.i @UI_Gadget_SetForeground()
+    Data.i @UI_Gadget_Redraw()
     Data.i @UI_Gadget_OnClick()
     Data.i @UI_Gadget_OnChange()
     Data.i @UI_Gadget_OnFocus()
     Data.i @UI_Gadget_OnLostFocus()
     Data.i @UI_Gadget_OnRightClick()
     Data.i @UI_Gadget_OnCustomEvent()
-    Data.i @UI_CheckBox_IsChecked()
-    Data.i @UI_CheckBox_SetChecked()
   UI_RadioButton_VTable_Data:
     Data.i @UI_Component_SetDataContext()
     Data.i @UI_Component_GetDataContext()
@@ -6947,6 +12321,13 @@ DataSection
     Data.i @UI_Component_GetDesiredWidth()
     Data.i @UI_Component_GetDesiredHeight()
     Data.i @UI_Component_Arrange()
+    Data.i @UI_Component_OnAnimationTick()
+    Data.i @UI_Gadget_SetBackground()
+    Data.i @UI_Component_GetBackground()
+    Data.i @UI_Component_SetBorderColor()
+    Data.i @UI_Component_SetBorderThickness()
+    Data.i @UI_Component_SetCornerRadius()
+    Data.i @UI_RadioButton_Free()
     Data.i @UI_Gadget_GetText()
     Data.i @UI_Gadget_SetText()
     Data.i @UI_Gadget_SetToolTip()
@@ -6955,15 +12336,20 @@ DataSection
     Data.i @UI_Gadget_GetColor()
     Data.i @UI_Gadget_SetFont()
     Data.i @UI_Gadget_SetFocus()
-    Data.i @UI_RadioButton_Free()
+    Data.i @UI_Gadget_GetState()
+    Data.i @UI_Gadget_SetState()
+    Data.i @UI_RadioButton_IsChecked()
+    Data.i @UI_RadioButton_SetChecked()
+    Data.i @UI_Gadget_IsHovered()
+    Data.i @UI_Gadget_IsPressed()
+    Data.i @UI_Gadget_SetForeground()
+    Data.i @UI_Gadget_Redraw()
     Data.i @UI_Gadget_OnClick()
     Data.i @UI_Gadget_OnChange()
     Data.i @UI_Gadget_OnFocus()
     Data.i @UI_Gadget_OnLostFocus()
     Data.i @UI_Gadget_OnRightClick()
     Data.i @UI_Gadget_OnCustomEvent()
-    Data.i @UI_RadioButton_IsChecked()
-    Data.i @UI_RadioButton_SetChecked()
     Data.i @UI_RadioButton_GetGroup()
     Data.i @UI_RadioButton_SetGroup()
   UI_ProgressBar_VTable_Data:
@@ -7017,6 +12403,13 @@ DataSection
     Data.i @UI_Component_GetDesiredWidth()
     Data.i @UI_Component_GetDesiredHeight()
     Data.i @UI_Component_Arrange()
+    Data.i @UI_Component_OnAnimationTick()
+    Data.i @UI_Gadget_SetBackground()
+    Data.i @UI_Component_GetBackground()
+    Data.i @UI_Component_SetBorderColor()
+    Data.i @UI_Component_SetBorderThickness()
+    Data.i @UI_Component_SetCornerRadius()
+    Data.i @UI_ProgressBar_Free()
     Data.i @UI_Gadget_GetText()
     Data.i @UI_Gadget_SetText()
     Data.i @UI_Gadget_SetToolTip()
@@ -7025,7 +12418,14 @@ DataSection
     Data.i @UI_Gadget_GetColor()
     Data.i @UI_Gadget_SetFont()
     Data.i @UI_Gadget_SetFocus()
-    Data.i @UI_ProgressBar_Free()
+    Data.i @UI_Gadget_GetState()
+    Data.i @UI_Gadget_SetState()
+    Data.i @UI_Gadget_IsChecked()
+    Data.i @UI_Gadget_SetChecked()
+    Data.i @UI_Gadget_IsHovered()
+    Data.i @UI_Gadget_IsPressed()
+    Data.i @UI_Gadget_SetForeground()
+    Data.i @UI_Gadget_Redraw()
     Data.i @UI_Gadget_OnClick()
     Data.i @UI_Gadget_OnChange()
     Data.i @UI_Gadget_OnFocus()
@@ -7085,6 +12485,13 @@ DataSection
     Data.i @UI_Component_GetDesiredWidth()
     Data.i @UI_Component_GetDesiredHeight()
     Data.i @UI_Component_Arrange()
+    Data.i @UI_Component_OnAnimationTick()
+    Data.i @UI_Gadget_SetBackground()
+    Data.i @UI_Component_GetBackground()
+    Data.i @UI_Component_SetBorderColor()
+    Data.i @UI_Component_SetBorderThickness()
+    Data.i @UI_Component_SetCornerRadius()
+    Data.i @UI_Slider_Free()
     Data.i @UI_Gadget_GetText()
     Data.i @UI_Gadget_SetText()
     Data.i @UI_Gadget_SetToolTip()
@@ -7093,7 +12500,14 @@ DataSection
     Data.i @UI_Gadget_GetColor()
     Data.i @UI_Gadget_SetFont()
     Data.i @UI_Gadget_SetFocus()
-    Data.i @UI_Slider_Free()
+    Data.i @UI_Gadget_GetState()
+    Data.i @UI_Gadget_SetState()
+    Data.i @UI_Gadget_IsChecked()
+    Data.i @UI_Gadget_SetChecked()
+    Data.i @UI_Gadget_IsHovered()
+    Data.i @UI_Gadget_IsPressed()
+    Data.i @UI_Gadget_SetForeground()
+    Data.i @UI_Gadget_Redraw()
     Data.i @UI_Gadget_OnClick()
     Data.i @UI_Gadget_OnChange()
     Data.i @UI_Gadget_OnFocus()
@@ -7153,6 +12567,13 @@ DataSection
     Data.i @UI_Component_GetDesiredWidth()
     Data.i @UI_Component_GetDesiredHeight()
     Data.i @UI_Component_Arrange()
+    Data.i @UI_Component_OnAnimationTick()
+    Data.i @UI_Gadget_SetBackground()
+    Data.i @UI_Component_GetBackground()
+    Data.i @UI_Component_SetBorderColor()
+    Data.i @UI_Component_SetBorderThickness()
+    Data.i @UI_Component_SetCornerRadius()
+    Data.i @UI_ComboBox_Free()
     Data.i @UI_Gadget_GetText()
     Data.i @UI_Gadget_SetText()
     Data.i @UI_Gadget_SetToolTip()
@@ -7161,7 +12582,14 @@ DataSection
     Data.i @UI_Gadget_GetColor()
     Data.i @UI_Gadget_SetFont()
     Data.i @UI_Gadget_SetFocus()
-    Data.i @UI_ComboBox_Free()
+    Data.i @UI_Gadget_GetState()
+    Data.i @UI_Gadget_SetState()
+    Data.i @UI_Gadget_IsChecked()
+    Data.i @UI_Gadget_SetChecked()
+    Data.i @UI_Gadget_IsHovered()
+    Data.i @UI_Gadget_IsPressed()
+    Data.i @UI_Gadget_SetForeground()
+    Data.i @UI_Gadget_Redraw()
     Data.i @UI_Gadget_OnClick()
     Data.i @UI_Gadget_OnChange()
     Data.i @UI_Gadget_OnFocus()
@@ -7224,6 +12652,13 @@ DataSection
     Data.i @UI_Component_GetDesiredWidth()
     Data.i @UI_Component_GetDesiredHeight()
     Data.i @UI_Component_Arrange()
+    Data.i @UI_Component_OnAnimationTick()
+    Data.i @UI_Gadget_SetBackground()
+    Data.i @UI_Component_GetBackground()
+    Data.i @UI_Component_SetBorderColor()
+    Data.i @UI_Component_SetBorderThickness()
+    Data.i @UI_Component_SetCornerRadius()
+    Data.i @UI_SpinBox_Free()
     Data.i @UI_Gadget_GetText()
     Data.i @UI_Gadget_SetText()
     Data.i @UI_Gadget_SetToolTip()
@@ -7232,7 +12667,14 @@ DataSection
     Data.i @UI_Gadget_GetColor()
     Data.i @UI_Gadget_SetFont()
     Data.i @UI_Gadget_SetFocus()
-    Data.i @UI_SpinBox_Free()
+    Data.i @UI_Gadget_GetState()
+    Data.i @UI_Gadget_SetState()
+    Data.i @UI_Gadget_IsChecked()
+    Data.i @UI_Gadget_SetChecked()
+    Data.i @UI_Gadget_IsHovered()
+    Data.i @UI_Gadget_IsPressed()
+    Data.i @UI_Gadget_SetForeground()
+    Data.i @UI_Gadget_Redraw()
     Data.i @UI_Gadget_OnClick()
     Data.i @UI_Gadget_OnChange()
     Data.i @UI_Gadget_OnFocus()
@@ -7295,6 +12737,13 @@ DataSection
     Data.i @UI_Component_GetDesiredWidth()
     Data.i @UI_Component_GetDesiredHeight()
     Data.i @UI_Component_Arrange()
+    Data.i @UI_Component_OnAnimationTick()
+    Data.i @UI_Gadget_SetBackground()
+    Data.i @UI_Component_GetBackground()
+    Data.i @UI_Component_SetBorderColor()
+    Data.i @UI_Component_SetBorderThickness()
+    Data.i @UI_Component_SetCornerRadius()
+    Data.i @UI_Editor_Free()
     Data.i @UI_Gadget_GetText()
     Data.i @UI_Gadget_SetText()
     Data.i @UI_Gadget_SetToolTip()
@@ -7303,7 +12752,14 @@ DataSection
     Data.i @UI_Gadget_GetColor()
     Data.i @UI_Gadget_SetFont()
     Data.i @UI_Gadget_SetFocus()
-    Data.i @UI_Editor_Free()
+    Data.i @UI_Gadget_GetState()
+    Data.i @UI_Gadget_SetState()
+    Data.i @UI_Gadget_IsChecked()
+    Data.i @UI_Gadget_SetChecked()
+    Data.i @UI_Gadget_IsHovered()
+    Data.i @UI_Gadget_IsPressed()
+    Data.i @UI_Gadget_SetForeground()
+    Data.i @UI_Gadget_Redraw()
     Data.i @UI_Gadget_OnClick()
     Data.i @UI_Gadget_OnChange()
     Data.i @UI_Gadget_OnFocus()
@@ -7367,6 +12823,13 @@ DataSection
     Data.i @UI_Component_GetDesiredWidth()
     Data.i @UI_Component_GetDesiredHeight()
     Data.i @UI_Component_Arrange()
+    Data.i @UI_Component_OnAnimationTick()
+    Data.i @UI_Gadget_SetBackground()
+    Data.i @UI_Component_GetBackground()
+    Data.i @UI_Component_SetBorderColor()
+    Data.i @UI_Component_SetBorderThickness()
+    Data.i @UI_Component_SetCornerRadius()
+    Data.i @UI_ListView_Free()
     Data.i @UI_Gadget_GetText()
     Data.i @UI_Gadget_SetText()
     Data.i @UI_Gadget_SetToolTip()
@@ -7375,7 +12838,14 @@ DataSection
     Data.i @UI_Gadget_GetColor()
     Data.i @UI_Gadget_SetFont()
     Data.i @UI_Gadget_SetFocus()
-    Data.i @UI_ListView_Free()
+    Data.i @UI_Gadget_GetState()
+    Data.i @UI_Gadget_SetState()
+    Data.i @UI_Gadget_IsChecked()
+    Data.i @UI_Gadget_SetChecked()
+    Data.i @UI_Gadget_IsHovered()
+    Data.i @UI_Gadget_IsPressed()
+    Data.i @UI_Gadget_SetForeground()
+    Data.i @UI_Gadget_Redraw()
     Data.i @UI_Gadget_OnClick()
     Data.i @UI_Gadget_OnChange()
     Data.i @UI_Gadget_OnFocus()
@@ -7443,6 +12913,13 @@ DataSection
     Data.i @UI_Component_GetDesiredWidth()
     Data.i @UI_Component_GetDesiredHeight()
     Data.i @UI_Component_Arrange()
+    Data.i @UI_Component_OnAnimationTick()
+    Data.i @UI_Gadget_SetBackground()
+    Data.i @UI_Component_GetBackground()
+    Data.i @UI_Component_SetBorderColor()
+    Data.i @UI_Component_SetBorderThickness()
+    Data.i @UI_Component_SetCornerRadius()
+    Data.i @UI_TreeView_Free()
     Data.i @UI_Gadget_GetText()
     Data.i @UI_Gadget_SetText()
     Data.i @UI_Gadget_SetToolTip()
@@ -7451,7 +12928,14 @@ DataSection
     Data.i @UI_Gadget_GetColor()
     Data.i @UI_Gadget_SetFont()
     Data.i @UI_Gadget_SetFocus()
-    Data.i @UI_TreeView_Free()
+    Data.i @UI_Gadget_GetState()
+    Data.i @UI_Gadget_SetState()
+    Data.i @UI_Gadget_IsChecked()
+    Data.i @UI_Gadget_SetChecked()
+    Data.i @UI_Gadget_IsHovered()
+    Data.i @UI_Gadget_IsPressed()
+    Data.i @UI_Gadget_SetForeground()
+    Data.i @UI_Gadget_Redraw()
     Data.i @UI_Gadget_OnClick()
     Data.i @UI_Gadget_OnChange()
     Data.i @UI_Gadget_OnFocus()
@@ -7522,6 +13006,13 @@ DataSection
     Data.i @UI_Component_GetDesiredWidth()
     Data.i @UI_Component_GetDesiredHeight()
     Data.i @UI_Component_Arrange()
+    Data.i @UI_Component_OnAnimationTick()
+    Data.i @UI_Gadget_SetBackground()
+    Data.i @UI_Component_GetBackground()
+    Data.i @UI_Component_SetBorderColor()
+    Data.i @UI_Component_SetBorderThickness()
+    Data.i @UI_Component_SetCornerRadius()
+    Data.i @UI_DatePicker_Free()
     Data.i @UI_Gadget_GetText()
     Data.i @UI_Gadget_SetText()
     Data.i @UI_Gadget_SetToolTip()
@@ -7530,7 +13021,14 @@ DataSection
     Data.i @UI_Gadget_GetColor()
     Data.i @UI_Gadget_SetFont()
     Data.i @UI_Gadget_SetFocus()
-    Data.i @UI_DatePicker_Free()
+    Data.i @UI_Gadget_GetState()
+    Data.i @UI_Gadget_SetState()
+    Data.i @UI_Gadget_IsChecked()
+    Data.i @UI_Gadget_SetChecked()
+    Data.i @UI_Gadget_IsHovered()
+    Data.i @UI_Gadget_IsPressed()
+    Data.i @UI_Gadget_SetForeground()
+    Data.i @UI_Gadget_Redraw()
     Data.i @UI_Gadget_OnClick()
     Data.i @UI_Gadget_OnChange()
     Data.i @UI_Gadget_OnFocus()
@@ -7591,6 +13089,13 @@ DataSection
     Data.i @UI_Component_GetDesiredWidth()
     Data.i @UI_Component_GetDesiredHeight()
     Data.i @UI_Component_Arrange()
+    Data.i @UI_Component_OnAnimationTick()
+    Data.i @UI_Gadget_SetBackground()
+    Data.i @UI_Component_GetBackground()
+    Data.i @UI_Component_SetBorderColor()
+    Data.i @UI_Component_SetBorderThickness()
+    Data.i @UI_Component_SetCornerRadius()
+    Data.i @UI_GroupBox_Free()
     Data.i @UI_Gadget_GetText()
     Data.i @UI_Gadget_SetText()
     Data.i @UI_Gadget_SetToolTip()
@@ -7599,7 +13104,14 @@ DataSection
     Data.i @UI_Gadget_GetColor()
     Data.i @UI_Gadget_SetFont()
     Data.i @UI_Gadget_SetFocus()
-    Data.i @UI_GroupBox_Free()
+    Data.i @UI_Gadget_GetState()
+    Data.i @UI_Gadget_SetState()
+    Data.i @UI_Gadget_IsChecked()
+    Data.i @UI_Gadget_SetChecked()
+    Data.i @UI_Gadget_IsHovered()
+    Data.i @UI_Gadget_IsPressed()
+    Data.i @UI_Gadget_SetForeground()
+    Data.i @UI_Gadget_Redraw()
     Data.i @UI_Gadget_OnClick()
     Data.i @UI_Gadget_OnChange()
     Data.i @UI_Gadget_OnFocus()
@@ -7657,6 +13169,13 @@ DataSection
     Data.i @UI_Component_GetDesiredWidth()
     Data.i @UI_Component_GetDesiredHeight()
     Data.i @UI_Component_Arrange()
+    Data.i @UI_Component_OnAnimationTick()
+    Data.i @UI_Gadget_SetBackground()
+    Data.i @UI_Component_GetBackground()
+    Data.i @UI_Component_SetBorderColor()
+    Data.i @UI_Component_SetBorderThickness()
+    Data.i @UI_Component_SetCornerRadius()
+    Data.i @UI_TabControl_Free()
     Data.i @UI_Gadget_GetText()
     Data.i @UI_Gadget_SetText()
     Data.i @UI_Gadget_SetToolTip()
@@ -7665,7 +13184,14 @@ DataSection
     Data.i @UI_Gadget_GetColor()
     Data.i @UI_Gadget_SetFont()
     Data.i @UI_Gadget_SetFocus()
-    Data.i @UI_TabControl_Free()
+    Data.i @UI_Gadget_GetState()
+    Data.i @UI_Gadget_SetState()
+    Data.i @UI_Gadget_IsChecked()
+    Data.i @UI_Gadget_SetChecked()
+    Data.i @UI_Gadget_IsHovered()
+    Data.i @UI_Gadget_IsPressed()
+    Data.i @UI_Gadget_SetForeground()
+    Data.i @UI_Gadget_Redraw()
     Data.i @UI_Gadget_OnClick()
     Data.i @UI_Gadget_OnChange()
     Data.i @UI_Gadget_OnFocus()
@@ -7681,6 +13207,495 @@ DataSection
     Data.i @UI_TabControl_GetTabCount()
     Data.i @UI_TabControl_GetTabText()
     Data.i @UI_TabControl_SetTabText()
+  UI_CanvasButton_VTable_Data:
+    Data.i @UI_Component_SetDataContext()
+    Data.i @UI_Component_GetDataContext()
+    Data.i @UI_Component_GetID()
+    Data.i @UI_Component_GetHandle()
+    Data.i @UI_Component_GetTag()
+    Data.i @UI_Component_SetTag()
+    Data.i @UI_Component_GetX()
+    Data.i @UI_Component_SetX()
+    Data.i @UI_Component_GetY()
+    Data.i @UI_Component_SetY()
+    Data.i @UI_Component_GetWidth()
+    Data.i @UI_Component_SetWidth()
+    Data.i @UI_Component_GetHeight()
+    Data.i @UI_Component_SetHeight()
+    Data.i @UI_Component_SetAutoWidth()
+    Data.i @UI_Component_SetAutoHeight()
+    Data.i @UI_Component_HasExplicitWidth()
+    Data.i @UI_Component_HasExplicitHeight()
+    Data.i @UI_Component_SetLocation()
+    Data.i @UI_Component_SetSize()
+    Data.i @UI_Gadget_SetPosition()
+    Data.i @UI_Component_IsVisible()
+    Data.i @UI_Component_GetVisible()
+    Data.i @UI_Gadget_SetVisible()
+    Data.i @UI_Component_IsEnabled()
+    Data.i @UI_Component_GetEnabled()
+    Data.i @UI_CanvasControl_SetEnabled()
+    Data.i @UI_Component_GetUserData()
+    Data.i @UI_Component_SetUserData()
+    Data.i @UI_Component_SetMargin()
+    Data.i @UI_Component_SetMarginAll()
+    Data.i @UI_Component_GetMarginLeft()
+    Data.i @UI_Component_GetMarginTop()
+    Data.i @UI_Component_GetMarginRight()
+    Data.i @UI_Component_GetMarginBottom()
+    Data.i @UI_Component_SetHorizontalAlignment()
+    Data.i @UI_Component_GetHorizontalAlignment()
+    Data.i @UI_Component_SetVerticalAlignment()
+    Data.i @UI_Component_GetVerticalAlignment()
+    Data.i @UI_Component_SetMinWidth()
+    Data.i @UI_Component_GetMinWidth()
+    Data.i @UI_Component_SetMaxWidth()
+    Data.i @UI_Component_GetMaxWidth()
+    Data.i @UI_Component_SetMinHeight()
+    Data.i @UI_Component_GetMinHeight()
+    Data.i @UI_Component_SetMaxHeight()
+    Data.i @UI_Component_GetMaxHeight()
+    Data.i @UI_Component_GetDesiredWidth()
+    Data.i @UI_Component_GetDesiredHeight()
+    Data.i @UI_CanvasControl_Arrange()
+    Data.i @UI_CanvasControl_OnAnimationTick()
+    Data.i @UI_CanvasControl_SetBackground()
+    Data.i @UI_CanvasControl_GetBackground()
+    Data.i @UI_CanvasControl_SetBorderColor()
+    Data.i @UI_CanvasControl_SetBorderThickness()
+    Data.i @UI_CanvasControl_SetCornerRadius()
+    Data.i @UI_CanvasControl_Free()
+    Data.i @UI_CanvasControl_GetText()
+    Data.i @UI_CanvasControl_SetText()
+    Data.i @UI_Gadget_SetToolTip()
+    Data.i @UI_Gadget_GetToolTip()
+    Data.i @UI_Gadget_SetColor()
+    Data.i @UI_Gadget_GetColor()
+    Data.i @UI_Gadget_SetFont()
+    Data.i @UI_Gadget_SetFocus()
+    Data.i @UI_Gadget_GetState()
+    Data.i @UI_Gadget_SetState()
+    Data.i @UI_Gadget_IsChecked()
+    Data.i @UI_Gadget_SetChecked()
+    Data.i @UI_CanvasControl_IsHovered()
+    Data.i @UI_CanvasControl_IsPressed()
+    Data.i @UI_CanvasControl_SetForeground()
+    Data.i @UI_CanvasControl_Redraw()
+    Data.i @UI_Gadget_OnClick()
+    Data.i @UI_Gadget_OnChange()
+    Data.i @UI_CanvasControl_OnFocus()
+    Data.i @UI_CanvasControl_OnLostFocus()
+    Data.i @UI_Gadget_OnRightClick()
+    Data.i @UI_CanvasControl_OnCustomEvent()
+    Data.i @UI_CanvasControl_InitDefaults()
+    Data.i @UI_CanvasControl_ScaleX()
+    Data.i @UI_CanvasControl_ScaleY()
+    Data.i @UI_CanvasControl_GetDpiScale()
+    Data.i @UI_CanvasControl_GetVisualState()
+    Data.i @UI_CanvasControl_UpdateVisualState()
+    Data.i @UI_CanvasControl_OnVisualStateChanged()
+    Data.i @UI_CanvasControl_IsMouseOver()
+    Data.i @UI_CanvasControl_SetIsHovered()
+    Data.i @UI_CanvasControl_SetIsPressed()
+    Data.i @UI_CanvasControl_IsFocused()
+    Data.i @UI_CanvasControl_SetIsFocused()
+    Data.i @UI_CanvasControl_GetForeground()
+    Data.i @UI_CanvasControl_GetHoverBackground()
+    Data.i @UI_CanvasControl_SetHoverBackground()
+    Data.i @UI_CanvasControl_GetHoverForeground()
+    Data.i @UI_CanvasControl_SetHoverForeground()
+    Data.i @UI_CanvasControl_GetPressedBackground()
+    Data.i @UI_CanvasControl_SetPressedBackground()
+    Data.i @UI_CanvasControl_GetPressedForeground()
+    Data.i @UI_CanvasControl_SetPressedForeground()
+    Data.i @UI_CanvasControl_GetDisabledBackground()
+    Data.i @UI_CanvasControl_SetDisabledBackground()
+    Data.i @UI_CanvasControl_GetDisabledForeground()
+    Data.i @UI_CanvasControl_SetDisabledForeground()
+    Data.i @UI_CanvasControl_GetBorderColor()
+    Data.i @UI_CanvasControl_GetHoverBorderColor()
+    Data.i @UI_CanvasControl_SetHoverBorderColor()
+    Data.i @UI_CanvasControl_GetPressedBorderColor()
+    Data.i @UI_CanvasControl_SetPressedBorderColor()
+    Data.i @UI_CanvasControl_GetBorderThickness()
+    Data.i @UI_CanvasControl_GetCornerRadius()
+    Data.i @UI_CanvasControl_SetBorder()
+    Data.i @UI_CanvasControl_GetBorderLeftThickness()
+    Data.i @UI_CanvasControl_SetBorderLeftThickness()
+    Data.i @UI_CanvasControl_GetBorderLeftColor()
+    Data.i @UI_CanvasControl_SetBorderLeftColor()
+    Data.i @UI_CanvasControl_SetPadding()
+    Data.i @UI_CanvasControl_GetPaddingLeft()
+    Data.i @UI_CanvasControl_GetPaddingTop()
+    Data.i @UI_CanvasControl_GetPaddingRight()
+    Data.i @UI_CanvasControl_GetPaddingBottom()
+    Data.i @UI_CanvasControl_GetCurrentBackgroundColor()
+    Data.i @UI_CanvasControl_GetCurrentForegroundColor()
+    Data.i @UI_CanvasControl_GetCurrentBorderColor()
+    Data.i @UI_CanvasControl_DrawControlBackground()
+    Data.i @UI_CanvasControl_DrawFocusRing()
+    Data.i @UI_CanvasButton_OnPaint()
+    Data.i @UI_CanvasControl_OnMouseEnter()
+    Data.i @UI_CanvasControl_OnMouseLeave()
+    Data.i @UI_CanvasControl_OnMouseDown()
+    Data.i @UI_CanvasControl_OnMouseUp()
+    Data.i @UI_CanvasControl_OnMouseMove()
+    Data.i @UI_CanvasControl_OnMouseWheel()
+    Data.i @UI_CanvasControl_OnKeyDown()
+    Data.i @UI_CanvasControl_OnKeyUp()
+    Data.i @UI_CanvasControl_OnInput()
+    Data.i @UI_CanvasControl_OnLeftDoubleClick()
+    Data.i @UI_CanvasControl_SetTypography()
+    Data.i @UI_CanvasControl_SetParentBackground()
+    Data.i @UI_CanvasControl_GetParentBackground()
+    Data.i @UI_CanvasControl_SetAnimateHoverScale()
+    Data.i @UI_CanvasControl_IsAnimateHoverScale()
+    Data.i @UI_CanvasButton_ApplyStyle()
+    Data.i @UI_CanvasControl_ApplyStyleTriggers()
+    Data.i @UI_CanvasControl_GetStyle()
+    Data.i @UI_CanvasButton_SetDefaultStyle()
+    Data.i @UI_CanvasButton_SetPrimaryStyle()
+    Data.i @UI_CanvasButton_SetSuccessStyle()
+    Data.i @UI_CanvasButton_SetDangerStyle()
+    Data.i @UI_CanvasButton_SetDarkStyle()
+    Data.i @UI_CanvasButton_SetOutlineStyle()
+    Data.i @UI_CanvasButton_SetGhostStyle()
+    Data.i @UI_CanvasButton_SetIcon_i()
+    Data.i @UI_CanvasButton_SetIcon_i_i()
+    Data.i @UI_CanvasButton_GetIcon()
+    Data.i @UI_CanvasButton_SetTextAlignment()
+  UI_CanvasText_VTable_Data:
+    Data.i @UI_Component_SetDataContext()
+    Data.i @UI_Component_GetDataContext()
+    Data.i @UI_Component_GetID()
+    Data.i @UI_Component_GetHandle()
+    Data.i @UI_Component_GetTag()
+    Data.i @UI_Component_SetTag()
+    Data.i @UI_Component_GetX()
+    Data.i @UI_Component_SetX()
+    Data.i @UI_Component_GetY()
+    Data.i @UI_Component_SetY()
+    Data.i @UI_Component_GetWidth()
+    Data.i @UI_Component_SetWidth()
+    Data.i @UI_Component_GetHeight()
+    Data.i @UI_Component_SetHeight()
+    Data.i @UI_Component_SetAutoWidth()
+    Data.i @UI_Component_SetAutoHeight()
+    Data.i @UI_Component_HasExplicitWidth()
+    Data.i @UI_Component_HasExplicitHeight()
+    Data.i @UI_Component_SetLocation()
+    Data.i @UI_Component_SetSize()
+    Data.i @UI_Gadget_SetPosition()
+    Data.i @UI_Component_IsVisible()
+    Data.i @UI_Component_GetVisible()
+    Data.i @UI_Gadget_SetVisible()
+    Data.i @UI_Component_IsEnabled()
+    Data.i @UI_Component_GetEnabled()
+    Data.i @UI_CanvasControl_SetEnabled()
+    Data.i @UI_Component_GetUserData()
+    Data.i @UI_Component_SetUserData()
+    Data.i @UI_Component_SetMargin()
+    Data.i @UI_Component_SetMarginAll()
+    Data.i @UI_Component_GetMarginLeft()
+    Data.i @UI_Component_GetMarginTop()
+    Data.i @UI_Component_GetMarginRight()
+    Data.i @UI_Component_GetMarginBottom()
+    Data.i @UI_Component_SetHorizontalAlignment()
+    Data.i @UI_Component_GetHorizontalAlignment()
+    Data.i @UI_Component_SetVerticalAlignment()
+    Data.i @UI_Component_GetVerticalAlignment()
+    Data.i @UI_Component_SetMinWidth()
+    Data.i @UI_Component_GetMinWidth()
+    Data.i @UI_Component_SetMaxWidth()
+    Data.i @UI_Component_GetMaxWidth()
+    Data.i @UI_Component_SetMinHeight()
+    Data.i @UI_Component_GetMinHeight()
+    Data.i @UI_Component_SetMaxHeight()
+    Data.i @UI_Component_GetMaxHeight()
+    Data.i @UI_CanvasText_GetDesiredWidth()
+    Data.i @UI_CanvasText_GetDesiredHeight()
+    Data.i @UI_CanvasControl_Arrange()
+    Data.i @UI_CanvasControl_OnAnimationTick()
+    Data.i @UI_CanvasControl_SetBackground()
+    Data.i @UI_CanvasControl_GetBackground()
+    Data.i @UI_CanvasControl_SetBorderColor()
+    Data.i @UI_CanvasControl_SetBorderThickness()
+    Data.i @UI_CanvasControl_SetCornerRadius()
+    Data.i @UI_CanvasControl_Free()
+    Data.i @UI_CanvasControl_GetText()
+    Data.i @UI_CanvasControl_SetText()
+    Data.i @UI_Gadget_SetToolTip()
+    Data.i @UI_Gadget_GetToolTip()
+    Data.i @UI_Gadget_SetColor()
+    Data.i @UI_Gadget_GetColor()
+    Data.i @UI_Gadget_SetFont()
+    Data.i @UI_Gadget_SetFocus()
+    Data.i @UI_Gadget_GetState()
+    Data.i @UI_Gadget_SetState()
+    Data.i @UI_Gadget_IsChecked()
+    Data.i @UI_Gadget_SetChecked()
+    Data.i @UI_CanvasControl_IsHovered()
+    Data.i @UI_CanvasControl_IsPressed()
+    Data.i @UI_CanvasControl_SetForeground()
+    Data.i @UI_CanvasControl_Redraw()
+    Data.i @UI_Gadget_OnClick()
+    Data.i @UI_Gadget_OnChange()
+    Data.i @UI_CanvasControl_OnFocus()
+    Data.i @UI_CanvasControl_OnLostFocus()
+    Data.i @UI_Gadget_OnRightClick()
+    Data.i @UI_CanvasControl_OnCustomEvent()
+    Data.i @UI_CanvasControl_InitDefaults()
+    Data.i @UI_CanvasControl_ScaleX()
+    Data.i @UI_CanvasControl_ScaleY()
+    Data.i @UI_CanvasControl_GetDpiScale()
+    Data.i @UI_CanvasControl_GetVisualState()
+    Data.i @UI_CanvasControl_UpdateVisualState()
+    Data.i @UI_CanvasControl_OnVisualStateChanged()
+    Data.i @UI_CanvasControl_IsMouseOver()
+    Data.i @UI_CanvasControl_SetIsHovered()
+    Data.i @UI_CanvasControl_SetIsPressed()
+    Data.i @UI_CanvasControl_IsFocused()
+    Data.i @UI_CanvasControl_SetIsFocused()
+    Data.i @UI_CanvasControl_GetForeground()
+    Data.i @UI_CanvasControl_GetHoverBackground()
+    Data.i @UI_CanvasControl_SetHoverBackground()
+    Data.i @UI_CanvasControl_GetHoverForeground()
+    Data.i @UI_CanvasControl_SetHoverForeground()
+    Data.i @UI_CanvasControl_GetPressedBackground()
+    Data.i @UI_CanvasControl_SetPressedBackground()
+    Data.i @UI_CanvasControl_GetPressedForeground()
+    Data.i @UI_CanvasControl_SetPressedForeground()
+    Data.i @UI_CanvasControl_GetDisabledBackground()
+    Data.i @UI_CanvasControl_SetDisabledBackground()
+    Data.i @UI_CanvasControl_GetDisabledForeground()
+    Data.i @UI_CanvasControl_SetDisabledForeground()
+    Data.i @UI_CanvasControl_GetBorderColor()
+    Data.i @UI_CanvasControl_GetHoverBorderColor()
+    Data.i @UI_CanvasControl_SetHoverBorderColor()
+    Data.i @UI_CanvasControl_GetPressedBorderColor()
+    Data.i @UI_CanvasControl_SetPressedBorderColor()
+    Data.i @UI_CanvasControl_GetBorderThickness()
+    Data.i @UI_CanvasControl_GetCornerRadius()
+    Data.i @UI_CanvasControl_SetBorder()
+    Data.i @UI_CanvasControl_GetBorderLeftThickness()
+    Data.i @UI_CanvasControl_SetBorderLeftThickness()
+    Data.i @UI_CanvasControl_GetBorderLeftColor()
+    Data.i @UI_CanvasControl_SetBorderLeftColor()
+    Data.i @UI_CanvasControl_SetPadding()
+    Data.i @UI_CanvasControl_GetPaddingLeft()
+    Data.i @UI_CanvasControl_GetPaddingTop()
+    Data.i @UI_CanvasControl_GetPaddingRight()
+    Data.i @UI_CanvasControl_GetPaddingBottom()
+    Data.i @UI_CanvasControl_GetCurrentBackgroundColor()
+    Data.i @UI_CanvasControl_GetCurrentForegroundColor()
+    Data.i @UI_CanvasControl_GetCurrentBorderColor()
+    Data.i @UI_CanvasControl_DrawControlBackground()
+    Data.i @UI_CanvasControl_DrawFocusRing()
+    Data.i @UI_CanvasText_OnPaint()
+    Data.i @UI_CanvasControl_OnMouseEnter()
+    Data.i @UI_CanvasControl_OnMouseLeave()
+    Data.i @UI_CanvasControl_OnMouseDown()
+    Data.i @UI_CanvasControl_OnMouseUp()
+    Data.i @UI_CanvasControl_OnMouseMove()
+    Data.i @UI_CanvasControl_OnMouseWheel()
+    Data.i @UI_CanvasControl_OnKeyDown()
+    Data.i @UI_CanvasControl_OnKeyUp()
+    Data.i @UI_CanvasControl_OnInput()
+    Data.i @UI_CanvasControl_OnLeftDoubleClick()
+    Data.i @UI_CanvasControl_SetTypography()
+    Data.i @UI_CanvasControl_SetParentBackground()
+    Data.i @UI_CanvasControl_GetParentBackground()
+    Data.i @UI_CanvasControl_SetAnimateHoverScale()
+    Data.i @UI_CanvasControl_IsAnimateHoverScale()
+    Data.i @UI_CanvasControl_ApplyStyle()
+    Data.i @UI_CanvasControl_ApplyStyleTriggers()
+    Data.i @UI_CanvasControl_GetStyle()
+    Data.i @UI_CanvasText_SetAlignment()
+    Data.i @UI_CanvasText_GetTextHorizontalAlignment()
+    Data.i @UI_CanvasText_GetTextVerticalAlignment()
+    Data.i @UI_CanvasText_SetEllipsis()
+    Data.i @UI_CanvasText_GetEllipsis()
+    Data.i @UI_CanvasText_SetTransparent()
+    Data.i @UI_CanvasText_IsTransparent()
+    Data.i @UI_CanvasText_FormatDisplayText()
+  UI_CanvasTextBox_VTable_Data:
+    Data.i @UI_Component_SetDataContext()
+    Data.i @UI_Component_GetDataContext()
+    Data.i @UI_Component_GetID()
+    Data.i @UI_Component_GetHandle()
+    Data.i @UI_Component_GetTag()
+    Data.i @UI_Component_SetTag()
+    Data.i @UI_Component_GetX()
+    Data.i @UI_Component_SetX()
+    Data.i @UI_Component_GetY()
+    Data.i @UI_Component_SetY()
+    Data.i @UI_Component_GetWidth()
+    Data.i @UI_Component_SetWidth()
+    Data.i @UI_Component_GetHeight()
+    Data.i @UI_Component_SetHeight()
+    Data.i @UI_Component_SetAutoWidth()
+    Data.i @UI_Component_SetAutoHeight()
+    Data.i @UI_Component_HasExplicitWidth()
+    Data.i @UI_Component_HasExplicitHeight()
+    Data.i @UI_Component_SetLocation()
+    Data.i @UI_Component_SetSize()
+    Data.i @UI_Gadget_SetPosition()
+    Data.i @UI_Component_IsVisible()
+    Data.i @UI_Component_GetVisible()
+    Data.i @UI_Gadget_SetVisible()
+    Data.i @UI_Component_IsEnabled()
+    Data.i @UI_Component_GetEnabled()
+    Data.i @UI_CanvasControl_SetEnabled()
+    Data.i @UI_Component_GetUserData()
+    Data.i @UI_Component_SetUserData()
+    Data.i @UI_Component_SetMargin()
+    Data.i @UI_Component_SetMarginAll()
+    Data.i @UI_Component_GetMarginLeft()
+    Data.i @UI_Component_GetMarginTop()
+    Data.i @UI_Component_GetMarginRight()
+    Data.i @UI_Component_GetMarginBottom()
+    Data.i @UI_Component_SetHorizontalAlignment()
+    Data.i @UI_Component_GetHorizontalAlignment()
+    Data.i @UI_Component_SetVerticalAlignment()
+    Data.i @UI_Component_GetVerticalAlignment()
+    Data.i @UI_Component_SetMinWidth()
+    Data.i @UI_Component_GetMinWidth()
+    Data.i @UI_Component_SetMaxWidth()
+    Data.i @UI_Component_GetMaxWidth()
+    Data.i @UI_Component_SetMinHeight()
+    Data.i @UI_Component_GetMinHeight()
+    Data.i @UI_Component_SetMaxHeight()
+    Data.i @UI_Component_GetMaxHeight()
+    Data.i @UI_Component_GetDesiredWidth()
+    Data.i @UI_Component_GetDesiredHeight()
+    Data.i @UI_CanvasControl_Arrange()
+    Data.i @UI_CanvasControl_OnAnimationTick()
+    Data.i @UI_CanvasControl_SetBackground()
+    Data.i @UI_CanvasControl_GetBackground()
+    Data.i @UI_CanvasControl_SetBorderColor()
+    Data.i @UI_CanvasControl_SetBorderThickness()
+    Data.i @UI_CanvasControl_SetCornerRadius()
+    Data.i @UI_CanvasTextBox_Free()
+    Data.i @UI_CanvasControl_GetText()
+    Data.i @UI_CanvasTextBox_SetText()
+    Data.i @UI_Gadget_SetToolTip()
+    Data.i @UI_Gadget_GetToolTip()
+    Data.i @UI_Gadget_SetColor()
+    Data.i @UI_Gadget_GetColor()
+    Data.i @UI_Gadget_SetFont()
+    Data.i @UI_Gadget_SetFocus()
+    Data.i @UI_Gadget_GetState()
+    Data.i @UI_Gadget_SetState()
+    Data.i @UI_Gadget_IsChecked()
+    Data.i @UI_Gadget_SetChecked()
+    Data.i @UI_CanvasControl_IsHovered()
+    Data.i @UI_CanvasControl_IsPressed()
+    Data.i @UI_CanvasControl_SetForeground()
+    Data.i @UI_CanvasControl_Redraw()
+    Data.i @UI_Gadget_OnClick()
+    Data.i @UI_Gadget_OnChange()
+    Data.i @UI_CanvasTextBox_OnFocus()
+    Data.i @UI_CanvasTextBox_OnLostFocus()
+    Data.i @UI_Gadget_OnRightClick()
+    Data.i @UI_CanvasControl_OnCustomEvent()
+    Data.i @UI_CanvasControl_InitDefaults()
+    Data.i @UI_CanvasControl_ScaleX()
+    Data.i @UI_CanvasControl_ScaleY()
+    Data.i @UI_CanvasControl_GetDpiScale()
+    Data.i @UI_CanvasControl_GetVisualState()
+    Data.i @UI_CanvasControl_UpdateVisualState()
+    Data.i @UI_CanvasControl_OnVisualStateChanged()
+    Data.i @UI_CanvasControl_IsMouseOver()
+    Data.i @UI_CanvasControl_SetIsHovered()
+    Data.i @UI_CanvasControl_SetIsPressed()
+    Data.i @UI_CanvasControl_IsFocused()
+    Data.i @UI_CanvasControl_SetIsFocused()
+    Data.i @UI_CanvasControl_GetForeground()
+    Data.i @UI_CanvasControl_GetHoverBackground()
+    Data.i @UI_CanvasControl_SetHoverBackground()
+    Data.i @UI_CanvasControl_GetHoverForeground()
+    Data.i @UI_CanvasControl_SetHoverForeground()
+    Data.i @UI_CanvasControl_GetPressedBackground()
+    Data.i @UI_CanvasControl_SetPressedBackground()
+    Data.i @UI_CanvasControl_GetPressedForeground()
+    Data.i @UI_CanvasControl_SetPressedForeground()
+    Data.i @UI_CanvasControl_GetDisabledBackground()
+    Data.i @UI_CanvasControl_SetDisabledBackground()
+    Data.i @UI_CanvasControl_GetDisabledForeground()
+    Data.i @UI_CanvasControl_SetDisabledForeground()
+    Data.i @UI_CanvasControl_GetBorderColor()
+    Data.i @UI_CanvasControl_GetHoverBorderColor()
+    Data.i @UI_CanvasControl_SetHoverBorderColor()
+    Data.i @UI_CanvasControl_GetPressedBorderColor()
+    Data.i @UI_CanvasControl_SetPressedBorderColor()
+    Data.i @UI_CanvasControl_GetBorderThickness()
+    Data.i @UI_CanvasControl_GetCornerRadius()
+    Data.i @UI_CanvasControl_SetBorder()
+    Data.i @UI_CanvasControl_GetBorderLeftThickness()
+    Data.i @UI_CanvasControl_SetBorderLeftThickness()
+    Data.i @UI_CanvasControl_GetBorderLeftColor()
+    Data.i @UI_CanvasControl_SetBorderLeftColor()
+    Data.i @UI_CanvasControl_SetPadding()
+    Data.i @UI_CanvasControl_GetPaddingLeft()
+    Data.i @UI_CanvasControl_GetPaddingTop()
+    Data.i @UI_CanvasControl_GetPaddingRight()
+    Data.i @UI_CanvasControl_GetPaddingBottom()
+    Data.i @UI_CanvasControl_GetCurrentBackgroundColor()
+    Data.i @UI_CanvasControl_GetCurrentForegroundColor()
+    Data.i @UI_CanvasControl_GetCurrentBorderColor()
+    Data.i @UI_CanvasControl_DrawControlBackground()
+    Data.i @UI_CanvasControl_DrawFocusRing()
+    Data.i @UI_CanvasTextBox_OnPaint()
+    Data.i @UI_CanvasControl_OnMouseEnter()
+    Data.i @UI_CanvasControl_OnMouseLeave()
+    Data.i @UI_CanvasTextBox_OnMouseDown()
+    Data.i @UI_CanvasTextBox_OnMouseUp()
+    Data.i @UI_CanvasTextBox_OnMouseMove()
+    Data.i @UI_CanvasControl_OnMouseWheel()
+    Data.i @UI_CanvasTextBox_OnKeyDown()
+    Data.i @UI_CanvasControl_OnKeyUp()
+    Data.i @UI_CanvasTextBox_OnInput()
+    Data.i @UI_CanvasTextBox_OnLeftDoubleClick()
+    Data.i @UI_CanvasControl_SetTypography()
+    Data.i @UI_CanvasControl_SetParentBackground()
+    Data.i @UI_CanvasControl_GetParentBackground()
+    Data.i @UI_CanvasControl_SetAnimateHoverScale()
+    Data.i @UI_CanvasControl_IsAnimateHoverScale()
+    Data.i @UI_CanvasControl_ApplyStyle()
+    Data.i @UI_CanvasControl_ApplyStyleTriggers()
+    Data.i @UI_CanvasControl_GetStyle()
+    Data.i @UI_CanvasTextBox_InitTextBoxDefaults()
+    Data.i @UI_CanvasTextBox_GetPlaceholder()
+    Data.i @UI_CanvasTextBox_SetPlaceholder()
+    Data.i @UI_CanvasTextBox_GetPlaceholderColor()
+    Data.i @UI_CanvasTextBox_SetPlaceholderColor()
+    Data.i @UI_CanvasTextBox_IsPassword()
+    Data.i @UI_CanvasTextBox_SetIsPassword()
+    Data.i @UI_CanvasTextBox_IsReadOnly()
+    Data.i @UI_CanvasTextBox_SetReadOnly()
+    Data.i @UI_CanvasTextBox_GetMaxLength()
+    Data.i @UI_CanvasTextBox_SetMaxLength()
+    Data.i @UI_CanvasTextBox_GetActiveBorderColor()
+    Data.i @UI_CanvasTextBox_SetActiveBorderColor()
+    Data.i @UI_CanvasTextBox_GetSelectionColor()
+    Data.i @UI_CanvasTextBox_SetSelectionColor()
+    Data.i @UI_CanvasTextBox_GetCursorPosition()
+    Data.i @UI_CanvasTextBox_SetCursorPosition()
+    Data.i @UI_CanvasTextBox_GetDisplayText()
+    Data.i @UI_CanvasTextBox_HasSelection()
+    Data.i @UI_CanvasTextBox_GetSelectionBounds()
+    Data.i @UI_CanvasTextBox_ClearSelection()
+    Data.i @UI_CanvasTextBox_SelectAll()
+    Data.i @UI_CanvasTextBox_DeleteSelection()
+    Data.i @UI_CanvasTextBox_InsertText()
+    Data.i @UI_CanvasTextBox_DeleteBackward()
+    Data.i @UI_CanvasTextBox_DeleteForward()
+    Data.i @UI_CanvasTextBox_Copy()
+    Data.i @UI_CanvasTextBox_Cut()
+    Data.i @UI_CanvasTextBox_Paste()
+    Data.i @UI_CanvasTextBox_OnSubmit()
+    Data.i @UI_CanvasTextBox_CharPosFromMouseX()
+    Data.i @UI_CanvasTextBox_EnsureCursorVisible()
   UI_ToggleSwitch_VTable_Data:
     Data.i @UI_Component_SetDataContext()
     Data.i @UI_Component_GetDataContext()
@@ -7708,7 +13723,7 @@ DataSection
     Data.i @UI_Gadget_SetVisible()
     Data.i @UI_Component_IsEnabled()
     Data.i @UI_Component_GetEnabled()
-    Data.i @UI_Gadget_SetEnabled()
+    Data.i @UI_CanvasControl_SetEnabled()
     Data.i @UI_Component_GetUserData()
     Data.i @UI_Component_SetUserData()
     Data.i @UI_Component_SetMargin()
@@ -7731,32 +13746,102 @@ DataSection
     Data.i @UI_Component_GetMaxHeight()
     Data.i @UI_Component_GetDesiredWidth()
     Data.i @UI_Component_GetDesiredHeight()
-    Data.i @UI_Component_Arrange()
-    Data.i @UI_Gadget_GetText()
-    Data.i @UI_Gadget_SetText()
+    Data.i @UI_CanvasControl_Arrange()
+    Data.i @UI_CanvasControl_OnAnimationTick()
+    Data.i @UI_CanvasControl_SetBackground()
+    Data.i @UI_CanvasControl_GetBackground()
+    Data.i @UI_CanvasControl_SetBorderColor()
+    Data.i @UI_CanvasControl_SetBorderThickness()
+    Data.i @UI_CanvasControl_SetCornerRadius()
+    Data.i @UI_CustomGadget_Free()
+    Data.i @UI_CanvasControl_GetText()
+    Data.i @UI_CanvasControl_SetText()
     Data.i @UI_Gadget_SetToolTip()
     Data.i @UI_Gadget_GetToolTip()
     Data.i @UI_Gadget_SetColor()
     Data.i @UI_Gadget_GetColor()
     Data.i @UI_Gadget_SetFont()
     Data.i @UI_Gadget_SetFocus()
-    Data.i @UI_CustomGadget_Free()
-    Data.i @UI_ToggleSwitch_OnClick()
-    Data.i @UI_Gadget_OnChange()
-    Data.i @UI_Gadget_OnFocus()
-    Data.i @UI_Gadget_OnLostFocus()
-    Data.i @UI_Gadget_OnRightClick()
-    Data.i @UI_CustomGadget_OnCustomEvent()
-    Data.i @UI_ToggleSwitch_OnPaint()
-    Data.i @UI_CustomGadget_Redraw()
-    Data.i @UI_CustomGadget_OnMouseEnter()
-    Data.i @UI_CustomGadget_OnMouseLeave()
-    Data.i @UI_CustomGadget_OnMouseDown()
-    Data.i @UI_CustomGadget_OnMouseUp()
-    Data.i @UI_CustomGadget_OnMouseMove()
-    Data.i @UI_CustomGadget_OnKeyDown()
+    Data.i @UI_Gadget_GetState()
+    Data.i @UI_Gadget_SetState()
     Data.i @UI_ToggleSwitch_IsChecked()
     Data.i @UI_ToggleSwitch_SetChecked()
+    Data.i @UI_CanvasControl_IsHovered()
+    Data.i @UI_CanvasControl_IsPressed()
+    Data.i @UI_CanvasControl_SetForeground()
+    Data.i @UI_CanvasControl_Redraw()
+    Data.i @UI_ToggleSwitch_OnClick()
+    Data.i @UI_Gadget_OnChange()
+    Data.i @UI_CanvasControl_OnFocus()
+    Data.i @UI_CanvasControl_OnLostFocus()
+    Data.i @UI_Gadget_OnRightClick()
+    Data.i @UI_CanvasControl_OnCustomEvent()
+    Data.i @UI_CanvasControl_InitDefaults()
+    Data.i @UI_CanvasControl_ScaleX()
+    Data.i @UI_CanvasControl_ScaleY()
+    Data.i @UI_CanvasControl_GetDpiScale()
+    Data.i @UI_CanvasControl_GetVisualState()
+    Data.i @UI_CanvasControl_UpdateVisualState()
+    Data.i @UI_CanvasControl_OnVisualStateChanged()
+    Data.i @UI_CanvasControl_IsMouseOver()
+    Data.i @UI_CanvasControl_SetIsHovered()
+    Data.i @UI_CanvasControl_SetIsPressed()
+    Data.i @UI_CanvasControl_IsFocused()
+    Data.i @UI_CanvasControl_SetIsFocused()
+    Data.i @UI_CanvasControl_GetForeground()
+    Data.i @UI_CanvasControl_GetHoverBackground()
+    Data.i @UI_CanvasControl_SetHoverBackground()
+    Data.i @UI_CanvasControl_GetHoverForeground()
+    Data.i @UI_CanvasControl_SetHoverForeground()
+    Data.i @UI_CanvasControl_GetPressedBackground()
+    Data.i @UI_CanvasControl_SetPressedBackground()
+    Data.i @UI_CanvasControl_GetPressedForeground()
+    Data.i @UI_CanvasControl_SetPressedForeground()
+    Data.i @UI_CanvasControl_GetDisabledBackground()
+    Data.i @UI_CanvasControl_SetDisabledBackground()
+    Data.i @UI_CanvasControl_GetDisabledForeground()
+    Data.i @UI_CanvasControl_SetDisabledForeground()
+    Data.i @UI_CanvasControl_GetBorderColor()
+    Data.i @UI_CanvasControl_GetHoverBorderColor()
+    Data.i @UI_CanvasControl_SetHoverBorderColor()
+    Data.i @UI_CanvasControl_GetPressedBorderColor()
+    Data.i @UI_CanvasControl_SetPressedBorderColor()
+    Data.i @UI_CanvasControl_GetBorderThickness()
+    Data.i @UI_CanvasControl_GetCornerRadius()
+    Data.i @UI_CanvasControl_SetBorder()
+    Data.i @UI_CanvasControl_GetBorderLeftThickness()
+    Data.i @UI_CanvasControl_SetBorderLeftThickness()
+    Data.i @UI_CanvasControl_GetBorderLeftColor()
+    Data.i @UI_CanvasControl_SetBorderLeftColor()
+    Data.i @UI_CanvasControl_SetPadding()
+    Data.i @UI_CanvasControl_GetPaddingLeft()
+    Data.i @UI_CanvasControl_GetPaddingTop()
+    Data.i @UI_CanvasControl_GetPaddingRight()
+    Data.i @UI_CanvasControl_GetPaddingBottom()
+    Data.i @UI_CanvasControl_GetCurrentBackgroundColor()
+    Data.i @UI_CanvasControl_GetCurrentForegroundColor()
+    Data.i @UI_CanvasControl_GetCurrentBorderColor()
+    Data.i @UI_CanvasControl_DrawControlBackground()
+    Data.i @UI_CanvasControl_DrawFocusRing()
+    Data.i @UI_ToggleSwitch_OnPaint()
+    Data.i @UI_CanvasControl_OnMouseEnter()
+    Data.i @UI_CanvasControl_OnMouseLeave()
+    Data.i @UI_CanvasControl_OnMouseDown()
+    Data.i @UI_CanvasControl_OnMouseUp()
+    Data.i @UI_CanvasControl_OnMouseMove()
+    Data.i @UI_CanvasControl_OnMouseWheel()
+    Data.i @UI_CanvasControl_OnKeyDown()
+    Data.i @UI_CanvasControl_OnKeyUp()
+    Data.i @UI_CanvasControl_OnInput()
+    Data.i @UI_CanvasControl_OnLeftDoubleClick()
+    Data.i @UI_CanvasControl_SetTypography()
+    Data.i @UI_CanvasControl_SetParentBackground()
+    Data.i @UI_CanvasControl_GetParentBackground()
+    Data.i @UI_CanvasControl_SetAnimateHoverScale()
+    Data.i @UI_CanvasControl_IsAnimateHoverScale()
+    Data.i @UI_CanvasControl_ApplyStyle()
+    Data.i @UI_CanvasControl_ApplyStyleTriggers()
+    Data.i @UI_CanvasControl_GetStyle()
   UI_ListIcon_VTable_Data:
     Data.i @UI_Component_SetDataContext()
     Data.i @UI_Component_GetDataContext()
@@ -7808,6 +13893,13 @@ DataSection
     Data.i @UI_Component_GetDesiredWidth()
     Data.i @UI_Component_GetDesiredHeight()
     Data.i @UI_Component_Arrange()
+    Data.i @UI_Component_OnAnimationTick()
+    Data.i @UI_Gadget_SetBackground()
+    Data.i @UI_Component_GetBackground()
+    Data.i @UI_Component_SetBorderColor()
+    Data.i @UI_Component_SetBorderThickness()
+    Data.i @UI_Component_SetCornerRadius()
+    Data.i @UI_ListIcon_Free()
     Data.i @UI_Gadget_GetText()
     Data.i @UI_Gadget_SetText()
     Data.i @UI_Gadget_SetToolTip()
@@ -7816,7 +13908,14 @@ DataSection
     Data.i @UI_Gadget_GetColor()
     Data.i @UI_Gadget_SetFont()
     Data.i @UI_Gadget_SetFocus()
-    Data.i @UI_ListIcon_Free()
+    Data.i @UI_Gadget_GetState()
+    Data.i @UI_Gadget_SetState()
+    Data.i @UI_Gadget_IsChecked()
+    Data.i @UI_Gadget_SetChecked()
+    Data.i @UI_Gadget_IsHovered()
+    Data.i @UI_Gadget_IsPressed()
+    Data.i @UI_Gadget_SetForeground()
+    Data.i @UI_Gadget_Redraw()
     Data.i @UI_Gadget_OnClick()
     Data.i @UI_Gadget_OnChange()
     Data.i @UI_Gadget_OnFocus()
@@ -7834,12 +13933,303 @@ DataSection
     Data.i @UI_ListIcon_Clear()
     Data.i @UI_ListIcon_SetItemData()
     Data.i @UI_ListIcon_GetItemData()
+  UI_Canvas_VTable_Data:
+    Data.i @UI_Component_SetDataContext()
+    Data.i @UI_Component_GetDataContext()
+    Data.i @UI_Component_GetID()
+    Data.i @UI_Component_GetHandle()
+    Data.i @UI_Component_GetTag()
+    Data.i @UI_Component_SetTag()
+    Data.i @UI_Component_GetX()
+    Data.i @UI_Component_SetX()
+    Data.i @UI_Component_GetY()
+    Data.i @UI_Component_SetY()
+    Data.i @UI_Component_GetWidth()
+    Data.i @UI_Component_SetWidth()
+    Data.i @UI_Component_GetHeight()
+    Data.i @UI_Component_SetHeight()
+    Data.i @UI_Component_SetAutoWidth()
+    Data.i @UI_Component_SetAutoHeight()
+    Data.i @UI_Component_HasExplicitWidth()
+    Data.i @UI_Component_HasExplicitHeight()
+    Data.i @UI_Component_SetLocation()
+    Data.i @UI_Component_SetSize()
+    Data.i @UI_Gadget_SetPosition()
+    Data.i @UI_Component_IsVisible()
+    Data.i @UI_Component_GetVisible()
+    Data.i @UI_Gadget_SetVisible()
+    Data.i @UI_Component_IsEnabled()
+    Data.i @UI_Component_GetEnabled()
+    Data.i @UI_Gadget_SetEnabled()
+    Data.i @UI_Component_GetUserData()
+    Data.i @UI_Component_SetUserData()
+    Data.i @UI_Component_SetMargin()
+    Data.i @UI_Component_SetMarginAll()
+    Data.i @UI_Component_GetMarginLeft()
+    Data.i @UI_Component_GetMarginTop()
+    Data.i @UI_Component_GetMarginRight()
+    Data.i @UI_Component_GetMarginBottom()
+    Data.i @UI_Component_SetHorizontalAlignment()
+    Data.i @UI_Component_GetHorizontalAlignment()
+    Data.i @UI_Component_SetVerticalAlignment()
+    Data.i @UI_Component_GetVerticalAlignment()
+    Data.i @UI_Component_SetMinWidth()
+    Data.i @UI_Component_GetMinWidth()
+    Data.i @UI_Component_SetMaxWidth()
+    Data.i @UI_Component_GetMaxWidth()
+    Data.i @UI_Component_SetMinHeight()
+    Data.i @UI_Component_GetMinHeight()
+    Data.i @UI_Component_SetMaxHeight()
+    Data.i @UI_Component_GetMaxHeight()
+    Data.i @UI_Component_GetDesiredWidth()
+    Data.i @UI_Component_GetDesiredHeight()
+    Data.i @UI_Component_Arrange()
+    Data.i @UI_Component_OnAnimationTick()
+    Data.i @UI_Gadget_SetBackground()
+    Data.i @UI_Component_GetBackground()
+    Data.i @UI_Component_SetBorderColor()
+    Data.i @UI_Component_SetBorderThickness()
+    Data.i @UI_Component_SetCornerRadius()
+    Data.i @UI_Canvas_Free()
+    Data.i @UI_Gadget_GetText()
+    Data.i @UI_Gadget_SetText()
+    Data.i @UI_Gadget_SetToolTip()
+    Data.i @UI_Gadget_GetToolTip()
+    Data.i @UI_Gadget_SetColor()
+    Data.i @UI_Gadget_GetColor()
+    Data.i @UI_Gadget_SetFont()
+    Data.i @UI_Gadget_SetFocus()
+    Data.i @UI_Gadget_GetState()
+    Data.i @UI_Gadget_SetState()
+    Data.i @UI_Gadget_IsChecked()
+    Data.i @UI_Gadget_SetChecked()
+    Data.i @UI_Gadget_IsHovered()
+    Data.i @UI_Gadget_IsPressed()
+    Data.i @UI_Gadget_SetForeground()
+    Data.i @UI_Gadget_Redraw()
+    Data.i @UI_Gadget_OnClick()
+    Data.i @UI_Gadget_OnChange()
+    Data.i @UI_Gadget_OnFocus()
+    Data.i @UI_Gadget_OnLostFocus()
+    Data.i @UI_Gadget_OnRightClick()
+    Data.i @UI_Gadget_OnCustomEvent()
+  UI_TreeNode_VTable_Data:
+    Data.i @UI_TreeNode_GetText()
+    Data.i @UI_TreeNode_SetText()
+    Data.i @UI_TreeNode_GetTag()
+    Data.i @UI_TreeNode_SetTag()
+    Data.i @UI_TreeNode_GetIcon()
+    Data.i @UI_TreeNode_SetIcon()
+    Data.i @UI_TreeNode_GetDataContext()
+    Data.i @UI_TreeNode_SetDataContext()
+    Data.i @UI_TreeNode_IsExpanded()
+    Data.i @UI_TreeNode_SetExpanded()
+    Data.i @UI_TreeNode_IsChecked()
+    Data.i @UI_TreeNode_SetChecked()
+    Data.i @UI_TreeNode_IsSelected()
+    Data.i @UI_TreeNode_SetSelected()
+    Data.i @UI_TreeNode_HasCheckBox()
+    Data.i @UI_TreeNode_SetHasCheckBox()
+    Data.i @UI_TreeNode_GetParent()
+    Data.i @UI_TreeNode_SetParent()
+    Data.i @UI_TreeNode_AddChild()
+    Data.i @UI_TreeNode_RemoveChild()
+    Data.i @UI_TreeNode_GetChildCount()
+    Data.i @UI_TreeNode_GetChild()
+    Data.i @UI_TreeNode_AddButton()
+    Data.i @UI_TreeNode_GetButtonCount()
+    Data.i @UI_TreeNode_SetButtonPos()
+    Data.i @UI_TreeNode_GetButtonId()
+    Data.i @UI_TreeNode_GetButtonIcon()
+    Data.i @UI_TreeNode_GetButtonCallback()
+    Data.i @UI_TreeNode_SetRenderLayout()
+    Data.i @UI_TreeNode_GetRenderY()
+    Data.i @UI_TreeNode_GetRenderH()
+    Data.i @UI_TreeNode_HitTestExpand()
+    Data.i @UI_TreeNode_HitTestCheck()
+    Data.i @UI_TreeNode_HitTestButton()
+    Data.i @UI_TreeNode_ExpandAll()
+    Data.i @UI_TreeNode_CollapseAll()
+    Data.i @UI_TreeNode_Free()
+  UI_CanvasTree_VTable_Data:
+    Data.i @UI_Component_SetDataContext()
+    Data.i @UI_Component_GetDataContext()
+    Data.i @UI_Component_GetID()
+    Data.i @UI_Component_GetHandle()
+    Data.i @UI_Component_GetTag()
+    Data.i @UI_Component_SetTag()
+    Data.i @UI_Component_GetX()
+    Data.i @UI_Component_SetX()
+    Data.i @UI_Component_GetY()
+    Data.i @UI_Component_SetY()
+    Data.i @UI_Component_GetWidth()
+    Data.i @UI_Component_SetWidth()
+    Data.i @UI_Component_GetHeight()
+    Data.i @UI_Component_SetHeight()
+    Data.i @UI_Component_SetAutoWidth()
+    Data.i @UI_Component_SetAutoHeight()
+    Data.i @UI_Component_HasExplicitWidth()
+    Data.i @UI_Component_HasExplicitHeight()
+    Data.i @UI_Component_SetLocation()
+    Data.i @UI_Component_SetSize()
+    Data.i @UI_Gadget_SetPosition()
+    Data.i @UI_Component_IsVisible()
+    Data.i @UI_Component_GetVisible()
+    Data.i @UI_Gadget_SetVisible()
+    Data.i @UI_Component_IsEnabled()
+    Data.i @UI_Component_GetEnabled()
+    Data.i @UI_CanvasControl_SetEnabled()
+    Data.i @UI_Component_GetUserData()
+    Data.i @UI_Component_SetUserData()
+    Data.i @UI_Component_SetMargin()
+    Data.i @UI_Component_SetMarginAll()
+    Data.i @UI_Component_GetMarginLeft()
+    Data.i @UI_Component_GetMarginTop()
+    Data.i @UI_Component_GetMarginRight()
+    Data.i @UI_Component_GetMarginBottom()
+    Data.i @UI_Component_SetHorizontalAlignment()
+    Data.i @UI_Component_GetHorizontalAlignment()
+    Data.i @UI_Component_SetVerticalAlignment()
+    Data.i @UI_Component_GetVerticalAlignment()
+    Data.i @UI_Component_SetMinWidth()
+    Data.i @UI_Component_GetMinWidth()
+    Data.i @UI_Component_SetMaxWidth()
+    Data.i @UI_Component_GetMaxWidth()
+    Data.i @UI_Component_SetMinHeight()
+    Data.i @UI_Component_GetMinHeight()
+    Data.i @UI_Component_SetMaxHeight()
+    Data.i @UI_Component_GetMaxHeight()
+    Data.i @UI_Component_GetDesiredWidth()
+    Data.i @UI_Component_GetDesiredHeight()
+    Data.i @UI_CanvasControl_Arrange()
+    Data.i @UI_CanvasControl_OnAnimationTick()
+    Data.i @UI_CanvasControl_SetBackground()
+    Data.i @UI_CanvasControl_GetBackground()
+    Data.i @UI_CanvasControl_SetBorderColor()
+    Data.i @UI_CanvasControl_SetBorderThickness()
+    Data.i @UI_CanvasControl_SetCornerRadius()
+    Data.i @UI_CanvasTree_Free()
+    Data.i @UI_CanvasControl_GetText()
+    Data.i @UI_CanvasControl_SetText()
+    Data.i @UI_Gadget_SetToolTip()
+    Data.i @UI_Gadget_GetToolTip()
+    Data.i @UI_Gadget_SetColor()
+    Data.i @UI_Gadget_GetColor()
+    Data.i @UI_CanvasTree_SetFont()
+    Data.i @UI_Gadget_SetFocus()
+    Data.i @UI_Gadget_GetState()
+    Data.i @UI_Gadget_SetState()
+    Data.i @UI_Gadget_IsChecked()
+    Data.i @UI_Gadget_SetChecked()
+    Data.i @UI_CanvasControl_IsHovered()
+    Data.i @UI_CanvasControl_IsPressed()
+    Data.i @UI_CanvasControl_SetForeground()
+    Data.i @UI_CanvasControl_Redraw()
+    Data.i @UI_Gadget_OnClick()
+    Data.i @UI_Gadget_OnChange()
+    Data.i @UI_CanvasControl_OnFocus()
+    Data.i @UI_CanvasControl_OnLostFocus()
+    Data.i @UI_Gadget_OnRightClick()
+    Data.i @UI_CanvasControl_OnCustomEvent()
+    Data.i @UI_CanvasTree_InitDefaults()
+    Data.i @UI_CanvasControl_ScaleX()
+    Data.i @UI_CanvasControl_ScaleY()
+    Data.i @UI_CanvasControl_GetDpiScale()
+    Data.i @UI_CanvasControl_GetVisualState()
+    Data.i @UI_CanvasControl_UpdateVisualState()
+    Data.i @UI_CanvasControl_OnVisualStateChanged()
+    Data.i @UI_CanvasControl_IsMouseOver()
+    Data.i @UI_CanvasControl_SetIsHovered()
+    Data.i @UI_CanvasControl_SetIsPressed()
+    Data.i @UI_CanvasControl_IsFocused()
+    Data.i @UI_CanvasControl_SetIsFocused()
+    Data.i @UI_CanvasControl_GetForeground()
+    Data.i @UI_CanvasControl_GetHoverBackground()
+    Data.i @UI_CanvasControl_SetHoverBackground()
+    Data.i @UI_CanvasControl_GetHoverForeground()
+    Data.i @UI_CanvasControl_SetHoverForeground()
+    Data.i @UI_CanvasControl_GetPressedBackground()
+    Data.i @UI_CanvasControl_SetPressedBackground()
+    Data.i @UI_CanvasControl_GetPressedForeground()
+    Data.i @UI_CanvasControl_SetPressedForeground()
+    Data.i @UI_CanvasControl_GetDisabledBackground()
+    Data.i @UI_CanvasControl_SetDisabledBackground()
+    Data.i @UI_CanvasControl_GetDisabledForeground()
+    Data.i @UI_CanvasControl_SetDisabledForeground()
+    Data.i @UI_CanvasControl_GetBorderColor()
+    Data.i @UI_CanvasControl_GetHoverBorderColor()
+    Data.i @UI_CanvasControl_SetHoverBorderColor()
+    Data.i @UI_CanvasControl_GetPressedBorderColor()
+    Data.i @UI_CanvasControl_SetPressedBorderColor()
+    Data.i @UI_CanvasControl_GetBorderThickness()
+    Data.i @UI_CanvasControl_GetCornerRadius()
+    Data.i @UI_CanvasControl_SetBorder()
+    Data.i @UI_CanvasControl_GetBorderLeftThickness()
+    Data.i @UI_CanvasControl_SetBorderLeftThickness()
+    Data.i @UI_CanvasControl_GetBorderLeftColor()
+    Data.i @UI_CanvasControl_SetBorderLeftColor()
+    Data.i @UI_CanvasControl_SetPadding()
+    Data.i @UI_CanvasControl_GetPaddingLeft()
+    Data.i @UI_CanvasControl_GetPaddingTop()
+    Data.i @UI_CanvasControl_GetPaddingRight()
+    Data.i @UI_CanvasControl_GetPaddingBottom()
+    Data.i @UI_CanvasControl_GetCurrentBackgroundColor()
+    Data.i @UI_CanvasControl_GetCurrentForegroundColor()
+    Data.i @UI_CanvasControl_GetCurrentBorderColor()
+    Data.i @UI_CanvasControl_DrawControlBackground()
+    Data.i @UI_CanvasControl_DrawFocusRing()
+    Data.i @UI_CanvasTree_OnPaint()
+    Data.i @UI_CanvasControl_OnMouseEnter()
+    Data.i @UI_CanvasTree_OnMouseLeave()
+    Data.i @UI_CanvasTree_OnMouseDown()
+    Data.i @UI_CanvasTree_OnMouseUp()
+    Data.i @UI_CanvasTree_OnMouseMove()
+    Data.i @UI_CanvasTree_OnMouseWheel()
+    Data.i @UI_CanvasTree_OnKeyDown()
+    Data.i @UI_CanvasControl_OnKeyUp()
+    Data.i @UI_CanvasControl_OnInput()
+    Data.i @UI_CanvasControl_OnLeftDoubleClick()
+    Data.i @UI_CanvasControl_SetTypography()
+    Data.i @UI_CanvasControl_SetParentBackground()
+    Data.i @UI_CanvasControl_GetParentBackground()
+    Data.i @UI_CanvasControl_SetAnimateHoverScale()
+    Data.i @UI_CanvasControl_IsAnimateHoverScale()
+    Data.i @UI_CanvasControl_ApplyStyle()
+    Data.i @UI_CanvasControl_ApplyStyleTriggers()
+    Data.i @UI_CanvasControl_GetStyle()
+    Data.i @UI_CanvasTree_GetRoot()
+    Data.i @UI_CanvasTree_GetSelectedNode()
+    Data.i @UI_CanvasTree_SetSelectedNode()
+    Data.i @UI_CanvasTree_SetShowCheckBoxes()
+    Data.i @UI_CanvasTree_GetShowCheckBoxes()
+    Data.i @UI_CanvasTree_SetShowLines()
+    Data.i @UI_CanvasTree_GetShowLines()
+    Data.i @UI_CanvasTree_SetLineHeight()
+    Data.i @UI_CanvasTree_GetLineHeight()
+    Data.i @UI_CanvasTree_SetIndentWidth()
+    Data.i @UI_CanvasTree_SetDarkMode()
+    Data.i @UI_CanvasTree_SetColors()
+    Data.i @UI_CanvasTree_SetOnSelect()
+    Data.i @UI_CanvasTree_SetOnExpand()
+    Data.i @UI_CanvasTree_SetOnCheck()
+    Data.i @UI_CanvasTree_SetOnButtonClick()
+    Data.i @UI_CanvasTree_AddNode()
+    Data.i @UI_CanvasTree_Clear()
+    Data.i @UI_CanvasTree_ExpandAll()
+    Data.i @UI_CanvasTree_CollapseAll()
+    Data.i @UI_CanvasTree_PopulateFlatList()
+    Data.i @UI_CanvasTree_RebuildVisibleList()
+    Data.i @UI_CanvasTree_EnsureVisible()
   UI_XMLLoader_VTable_Data:
     Data.i @UI_XMLLoader_Free()
     Data.i @UI_XMLLoader_ParseBoxValues()
+    Data.i @UI_XMLLoader_ParseColor()
+    Data.i @UI_XMLLoader_ParseResources()
+    Data.i @UI_XMLLoader_ApplyCanvasControlAttributes()
     Data.i @UI_XMLLoader_ApplyCommonAttributes()
     Data.i @UI_XMLLoader_ParseBindingExpression()
     Data.i @UI_XMLLoader_ApplyDataBindings()
+    Data.i @UI_XMLLoader_ParseCanvasTreeNodes()
     Data.i @UI_XMLLoader_ParseNode()
     Data.i @UI_XMLLoader_LoadFromFile()
     Data.i @UI_XMLLoader_LoadFromString()
@@ -7927,6 +14317,13 @@ DataSection
     Data.i @UI_Component_GetDesiredWidth()
     Data.i @UI_Component_GetDesiredHeight()
     Data.i @UI_Component_Arrange()
+    Data.i @UI_Component_OnAnimationTick()
+    Data.i @UI_Component_SetBackground()
+    Data.i @UI_Component_GetBackground()
+    Data.i @UI_Component_SetBorderColor()
+    Data.i @UI_Component_SetBorderThickness()
+    Data.i @UI_Component_SetCornerRadius()
+    Data.i @UI_Window_Free()
     Data.i @UI_Window_CreateWindowInternal()
     Data.i @UI_Window_SetTitle()
     Data.i @UI_Window_GetTitle()
@@ -7938,10 +14335,12 @@ DataSection
     Data.i @UI_Window_GetContent()
     Data.i @UI_Window_RegisterControl()
     Data.i @UI_Window_FindControl()
+    Data.i @UI_Window_SetBackgroundColor()
+    Data.i @UI_Window_GetBackgroundColor()
     Data.i @UI_Window_LoadView()
     Data.i @UI_Window_LoadViewFromString()
+    Data.i @UI_Window_GetResources()
     Data.i @UI_Window_Close()
-    Data.i @UI_Window_Free()
     Data.i @UI_Window_OnClose()
     Data.i @UI_Window_OnResize()
     Data.i @UI_Window_OnMove()
@@ -7955,6 +14354,63 @@ EndDataSection
 ; ----------------------------------------------------------------------------
 ; 5. CONSTRUCTORS & FACTORY FUNCTIONS
 ; ----------------------------------------------------------------------------
+
+Procedure.i New_UI_AnimationEngine()
+  Protected *obj.UI_AnimationEngine_Inst = AllocateStructure(UI_AnimationEngine_Inst)
+  If *obj
+    *obj\VTable = ?UI_AnimationEngine_VTable_Data
+    UI_AnimationEngine_Init(*obj)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure Free_UI_AnimationEngine(*obj.UI_AnimationEngine_Inst)
+  If *obj
+    UI_AnimationEngine_Free(*obj)
+    FreeStructure(*obj)
+  EndIf
+EndProcedure
+
+Procedure.i New_UI_Style_void()
+  Protected *obj.UI_Style_Inst = AllocateStructure(UI_Style_Inst)
+  If *obj
+    *obj\VTable = ?UI_Style_VTable_Data
+    UI_Style_Init_void(*obj)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure.i New_UI_Style_s_s_s(targetType_p.s, key_p.s, basedOn_p.s)
+  Protected *obj.UI_Style_Inst = AllocateStructure(UI_Style_Inst)
+  If *obj
+    *obj\VTable = ?UI_Style_VTable_Data
+    UI_Style_Init_s_s_s(*obj, targetType_p, key_p, basedOn_p)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure Free_UI_Style(*obj.UI_Style_Inst)
+  If *obj
+    UI_Style_Free(*obj)
+    FreeStructure(*obj)
+  EndIf
+EndProcedure
+
+Procedure.i New_UI_ResourceDictionary()
+  Protected *obj.UI_ResourceDictionary_Inst = AllocateStructure(UI_ResourceDictionary_Inst)
+  If *obj
+    *obj\VTable = ?UI_ResourceDictionary_VTable_Data
+    UI_ResourceDictionary_Init(*obj)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure Free_UI_ResourceDictionary(*obj.UI_ResourceDictionary_Inst)
+  If *obj
+    UI_ResourceDictionary_Free(*obj)
+    FreeStructure(*obj)
+  EndIf
+EndProcedure
 
 Procedure.i New_UI_Window_void()
   Protected *obj.UI_Window_Inst = AllocateStructure(UI_Window_Inst)
@@ -8227,6 +14683,7 @@ EndProcedure
 
 Procedure Free_UI_Layouts_Container(*obj.UI_Layouts_Container_Inst)
   If *obj
+    UI_Layouts_Container_Free(*obj)
     FreeStructure(*obj)
   EndIf
 EndProcedure
@@ -8269,6 +14726,7 @@ EndProcedure
 
 Procedure Free_UI_Layouts_StackPanel(*obj.UI_Layouts_StackPanel_Inst)
   If *obj
+    UI_Layouts_Container_Free(*obj)
     FreeStructure(*obj)
   EndIf
 EndProcedure
@@ -8302,6 +14760,7 @@ EndProcedure
 
 Procedure Free_UI_Layouts_DockPanel(*obj.UI_Layouts_DockPanel_Inst)
   If *obj
+    UI_Layouts_DockPanel_Free(*obj)
     FreeStructure(*obj)
   EndIf
 EndProcedure
@@ -8326,6 +14785,7 @@ EndProcedure
 
 Procedure Free_UI_Layouts_Grid(*obj.UI_Layouts_Grid_Inst)
   If *obj
+    UI_Layouts_Grid_Free(*obj)
     FreeStructure(*obj)
   EndIf
 EndProcedure
@@ -8939,6 +15399,144 @@ Procedure Free_UI_TabControl(*obj.UI_TabControl_Inst)
   EndIf
 EndProcedure
 
+Procedure.i New_UI_CanvasButton_void()
+  Protected *obj.UI_CanvasButton_Inst = AllocateStructure(UI_CanvasButton_Inst)
+  If *obj
+    *obj\VTable = ?UI_CanvasButton_VTable_Data
+    UI_CanvasButton_Init_void(*obj)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure.i New_UI_CanvasButton_s(text_p.s)
+  Protected *obj.UI_CanvasButton_Inst = AllocateStructure(UI_CanvasButton_Inst)
+  If *obj
+    *obj\VTable = ?UI_CanvasButton_VTable_Data
+    UI_CanvasButton_Init_s(*obj, text_p)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure.i New_UI_CanvasButton_s_i_i(text_p.s, w_p.i, h_p.i)
+  Protected *obj.UI_CanvasButton_Inst = AllocateStructure(UI_CanvasButton_Inst)
+  If *obj
+    *obj\VTable = ?UI_CanvasButton_VTable_Data
+    UI_CanvasButton_Init_s_i_i(*obj, text_p, w_p, h_p)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure.i New_UI_CanvasButton_i_i_i_i_s(x_p.i, y_p.i, w_p.i, h_p.i, text_p.s)
+  Protected *obj.UI_CanvasButton_Inst = AllocateStructure(UI_CanvasButton_Inst)
+  If *obj
+    *obj\VTable = ?UI_CanvasButton_VTable_Data
+    UI_CanvasButton_Init_i_i_i_i_s(*obj, x_p, y_p, w_p, h_p, text_p)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure Free_UI_CanvasButton(*obj.UI_CanvasButton_Inst)
+  If *obj
+    UI_CanvasControl_Free(*obj)
+    FreeStructure(*obj)
+  EndIf
+EndProcedure
+
+Procedure.i New_UI_CanvasText_void()
+  Protected *obj.UI_CanvasText_Inst = AllocateStructure(UI_CanvasText_Inst)
+  If *obj
+    *obj\VTable = ?UI_CanvasText_VTable_Data
+    UI_CanvasText_Init_void(*obj)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure.i New_UI_CanvasText_s(text_p.s)
+  Protected *obj.UI_CanvasText_Inst = AllocateStructure(UI_CanvasText_Inst)
+  If *obj
+    *obj\VTable = ?UI_CanvasText_VTable_Data
+    UI_CanvasText_Init_s(*obj, text_p)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure.i New_UI_CanvasText_s_i_i(text_p.s, w_p.i, h_p.i)
+  Protected *obj.UI_CanvasText_Inst = AllocateStructure(UI_CanvasText_Inst)
+  If *obj
+    *obj\VTable = ?UI_CanvasText_VTable_Data
+    UI_CanvasText_Init_s_i_i(*obj, text_p, w_p, h_p)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure.i New_UI_CanvasText_i_i_i_i_s(x_p.i, y_p.i, w_p.i, h_p.i, text_p.s)
+  Protected *obj.UI_CanvasText_Inst = AllocateStructure(UI_CanvasText_Inst)
+  If *obj
+    *obj\VTable = ?UI_CanvasText_VTable_Data
+    UI_CanvasText_Init_i_i_i_i_s(*obj, x_p, y_p, w_p, h_p, text_p)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure Free_UI_CanvasText(*obj.UI_CanvasText_Inst)
+  If *obj
+    UI_CanvasControl_Free(*obj)
+    FreeStructure(*obj)
+  EndIf
+EndProcedure
+
+Procedure.i New_UI_CanvasTextBox_void()
+  Protected *obj.UI_CanvasTextBox_Inst = AllocateStructure(UI_CanvasTextBox_Inst)
+  If *obj
+    *obj\VTable = ?UI_CanvasTextBox_VTable_Data
+    UI_CanvasTextBox_Init_void(*obj)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure.i New_UI_CanvasTextBox_s(placeholder_p.s)
+  Protected *obj.UI_CanvasTextBox_Inst = AllocateStructure(UI_CanvasTextBox_Inst)
+  If *obj
+    *obj\VTable = ?UI_CanvasTextBox_VTable_Data
+    UI_CanvasTextBox_Init_s(*obj, placeholder_p)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure.i New_UI_CanvasTextBox_s_i_i(placeholder_p.s, w_p.i, h_p.i)
+  Protected *obj.UI_CanvasTextBox_Inst = AllocateStructure(UI_CanvasTextBox_Inst)
+  If *obj
+    *obj\VTable = ?UI_CanvasTextBox_VTable_Data
+    UI_CanvasTextBox_Init_s_i_i(*obj, placeholder_p, w_p, h_p)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure.i New_UI_CanvasTextBox_i_i_i_i_s(x_p.i, y_p.i, w_p.i, h_p.i, placeholder_p.s)
+  Protected *obj.UI_CanvasTextBox_Inst = AllocateStructure(UI_CanvasTextBox_Inst)
+  If *obj
+    *obj\VTable = ?UI_CanvasTextBox_VTable_Data
+    UI_CanvasTextBox_Init_i_i_i_i_s(*obj, x_p, y_p, w_p, h_p, placeholder_p)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure.i New_UI_CanvasTextBox_i_i_i_i_s_b(x_p.i, y_p.i, w_p.i, h_p.i, placeholder_p.s, isPassword_p.b)
+  Protected *obj.UI_CanvasTextBox_Inst = AllocateStructure(UI_CanvasTextBox_Inst)
+  If *obj
+    *obj\VTable = ?UI_CanvasTextBox_VTable_Data
+    UI_CanvasTextBox_Init_i_i_i_i_s_b(*obj, x_p, y_p, w_p, h_p, placeholder_p, isPassword_p)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure Free_UI_CanvasTextBox(*obj.UI_CanvasTextBox_Inst)
+  If *obj
+    UI_CanvasTextBox_Free(*obj)
+    FreeStructure(*obj)
+  EndIf
+EndProcedure
+
 Procedure.i New_UI_ToggleSwitch_void()
   Protected *obj.UI_ToggleSwitch_Inst = AllocateStructure(UI_ToggleSwitch_Inst)
   If *obj
@@ -9021,6 +15619,135 @@ EndProcedure
 Procedure Free_UI_ListIcon(*obj.UI_ListIcon_Inst)
   If *obj
     UI_ListIcon_Free(*obj)
+    FreeStructure(*obj)
+  EndIf
+EndProcedure
+
+Procedure.i New_UI_Canvas_void()
+  Protected *obj.UI_Canvas_Inst = AllocateStructure(UI_Canvas_Inst)
+  If *obj
+    *obj\VTable = ?UI_Canvas_VTable_Data
+    UI_Canvas_Init_void(*obj)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure.i New_UI_Canvas_i_i(w_p.i, h_p.i)
+  Protected *obj.UI_Canvas_Inst = AllocateStructure(UI_Canvas_Inst)
+  If *obj
+    *obj\VTable = ?UI_Canvas_VTable_Data
+    UI_Canvas_Init_i_i(*obj, w_p, h_p)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure.i New_UI_Canvas_i_i_i_i(x_p.i, y_p.i, w_p.i, h_p.i)
+  Protected *obj.UI_Canvas_Inst = AllocateStructure(UI_Canvas_Inst)
+  If *obj
+    *obj\VTable = ?UI_Canvas_VTable_Data
+    UI_Canvas_Init_i_i_i_i(*obj, x_p, y_p, w_p, h_p)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure.i New_UI_Canvas_i_i_i_i_i(x_p.i, y_p.i, w_p.i, h_p.i, flags_p.i)
+  Protected *obj.UI_Canvas_Inst = AllocateStructure(UI_Canvas_Inst)
+  If *obj
+    *obj\VTable = ?UI_Canvas_VTable_Data
+    UI_Canvas_Init_i_i_i_i_i(*obj, x_p, y_p, w_p, h_p, flags_p)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure Free_UI_Canvas(*obj.UI_Canvas_Inst)
+  If *obj
+    UI_Canvas_Free(*obj)
+    FreeStructure(*obj)
+  EndIf
+EndProcedure
+
+Procedure.i New_UI_TreeNode_void()
+  Protected *obj.UI_TreeNode_Inst = AllocateStructure(UI_TreeNode_Inst)
+  If *obj
+    *obj\VTable = ?UI_TreeNode_VTable_Data
+    UI_TreeNode_Init_void(*obj)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure.i New_UI_TreeNode_s(text_p.s)
+  Protected *obj.UI_TreeNode_Inst = AllocateStructure(UI_TreeNode_Inst)
+  If *obj
+    *obj\VTable = ?UI_TreeNode_VTable_Data
+    UI_TreeNode_Init_s(*obj, text_p)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure.i New_UI_TreeNode_s_i(text_p.s, icon_p.i)
+  Protected *obj.UI_TreeNode_Inst = AllocateStructure(UI_TreeNode_Inst)
+  If *obj
+    *obj\VTable = ?UI_TreeNode_VTable_Data
+    UI_TreeNode_Init_s_i(*obj, text_p, icon_p)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure.i New_UI_TreeNode_s_i_s(text_p.s, icon_p.i, tag_p.s)
+  Protected *obj.UI_TreeNode_Inst = AllocateStructure(UI_TreeNode_Inst)
+  If *obj
+    *obj\VTable = ?UI_TreeNode_VTable_Data
+    UI_TreeNode_Init_s_i_s(*obj, text_p, icon_p, tag_p)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure Free_UI_TreeNode(*obj.UI_TreeNode_Inst)
+  If *obj
+    UI_TreeNode_Free(*obj)
+    FreeStructure(*obj)
+  EndIf
+EndProcedure
+
+Procedure.i New_UI_CanvasTree_void()
+  Protected *obj.UI_CanvasTree_Inst = AllocateStructure(UI_CanvasTree_Inst)
+  If *obj
+    *obj\VTable = ?UI_CanvasTree_VTable_Data
+    UI_CanvasTree_Init_void(*obj)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure.i New_UI_CanvasTree_i_i(w_p.i, h_p.i)
+  Protected *obj.UI_CanvasTree_Inst = AllocateStructure(UI_CanvasTree_Inst)
+  If *obj
+    *obj\VTable = ?UI_CanvasTree_VTable_Data
+    UI_CanvasTree_Init_i_i(*obj, w_p, h_p)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure.i New_UI_CanvasTree_i_i_i_i(x_p.i, y_p.i, w_p.i, h_p.i)
+  Protected *obj.UI_CanvasTree_Inst = AllocateStructure(UI_CanvasTree_Inst)
+  If *obj
+    *obj\VTable = ?UI_CanvasTree_VTable_Data
+    UI_CanvasTree_Init_i_i_i_i(*obj, x_p, y_p, w_p, h_p)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure.i New_UI_CanvasTree_i_i_i_i_i(x_p.i, y_p.i, w_p.i, h_p.i, flags_p.i)
+  Protected *obj.UI_CanvasTree_Inst = AllocateStructure(UI_CanvasTree_Inst)
+  If *obj
+    *obj\VTable = ?UI_CanvasTree_VTable_Data
+    UI_CanvasTree_Init_i_i_i_i_i(*obj, x_p, y_p, w_p, h_p, flags_p)
+  EndIf
+  ProcedureReturn *obj
+EndProcedure
+
+Procedure Free_UI_CanvasTree(*obj.UI_CanvasTree_Inst)
+  If *obj
+    UI_CanvasTree_Free(*obj)
     FreeStructure(*obj)
   EndIf
 EndProcedure
@@ -9109,8 +15836,100 @@ EndProcedure
 
 
 ; ============================================================================
-; PureBasic OOP GUI Framework - CustomGadget.pbi
-; Base class for 2D Vector-rendered / Canvas Custom Gadgets
+; PureBasic OOP GUI Framework - AnimationEngine.pbi
+; High-Performance 60 FPS Micro-Animation & Transition Engine for CanvasControls
+; Features: Non-blocking 16ms event pump, Auto-sleep when idle (0% CPU),
+;           Standard Easing functions (Linear, EaseOutQuad, EaseOutCubic, EaseOutBack),
+;           Float & Color Lerp interpolations.
+; Author:      MicrodevWeb & Google DeepMind Antigravity
+; ============================================================================
+
+
+
+
+
+
+
+
+; Instance Singleton Globale de l'AnimationEngine
+
+Procedure UI_InitAnimationEngine()
+  If Not UI_GlobalAnimEngine
+    UI_GlobalAnimEngine = New_UI_AnimationEngine()
+  EndIf
+EndProcedure
+
+Procedure.b UI_HasActiveAnimations()
+  If UI_GlobalAnimEngine
+    ProcedureReturn UI_GlobalAnimEngine\HasActiveAnimations()
+  EndIf
+  ProcedureReturn #False
+EndProcedure
+
+Procedure UI_UpdateAnimations()
+  If UI_GlobalAnimEngine
+    UI_GlobalAnimEngine\Update()
+  EndIf
+EndProcedure
+
+Procedure UI_ShutdownAnimationEngine()
+  If UI_GlobalAnimEngine
+    UI_GlobalAnimEngine\Free()
+    UI_GlobalAnimEngine = #Null
+  EndIf
+EndProcedure
+; ============================================================================
+; PureBasic OOP GUI Framework - Style.pbi
+; WPF/XAML-style Declarative Style & Trigger System for CanvasControl
+; Author:      MicrodevWeb & Google DeepMind Antigravity
+; ============================================================================
+
+
+Procedure.i UI_ParseColor(colorStr.s, defaultColor.i = 0)
+  colorStr = Trim(colorStr)
+  If colorStr = "" : ProcedureReturn defaultColor : EndIf
+  If Left(colorStr, 1) = "#"
+    colorStr = Mid(colorStr, 2)
+  ElseIf Left(colorStr, 2) = "0x" Or Left(colorStr, 2) = "0X"
+    colorStr = Mid(colorStr, 3)
+  ElseIf Left(colorStr, 1) = "$"
+    colorStr = Mid(colorStr, 2)
+  EndIf
+
+  If Len(colorStr) = 6
+    Protected r.i = Val("$" + Mid(colorStr, 1, 2))
+    Protected g.i = Val("$" + Mid(colorStr, 3, 2))
+    Protected b.i = Val("$" + Mid(colorStr, 5, 2))
+    ProcedureReturn RGB(r, g, b)
+  ElseIf Len(colorStr) = 3
+    Protected r3.i = Val("$" + Mid(colorStr, 1, 1) + Mid(colorStr, 1, 1))
+    Protected g3.i = Val("$" + Mid(colorStr, 2, 1) + Mid(colorStr, 2, 1))
+    Protected b3.i = Val("$" + Mid(colorStr, 3, 1) + Mid(colorStr, 3, 1))
+    ProcedureReturn RGB(r3, g3, b3)
+  EndIf
+
+  ProcedureReturn Val(colorStr)
+EndProcedure
+
+
+
+
+
+; ============================================================================
+; PureBasic OOP GUI Framework - ResourceDictionary.pbi
+; Resource Dictionary storing WPF-style Named & Implicit Styles
+; Author:      MicrodevWeb & Google DeepMind Antigravity
+; ============================================================================
+
+
+
+
+; ============================================================================
+; PureBasic OOP GUI Framework - CanvasControl.pbi
+; Universal Base Class for WPF/WinUI-style 2D Vector-rendered Canvas Controls
+; Features: Visual State Machine (Normal, Hover, Pressed, Focused, Disabled),
+;           WPF Styling Tokens (Background, Foreground, Border, CornerRadius, Padding),
+;           High-DPI dynamic scaling, Input event routing, and MVVM Two-Way Bindings.
 ; Author:      MicrodevWeb
 ; ============================================================================
 
@@ -9147,6 +15966,24 @@ EndProcedure
 
 
 
+
+
+; ----------------------------------------------------------------------------
+; Visual States (WPF VisualStateManager style)
+; ----------------------------------------------------------------------------
+
+
+  ; ==========================================================================
+  ; Abstract Class: CanvasControl
+  ; Base class for all custom vector canvas-rendered UI controls
+  ; ==========================================================================
+
+; ============================================================================
+; PureBasic OOP GUI Framework - CustomGadget.pbi
+; Base class for 2D Vector-rendered / Canvas Custom Gadgets
+; Inherits from modern CanvasControl (WPF styling tokens & visual state machine)
+; Author:      MicrodevWeb
+; ============================================================================
 
 
 
@@ -9252,16 +16089,29 @@ Procedure UI_BindingEngine_OnVMPropertyChanged(*vm, *pKeyPtr)
             
             Select tProp
               Case "text", "value"
-                SetGadgetText(*ctrl\GetID(), valStr)
+                *ctrl\SetText(valStr)
               Case "checked", "state"
                 Protected bVal.b = #False
                 If UCase(valStr) = "TRUE" Or valStr = "1" : bVal = #True : EndIf
-                SetGadgetState(*ctrl\GetID(), bVal)
+                *ctrl\SetChecked(bVal)
               Case "progress", "progressvalue"
-                SetGadgetState(*ctrl\GetID(), Val(valStr))
+                *ctrl\SetState(Val(valStr))
+              Case "background"
+                *ctrl\SetBackground(Val(valStr))
+              Case "foreground"
+                *ctrl\SetForeground(Val(valStr))
+              Case "isenabled"
+                Protected isEn.b = #False
+                If UCase(valStr) = "TRUE" Or valStr = "1" : isEn = #True : EndIf
+                *ctrl\SetEnabled(isEn)
+              Case "isvisible"
+                Protected isVis.b = #False
+                If UCase(valStr) = "TRUE" Or valStr = "1" : isVis = #True : EndIf
+                *ctrl\SetVisible(isVis)
               Default:
-                SetGadgetText(*ctrl\GetID(), valStr)
+                *ctrl\SetText(valStr)
             EndSelect
+            *ctrl\Redraw()
           EndIf
           UI_ActivePropertyBindings()\isUpdating = #False
         EndIf
@@ -9311,20 +16161,33 @@ Procedure UI_MVVM_RegisterBinding(*control.UI_Gadget_vt, targetProp.s, *viewMode
 
   ; Initial push from ViewModel to View
   Protected initialVal.s = *viewModel\GetValueAsString(sourceProp)
-  If initialVal <> "" And IsGadget(*control\GetID())
+  If IsGadget(*control\GetID())
     Protected tProp.s = LCase(targetProp)
     Select tProp
-      Case "text"
-        SetGadgetText(*control\GetID(), initialVal)
+      Case "text", "value"
+        *control\SetText(initialVal)
       Case "checked", "state"
-        Protected bVal.b = #False
-        If UCase(initialVal) = "TRUE" Or initialVal = "1" : bVal = #True : EndIf
-        SetGadgetState(*control\GetID(), bVal)
+        Protected bInitVal.b = #False
+        If UCase(initialVal) = "TRUE" Or initialVal = "1" : bInitVal = #True : EndIf
+        *control\SetChecked(bInitVal)
       Case "progress", "progressvalue"
-        SetGadgetState(*control\GetID(), Val(initialVal))
+        *control\SetState(Val(initialVal))
+      Case "background"
+        *control\SetBackground(Val(initialVal))
+      Case "foreground"
+        *control\SetForeground(Val(initialVal))
+      Case "isenabled"
+        Protected isInitEn.b = #False
+        If UCase(initialVal) = "TRUE" Or initialVal = "1" : isInitEn = #True : EndIf
+        *control\SetEnabled(isInitEn)
+      Case "isvisible"
+        Protected isInitVis.b = #False
+        If UCase(initialVal) = "TRUE" Or initialVal = "1" : isInitVis = #True : EndIf
+        *control\SetVisible(isInitVis)
       Default:
-        SetGadgetText(*control\GetID(), initialVal)
+        *control\SetText(initialVal)
     EndSelect
+    *control\Redraw()
   EndIf
 EndProcedure
 
@@ -9366,18 +16229,20 @@ Procedure.b UI_MVVM_DispatchUIEvent(*control.UI_Gadget_vt, eventType.i)
 
   Protected handled.b = #False
 
-  ; 1. Check Command Bindings (Button click / Toggle change)
-  ForEach UI_ActiveCommandBindings()
-    If UI_ActiveCommandBindings()\control = *control
-      Protected *cmdVM.MVVM_ViewModelBase_vt = UI_ActiveCommandBindings()\viewModel
-      If *cmdVM
-        *cmdVM\ExecuteCommand(UI_ActiveCommandBindings()\commandName, *control)
-        handled = #True
+  ; 1. Check Command Bindings (Button click / Canvas click / Toggle change)
+  If eventType = #PB_EventType_LeftClick Or eventType = #PB_EventType_LeftButtonUp Or eventType = #PB_EventType_Change
+    ForEach UI_ActiveCommandBindings()
+      If UI_ActiveCommandBindings()\control = *control
+        Protected *cmdVM.MVVM_ViewModelBase_vt = UI_ActiveCommandBindings()\viewModel
+        If *cmdVM
+          *cmdVM\ExecuteCommand(UI_ActiveCommandBindings()\commandName, *control)
+          handled = #True
+        EndIf
       EndIf
-    EndIf
-  Next
+    Next
+  EndIf
 
-  ; 2. Check Two-Way Property Bindings (TextBox change / CheckBox click)
+  ; 2. Check Two-Way Property Bindings (TextBox change / CheckBox click / Hover / Press / Focus)
   ForEach UI_ActivePropertyBindings()
     If UI_ActivePropertyBindings()\control = *control
       If UI_ActivePropertyBindings()\mode = #UI_BindingMode_TwoWay
@@ -9385,18 +16250,48 @@ Procedure.b UI_MVVM_DispatchUIEvent(*control.UI_Gadget_vt, eventType.i)
           UI_ActivePropertyBindings()\isUpdating = #True
           Protected *propVM.MVVM_ViewModelBase_vt = UI_ActivePropertyBindings()\viewModel
           If *propVM And IsGadget(*control\GetID())
-            Protected curText.s = GetGadgetText(*control\GetID())
             Protected tProp.s = LCase(UI_ActivePropertyBindings()\targetProp)
-            If tProp = "checked" Or tProp = "state"
-              If GetGadgetState(*control\GetID())
-                *propVM\SetBool(UI_ActivePropertyBindings()\sourceProp, #True)
-              Else
-                *propVM\SetBool(UI_ActivePropertyBindings()\sourceProp, #False)
-              EndIf
-            Else
-              *propVM\SetString(UI_ActivePropertyBindings()\sourceProp, curText)
-            EndIf
-            handled = #True
+            Select tProp
+              Case "ismouseover", "ishovered"
+                If eventType = #PB_EventType_MouseEnter
+                  *propVM\SetBool(UI_ActivePropertyBindings()\sourceProp, #True)
+                  handled = #True
+                ElseIf eventType = #PB_EventType_MouseLeave
+                  *propVM\SetBool(UI_ActivePropertyBindings()\sourceProp, #False)
+                  handled = #True
+                EndIf
+
+              Case "ispressed"
+                If eventType = #PB_EventType_LeftButtonDown
+                  *propVM\SetBool(UI_ActivePropertyBindings()\sourceProp, #True)
+                  handled = #True
+                ElseIf eventType = #PB_EventType_LeftButtonUp
+                  *propVM\SetBool(UI_ActivePropertyBindings()\sourceProp, #False)
+                  handled = #True
+                EndIf
+
+              Case "isfocused"
+                If eventType = #PB_EventType_Focus
+                  *propVM\SetBool(UI_ActivePropertyBindings()\sourceProp, #True)
+                  handled = #True
+                ElseIf eventType = #PB_EventType_LostFocus
+                  *propVM\SetBool(UI_ActivePropertyBindings()\sourceProp, #False)
+                  handled = #True
+                EndIf
+
+              Case "checked", "state"
+                If eventType = #PB_EventType_LeftClick Or eventType = #PB_EventType_LeftButtonUp Or eventType = #PB_EventType_Change
+                  *propVM\SetBool(UI_ActivePropertyBindings()\sourceProp, *control\IsChecked())
+                  handled = #True
+                EndIf
+
+              Case "text", "value"
+                If eventType = #PB_EventType_Change Or eventType = #PB_EventType_Input
+                  Protected curText.s = *control\GetText()
+                  *propVM\SetString(UI_ActivePropertyBindings()\sourceProp, curText)
+                  handled = #True
+                EndIf
+            EndSelect
           EndIf
           UI_ActivePropertyBindings()\isUpdating = #False
         EndIf
@@ -9609,6 +16504,50 @@ EndProcedure
 
 ; Custom Controls
 ; ============================================================================
+; PureBasic OOP GUI Framework - CanvasButton.pbi
+; Modern WPF/WinUI-style 2D Vector-rendered Canvas Button Control
+; Features: Visual States (Normal, Hover, Pressed, Focused, Disabled),
+;           WPF Styling Tokens (CornerRadius, Padding, Borders, Palette presets),
+;           Vector rounded background, Optional Icon support, High-DPI text alignment,
+;           Full MVVM Command and Two-Way Hover/Pressed Property DataBinding.
+; Author:      MicrodevWeb
+; ============================================================================
+
+
+
+
+; ============================================================================
+; PureBasic OOP GUI Framework - CanvasText.pbi
+; Modern WPF/WinUI-style 2D Vector-rendered TextBlock / Label Control
+; Features: Horizontal and Vertical alignment, Text Truncation with Ellipsis (...),
+;           Transparent or Solid Background, Custom Typography & High-DPI Scaling,
+;           MVVM Two-Way/One-Way DataBinding support.
+; Author:      MicrodevWeb
+; ============================================================================
+
+
+
+
+
+
+; ============================================================================
+; PureBasic OOP GUI Framework - CanvasTextBox.pbi
+; Modern WPF/WinUI 3 Style Vector Text Input Control
+; Features: Vector rounded border, focus ring, placeholder watermark,
+;           native OS blinking caret, text selection (mouse & keyboard),
+;           copy/paste/cut/undo shortcuts, password mode, high-DPI typography,
+;           and MVVM Two-Way text binding.
+; Author:      MicrodevWeb
+; ============================================================================
+
+
+
+  ; ==========================================================================
+  ; Class: CanvasTextBox
+  ; High-fidelity vector editable text field
+  ; ==========================================================================
+
+; ============================================================================
 ; PureBasic OOP GUI Framework - ToggleSwitch.pbi
 ; Modern iOS/Material-style animated toggle switch CustomGadget with Multi-Constructors
 ; Author:      MicrodevWeb
@@ -9625,6 +16564,39 @@ EndProcedure
 
 
 
+
+; ============================================================================
+; PureBasic OOP GUI Framework - Canvas.pbi
+; Standard Canvas / CanvasGadget wrapper with Multi-Constructors
+; ============================================================================
+
+
+
+
+; ============================================================================
+; PureBasic OOP GUI Framework - CanvasTree.pbi
+; Modern DPI-Aware Canvas-rendered Hierarchical TreeView Control
+; Features: Multi-level hierarchy, Vector chevrons, CheckBoxes, Node icons,
+;           Custom per-node Action Buttons with callbacks, Virtual Scrolling,
+;           Smooth Wheel/Drag Scrollbar, Theme support (Light/Dark), Keyboard Nav.
+; Author:      MicrodevWeb
+; ============================================================================
+
+
+; ----------------------------------------------------------------------------
+; Data structures for Node Action Buttons
+; ----------------------------------------------------------------------------
+
+
+  ; ==========================================================================
+  ; Class: TreeNode
+  ; Represents a hierarchical item in UI_CanvasTree
+  ; ==========================================================================
+
+  ; ==========================================================================
+  ; Class: CanvasTree
+  ; High-DPI Virtual Canvas TreeView Gadget
+  ; ==========================================================================
 
 
 ; Declarative XML / XAML Layout Loader
