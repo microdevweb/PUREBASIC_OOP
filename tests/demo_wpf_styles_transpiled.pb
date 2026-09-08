@@ -208,6 +208,12 @@ Interface UI_Component_vt
   GetDesiredHeight.i()
   Arrange(nx.i, ny.i, nw.i, nh.i)
   OnAnimationTick(propName.s, value.f)
+  SetBackground(col.i)
+  GetBackground.i()
+  SetBorderColor(col.i)
+  SetBorderThickness(th.i)
+  SetCornerRadius(cr.i)
+  Free()
 EndInterface
 
 Interface UI_Gadget_vt Extends UI_Component_vt
@@ -219,14 +225,12 @@ Interface UI_Gadget_vt Extends UI_Component_vt
   GetColor.i(colorType.i)
   SetFont(font.i)
   SetFocus()
-  Free()
   GetState.i()
   SetState(state.i)
   IsChecked.b()
   SetChecked(c.b)
   IsHovered.b()
   IsPressed.b()
-  SetBackground(color.i)
   SetForeground(color.i)
   Redraw()
   OnClick()
@@ -298,7 +302,6 @@ Interface UI_Window_vt Extends UI_Component_vt
   LoadViewFromString.b(xmlContent.s, *dataContext_p)
   GetResources.i()
   Close()
-  Free()
   OnClose.b()
   OnResize(newW.i, newH.i)
   OnMove(newX.i, newY.i)
@@ -331,7 +334,6 @@ Interface UI_CanvasControl_vt Extends UI_Gadget_vt
   SetIsPressed(state_p.b)
   IsFocused.b()
   SetIsFocused(state_p.b)
-  GetBackground.i()
   GetForeground.i()
   GetHoverBackground.i()
   SetHoverBackground(color_p.i)
@@ -346,16 +348,17 @@ Interface UI_CanvasControl_vt Extends UI_Gadget_vt
   GetDisabledForeground.i()
   SetDisabledForeground(color_p.i)
   GetBorderColor.i()
-  SetBorderColor(color_p.i)
   GetHoverBorderColor.i()
   SetHoverBorderColor(color_p.i)
   GetPressedBorderColor.i()
   SetPressedBorderColor(color_p.i)
   GetBorderThickness.i()
-  SetBorderThickness(thickness_p.i)
   GetCornerRadius.i()
-  SetCornerRadius(radius_p.i)
   SetBorder(color_p.i, thickness_p.i, radius_p.i)
+  GetBorderLeftThickness.i()
+  SetBorderLeftThickness(thickness_p.i)
+  GetBorderLeftColor.i()
+  SetBorderLeftColor(color_p.i)
   SetPadding(l_p.i, t_p.i, r_p.i, b_p.i)
   GetPaddingLeft.i()
   GetPaddingTop.i()
@@ -497,6 +500,9 @@ Interface MVVM_BindingEngine_vt
 EndInterface
 
 Interface UI_Layouts_Container_vt Extends UI_Component_vt
+  EnsureBgGadget()
+  SetBorder(col.i, thick.i, radius.i)
+  DrawBackground(nw.i, nh.i)
   SetPadding(l.i, t.i, r.i, b.i)
   SetPaddingAll(p.i)
   GetPaddingLeft.i()
@@ -789,7 +795,7 @@ Interface UI_XMLLoader_vt
   ParseBoxValues(valStr.s, *outL.INTEGER, *outT.INTEGER, *outR.INTEGER, *outB.INTEGER)
   ParseColor.i(colorStr.s, defaultColor.i)
   ParseResources(resNode.i, *targetWindow.UI_Window_vt)
-  ApplyCanvasControlAttributes(*ctrl.UI_CanvasControl_vt, node.i, *targetWindow.UI_Window_vt)
+  ApplyCanvasControlAttributes(*ctrl.UI_CanvasControl_vt, node.i, *targetWindow.UI_Window_vt, *parentContainer.UI_Layouts_Container_vt)
   ApplyCommonAttributes(*comp.UI_Component_vt, node.i, *targetWindow.UI_Window_vt)
   ParseBindingExpression.b(attrVal.s, *outPropName.STRING, *outMode.INTEGER)
   ApplyDataBindings(*comp.UI_Component_vt, node.i, *targetWindow.UI_Window_vt)
@@ -895,6 +901,8 @@ Structure UI_CanvasControl_Inst Extends UI_Gadget_Inst
   pressedBorderColor.i
   borderThickness.i
   cornerRadius.i
+  borderLeftThickness.i
+  borderLeftColor.i
   paddingLeft.i
   paddingTop.i
   paddingRight.i
@@ -916,6 +924,8 @@ Structure UI_CanvasControl_Inst Extends UI_Gadget_Inst
   basePressedBorderColor.i
   baseBorderThickness.i
   baseCornerRadius.i
+  baseBorderLeftThickness.i
+  baseBorderLeftColor.i
   baseScale.f
 EndStructure
 
@@ -980,6 +990,12 @@ Structure UI_Layouts_Container_Inst Extends UI_Component_Inst
   paddingTop.i
   paddingRight.i
   paddingBottom.i
+  bgGadgetId.i
+  backgroundColor.i
+  borderColor.i
+  borderThickness.i
+  cornerRadius.i
+  hasBackground.b
 EndStructure
 
 Structure UI_Layouts_StackPanel_Inst Extends UI_Layouts_Container_Inst
@@ -1155,6 +1171,7 @@ EndStructure
 
 Structure UI_XMLLoader_Inst
   *VTable.UI_XMLLoader_vt
+  currentXmlDir.s
 EndStructure
 
 ; ----------------------------------------------------------------------------
@@ -1237,6 +1254,12 @@ Declare.i UI_Component_GetDesiredWidth(*This.UI_Component_Inst)
 Declare.i UI_Component_GetDesiredHeight(*This.UI_Component_Inst)
 Declare UI_Component_Arrange(*This.UI_Component_Inst, nx.i, ny.i, nw.i, nh.i)
 Declare UI_Component_OnAnimationTick(*This.UI_Component_Inst, propName.s, value.f)
+Declare UI_Component_SetBackground(*This.UI_Component_Inst, col.i)
+Declare.i UI_Component_GetBackground(*This.UI_Component_Inst)
+Declare UI_Component_SetBorderColor(*This.UI_Component_Inst, col.i)
+Declare UI_Component_SetBorderThickness(*This.UI_Component_Inst, th.i)
+Declare UI_Component_SetCornerRadius(*This.UI_Component_Inst, cr.i)
+Declare UI_Component_Free(*This.UI_Component_Inst)
 Declare UI_Gadget_Init(*This.UI_Gadget_Inst)
 Declare.s UI_Gadget_GetText(*This.UI_Gadget_Inst)
 Declare UI_Gadget_SetText(*This.UI_Gadget_Inst, t.s)
@@ -1407,6 +1430,10 @@ Declare UI_CanvasControl_SetBorderThickness(*This.UI_CanvasControl_Inst, thickne
 Declare.i UI_CanvasControl_GetCornerRadius(*This.UI_CanvasControl_Inst)
 Declare UI_CanvasControl_SetCornerRadius(*This.UI_CanvasControl_Inst, radius_p.i)
 Declare UI_CanvasControl_SetBorder(*This.UI_CanvasControl_Inst, color_p.i, thickness_p.i, radius_p.i)
+Declare.i UI_CanvasControl_GetBorderLeftThickness(*This.UI_CanvasControl_Inst)
+Declare UI_CanvasControl_SetBorderLeftThickness(*This.UI_CanvasControl_Inst, thickness_p.i)
+Declare.i UI_CanvasControl_GetBorderLeftColor(*This.UI_CanvasControl_Inst)
+Declare UI_CanvasControl_SetBorderLeftColor(*This.UI_CanvasControl_Inst, color_p.i)
 Declare UI_CanvasControl_SetPadding(*This.UI_CanvasControl_Inst, l_p.i, t_p.i, r_p.i, b_p.i)
 Declare.i UI_CanvasControl_GetPaddingLeft(*This.UI_CanvasControl_Inst)
 Declare.i UI_CanvasControl_GetPaddingTop(*This.UI_CanvasControl_Inst)
@@ -1540,6 +1567,14 @@ Declare MVVM_BindingEngine_UnregisterAll(*This.MVVM_BindingEngine_Inst, *targetO
 Declare UI_Layouts_Container_Init_void(*This.UI_Layouts_Container_Inst)
 Declare UI_Layouts_Container_Init_i_i(*This.UI_Layouts_Container_Inst, w_p.i, h_p.i)
 Declare UI_Layouts_Container_Init_i_i_i_i(*This.UI_Layouts_Container_Inst, x_p.i, y_p.i, w_p.i, h_p.i)
+Declare UI_Layouts_Container_EnsureBgGadget(*This.UI_Layouts_Container_Inst)
+Declare UI_Layouts_Container_SetBackground(*This.UI_Layouts_Container_Inst, col.i)
+Declare.i UI_Layouts_Container_GetBackground(*This.UI_Layouts_Container_Inst)
+Declare UI_Layouts_Container_SetBorderColor(*This.UI_Layouts_Container_Inst, col.i)
+Declare UI_Layouts_Container_SetBorderThickness(*This.UI_Layouts_Container_Inst, th.i)
+Declare UI_Layouts_Container_SetCornerRadius(*This.UI_Layouts_Container_Inst, cr.i)
+Declare UI_Layouts_Container_SetBorder(*This.UI_Layouts_Container_Inst, col.i, thick.i, radius.i)
+Declare UI_Layouts_Container_DrawBackground(*This.UI_Layouts_Container_Inst, nw.i, nh.i)
 Declare UI_Layouts_Container_SetPadding(*This.UI_Layouts_Container_Inst, l.i, t.i, r.i, b.i)
 Declare UI_Layouts_Container_SetPaddingAll(*This.UI_Layouts_Container_Inst, p.i)
 Declare.i UI_Layouts_Container_GetPaddingLeft(*This.UI_Layouts_Container_Inst)
@@ -1554,6 +1589,7 @@ Declare UI_Layouts_Container_SetWidth(*This.UI_Layouts_Container_Inst, nw.i)
 Declare UI_Layouts_Container_SetHeight(*This.UI_Layouts_Container_Inst, nh.i)
 Declare UI_Layouts_Container_SetSize(*This.UI_Layouts_Container_Inst, nw.i, nh.i)
 Declare UI_Layouts_Container_UpdateLayout(*This.UI_Layouts_Container_Inst)
+Declare UI_Layouts_Container_Free(*This.UI_Layouts_Container_Inst)
 Declare UI_Layouts_Container_Arrange(*This.UI_Layouts_Container_Inst, nx.i, ny.i, nw.i, nh.i)
 Declare UI_Layouts_StackPanel_Init_void(*This.UI_Layouts_StackPanel_Inst)
 Declare UI_Layouts_StackPanel_Init_i(*This.UI_Layouts_StackPanel_Inst, orient.i)
@@ -1734,6 +1770,7 @@ Declare UI_CanvasButton_SetIcon_i_i(*This.UI_CanvasButton_Inst, img_p.i, spacing
 Declare.i UI_CanvasButton_GetIcon(*This.UI_CanvasButton_Inst)
 Declare UI_CanvasButton_SetTextAlignment(*This.UI_CanvasButton_Inst, align_p.i)
 Declare UI_CanvasButton_OnPaint(*This.UI_CanvasButton_Inst, w_p.i, h_p.i)
+Declare UI_CanvasButton_ApplyStyle(*This.UI_CanvasButton_Inst, *s.UI_Style_vt)
 Declare UI_CanvasText_Init_void(*This.UI_CanvasText_Inst)
 Declare UI_CanvasText_Init_s(*This.UI_CanvasText_Inst, text_p.s)
 Declare UI_CanvasText_Init_s_i_i(*This.UI_CanvasText_Inst, text_p.s, w_p.i, h_p.i)
@@ -1909,7 +1946,7 @@ Declare UI_XMLLoader_Free(*This.UI_XMLLoader_Inst)
 Declare UI_XMLLoader_ParseBoxValues(*This.UI_XMLLoader_Inst, valStr.s, *outL.INTEGER, *outT.INTEGER, *outR.INTEGER, *outB.INTEGER)
 Declare.i UI_XMLLoader_ParseColor(*This.UI_XMLLoader_Inst, colorStr.s, defaultColor.i)
 Declare UI_XMLLoader_ParseResources(*This.UI_XMLLoader_Inst, resNode.i, *targetWindow.UI_Window_vt)
-Declare UI_XMLLoader_ApplyCanvasControlAttributes(*This.UI_XMLLoader_Inst, *ctrl.UI_CanvasControl_vt, node.i, *targetWindow.UI_Window_vt)
+Declare UI_XMLLoader_ApplyCanvasControlAttributes(*This.UI_XMLLoader_Inst, *ctrl.UI_CanvasControl_vt, node.i, *targetWindow.UI_Window_vt, *parentContainer.UI_Layouts_Container_vt)
 Declare UI_XMLLoader_ApplyCommonAttributes(*This.UI_XMLLoader_Inst, *comp.UI_Component_vt, node.i, *targetWindow.UI_Window_vt)
 Declare.b UI_XMLLoader_ParseBindingExpression(*This.UI_XMLLoader_Inst, attrVal.s, *outPropName.STRING, *outMode.INTEGER)
 Declare UI_XMLLoader_ApplyDataBindings(*This.UI_XMLLoader_Inst, *comp.UI_Component_vt, node.i, *targetWindow.UI_Window_vt)
@@ -2388,6 +2425,31 @@ Procedure UI_Component_Arrange(*This.UI_Component_Inst, nx.i, ny.i, nw.i, nh.i)
 EndProcedure
 
 Procedure UI_Component_OnAnimationTick(*This.UI_Component_Inst, propName.s, value.f)
+  Protected *This_vt.UI_Component_vt = *This
+EndProcedure
+
+Procedure UI_Component_SetBackground(*This.UI_Component_Inst, col.i)
+  Protected *This_vt.UI_Component_vt = *This
+EndProcedure
+
+Procedure.i UI_Component_GetBackground(*This.UI_Component_Inst)
+  Protected *This_vt.UI_Component_vt = *This
+        ProcedureReturn 0
+EndProcedure
+
+Procedure UI_Component_SetBorderColor(*This.UI_Component_Inst, col.i)
+  Protected *This_vt.UI_Component_vt = *This
+EndProcedure
+
+Procedure UI_Component_SetBorderThickness(*This.UI_Component_Inst, th.i)
+  Protected *This_vt.UI_Component_vt = *This
+EndProcedure
+
+Procedure UI_Component_SetCornerRadius(*This.UI_Component_Inst, cr.i)
+  Protected *This_vt.UI_Component_vt = *This
+EndProcedure
+
+Procedure UI_Component_Free(*This.UI_Component_Inst)
   Protected *This_vt.UI_Component_vt = *This
 EndProcedure
 
@@ -3541,6 +3603,8 @@ Procedure UI_CanvasControl_InitDefaults(*This.UI_CanvasControl_Inst)
         *This\pressedBorderColor = RGB(0, 90, 180)
         *This\borderThickness = 1
         *This\cornerRadius = 4
+        *This\borderLeftThickness = 0
+        *This\borderLeftColor = 0
   
         *This\paddingLeft = 8
         *This\paddingTop = 4
@@ -3560,6 +3624,8 @@ Procedure UI_CanvasControl_InitDefaults(*This.UI_CanvasControl_Inst)
         *This\basePressedBorderColor = *This\pressedBorderColor
         *This\baseBorderThickness = *This\borderThickness
         *This\baseCornerRadius = *This\cornerRadius
+        *This\baseBorderLeftThickness = 0
+        *This\baseBorderLeftColor = 0
         *This\baseScale = 1.0
 EndProcedure
 
@@ -3882,6 +3948,28 @@ Procedure UI_CanvasControl_SetBorder(*This.UI_CanvasControl_Inst, color_p.i, thi
         *This_vt\Redraw()
 EndProcedure
 
+Procedure.i UI_CanvasControl_GetBorderLeftThickness(*This.UI_CanvasControl_Inst)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        ProcedureReturn *This\borderLeftThickness
+EndProcedure
+
+Procedure UI_CanvasControl_SetBorderLeftThickness(*This.UI_CanvasControl_Inst, thickness_p.i)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        *This\borderLeftThickness = thickness_p
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure.i UI_CanvasControl_GetBorderLeftColor(*This.UI_CanvasControl_Inst)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        ProcedureReturn *This\borderLeftColor
+EndProcedure
+
+Procedure UI_CanvasControl_SetBorderLeftColor(*This.UI_CanvasControl_Inst, color_p.i)
+  Protected *This_vt.UI_CanvasControl_vt = *This
+        *This\borderLeftColor = color_p
+        *This_vt\Redraw()
+EndProcedure
+
 Procedure UI_CanvasControl_SetPadding(*This.UI_CanvasControl_Inst, l_p.i, t_p.i, r_p.i, b_p.i)
   Protected *This_vt.UI_CanvasControl_vt = *This
         *This\paddingLeft = l_p
@@ -4006,6 +4094,14 @@ Procedure UI_CanvasControl_DrawControlBackground(*This.UI_CanvasControl_Inst, w_
             Box(drawX, drawY, drawW, drawH, curBg)
   EndIf
   EndIf
+  
+        ; Bordure d'accentuation latérale gauche (ex: indicateur d'onglet actif WPF)
+        If (*This\borderLeftThickness > 0)
+          Protected scaledBLT.i = DesktopScaledX(*This\borderLeftThickness)
+          Protected curBLCol.i = *This\borderLeftColor
+          If curBLCol = 0 : curBLCol = curBorder : EndIf
+          Box(drawX, drawY, scaledBLT, drawH, curBLCol)
+        EndIf
 EndProcedure
 
 Procedure UI_CanvasControl_DrawFocusRing(*This.UI_CanvasControl_Inst, w_p.i, h_p.i)
@@ -4256,8 +4352,36 @@ Procedure UI_CanvasControl_ApplyStyle(*This.UI_CanvasControl_Inst, *s.UI_Style_v
               *This\pressedBorderColor = UI_ParseColor(val, *This\pressedBorderColor)
             Case "BORDERTHICKNESS"
               *This\borderThickness = Val(val)
+            Case "BORDERLEFTTHICKNESS"
+              *This\borderLeftThickness = Val(val)
+            Case "BORDERLEFTCOLOR"
+              *This\borderLeftColor = UI_ParseColor(val, *This\borderLeftColor)
             Case "CORNERRADIUS"
               *This\cornerRadius = Val(val)
+            Case "PADDINGLEFT"
+              *This\paddingLeft = Val(val)
+            Case "PADDINGRIGHT"
+              *This\paddingRight = Val(val)
+            Case "PADDINGTOP"
+              *This\paddingTop = Val(val)
+            Case "PADDINGBOTTOM"
+              *This\paddingBottom = Val(val)
+            Case "PADDING"
+              Protected pCountVal.i = CountString(val, ",") + 1
+              If pCountVal = 1
+                Protected pvSingle.i = Val(val)
+                *This\paddingLeft = pvSingle : *This\paddingRight = pvSingle : *This\paddingTop = pvSingle : *This\paddingBottom = pvSingle
+              ElseIf pCountVal = 2
+                *This\paddingLeft = Val(StringField(val, 1, ","))
+                *This\paddingRight = *This\paddingLeft
+                *This\paddingTop = Val(StringField(val, 2, ","))
+                *This\paddingBottom = *This\paddingTop
+              ElseIf pCountVal >= 4
+                *This\paddingLeft = Val(StringField(val, 1, ","))
+                *This\paddingTop = Val(StringField(val, 2, ","))
+                *This\paddingRight = Val(StringField(val, 3, ","))
+                *This\paddingBottom = Val(StringField(val, 4, ","))
+              EndIf
             Case "SCALE"
               *This\currentScale = ValF(val)
               *This\targetScale = *This\currentScale
@@ -4294,6 +4418,8 @@ Procedure UI_CanvasControl_ApplyStyle(*This.UI_CanvasControl_Inst, *s.UI_Style_v
         *This\basePressedForeground = *This\pressedForeground
         *This\basePressedBorderColor = *This\pressedBorderColor
         *This\baseBorderThickness = *This\borderThickness
+        *This\baseBorderLeftThickness = *This\borderLeftThickness
+        *This\baseBorderLeftColor = *This\borderLeftColor
         *This\baseCornerRadius = *This\cornerRadius
         *This\baseScale = *This\currentScale
   
@@ -4323,6 +4449,8 @@ Procedure UI_CanvasControl_ApplyStyleTriggers(*This.UI_CanvasControl_Inst)
         *This\pressedBorderColor = *This\basePressedBorderColor
         *This\cornerRadius = *This\baseCornerRadius
         *This\borderThickness = *This\baseBorderThickness
+        *This\borderLeftThickness = *This\baseBorderLeftThickness
+        *This\borderLeftColor = *This\baseBorderLeftColor
   
         ; 2. Parcourir les triggers et activer ceux dont la condition est remplie
         Protected tCount.i = *This\style\GetTriggerCount()
@@ -4375,6 +4503,10 @@ Procedure UI_CanvasControl_ApplyStyleTriggers(*This.UI_CanvasControl_Inst)
                   *This\cornerRadius = Val(val)
                 Case "BORDERTHICKNESS"
                   *This\borderThickness = Val(val)
+                Case "BORDERLEFTTHICKNESS"
+                  *This\borderLeftThickness = Val(val)
+                Case "BORDERLEFTCOLOR"
+                  *This\borderLeftColor = UI_ParseColor(val, *This\borderLeftColor)
                 Case "SCALE"
                   hasScaleTrigger = #True
                   Protected targetSc.f = ValF(val)
@@ -5117,6 +5249,12 @@ Procedure UI_Layouts_Container_Init_void(*This.UI_Layouts_Container_Inst)
         *This\paddingBottom = 0
         *This\horizontalAlignment = #UI_Align_Stretch
         *This\verticalAlignment = #UI_Align_VStretch
+        *This\bgGadgetId = 0
+        *This\backgroundColor = 0
+        *This\borderColor = 0
+        *This\borderThickness = 0
+        *This\cornerRadius = 0
+        *This\hasBackground = #False
 EndProcedure
 
 Procedure UI_Layouts_Container_Init_i_i(*This.UI_Layouts_Container_Inst, w_p.i, h_p.i)
@@ -5130,6 +5268,12 @@ Procedure UI_Layouts_Container_Init_i_i(*This.UI_Layouts_Container_Inst, w_p.i, 
         *This\paddingBottom = 0
         *This\horizontalAlignment = #UI_Align_Stretch
         *This\verticalAlignment = #UI_Align_VStretch
+        *This\bgGadgetId = 0
+        *This\backgroundColor = 0
+        *This\borderColor = 0
+        *This\borderThickness = 0
+        *This\cornerRadius = 0
+        *This\hasBackground = #False
 EndProcedure
 
 Procedure UI_Layouts_Container_Init_i_i_i_i(*This.UI_Layouts_Container_Inst, x_p.i, y_p.i, w_p.i, h_p.i)
@@ -5143,6 +5287,101 @@ Procedure UI_Layouts_Container_Init_i_i_i_i(*This.UI_Layouts_Container_Inst, x_p
         *This\paddingBottom = 0
         *This\horizontalAlignment = #UI_Align_Stretch
         *This\verticalAlignment = #UI_Align_VStretch
+        *This\bgGadgetId = 0
+        *This\backgroundColor = 0
+        *This\borderColor = 0
+        *This\borderThickness = 0
+        *This\cornerRadius = 0
+        *This\hasBackground = #False
+EndProcedure
+
+Procedure UI_Layouts_Container_EnsureBgGadget(*This.UI_Layouts_Container_Inst)
+  Protected *This_vt.UI_Layouts_Container_vt = *This
+  If (*This\bgGadgetId = 0)
+          *This\bgGadgetId = CanvasGadget(#PB_Any, 0, 0, 10, 10)
+  If (*This\bgGadgetId)
+            DisableGadget(*This\bgGadgetId, #True)
+  EndIf
+  EndIf
+EndProcedure
+
+Procedure UI_Layouts_Container_SetBackground(*This.UI_Layouts_Container_Inst, col.i)
+  Protected *This_vt.UI_Layouts_Container_vt = *This
+        *This\backgroundColor = col
+        *This\hasBackground = #True
+        *This_vt\EnsureBgGadget()
+        *This_vt\DrawBackground(*This\width, *This\height)
+EndProcedure
+
+Procedure.i UI_Layouts_Container_GetBackground(*This.UI_Layouts_Container_Inst)
+  Protected *This_vt.UI_Layouts_Container_vt = *This
+        ProcedureReturn *This\backgroundColor
+EndProcedure
+
+Procedure UI_Layouts_Container_SetBorderColor(*This.UI_Layouts_Container_Inst, col.i)
+  Protected *This_vt.UI_Layouts_Container_vt = *This
+        *This\borderColor = col
+        *This\hasBackground = #True
+        *This_vt\EnsureBgGadget()
+        *This_vt\DrawBackground(*This\width, *This\height)
+EndProcedure
+
+Procedure UI_Layouts_Container_SetBorderThickness(*This.UI_Layouts_Container_Inst, th.i)
+  Protected *This_vt.UI_Layouts_Container_vt = *This
+        *This\borderThickness = th
+        *This\hasBackground = #True
+        *This_vt\EnsureBgGadget()
+        *This_vt\DrawBackground(*This\width, *This\height)
+EndProcedure
+
+Procedure UI_Layouts_Container_SetCornerRadius(*This.UI_Layouts_Container_Inst, cr.i)
+  Protected *This_vt.UI_Layouts_Container_vt = *This
+        *This\cornerRadius = cr
+        *This\hasBackground = #True
+        *This_vt\EnsureBgGadget()
+        *This_vt\DrawBackground(*This\width, *This\height)
+EndProcedure
+
+Procedure UI_Layouts_Container_SetBorder(*This.UI_Layouts_Container_Inst, col.i, thick.i, radius.i)
+  Protected *This_vt.UI_Layouts_Container_vt = *This
+        *This\borderColor = col
+        *This\borderThickness = thick
+        *This\cornerRadius = radius
+        *This\hasBackground = #True
+        *This_vt\EnsureBgGadget()
+        *This_vt\DrawBackground(*This\width, *This\height)
+EndProcedure
+
+Procedure UI_Layouts_Container_DrawBackground(*This.UI_Layouts_Container_Inst, nw.i, nh.i)
+  Protected *This_vt.UI_Layouts_Container_vt = *This
+  If (*This\hasBackground And *This\bgGadgetId And IsGadget(*This\bgGadgetId) And nw > 0 And nh > 0)
+  If (StartDrawing(CanvasOutput(*This\bgGadgetId)))
+            Protected sRadius.i = DesktopScaledX(*This\cornerRadius)
+            Protected sThick.i = DesktopScaledX(*This\borderThickness)
+  If (sRadius > 0)
+  If (sThick > 0)
+                RoundBox(0, 0, nw, nh, sRadius, sRadius, *This\borderColor)
+  If (nw > sThick * 2 And nh > sThick * 2)
+                  Protected inR.i = sRadius - sThick
+                  If inR < 0 : inR = 0 : EndIf
+                  RoundBox(sThick, sThick, nw - (sThick * 2), nh - (sThick * 2), inR, inR, *This\backgroundColor)
+  EndIf
+  Else
+                RoundBox(0, 0, nw, nh, sRadius, sRadius, *This\backgroundColor)
+  EndIf
+  Else
+  If (sThick > 0)
+                Box(0, 0, nw, nh, *This\borderColor)
+  If (nw > sThick * 2 And nh > sThick * 2)
+                  Box(sThick, sThick, nw - (sThick * 2), nh - (sThick * 2), *This\backgroundColor)
+  EndIf
+  Else
+                Box(0, 0, nw, nh, *This\backgroundColor)
+  EndIf
+  EndIf
+            StopDrawing()
+  EndIf
+  EndIf
 EndProcedure
 
 Procedure UI_Layouts_Container_SetPadding(*This.UI_Layouts_Container_Inst, l.i, t.i, r.i, b.i)
@@ -5241,12 +5480,25 @@ Procedure UI_Layouts_Container_UpdateLayout(*This.UI_Layouts_Container_Inst)
         EndIf
 EndProcedure
 
+Procedure UI_Layouts_Container_Free(*This.UI_Layouts_Container_Inst)
+  Protected *This_vt.UI_Layouts_Container_vt = *This
+  If (*This\bgGadgetId And IsGadget(*This\bgGadgetId))
+          FreeGadget(*This\bgGadgetId)
+          *This\bgGadgetId = 0
+  EndIf
+        UI_Component_Free(*This)
+EndProcedure
+
 Procedure UI_Layouts_Container_Arrange(*This.UI_Layouts_Container_Inst, nx.i, ny.i, nw.i, nh.i)
   Protected *This_vt.UI_Layouts_Container_vt = *This
         *This_vt\SetPosition(nx, ny, nw, nh)
-        If *This\id And IsGadget(*This\id)
+  If (*This\bgGadgetId And IsGadget(*This\bgGadgetId))
+          ResizeGadget(*This\bgGadgetId, nx, ny, nw, nh)
+          *This_vt\DrawBackground(nw, nh)
+  EndIf
+  If (*This\id And IsGadget(*This\id))
           ResizeGadget(*This\id, nx, ny, nw, nh)
-        EndIf
+  EndIf
   
         Protected innerX.i = nx + *This\paddingLeft
         Protected innerY.i = ny + *This\paddingTop
@@ -5413,6 +5665,10 @@ EndProcedure
 Procedure UI_Layouts_StackPanel_Arrange(*This.UI_Layouts_StackPanel_Inst, nx.i, ny.i, nw.i, nh.i)
   Protected *This_vt.UI_Layouts_StackPanel_vt = *This
         *This_vt\SetPosition(nx, ny, nw, nh)
+  If (*This\bgGadgetId And IsGadget(*This\bgGadgetId))
+          ResizeGadget(*This\bgGadgetId, nx, ny, nw, nh)
+          *This_vt\DrawBackground(nw, nh)
+  EndIf
         If *This\id And IsGadget(*This\id)
           ResizeGadget(*This\id, nx, ny, nw, nh)
         EndIf
@@ -5568,6 +5824,10 @@ EndProcedure
 Procedure UI_Layouts_DockPanel_Arrange(*This.UI_Layouts_DockPanel_Inst, nx.i, ny.i, nw.i, nh.i)
   Protected *This_vt.UI_Layouts_DockPanel_vt = *This
         *This_vt\SetPosition(nx, ny, nw, nh)
+  If (*This\bgGadgetId And IsGadget(*This\bgGadgetId))
+          ResizeGadget(*This\bgGadgetId, nx, ny, nw, nh)
+          *This_vt\DrawBackground(nw, nh)
+  EndIf
         If *This\id And IsGadget(*This\id)
           ResizeGadget(*This\id, nx, ny, nw, nh)
         EndIf
@@ -5734,6 +5994,10 @@ EndProcedure
 Procedure UI_Layouts_Grid_Arrange(*This.UI_Layouts_Grid_Inst, nx.i, ny.i, nw.i, nh.i)
   Protected *This_vt.UI_Layouts_Grid_vt = *This
         *This_vt\SetPosition(nx, ny, nw, nh)
+  If (*This\bgGadgetId And IsGadget(*This\bgGadgetId))
+          ResizeGadget(*This\bgGadgetId, nx, ny, nw, nh)
+          *This_vt\DrawBackground(nw, nh)
+  EndIf
         If *This\id And IsGadget(*This\id)
           ResizeGadget(*This\id, nx, ny, nw, nh)
         EndIf
@@ -7478,6 +7742,25 @@ Procedure UI_CanvasButton_OnPaint(*This.UI_CanvasButton_Inst, w_p.i, h_p.i)
           DrawingMode(#PB_2DDrawing_Transparent)
           DrawText(startX, txtY, *This\text, fg)
         EndIf
+EndProcedure
+
+Procedure UI_CanvasButton_ApplyStyle(*This.UI_CanvasButton_Inst, *s.UI_Style_vt)
+  Protected *This_vt.UI_CanvasButton_vt = *This
+        UI_CanvasControl_ApplyStyle(*This, *s)
+        If Not *s : ProcedureReturn : EndIf
+        Protected count.i = *s\GetSetterCount()
+        Protected i.i
+        For i = 0 To count - 1
+          Protected prop.s = UCase(Trim(*s\GetSetterProperty(i)))
+          Protected val.s = Trim(*s\GetSetterValue(i))
+          If prop = "TEXTALIGNMENT" Or prop = "HALIGN"
+            If UCase(val) = "LEFT" : *This\textAlignment = 1
+            ElseIf UCase(val) = "RIGHT" : *This\textAlignment = 2
+            ElseIf UCase(val) = "CENTER" : *This\textAlignment = 0
+            EndIf
+          EndIf
+        Next
+        *This_vt\Redraw()
 EndProcedure
 
 Procedure UI_CanvasText_Init_void(*This.UI_CanvasText_Inst)
@@ -9704,6 +9987,7 @@ EndProcedure
 
 Procedure UI_XMLLoader_Init(*This.UI_XMLLoader_Inst)
   Protected *This_vt.UI_XMLLoader_vt = *This
+        *This\currentXmlDir = ""
 EndProcedure
 
 Procedure UI_XMLLoader_Free(*This.UI_XMLLoader_Inst)
@@ -9809,18 +10093,50 @@ Procedure UI_XMLLoader_ParseResources(*This.UI_XMLLoader_Inst, resNode.i, *targe
               Wend
   
               *resDict\AddStyle(*style)
+            ElseIf childTag = "RESOURCEDICTIONARY"
+              Protected srcPath.s = GetXMLAttribute(*child, "Source")
+              If srcPath = "" : srcPath = GetXMLAttribute(*child, "source") : EndIf
+              If srcPath <> ""
+                Protected fullSrcPath.s = srcPath
+                If *This\currentXmlDir <> "" And FileSize(fullSrcPath) <= 0
+                  fullSrcPath = *This\currentXmlDir + srcPath
+                EndIf
+                If FileSize(fullSrcPath) <= 0 And FileSize(GetPathPart(ProgramFilename()) + srcPath) > 0
+                  fullSrcPath = GetPathPart(ProgramFilename()) + srcPath
+                EndIf
+                If FileSize(fullSrcPath) <= 0 And FileSize("styles/" + srcPath) > 0
+                  fullSrcPath = "styles/" + srcPath
+                EndIf
+                If FileSize(fullSrcPath) > 0
+                  Protected extXml.i = LoadXML(#PB_Any, fullSrcPath)
+                  If extXml And XMLStatus(extXml) = #PB_XML_Success
+                    Protected *extRoot = MainXMLNode(extXml)
+                    If *extRoot
+                      *This_vt\ParseResources(*extRoot, *targetWindow)
+                    EndIf
+                    FreeXML(extXml)
+                  EndIf
+                EndIf
+              Else
+                ; Dictionnaire inline
+                *This_vt\ParseResources(*child, *targetWindow)
+              EndIf
+            ElseIf childTag = "RESOURCEDICTIONARY.MERGEDDICTIONARIES"
+              *This_vt\ParseResources(*child, *targetWindow)
             EndIf
           EndIf
           *child = NextXMLNode(*child)
         Wend
 EndProcedure
 
-Procedure UI_XMLLoader_ApplyCanvasControlAttributes(*This.UI_XMLLoader_Inst, *ctrl.UI_CanvasControl_vt, node.i, *targetWindow.UI_Window_vt)
+Procedure UI_XMLLoader_ApplyCanvasControlAttributes(*This.UI_XMLLoader_Inst, *ctrl.UI_CanvasControl_vt, node.i, *targetWindow.UI_Window_vt, *parentContainer.UI_Layouts_Container_vt)
   Protected *This_vt.UI_XMLLoader_vt = *This
         If Not *ctrl : ProcedureReturn : EndIf
   
-        ; Hériter de la couleur de fond de la fenêtre
-        If *targetWindow
+        ; Hériter de la couleur de fond du conteneur parent ou de la fenêtre
+        If *parentContainer And *parentContainer\GetBackground() <> 0
+          *ctrl\SetParentBackground(*parentContainer\GetBackground())
+        ElseIf *targetWindow
           *ctrl\SetParentBackground(*targetWindow\GetBackgroundColor())
         EndIf
   
@@ -9901,6 +10217,16 @@ Procedure UI_XMLLoader_ApplyCanvasControlAttributes(*This.UI_XMLLoader_Inst, *ct
         Protected thickStr.s = GetXMLAttribute(node, "BorderThickness")
         If thickStr <> ""
           *ctrl\SetBorderThickness(Val(thickStr))
+        EndIf
+  
+        Protected borderLeftThickStr.s = GetXMLAttribute(node, "BorderLeftThickness")
+        If borderLeftThickStr <> ""
+          *ctrl\SetBorderLeftThickness(Val(borderLeftThickStr))
+        EndIf
+  
+        Protected borderLeftColorStr.s = GetXMLAttribute(node, "BorderLeftColor")
+        If borderLeftColorStr <> ""
+          *ctrl\SetBorderLeftColor(*This_vt\ParseColor(borderLeftColorStr, *ctrl\GetBorderLeftColor()))
         EndIf
   
         Protected radStr.s = GetXMLAttribute(node, "CornerRadius")
@@ -10029,6 +10355,25 @@ Procedure UI_XMLLoader_ApplyCommonAttributes(*This.UI_XMLLoader_Inst, *comp.UI_C
         If enStr = "FALSE" Or enStr = "0"
           *comp\SetEnabled(#False)
         EndIf
+  
+        ; Visual Styling (Background, Border, CornerRadius for Container and Controls)
+        Protected bgVal.s = GetXMLAttribute(node, "Background")
+        If bgVal = "" : bgVal = GetXMLAttribute(node, "Bg") : EndIf
+        If bgVal <> "" And Left(bgVal, 1) <> "{"
+          *comp\SetBackground(*This_vt\ParseColor(bgVal, *comp\GetBackground()))
+        EndIf
+  
+        Protected bcVal.s = GetXMLAttribute(node, "BorderColor")
+        If bcVal = "" : bcVal = GetXMLAttribute(node, "BorderBrush") : EndIf
+        If bcVal <> ""
+          *comp\SetBorderColor(*This_vt\ParseColor(bcVal, 0))
+        EndIf
+  
+        Protected btVal.s = GetXMLAttribute(node, "BorderThickness")
+        If btVal <> "" : *comp\SetBorderThickness(Val(btVal)) : EndIf
+  
+        Protected crVal.s = GetXMLAttribute(node, "CornerRadius")
+        If crVal <> "" : *comp\SetCornerRadius(Val(crVal)) : EndIf
   
         ; MVVM DataBindings
         *This_vt\ApplyDataBindings(*comp, node, *targetWindow)
@@ -10337,11 +10682,15 @@ Procedure.i UI_XMLLoader_ParseNode(*This.UI_XMLLoader_Inst, node.i, *targetWindo
                 Protected *gChild.UI_Component_vt = *This_vt\ParseNode(*gChildNode, *targetWindow, *grid)
                 If *gChild
                   Protected rowVal.i = Val(GetXMLAttribute(*gChildNode, "Row"))
+                  If rowVal = 0 : rowVal = Val(GetXMLAttribute(*gChildNode, "Grid.Row")) : EndIf
                   Protected colVal.i = Val(GetXMLAttribute(*gChildNode, "Col"))
                   If colVal = 0 : colVal = Val(GetXMLAttribute(*gChildNode, "Column")) : EndIf
+                  If colVal = 0 : colVal = Val(GetXMLAttribute(*gChildNode, "Grid.Column")) : EndIf
                   Protected rowSpan.i = Val(GetXMLAttribute(*gChildNode, "RowSpan"))
+                  If rowSpan <= 0 : rowSpan = Val(GetXMLAttribute(*gChildNode, "Grid.RowSpan")) : EndIf
                   If rowSpan <= 0 : rowSpan = 1 : EndIf
                   Protected colSpan.i = Val(GetXMLAttribute(*gChildNode, "ColSpan"))
+                  If colSpan <= 0 : colSpan = Val(GetXMLAttribute(*gChildNode, "Grid.ColumnSpan")) : EndIf
                   If colSpan <= 0 : colSpan = 1 : EndIf
   
                   *grid\SetCellSpan(*gChild, rowVal, colVal, rowSpan, colSpan)
@@ -10371,6 +10720,29 @@ Procedure.i UI_XMLLoader_ParseNode(*This.UI_XMLLoader_Inst, node.i, *targetWindo
                 EndIf
               EndIf
               *cntChildNode = NextXMLNode(*cntChildNode)
+            Wend
+  
+          Case "BORDER"
+            Protected *border.UI_Layouts_Container_vt = New_UI_Layouts_Container_void()
+            Protected bPadStr.s = GetXMLAttribute(node, "Padding")
+            If bPadStr <> ""
+              Protected bpL.INTEGER, bpT.INTEGER, bpR.INTEGER, bpB.INTEGER
+              *This_vt\ParseBoxValues(bPadStr, @bpL, @bpT, @bpR, @bpB)
+              *border\SetPadding(bpL\i, bpT\i, bpR\i, bpB\i)
+            EndIf
+  
+            *This_vt\ApplyCommonAttributes(*border, node, *targetWindow)
+            *createdComp = *border
+  
+            Protected *bChildNode = ChildXMLNode(node)
+            While *bChildNode
+              If XMLNodeType(*bChildNode) = #PB_XML_Normal
+                Protected *bChild.UI_Component_vt = *This_vt\ParseNode(*bChildNode, *targetWindow, *border)
+                If *bChild
+                  *border\AddChild(*bChild)
+                EndIf
+              EndIf
+              *bChildNode = NextXMLNode(*bChildNode)
             Wend
   
           ; ====================================================================
@@ -10646,8 +11018,18 @@ Procedure.i UI_XMLLoader_ParseNode(*This.UI_XMLLoader_Inst, node.i, *targetWindo
             Protected btnRad.s = GetXMLAttribute(node, "CornerRadius")
             If btnRad <> "" : *cbtn\SetCornerRadius(Val(btnRad)) : EndIf
   
+            Protected btnAlignStr.s = UCase(Trim(GetXMLAttribute(node, "HAlign")))
+            If btnAlignStr = "" : btnAlignStr = UCase(Trim(GetXMLAttribute(node, "TextAlignment"))) : EndIf
+            If btnAlignStr = "LEFT"
+              *cbtn\SetTextAlignment(1)
+            ElseIf btnAlignStr = "RIGHT"
+              *cbtn\SetTextAlignment(2)
+            ElseIf btnAlignStr = "CENTER"
+              *cbtn\SetTextAlignment(0)
+            EndIf
+  
             *This_vt\ApplyCommonAttributes(*cbtn, node, *targetWindow)
-            *This_vt\ApplyCanvasControlAttributes(*cbtn, node, *targetWindow)
+            *This_vt\ApplyCanvasControlAttributes(*cbtn, node, *targetWindow, *parentContainer)
             *createdComp = *cbtn
   
           Case "CANVASTEXT"
@@ -10655,7 +11037,9 @@ Procedure.i UI_XMLLoader_ParseNode(*This.UI_XMLLoader_Inst, node.i, *targetWindo
             If ctxtText = "" : ctxtText = GetXMLAttribute(node, "text") : EndIf
             If ctxtText = "" : ctxtText = GetXMLNodeText(node) : EndIf
             Protected *ctxt.UI_CanvasText_vt = New_UI_CanvasText_void()
-            If ctxtText <> "" : *ctxt\SetText(ctxtText) : EndIf
+            If ctxtText <> "" And Left(ctxtText, 1) <> "{"
+              *ctxt\SetText(ctxtText)
+            EndIf
   
             Protected ctxthAlignStr.s = UCase(Trim(GetXMLAttribute(node, "HAlign")))
             If ctxthAlignStr = "" : ctxthAlignStr = UCase(Trim(GetXMLAttribute(node, "TextAlignment"))) : EndIf
@@ -10681,7 +11065,7 @@ Procedure.i UI_XMLLoader_ParseNode(*This.UI_XMLLoader_Inst, node.i, *targetWindo
             If ctxtTrans = "FALSE" Or ctxtTrans = "0" : *ctxt\SetTransparent(#False) : EndIf
   
             *This_vt\ApplyCommonAttributes(*ctxt, node, *targetWindow)
-            *This_vt\ApplyCanvasControlAttributes(*ctxt, node, *targetWindow)
+            *This_vt\ApplyCanvasControlAttributes(*ctxt, node, *targetWindow, *parentContainer)
             *createdComp = *ctxt
   
           Case "CANVASTEXTBOX"
@@ -10691,7 +11075,9 @@ Procedure.i UI_XMLLoader_ParseNode(*This.UI_XMLLoader_Inst, node.i, *targetWindo
             If ctbPH = "" : ctbPH = GetXMLAttribute(node, "placeholder") : EndIf
   
             Protected *ctb.UI_CanvasTextBox_vt = New_UI_CanvasTextBox_void()
-            If ctbText <> "" : *ctb\SetText(ctbText) : EndIf
+            If ctbText <> "" And Left(ctbText, 1) <> "{"
+              *ctb\SetText(ctbText)
+            EndIf
             If ctbPH <> "" : *ctb\SetPlaceholder(ctbPH) : EndIf
   
             Protected ctbPHCol.s = GetXMLAttribute(node, "PlaceholderColor")
@@ -10715,7 +11101,7 @@ Procedure.i UI_XMLLoader_ParseNode(*This.UI_XMLLoader_Inst, node.i, *targetWindo
             If ctbMaxLStr <> "" : *ctb\SetMaxLength(Val(ctbMaxLStr)) : EndIf
   
             *This_vt\ApplyCommonAttributes(*ctb, node, *targetWindow)
-            *This_vt\ApplyCanvasControlAttributes(*ctb, node, *targetWindow)
+            *This_vt\ApplyCanvasControlAttributes(*ctb, node, *targetWindow, *parentContainer)
             *createdComp = *ctb
   
         EndSelect
@@ -10737,6 +11123,8 @@ Procedure.b UI_XMLLoader_LoadFromFile(*This.UI_XMLLoader_Inst, xmlPath.s, *targe
         If FileSize(actualPath) <= 0
           ProcedureReturn #False
         EndIf
+  
+        *This\currentXmlDir = GetPathPart(actualPath)
   
         Protected xmlHandle.i = LoadXML(#PB_Any, actualPath)
         If Not xmlHandle Or XMLStatus(xmlHandle) <> #PB_XML_Success
@@ -10868,6 +11256,12 @@ DataSection
     Data.i @UI_Component_GetDesiredHeight()
     Data.i @UI_Component_Arrange()
     Data.i @UI_Component_OnAnimationTick()
+    Data.i @UI_Component_SetBackground()
+    Data.i @UI_Component_GetBackground()
+    Data.i @UI_Component_SetBorderColor()
+    Data.i @UI_Component_SetBorderThickness()
+    Data.i @UI_Component_SetCornerRadius()
+    Data.i @UI_Window_Free()
     Data.i @UI_Window_CreateWindowInternal()
     Data.i @UI_Window_SetTitle()
     Data.i @UI_Window_GetTitle()
@@ -10885,7 +11279,6 @@ DataSection
     Data.i @UI_Window_LoadViewFromString()
     Data.i @UI_Window_GetResources()
     Data.i @UI_Window_Close()
-    Data.i @UI_Window_Free()
     Data.i @UI_Window_OnClose()
     Data.i @UI_Window_OnResize()
     Data.i @UI_Window_OnMove()
@@ -11079,6 +11472,15 @@ DataSection
     Data.i @UI_Component_GetDesiredHeight()
     Data.i @UI_Layouts_Container_Arrange()
     Data.i @UI_Component_OnAnimationTick()
+    Data.i @UI_Layouts_Container_SetBackground()
+    Data.i @UI_Layouts_Container_GetBackground()
+    Data.i @UI_Layouts_Container_SetBorderColor()
+    Data.i @UI_Layouts_Container_SetBorderThickness()
+    Data.i @UI_Layouts_Container_SetCornerRadius()
+    Data.i @UI_Layouts_Container_Free()
+    Data.i @UI_Layouts_Container_EnsureBgGadget()
+    Data.i @UI_Layouts_Container_SetBorder()
+    Data.i @UI_Layouts_Container_DrawBackground()
     Data.i @UI_Layouts_Container_SetPadding()
     Data.i @UI_Layouts_Container_SetPaddingAll()
     Data.i @UI_Layouts_Container_GetPaddingLeft()
@@ -11142,6 +11544,15 @@ DataSection
     Data.i @UI_Layouts_StackPanel_GetDesiredHeight()
     Data.i @UI_Layouts_StackPanel_Arrange()
     Data.i @UI_Component_OnAnimationTick()
+    Data.i @UI_Layouts_Container_SetBackground()
+    Data.i @UI_Layouts_Container_GetBackground()
+    Data.i @UI_Layouts_Container_SetBorderColor()
+    Data.i @UI_Layouts_Container_SetBorderThickness()
+    Data.i @UI_Layouts_Container_SetCornerRadius()
+    Data.i @UI_Layouts_Container_Free()
+    Data.i @UI_Layouts_Container_EnsureBgGadget()
+    Data.i @UI_Layouts_Container_SetBorder()
+    Data.i @UI_Layouts_Container_DrawBackground()
     Data.i @UI_Layouts_Container_SetPadding()
     Data.i @UI_Layouts_Container_SetPaddingAll()
     Data.i @UI_Layouts_Container_GetPaddingLeft()
@@ -11209,6 +11620,15 @@ DataSection
     Data.i @UI_Component_GetDesiredHeight()
     Data.i @UI_Layouts_DockPanel_Arrange()
     Data.i @UI_Component_OnAnimationTick()
+    Data.i @UI_Layouts_Container_SetBackground()
+    Data.i @UI_Layouts_Container_GetBackground()
+    Data.i @UI_Layouts_Container_SetBorderColor()
+    Data.i @UI_Layouts_Container_SetBorderThickness()
+    Data.i @UI_Layouts_Container_SetCornerRadius()
+    Data.i @UI_Layouts_Container_Free()
+    Data.i @UI_Layouts_Container_EnsureBgGadget()
+    Data.i @UI_Layouts_Container_SetBorder()
+    Data.i @UI_Layouts_Container_DrawBackground()
     Data.i @UI_Layouts_Container_SetPadding()
     Data.i @UI_Layouts_Container_SetPaddingAll()
     Data.i @UI_Layouts_Container_GetPaddingLeft()
@@ -11277,6 +11697,15 @@ DataSection
     Data.i @UI_Component_GetDesiredHeight()
     Data.i @UI_Layouts_Grid_Arrange()
     Data.i @UI_Component_OnAnimationTick()
+    Data.i @UI_Layouts_Container_SetBackground()
+    Data.i @UI_Layouts_Container_GetBackground()
+    Data.i @UI_Layouts_Container_SetBorderColor()
+    Data.i @UI_Layouts_Container_SetBorderThickness()
+    Data.i @UI_Layouts_Container_SetCornerRadius()
+    Data.i @UI_Layouts_Container_Free()
+    Data.i @UI_Layouts_Container_EnsureBgGadget()
+    Data.i @UI_Layouts_Container_SetBorder()
+    Data.i @UI_Layouts_Container_DrawBackground()
     Data.i @UI_Layouts_Container_SetPadding()
     Data.i @UI_Layouts_Container_SetPaddingAll()
     Data.i @UI_Layouts_Container_GetPaddingLeft()
@@ -11345,6 +11774,12 @@ DataSection
     Data.i @UI_Component_GetDesiredHeight()
     Data.i @UI_Component_Arrange()
     Data.i @UI_Component_OnAnimationTick()
+    Data.i @UI_Gadget_SetBackground()
+    Data.i @UI_Component_GetBackground()
+    Data.i @UI_Component_SetBorderColor()
+    Data.i @UI_Component_SetBorderThickness()
+    Data.i @UI_Component_SetCornerRadius()
+    Data.i @UI_Button_Free()
     Data.i @UI_Gadget_GetText()
     Data.i @UI_Gadget_SetText()
     Data.i @UI_Gadget_SetToolTip()
@@ -11353,14 +11788,12 @@ DataSection
     Data.i @UI_Gadget_GetColor()
     Data.i @UI_Gadget_SetFont()
     Data.i @UI_Gadget_SetFocus()
-    Data.i @UI_Button_Free()
     Data.i @UI_Gadget_GetState()
     Data.i @UI_Gadget_SetState()
     Data.i @UI_Gadget_IsChecked()
     Data.i @UI_Gadget_SetChecked()
     Data.i @UI_Gadget_IsHovered()
     Data.i @UI_Gadget_IsPressed()
-    Data.i @UI_Gadget_SetBackground()
     Data.i @UI_Gadget_SetForeground()
     Data.i @UI_Gadget_Redraw()
     Data.i @UI_Gadget_OnClick()
@@ -11421,6 +11854,12 @@ DataSection
     Data.i @UI_Component_GetDesiredHeight()
     Data.i @UI_Component_Arrange()
     Data.i @UI_Component_OnAnimationTick()
+    Data.i @UI_Gadget_SetBackground()
+    Data.i @UI_Component_GetBackground()
+    Data.i @UI_Component_SetBorderColor()
+    Data.i @UI_Component_SetBorderThickness()
+    Data.i @UI_Component_SetCornerRadius()
+    Data.i @UI_TextBox_Free()
     Data.i @UI_Gadget_GetText()
     Data.i @UI_Gadget_SetText()
     Data.i @UI_Gadget_SetToolTip()
@@ -11429,14 +11868,12 @@ DataSection
     Data.i @UI_Gadget_GetColor()
     Data.i @UI_Gadget_SetFont()
     Data.i @UI_Gadget_SetFocus()
-    Data.i @UI_TextBox_Free()
     Data.i @UI_Gadget_GetState()
     Data.i @UI_Gadget_SetState()
     Data.i @UI_Gadget_IsChecked()
     Data.i @UI_Gadget_SetChecked()
     Data.i @UI_Gadget_IsHovered()
     Data.i @UI_Gadget_IsPressed()
-    Data.i @UI_Gadget_SetBackground()
     Data.i @UI_Gadget_SetForeground()
     Data.i @UI_Gadget_Redraw()
     Data.i @UI_Gadget_OnClick()
@@ -11500,6 +11937,12 @@ DataSection
     Data.i @UI_Component_GetDesiredHeight()
     Data.i @UI_Component_Arrange()
     Data.i @UI_Component_OnAnimationTick()
+    Data.i @UI_Gadget_SetBackground()
+    Data.i @UI_Component_GetBackground()
+    Data.i @UI_Component_SetBorderColor()
+    Data.i @UI_Component_SetBorderThickness()
+    Data.i @UI_Component_SetCornerRadius()
+    Data.i @UI_Label_Free()
     Data.i @UI_Gadget_GetText()
     Data.i @UI_Gadget_SetText()
     Data.i @UI_Gadget_SetToolTip()
@@ -11508,14 +11951,12 @@ DataSection
     Data.i @UI_Gadget_GetColor()
     Data.i @UI_Gadget_SetFont()
     Data.i @UI_Gadget_SetFocus()
-    Data.i @UI_Label_Free()
     Data.i @UI_Gadget_GetState()
     Data.i @UI_Gadget_SetState()
     Data.i @UI_Gadget_IsChecked()
     Data.i @UI_Gadget_SetChecked()
     Data.i @UI_Gadget_IsHovered()
     Data.i @UI_Gadget_IsPressed()
-    Data.i @UI_Gadget_SetBackground()
     Data.i @UI_Gadget_SetForeground()
     Data.i @UI_Gadget_Redraw()
     Data.i @UI_Gadget_OnClick()
@@ -11576,6 +12017,12 @@ DataSection
     Data.i @UI_Component_GetDesiredHeight()
     Data.i @UI_Component_Arrange()
     Data.i @UI_Component_OnAnimationTick()
+    Data.i @UI_Gadget_SetBackground()
+    Data.i @UI_Component_GetBackground()
+    Data.i @UI_Component_SetBorderColor()
+    Data.i @UI_Component_SetBorderThickness()
+    Data.i @UI_Component_SetCornerRadius()
+    Data.i @UI_CheckBox_Free()
     Data.i @UI_Gadget_GetText()
     Data.i @UI_Gadget_SetText()
     Data.i @UI_Gadget_SetToolTip()
@@ -11584,14 +12031,12 @@ DataSection
     Data.i @UI_Gadget_GetColor()
     Data.i @UI_Gadget_SetFont()
     Data.i @UI_Gadget_SetFocus()
-    Data.i @UI_CheckBox_Free()
     Data.i @UI_Gadget_GetState()
     Data.i @UI_Gadget_SetState()
     Data.i @UI_CheckBox_IsChecked()
     Data.i @UI_CheckBox_SetChecked()
     Data.i @UI_Gadget_IsHovered()
     Data.i @UI_Gadget_IsPressed()
-    Data.i @UI_Gadget_SetBackground()
     Data.i @UI_Gadget_SetForeground()
     Data.i @UI_Gadget_Redraw()
     Data.i @UI_Gadget_OnClick()
@@ -11652,6 +12097,12 @@ DataSection
     Data.i @UI_Component_GetDesiredHeight()
     Data.i @UI_Component_Arrange()
     Data.i @UI_Component_OnAnimationTick()
+    Data.i @UI_Gadget_SetBackground()
+    Data.i @UI_Component_GetBackground()
+    Data.i @UI_Component_SetBorderColor()
+    Data.i @UI_Component_SetBorderThickness()
+    Data.i @UI_Component_SetCornerRadius()
+    Data.i @UI_RadioButton_Free()
     Data.i @UI_Gadget_GetText()
     Data.i @UI_Gadget_SetText()
     Data.i @UI_Gadget_SetToolTip()
@@ -11660,14 +12111,12 @@ DataSection
     Data.i @UI_Gadget_GetColor()
     Data.i @UI_Gadget_SetFont()
     Data.i @UI_Gadget_SetFocus()
-    Data.i @UI_RadioButton_Free()
     Data.i @UI_Gadget_GetState()
     Data.i @UI_Gadget_SetState()
     Data.i @UI_RadioButton_IsChecked()
     Data.i @UI_RadioButton_SetChecked()
     Data.i @UI_Gadget_IsHovered()
     Data.i @UI_Gadget_IsPressed()
-    Data.i @UI_Gadget_SetBackground()
     Data.i @UI_Gadget_SetForeground()
     Data.i @UI_Gadget_Redraw()
     Data.i @UI_Gadget_OnClick()
@@ -11730,6 +12179,12 @@ DataSection
     Data.i @UI_Component_GetDesiredHeight()
     Data.i @UI_Component_Arrange()
     Data.i @UI_Component_OnAnimationTick()
+    Data.i @UI_Gadget_SetBackground()
+    Data.i @UI_Component_GetBackground()
+    Data.i @UI_Component_SetBorderColor()
+    Data.i @UI_Component_SetBorderThickness()
+    Data.i @UI_Component_SetCornerRadius()
+    Data.i @UI_ProgressBar_Free()
     Data.i @UI_Gadget_GetText()
     Data.i @UI_Gadget_SetText()
     Data.i @UI_Gadget_SetToolTip()
@@ -11738,14 +12193,12 @@ DataSection
     Data.i @UI_Gadget_GetColor()
     Data.i @UI_Gadget_SetFont()
     Data.i @UI_Gadget_SetFocus()
-    Data.i @UI_ProgressBar_Free()
     Data.i @UI_Gadget_GetState()
     Data.i @UI_Gadget_SetState()
     Data.i @UI_Gadget_IsChecked()
     Data.i @UI_Gadget_SetChecked()
     Data.i @UI_Gadget_IsHovered()
     Data.i @UI_Gadget_IsPressed()
-    Data.i @UI_Gadget_SetBackground()
     Data.i @UI_Gadget_SetForeground()
     Data.i @UI_Gadget_Redraw()
     Data.i @UI_Gadget_OnClick()
@@ -11808,6 +12261,12 @@ DataSection
     Data.i @UI_Component_GetDesiredHeight()
     Data.i @UI_Component_Arrange()
     Data.i @UI_Component_OnAnimationTick()
+    Data.i @UI_Gadget_SetBackground()
+    Data.i @UI_Component_GetBackground()
+    Data.i @UI_Component_SetBorderColor()
+    Data.i @UI_Component_SetBorderThickness()
+    Data.i @UI_Component_SetCornerRadius()
+    Data.i @UI_Slider_Free()
     Data.i @UI_Gadget_GetText()
     Data.i @UI_Gadget_SetText()
     Data.i @UI_Gadget_SetToolTip()
@@ -11816,14 +12275,12 @@ DataSection
     Data.i @UI_Gadget_GetColor()
     Data.i @UI_Gadget_SetFont()
     Data.i @UI_Gadget_SetFocus()
-    Data.i @UI_Slider_Free()
     Data.i @UI_Gadget_GetState()
     Data.i @UI_Gadget_SetState()
     Data.i @UI_Gadget_IsChecked()
     Data.i @UI_Gadget_SetChecked()
     Data.i @UI_Gadget_IsHovered()
     Data.i @UI_Gadget_IsPressed()
-    Data.i @UI_Gadget_SetBackground()
     Data.i @UI_Gadget_SetForeground()
     Data.i @UI_Gadget_Redraw()
     Data.i @UI_Gadget_OnClick()
@@ -11886,6 +12343,12 @@ DataSection
     Data.i @UI_Component_GetDesiredHeight()
     Data.i @UI_Component_Arrange()
     Data.i @UI_Component_OnAnimationTick()
+    Data.i @UI_Gadget_SetBackground()
+    Data.i @UI_Component_GetBackground()
+    Data.i @UI_Component_SetBorderColor()
+    Data.i @UI_Component_SetBorderThickness()
+    Data.i @UI_Component_SetCornerRadius()
+    Data.i @UI_ComboBox_Free()
     Data.i @UI_Gadget_GetText()
     Data.i @UI_Gadget_SetText()
     Data.i @UI_Gadget_SetToolTip()
@@ -11894,14 +12357,12 @@ DataSection
     Data.i @UI_Gadget_GetColor()
     Data.i @UI_Gadget_SetFont()
     Data.i @UI_Gadget_SetFocus()
-    Data.i @UI_ComboBox_Free()
     Data.i @UI_Gadget_GetState()
     Data.i @UI_Gadget_SetState()
     Data.i @UI_Gadget_IsChecked()
     Data.i @UI_Gadget_SetChecked()
     Data.i @UI_Gadget_IsHovered()
     Data.i @UI_Gadget_IsPressed()
-    Data.i @UI_Gadget_SetBackground()
     Data.i @UI_Gadget_SetForeground()
     Data.i @UI_Gadget_Redraw()
     Data.i @UI_Gadget_OnClick()
@@ -11967,6 +12428,12 @@ DataSection
     Data.i @UI_Component_GetDesiredHeight()
     Data.i @UI_Component_Arrange()
     Data.i @UI_Component_OnAnimationTick()
+    Data.i @UI_Gadget_SetBackground()
+    Data.i @UI_Component_GetBackground()
+    Data.i @UI_Component_SetBorderColor()
+    Data.i @UI_Component_SetBorderThickness()
+    Data.i @UI_Component_SetCornerRadius()
+    Data.i @UI_SpinBox_Free()
     Data.i @UI_Gadget_GetText()
     Data.i @UI_Gadget_SetText()
     Data.i @UI_Gadget_SetToolTip()
@@ -11975,14 +12442,12 @@ DataSection
     Data.i @UI_Gadget_GetColor()
     Data.i @UI_Gadget_SetFont()
     Data.i @UI_Gadget_SetFocus()
-    Data.i @UI_SpinBox_Free()
     Data.i @UI_Gadget_GetState()
     Data.i @UI_Gadget_SetState()
     Data.i @UI_Gadget_IsChecked()
     Data.i @UI_Gadget_SetChecked()
     Data.i @UI_Gadget_IsHovered()
     Data.i @UI_Gadget_IsPressed()
-    Data.i @UI_Gadget_SetBackground()
     Data.i @UI_Gadget_SetForeground()
     Data.i @UI_Gadget_Redraw()
     Data.i @UI_Gadget_OnClick()
@@ -12048,6 +12513,12 @@ DataSection
     Data.i @UI_Component_GetDesiredHeight()
     Data.i @UI_Component_Arrange()
     Data.i @UI_Component_OnAnimationTick()
+    Data.i @UI_Gadget_SetBackground()
+    Data.i @UI_Component_GetBackground()
+    Data.i @UI_Component_SetBorderColor()
+    Data.i @UI_Component_SetBorderThickness()
+    Data.i @UI_Component_SetCornerRadius()
+    Data.i @UI_Editor_Free()
     Data.i @UI_Gadget_GetText()
     Data.i @UI_Gadget_SetText()
     Data.i @UI_Gadget_SetToolTip()
@@ -12056,14 +12527,12 @@ DataSection
     Data.i @UI_Gadget_GetColor()
     Data.i @UI_Gadget_SetFont()
     Data.i @UI_Gadget_SetFocus()
-    Data.i @UI_Editor_Free()
     Data.i @UI_Gadget_GetState()
     Data.i @UI_Gadget_SetState()
     Data.i @UI_Gadget_IsChecked()
     Data.i @UI_Gadget_SetChecked()
     Data.i @UI_Gadget_IsHovered()
     Data.i @UI_Gadget_IsPressed()
-    Data.i @UI_Gadget_SetBackground()
     Data.i @UI_Gadget_SetForeground()
     Data.i @UI_Gadget_Redraw()
     Data.i @UI_Gadget_OnClick()
@@ -12130,6 +12599,12 @@ DataSection
     Data.i @UI_Component_GetDesiredHeight()
     Data.i @UI_Component_Arrange()
     Data.i @UI_Component_OnAnimationTick()
+    Data.i @UI_Gadget_SetBackground()
+    Data.i @UI_Component_GetBackground()
+    Data.i @UI_Component_SetBorderColor()
+    Data.i @UI_Component_SetBorderThickness()
+    Data.i @UI_Component_SetCornerRadius()
+    Data.i @UI_ListView_Free()
     Data.i @UI_Gadget_GetText()
     Data.i @UI_Gadget_SetText()
     Data.i @UI_Gadget_SetToolTip()
@@ -12138,14 +12613,12 @@ DataSection
     Data.i @UI_Gadget_GetColor()
     Data.i @UI_Gadget_SetFont()
     Data.i @UI_Gadget_SetFocus()
-    Data.i @UI_ListView_Free()
     Data.i @UI_Gadget_GetState()
     Data.i @UI_Gadget_SetState()
     Data.i @UI_Gadget_IsChecked()
     Data.i @UI_Gadget_SetChecked()
     Data.i @UI_Gadget_IsHovered()
     Data.i @UI_Gadget_IsPressed()
-    Data.i @UI_Gadget_SetBackground()
     Data.i @UI_Gadget_SetForeground()
     Data.i @UI_Gadget_Redraw()
     Data.i @UI_Gadget_OnClick()
@@ -12216,6 +12689,12 @@ DataSection
     Data.i @UI_Component_GetDesiredHeight()
     Data.i @UI_Component_Arrange()
     Data.i @UI_Component_OnAnimationTick()
+    Data.i @UI_Gadget_SetBackground()
+    Data.i @UI_Component_GetBackground()
+    Data.i @UI_Component_SetBorderColor()
+    Data.i @UI_Component_SetBorderThickness()
+    Data.i @UI_Component_SetCornerRadius()
+    Data.i @UI_TreeView_Free()
     Data.i @UI_Gadget_GetText()
     Data.i @UI_Gadget_SetText()
     Data.i @UI_Gadget_SetToolTip()
@@ -12224,14 +12703,12 @@ DataSection
     Data.i @UI_Gadget_GetColor()
     Data.i @UI_Gadget_SetFont()
     Data.i @UI_Gadget_SetFocus()
-    Data.i @UI_TreeView_Free()
     Data.i @UI_Gadget_GetState()
     Data.i @UI_Gadget_SetState()
     Data.i @UI_Gadget_IsChecked()
     Data.i @UI_Gadget_SetChecked()
     Data.i @UI_Gadget_IsHovered()
     Data.i @UI_Gadget_IsPressed()
-    Data.i @UI_Gadget_SetBackground()
     Data.i @UI_Gadget_SetForeground()
     Data.i @UI_Gadget_Redraw()
     Data.i @UI_Gadget_OnClick()
@@ -12305,6 +12782,12 @@ DataSection
     Data.i @UI_Component_GetDesiredHeight()
     Data.i @UI_Component_Arrange()
     Data.i @UI_Component_OnAnimationTick()
+    Data.i @UI_Gadget_SetBackground()
+    Data.i @UI_Component_GetBackground()
+    Data.i @UI_Component_SetBorderColor()
+    Data.i @UI_Component_SetBorderThickness()
+    Data.i @UI_Component_SetCornerRadius()
+    Data.i @UI_DatePicker_Free()
     Data.i @UI_Gadget_GetText()
     Data.i @UI_Gadget_SetText()
     Data.i @UI_Gadget_SetToolTip()
@@ -12313,14 +12796,12 @@ DataSection
     Data.i @UI_Gadget_GetColor()
     Data.i @UI_Gadget_SetFont()
     Data.i @UI_Gadget_SetFocus()
-    Data.i @UI_DatePicker_Free()
     Data.i @UI_Gadget_GetState()
     Data.i @UI_Gadget_SetState()
     Data.i @UI_Gadget_IsChecked()
     Data.i @UI_Gadget_SetChecked()
     Data.i @UI_Gadget_IsHovered()
     Data.i @UI_Gadget_IsPressed()
-    Data.i @UI_Gadget_SetBackground()
     Data.i @UI_Gadget_SetForeground()
     Data.i @UI_Gadget_Redraw()
     Data.i @UI_Gadget_OnClick()
@@ -12384,6 +12865,12 @@ DataSection
     Data.i @UI_Component_GetDesiredHeight()
     Data.i @UI_Component_Arrange()
     Data.i @UI_Component_OnAnimationTick()
+    Data.i @UI_Gadget_SetBackground()
+    Data.i @UI_Component_GetBackground()
+    Data.i @UI_Component_SetBorderColor()
+    Data.i @UI_Component_SetBorderThickness()
+    Data.i @UI_Component_SetCornerRadius()
+    Data.i @UI_GroupBox_Free()
     Data.i @UI_Gadget_GetText()
     Data.i @UI_Gadget_SetText()
     Data.i @UI_Gadget_SetToolTip()
@@ -12392,14 +12879,12 @@ DataSection
     Data.i @UI_Gadget_GetColor()
     Data.i @UI_Gadget_SetFont()
     Data.i @UI_Gadget_SetFocus()
-    Data.i @UI_GroupBox_Free()
     Data.i @UI_Gadget_GetState()
     Data.i @UI_Gadget_SetState()
     Data.i @UI_Gadget_IsChecked()
     Data.i @UI_Gadget_SetChecked()
     Data.i @UI_Gadget_IsHovered()
     Data.i @UI_Gadget_IsPressed()
-    Data.i @UI_Gadget_SetBackground()
     Data.i @UI_Gadget_SetForeground()
     Data.i @UI_Gadget_Redraw()
     Data.i @UI_Gadget_OnClick()
@@ -12460,6 +12945,12 @@ DataSection
     Data.i @UI_Component_GetDesiredHeight()
     Data.i @UI_Component_Arrange()
     Data.i @UI_Component_OnAnimationTick()
+    Data.i @UI_Gadget_SetBackground()
+    Data.i @UI_Component_GetBackground()
+    Data.i @UI_Component_SetBorderColor()
+    Data.i @UI_Component_SetBorderThickness()
+    Data.i @UI_Component_SetCornerRadius()
+    Data.i @UI_TabControl_Free()
     Data.i @UI_Gadget_GetText()
     Data.i @UI_Gadget_SetText()
     Data.i @UI_Gadget_SetToolTip()
@@ -12468,14 +12959,12 @@ DataSection
     Data.i @UI_Gadget_GetColor()
     Data.i @UI_Gadget_SetFont()
     Data.i @UI_Gadget_SetFocus()
-    Data.i @UI_TabControl_Free()
     Data.i @UI_Gadget_GetState()
     Data.i @UI_Gadget_SetState()
     Data.i @UI_Gadget_IsChecked()
     Data.i @UI_Gadget_SetChecked()
     Data.i @UI_Gadget_IsHovered()
     Data.i @UI_Gadget_IsPressed()
-    Data.i @UI_Gadget_SetBackground()
     Data.i @UI_Gadget_SetForeground()
     Data.i @UI_Gadget_Redraw()
     Data.i @UI_Gadget_OnClick()
@@ -12545,6 +13034,12 @@ DataSection
     Data.i @UI_Component_GetDesiredHeight()
     Data.i @UI_CanvasControl_Arrange()
     Data.i @UI_CanvasControl_OnAnimationTick()
+    Data.i @UI_CanvasControl_SetBackground()
+    Data.i @UI_CanvasControl_GetBackground()
+    Data.i @UI_CanvasControl_SetBorderColor()
+    Data.i @UI_CanvasControl_SetBorderThickness()
+    Data.i @UI_CanvasControl_SetCornerRadius()
+    Data.i @UI_CanvasControl_Free()
     Data.i @UI_CanvasControl_GetText()
     Data.i @UI_CanvasControl_SetText()
     Data.i @UI_Gadget_SetToolTip()
@@ -12553,14 +13048,12 @@ DataSection
     Data.i @UI_Gadget_GetColor()
     Data.i @UI_Gadget_SetFont()
     Data.i @UI_Gadget_SetFocus()
-    Data.i @UI_CanvasControl_Free()
     Data.i @UI_Gadget_GetState()
     Data.i @UI_Gadget_SetState()
     Data.i @UI_Gadget_IsChecked()
     Data.i @UI_Gadget_SetChecked()
     Data.i @UI_CanvasControl_IsHovered()
     Data.i @UI_CanvasControl_IsPressed()
-    Data.i @UI_CanvasControl_SetBackground()
     Data.i @UI_CanvasControl_SetForeground()
     Data.i @UI_CanvasControl_Redraw()
     Data.i @UI_Gadget_OnClick()
@@ -12581,7 +13074,6 @@ DataSection
     Data.i @UI_CanvasControl_SetIsPressed()
     Data.i @UI_CanvasControl_IsFocused()
     Data.i @UI_CanvasControl_SetIsFocused()
-    Data.i @UI_CanvasControl_GetBackground()
     Data.i @UI_CanvasControl_GetForeground()
     Data.i @UI_CanvasControl_GetHoverBackground()
     Data.i @UI_CanvasControl_SetHoverBackground()
@@ -12596,16 +13088,17 @@ DataSection
     Data.i @UI_CanvasControl_GetDisabledForeground()
     Data.i @UI_CanvasControl_SetDisabledForeground()
     Data.i @UI_CanvasControl_GetBorderColor()
-    Data.i @UI_CanvasControl_SetBorderColor()
     Data.i @UI_CanvasControl_GetHoverBorderColor()
     Data.i @UI_CanvasControl_SetHoverBorderColor()
     Data.i @UI_CanvasControl_GetPressedBorderColor()
     Data.i @UI_CanvasControl_SetPressedBorderColor()
     Data.i @UI_CanvasControl_GetBorderThickness()
-    Data.i @UI_CanvasControl_SetBorderThickness()
     Data.i @UI_CanvasControl_GetCornerRadius()
-    Data.i @UI_CanvasControl_SetCornerRadius()
     Data.i @UI_CanvasControl_SetBorder()
+    Data.i @UI_CanvasControl_GetBorderLeftThickness()
+    Data.i @UI_CanvasControl_SetBorderLeftThickness()
+    Data.i @UI_CanvasControl_GetBorderLeftColor()
+    Data.i @UI_CanvasControl_SetBorderLeftColor()
     Data.i @UI_CanvasControl_SetPadding()
     Data.i @UI_CanvasControl_GetPaddingLeft()
     Data.i @UI_CanvasControl_GetPaddingTop()
@@ -12632,7 +13125,7 @@ DataSection
     Data.i @UI_CanvasControl_GetParentBackground()
     Data.i @UI_CanvasControl_SetAnimateHoverScale()
     Data.i @UI_CanvasControl_IsAnimateHoverScale()
-    Data.i @UI_CanvasControl_ApplyStyle()
+    Data.i @UI_CanvasButton_ApplyStyle()
     Data.i @UI_CanvasControl_ApplyStyleTriggers()
     Data.i @UI_CanvasControl_GetStyle()
     Data.i @UI_CanvasButton_SetDefaultStyle()
@@ -12698,6 +13191,12 @@ DataSection
     Data.i @UI_CanvasText_GetDesiredHeight()
     Data.i @UI_CanvasControl_Arrange()
     Data.i @UI_CanvasControl_OnAnimationTick()
+    Data.i @UI_CanvasControl_SetBackground()
+    Data.i @UI_CanvasControl_GetBackground()
+    Data.i @UI_CanvasControl_SetBorderColor()
+    Data.i @UI_CanvasControl_SetBorderThickness()
+    Data.i @UI_CanvasControl_SetCornerRadius()
+    Data.i @UI_CanvasControl_Free()
     Data.i @UI_CanvasControl_GetText()
     Data.i @UI_CanvasControl_SetText()
     Data.i @UI_Gadget_SetToolTip()
@@ -12706,14 +13205,12 @@ DataSection
     Data.i @UI_Gadget_GetColor()
     Data.i @UI_Gadget_SetFont()
     Data.i @UI_Gadget_SetFocus()
-    Data.i @UI_CanvasControl_Free()
     Data.i @UI_Gadget_GetState()
     Data.i @UI_Gadget_SetState()
     Data.i @UI_Gadget_IsChecked()
     Data.i @UI_Gadget_SetChecked()
     Data.i @UI_CanvasControl_IsHovered()
     Data.i @UI_CanvasControl_IsPressed()
-    Data.i @UI_CanvasControl_SetBackground()
     Data.i @UI_CanvasControl_SetForeground()
     Data.i @UI_CanvasControl_Redraw()
     Data.i @UI_Gadget_OnClick()
@@ -12734,7 +13231,6 @@ DataSection
     Data.i @UI_CanvasControl_SetIsPressed()
     Data.i @UI_CanvasControl_IsFocused()
     Data.i @UI_CanvasControl_SetIsFocused()
-    Data.i @UI_CanvasControl_GetBackground()
     Data.i @UI_CanvasControl_GetForeground()
     Data.i @UI_CanvasControl_GetHoverBackground()
     Data.i @UI_CanvasControl_SetHoverBackground()
@@ -12749,16 +13245,17 @@ DataSection
     Data.i @UI_CanvasControl_GetDisabledForeground()
     Data.i @UI_CanvasControl_SetDisabledForeground()
     Data.i @UI_CanvasControl_GetBorderColor()
-    Data.i @UI_CanvasControl_SetBorderColor()
     Data.i @UI_CanvasControl_GetHoverBorderColor()
     Data.i @UI_CanvasControl_SetHoverBorderColor()
     Data.i @UI_CanvasControl_GetPressedBorderColor()
     Data.i @UI_CanvasControl_SetPressedBorderColor()
     Data.i @UI_CanvasControl_GetBorderThickness()
-    Data.i @UI_CanvasControl_SetBorderThickness()
     Data.i @UI_CanvasControl_GetCornerRadius()
-    Data.i @UI_CanvasControl_SetCornerRadius()
     Data.i @UI_CanvasControl_SetBorder()
+    Data.i @UI_CanvasControl_GetBorderLeftThickness()
+    Data.i @UI_CanvasControl_SetBorderLeftThickness()
+    Data.i @UI_CanvasControl_GetBorderLeftColor()
+    Data.i @UI_CanvasControl_SetBorderLeftColor()
     Data.i @UI_CanvasControl_SetPadding()
     Data.i @UI_CanvasControl_GetPaddingLeft()
     Data.i @UI_CanvasControl_GetPaddingTop()
@@ -12848,6 +13345,12 @@ DataSection
     Data.i @UI_Component_GetDesiredHeight()
     Data.i @UI_CanvasControl_Arrange()
     Data.i @UI_CanvasControl_OnAnimationTick()
+    Data.i @UI_CanvasControl_SetBackground()
+    Data.i @UI_CanvasControl_GetBackground()
+    Data.i @UI_CanvasControl_SetBorderColor()
+    Data.i @UI_CanvasControl_SetBorderThickness()
+    Data.i @UI_CanvasControl_SetCornerRadius()
+    Data.i @UI_CanvasTextBox_Free()
     Data.i @UI_CanvasControl_GetText()
     Data.i @UI_CanvasTextBox_SetText()
     Data.i @UI_Gadget_SetToolTip()
@@ -12856,14 +13359,12 @@ DataSection
     Data.i @UI_Gadget_GetColor()
     Data.i @UI_Gadget_SetFont()
     Data.i @UI_Gadget_SetFocus()
-    Data.i @UI_CanvasTextBox_Free()
     Data.i @UI_Gadget_GetState()
     Data.i @UI_Gadget_SetState()
     Data.i @UI_Gadget_IsChecked()
     Data.i @UI_Gadget_SetChecked()
     Data.i @UI_CanvasControl_IsHovered()
     Data.i @UI_CanvasControl_IsPressed()
-    Data.i @UI_CanvasControl_SetBackground()
     Data.i @UI_CanvasControl_SetForeground()
     Data.i @UI_CanvasControl_Redraw()
     Data.i @UI_Gadget_OnClick()
@@ -12884,7 +13385,6 @@ DataSection
     Data.i @UI_CanvasControl_SetIsPressed()
     Data.i @UI_CanvasControl_IsFocused()
     Data.i @UI_CanvasControl_SetIsFocused()
-    Data.i @UI_CanvasControl_GetBackground()
     Data.i @UI_CanvasControl_GetForeground()
     Data.i @UI_CanvasControl_GetHoverBackground()
     Data.i @UI_CanvasControl_SetHoverBackground()
@@ -12899,16 +13399,17 @@ DataSection
     Data.i @UI_CanvasControl_GetDisabledForeground()
     Data.i @UI_CanvasControl_SetDisabledForeground()
     Data.i @UI_CanvasControl_GetBorderColor()
-    Data.i @UI_CanvasControl_SetBorderColor()
     Data.i @UI_CanvasControl_GetHoverBorderColor()
     Data.i @UI_CanvasControl_SetHoverBorderColor()
     Data.i @UI_CanvasControl_GetPressedBorderColor()
     Data.i @UI_CanvasControl_SetPressedBorderColor()
     Data.i @UI_CanvasControl_GetBorderThickness()
-    Data.i @UI_CanvasControl_SetBorderThickness()
     Data.i @UI_CanvasControl_GetCornerRadius()
-    Data.i @UI_CanvasControl_SetCornerRadius()
     Data.i @UI_CanvasControl_SetBorder()
+    Data.i @UI_CanvasControl_GetBorderLeftThickness()
+    Data.i @UI_CanvasControl_SetBorderLeftThickness()
+    Data.i @UI_CanvasControl_GetBorderLeftColor()
+    Data.i @UI_CanvasControl_SetBorderLeftColor()
     Data.i @UI_CanvasControl_SetPadding()
     Data.i @UI_CanvasControl_GetPaddingLeft()
     Data.i @UI_CanvasControl_GetPaddingTop()
@@ -13022,6 +13523,12 @@ DataSection
     Data.i @UI_Component_GetDesiredHeight()
     Data.i @UI_CanvasControl_Arrange()
     Data.i @UI_CanvasControl_OnAnimationTick()
+    Data.i @UI_CanvasControl_SetBackground()
+    Data.i @UI_CanvasControl_GetBackground()
+    Data.i @UI_CanvasControl_SetBorderColor()
+    Data.i @UI_CanvasControl_SetBorderThickness()
+    Data.i @UI_CanvasControl_SetCornerRadius()
+    Data.i @UI_CustomGadget_Free()
     Data.i @UI_CanvasControl_GetText()
     Data.i @UI_CanvasControl_SetText()
     Data.i @UI_Gadget_SetToolTip()
@@ -13030,14 +13537,12 @@ DataSection
     Data.i @UI_Gadget_GetColor()
     Data.i @UI_Gadget_SetFont()
     Data.i @UI_Gadget_SetFocus()
-    Data.i @UI_CustomGadget_Free()
     Data.i @UI_Gadget_GetState()
     Data.i @UI_Gadget_SetState()
     Data.i @UI_ToggleSwitch_IsChecked()
     Data.i @UI_ToggleSwitch_SetChecked()
     Data.i @UI_CanvasControl_IsHovered()
     Data.i @UI_CanvasControl_IsPressed()
-    Data.i @UI_CanvasControl_SetBackground()
     Data.i @UI_CanvasControl_SetForeground()
     Data.i @UI_CanvasControl_Redraw()
     Data.i @UI_ToggleSwitch_OnClick()
@@ -13058,7 +13563,6 @@ DataSection
     Data.i @UI_CanvasControl_SetIsPressed()
     Data.i @UI_CanvasControl_IsFocused()
     Data.i @UI_CanvasControl_SetIsFocused()
-    Data.i @UI_CanvasControl_GetBackground()
     Data.i @UI_CanvasControl_GetForeground()
     Data.i @UI_CanvasControl_GetHoverBackground()
     Data.i @UI_CanvasControl_SetHoverBackground()
@@ -13073,16 +13577,17 @@ DataSection
     Data.i @UI_CanvasControl_GetDisabledForeground()
     Data.i @UI_CanvasControl_SetDisabledForeground()
     Data.i @UI_CanvasControl_GetBorderColor()
-    Data.i @UI_CanvasControl_SetBorderColor()
     Data.i @UI_CanvasControl_GetHoverBorderColor()
     Data.i @UI_CanvasControl_SetHoverBorderColor()
     Data.i @UI_CanvasControl_GetPressedBorderColor()
     Data.i @UI_CanvasControl_SetPressedBorderColor()
     Data.i @UI_CanvasControl_GetBorderThickness()
-    Data.i @UI_CanvasControl_SetBorderThickness()
     Data.i @UI_CanvasControl_GetCornerRadius()
-    Data.i @UI_CanvasControl_SetCornerRadius()
     Data.i @UI_CanvasControl_SetBorder()
+    Data.i @UI_CanvasControl_GetBorderLeftThickness()
+    Data.i @UI_CanvasControl_SetBorderLeftThickness()
+    Data.i @UI_CanvasControl_GetBorderLeftColor()
+    Data.i @UI_CanvasControl_SetBorderLeftColor()
     Data.i @UI_CanvasControl_SetPadding()
     Data.i @UI_CanvasControl_GetPaddingLeft()
     Data.i @UI_CanvasControl_GetPaddingTop()
@@ -13164,6 +13669,12 @@ DataSection
     Data.i @UI_Component_GetDesiredHeight()
     Data.i @UI_Component_Arrange()
     Data.i @UI_Component_OnAnimationTick()
+    Data.i @UI_Gadget_SetBackground()
+    Data.i @UI_Component_GetBackground()
+    Data.i @UI_Component_SetBorderColor()
+    Data.i @UI_Component_SetBorderThickness()
+    Data.i @UI_Component_SetCornerRadius()
+    Data.i @UI_ListIcon_Free()
     Data.i @UI_Gadget_GetText()
     Data.i @UI_Gadget_SetText()
     Data.i @UI_Gadget_SetToolTip()
@@ -13172,14 +13683,12 @@ DataSection
     Data.i @UI_Gadget_GetColor()
     Data.i @UI_Gadget_SetFont()
     Data.i @UI_Gadget_SetFocus()
-    Data.i @UI_ListIcon_Free()
     Data.i @UI_Gadget_GetState()
     Data.i @UI_Gadget_SetState()
     Data.i @UI_Gadget_IsChecked()
     Data.i @UI_Gadget_SetChecked()
     Data.i @UI_Gadget_IsHovered()
     Data.i @UI_Gadget_IsPressed()
-    Data.i @UI_Gadget_SetBackground()
     Data.i @UI_Gadget_SetForeground()
     Data.i @UI_Gadget_Redraw()
     Data.i @UI_Gadget_OnClick()
@@ -13251,6 +13760,12 @@ DataSection
     Data.i @UI_Component_GetDesiredHeight()
     Data.i @UI_Component_Arrange()
     Data.i @UI_Component_OnAnimationTick()
+    Data.i @UI_Gadget_SetBackground()
+    Data.i @UI_Component_GetBackground()
+    Data.i @UI_Component_SetBorderColor()
+    Data.i @UI_Component_SetBorderThickness()
+    Data.i @UI_Component_SetCornerRadius()
+    Data.i @UI_Canvas_Free()
     Data.i @UI_Gadget_GetText()
     Data.i @UI_Gadget_SetText()
     Data.i @UI_Gadget_SetToolTip()
@@ -13259,14 +13774,12 @@ DataSection
     Data.i @UI_Gadget_GetColor()
     Data.i @UI_Gadget_SetFont()
     Data.i @UI_Gadget_SetFocus()
-    Data.i @UI_Canvas_Free()
     Data.i @UI_Gadget_GetState()
     Data.i @UI_Gadget_SetState()
     Data.i @UI_Gadget_IsChecked()
     Data.i @UI_Gadget_SetChecked()
     Data.i @UI_Gadget_IsHovered()
     Data.i @UI_Gadget_IsPressed()
-    Data.i @UI_Gadget_SetBackground()
     Data.i @UI_Gadget_SetForeground()
     Data.i @UI_Gadget_Redraw()
     Data.i @UI_Gadget_OnClick()
@@ -13365,6 +13878,12 @@ DataSection
     Data.i @UI_Component_GetDesiredHeight()
     Data.i @UI_CanvasControl_Arrange()
     Data.i @UI_CanvasControl_OnAnimationTick()
+    Data.i @UI_CanvasControl_SetBackground()
+    Data.i @UI_CanvasControl_GetBackground()
+    Data.i @UI_CanvasControl_SetBorderColor()
+    Data.i @UI_CanvasControl_SetBorderThickness()
+    Data.i @UI_CanvasControl_SetCornerRadius()
+    Data.i @UI_CanvasTree_Free()
     Data.i @UI_CanvasControl_GetText()
     Data.i @UI_CanvasControl_SetText()
     Data.i @UI_Gadget_SetToolTip()
@@ -13373,14 +13892,12 @@ DataSection
     Data.i @UI_Gadget_GetColor()
     Data.i @UI_CanvasTree_SetFont()
     Data.i @UI_Gadget_SetFocus()
-    Data.i @UI_CanvasTree_Free()
     Data.i @UI_Gadget_GetState()
     Data.i @UI_Gadget_SetState()
     Data.i @UI_Gadget_IsChecked()
     Data.i @UI_Gadget_SetChecked()
     Data.i @UI_CanvasControl_IsHovered()
     Data.i @UI_CanvasControl_IsPressed()
-    Data.i @UI_CanvasControl_SetBackground()
     Data.i @UI_CanvasControl_SetForeground()
     Data.i @UI_CanvasControl_Redraw()
     Data.i @UI_Gadget_OnClick()
@@ -13401,7 +13918,6 @@ DataSection
     Data.i @UI_CanvasControl_SetIsPressed()
     Data.i @UI_CanvasControl_IsFocused()
     Data.i @UI_CanvasControl_SetIsFocused()
-    Data.i @UI_CanvasControl_GetBackground()
     Data.i @UI_CanvasControl_GetForeground()
     Data.i @UI_CanvasControl_GetHoverBackground()
     Data.i @UI_CanvasControl_SetHoverBackground()
@@ -13416,16 +13932,17 @@ DataSection
     Data.i @UI_CanvasControl_GetDisabledForeground()
     Data.i @UI_CanvasControl_SetDisabledForeground()
     Data.i @UI_CanvasControl_GetBorderColor()
-    Data.i @UI_CanvasControl_SetBorderColor()
     Data.i @UI_CanvasControl_GetHoverBorderColor()
     Data.i @UI_CanvasControl_SetHoverBorderColor()
     Data.i @UI_CanvasControl_GetPressedBorderColor()
     Data.i @UI_CanvasControl_SetPressedBorderColor()
     Data.i @UI_CanvasControl_GetBorderThickness()
-    Data.i @UI_CanvasControl_SetBorderThickness()
     Data.i @UI_CanvasControl_GetCornerRadius()
-    Data.i @UI_CanvasControl_SetCornerRadius()
     Data.i @UI_CanvasControl_SetBorder()
+    Data.i @UI_CanvasControl_GetBorderLeftThickness()
+    Data.i @UI_CanvasControl_SetBorderLeftThickness()
+    Data.i @UI_CanvasControl_GetBorderLeftColor()
+    Data.i @UI_CanvasControl_SetBorderLeftColor()
     Data.i @UI_CanvasControl_SetPadding()
     Data.i @UI_CanvasControl_GetPaddingLeft()
     Data.i @UI_CanvasControl_GetPaddingTop()
@@ -13824,6 +14341,7 @@ EndProcedure
 
 Procedure Free_UI_Layouts_Container(*obj.UI_Layouts_Container_Inst)
   If *obj
+    UI_Layouts_Container_Free(*obj)
     FreeStructure(*obj)
   EndIf
 EndProcedure
@@ -13866,6 +14384,7 @@ EndProcedure
 
 Procedure Free_UI_Layouts_StackPanel(*obj.UI_Layouts_StackPanel_Inst)
   If *obj
+    UI_Layouts_Container_Free(*obj)
     FreeStructure(*obj)
   EndIf
 EndProcedure
@@ -13899,6 +14418,7 @@ EndProcedure
 
 Procedure Free_UI_Layouts_DockPanel(*obj.UI_Layouts_DockPanel_Inst)
   If *obj
+    UI_Layouts_Container_Free(*obj)
     FreeStructure(*obj)
   EndIf
 EndProcedure
@@ -13923,6 +14443,7 @@ EndProcedure
 
 Procedure Free_UI_Layouts_Grid(*obj.UI_Layouts_Grid_Inst)
   If *obj
+    UI_Layouts_Container_Free(*obj)
     FreeStructure(*obj)
   EndIf
 EndProcedure
@@ -15263,7 +15784,7 @@ Procedure UI_MVVM_RegisterBinding(*control.UI_Gadget_vt, targetProp.s, *viewMode
 
   ; Initial push from ViewModel to View
   Protected initialVal.s = *viewModel\GetValueAsString(sourceProp)
-  If initialVal <> "" And IsGadget(*control\GetID())
+  If IsGadget(*control\GetID())
     Protected tProp.s = LCase(targetProp)
     Select tProp
       Case "text", "value"

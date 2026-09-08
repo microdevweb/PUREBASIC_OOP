@@ -708,6 +708,19 @@ Procedure.b LoadSourceLinesRecursive(filePath.s)
     file = ReadFile(#PB_Any, altPath)
     If file
       filePath = altPath
+    Else
+      altPath = CanonicalizePath(BaseDirectory + filePath)
+      file = ReadFile(#PB_Any, altPath)
+      If file
+        filePath = altPath
+      EndIf
+    EndIf
+  EndIf
+  If Not file
+    Protected curAlt.s = CanonicalizePath(GetCurrentDirectory() + filePath)
+    file = ReadFile(#PB_Any, curAlt)
+    If file
+      filePath = curAlt
     EndIf
   EndIf
 
@@ -759,11 +772,40 @@ Procedure.b LoadSourceLinesRecursive(filePath.s)
         
         Protected finalIncPath.s = incPath
         If Not isAbs
-          finalIncPath = dir + incPath
-          If FileSize(finalIncPath) <= 0 And BaseDirectory <> ""
-            Protected testAlt.s = CanonicalizePath(BaseDirectory + incPath)
-            If FileSize(testAlt) > 0
-              finalIncPath = testAlt
+          If FindString(LCase(dir), "temp\") = 0
+            finalIncPath = dir + incPath
+          Else
+            finalIncPath = ""
+          EndIf
+          
+          If finalIncPath = "" Or FileSize(finalIncPath) <= 0
+            If BaseDirectory <> "" And FileSize(CanonicalizePath(BaseDirectory + incPath)) > 0
+              finalIncPath = CanonicalizePath(BaseDirectory + incPath)
+            ElseIf FileSize(CanonicalizePath(GetCurrentDirectory() + incPath)) > 0
+              finalIncPath = CanonicalizePath(GetCurrentDirectory() + incPath)
+            ElseIf dir <> "" And FileSize(CanonicalizePath(dir + incPath)) > 0
+              finalIncPath = CanonicalizePath(dir + incPath)
+            Else
+              ; Fallback: search in subdirectories (e.g. examples/**/incPath)
+              Protected examDir = ExamineDirectory(#PB_Any, GetCurrentDirectory() + "examples\", "*.*")
+              If examDir
+                While NextDirectoryEntry(examDir)
+                  If DirectoryEntryType(examDir) = #PB_DirectoryEntry_Directory
+                    Protected subDirName.s = DirectoryEntryName(examDir)
+                    If subDirName <> "." And subDirName <> ".."
+                      Protected cand.s = CanonicalizePath(GetCurrentDirectory() + "examples\" + subDirName + "\" + incPath)
+                      If FileSize(cand) > 0
+                        finalIncPath = cand
+                        Break
+                      EndIf
+                    EndIf
+                  EndIf
+                Wend
+                FinishDirectory(examDir)
+              EndIf
+              If finalIncPath = "" Or FileSize(finalIncPath) <= 0
+                finalIncPath = dir + incPath
+              EndIf
             EndIf
           EndIf
         EndIf
@@ -2830,6 +2872,9 @@ Procedure.i Main()
       i + 1
       If i < argCount
         BaseDirectory = ProgramParameter(i)
+        If FindString(LCase(BaseDirectory), "temp\") > 0
+          BaseDirectory = ""
+        EndIf
         If BaseDirectory <> "" And Right(BaseDirectory, 1) <> "\"
           BaseDirectory + "\"
         EndIf
@@ -2867,6 +2912,17 @@ Procedure.i Main()
       CloseConsole()
       ProcedureReturn 1
     EndIf
+  EndIf
+
+  If BaseDirectory = "" Or FindString(LCase(BaseDirectory), "temp\") > 0
+    If inputPBO <> "" And FindString(LCase(inputPBO), "temp\") = 0
+      BaseDirectory = GetPathPart(inputPBO)
+    Else
+      BaseDirectory = GetCurrentDirectory()
+    EndIf
+  EndIf
+  If BaseDirectory <> "" And Right(BaseDirectory, 1) <> "\"
+    BaseDirectory + "\"
   EndIf
 
   If inputPBO = ""

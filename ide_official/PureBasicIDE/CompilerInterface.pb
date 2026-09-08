@@ -2418,10 +2418,24 @@ Procedure Compiler_CompileRun(SourceFileName$, *Source.SourceFile, CheckSyntax)
   
   ; Transpile OOP source (.pbo / Class keywords) before passing to pbcompiler
   Protected actualBaseDir$ = ""
-  If *Source And *Source\FileName$ <> ""
+  If *Source And *Source\FileName$ <> "" And FindString(LCase(*Source\FileName$), "temp\") = 0
     actualBaseDir$ = GetPathPart(*Source\FileName$)
-  ElseIf *ActiveSource And *ActiveSource\FileName$ <> ""
+  ElseIf *ActiveSource And *ActiveSource\FileName$ <> "" And FindString(LCase(*ActiveSource\FileName$), "temp\") = 0
     actualBaseDir$ = GetPathPart(*ActiveSource\FileName$)
+  EndIf
+  If (actualBaseDir$ = "" Or FindString(LCase(actualBaseDir$), "temp\") > 0) And ProjectFile$ <> ""
+    actualBaseDir$ = GetPathPart(ProjectFile$)
+  EndIf
+  If actualBaseDir$ = "" Or FindString(LCase(actualBaseDir$), "temp\") > 0
+    ForEach FileList()
+      If FileList()\FileName$ <> "" And FindString(LCase(FileList()\FileName$), "temp\") = 0
+        actualBaseDir$ = GetPathPart(FileList()\FileName$)
+        Break
+      EndIf
+    Next
+  EndIf
+  If actualBaseDir$ = "" Or FindString(LCase(actualBaseDir$), "temp\") > 0
+    actualBaseDir$ = GetCurrentDirectory()
   EndIf
   Protected ActualSourceFile$ = TranspileOOPFile(SourceFileName$, actualBaseDir$)
   
@@ -2429,7 +2443,9 @@ Procedure Compiler_CompileRun(SourceFileName$, *Source.SourceFile, CheckSyntax)
     ; Transpilation failed due to OOP error!
     HideCompilerWindow()
     If OOP_TranspilerErrorFile$ <> ""
-      LoadSourceFile(OOP_TranspilerErrorFile$)
+      If FindString(LCase(OOP_TranspilerErrorFile$), "temp\") = 0
+        LoadSourceFile(OOP_TranspilerErrorFile$)
+      EndIf
       If OOP_TranspilerErrorLine > 0
         ChangeActiveLine(OOP_TranspilerErrorLine, -5)
         SetSelection(OOP_TranspilerErrorLine, 1, OOP_TranspilerErrorLine, -1)
@@ -2666,14 +2682,26 @@ Procedure Compiler_BuildTarget(SourceFileName$, TargetFileName$, *Target.Compile
   
   ; Transpile OOP source (.pbo / Class keywords) before passing to pbcompiler
   Protected actualBaseDir$ = ""
-  If *Target And *Target\MainFile$ <> ""
-    actualBaseDir$ = GetPathPart(*Target\MainFile$)
-  ElseIf *Target And *Target\FileName$ <> ""
+  If *Target And *Target\FileName$ <> "" And FindString(LCase(*Target\FileName$), "temp\") = 0
     actualBaseDir$ = GetPathPart(*Target\FileName$)
-  ElseIf *ActiveSource And *ActiveSource\FileName$ <> ""
+  ElseIf *Target And *Target\MainFile$ <> "" And GetPathPart(*Target\MainFile$) <> "" And FindString(LCase(*Target\MainFile$), "temp\") = 0
+    actualBaseDir$ = GetPathPart(*Target\MainFile$)
+  ElseIf *ActiveSource And *ActiveSource\FileName$ <> "" And FindString(LCase(*ActiveSource\FileName$), "temp\") = 0
     actualBaseDir$ = GetPathPart(*ActiveSource\FileName$)
-  Else
-    actualBaseDir$ = GetPathPart(SourceFileName$)
+  EndIf
+  If (actualBaseDir$ = "" Or FindString(LCase(actualBaseDir$), "temp\") > 0) And ProjectFile$ <> ""
+    actualBaseDir$ = GetPathPart(ProjectFile$)
+  EndIf
+  If actualBaseDir$ = "" Or FindString(LCase(actualBaseDir$), "temp\") > 0
+    ForEach FileList()
+      If FileList()\FileName$ <> "" And FindString(LCase(FileList()\FileName$), "temp\") = 0
+        actualBaseDir$ = GetPathPart(FileList()\FileName$)
+        Break
+      EndIf
+    Next
+  EndIf
+  If actualBaseDir$ = "" Or FindString(LCase(actualBaseDir$), "temp\") > 0
+    actualBaseDir$ = GetCurrentDirectory()
   EndIf
   Protected ActualSourceFile$ = TranspileOOPFile(SourceFileName$, actualBaseDir$)
   
@@ -2681,7 +2709,9 @@ Procedure Compiler_BuildTarget(SourceFileName$, TargetFileName$, *Target.Compile
     ; Transpilation failed due to OOP error!
     HideCompilerWindow()
     If OOP_TranspilerErrorFile$ <> ""
-      LoadSourceFile(OOP_TranspilerErrorFile$)
+      If FindString(LCase(OOP_TranspilerErrorFile$), "temp\") = 0
+        LoadSourceFile(OOP_TranspilerErrorFile$)
+      EndIf
       If OOP_TranspilerErrorLine > 0
         ChangeActiveLine(OOP_TranspilerErrorLine, -5)
         SetSelection(OOP_TranspilerErrorLine, 1, OOP_TranspilerErrorLine, -1)
