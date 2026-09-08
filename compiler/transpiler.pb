@@ -1949,9 +1949,15 @@ Procedure ProcessLineLifecycle(cleanLine.s, List trackedList.OOP_TrackedInstance
   
   Protected upLine.s = UCase(cleanLine)
   Protected isProcRet.b = Bool(Left(upLine, 15) = "PROCEDURERETURN")
-  Protected hasAddChild.b = Bool(FindString(cleanLine, "AddChild(") > 0 Or FindString(cleanLine, "AddChild (") > 0)
-  Protected hasAddElement.b = Bool(FindString(cleanLine, "AddElement(") > 0 Or FindString(cleanLine, "AddElement (") > 0)
-  Protected hasRegister.b = Bool(FindString(cleanLine, "Register") > 0)
+  Protected hasTransferCall.b = Bool(FindString(cleanLine, "AddChild") > 0 Or 
+                                     FindString(cleanLine, "AddElement") > 0 Or 
+                                     FindString(cleanLine, "Register") > 0 Or 
+                                     FindString(cleanLine, "SetCell") > 0 Or 
+                                     FindString(cleanLine, "SetDock") > 0 Or 
+                                     FindString(cleanLine, "SetContent") > 0 Or 
+                                     FindString(cleanLine, "AddPanel") > 0 Or 
+                                     FindString(cleanLine, "AddControl") > 0 Or 
+                                     FindString(cleanLine, "SetMainWindow") > 0)
   Protected isFieldAssign.b = Bool((FindString(cleanLine, "This\") > 0 Or FindString(cleanLine, "*This\") > 0) And FindString(cleanLine, "=") > 0)
 
   ForEach trackedList()
@@ -1972,7 +1978,7 @@ Procedure ProcessLineLifecycle(cleanLine.s, List trackedList.OOP_TrackedInstance
         Continue
       EndIf
 
-      ; 2. Check for Ownership Transfer (ProcedureReturn, This\field =, AddChild, AddElement, Register)
+      ; 2. Check for Ownership Transfer (ProcedureReturn, This\field =, AddChild, SetCell, SetDock, SetContent...)
       If isProcRet And FindString(cleanLine, vName) > 0
         trackedList()\state = #OOP_INSTANCE_TRANSFERRED
         Continue
@@ -1983,7 +1989,7 @@ Procedure ProcessLineLifecycle(cleanLine.s, List trackedList.OOP_TrackedInstance
         Continue
       EndIf
 
-      If (hasAddChild Or hasAddElement Or hasRegister) And FindString(cleanLine, vName) > 0
+      If hasTransferCall And FindString(cleanLine, vName) > 0
         trackedList()\state = #OOP_INSTANCE_TRANSFERRED
         Continue
       EndIf

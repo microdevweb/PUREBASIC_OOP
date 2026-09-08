@@ -1,6 +1,6 @@
 ; ============================================================================
-; Application Gestionnaire de Tâches (TodoApp) - Constantes Contractuelles
-; Fichier : constants/AppConstants.pbi
+; Application Gestionnaire de Taches (TodoApp) - Constantes Contractuelles
+; File: constants/AppConstants.pbi
 ; ============================================================================
 
 #PROP_TASK_TITLE   = "TaskTitle"

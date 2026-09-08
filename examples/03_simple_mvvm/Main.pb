@@ -17,3 +17,8 @@ Define *view.Demo::Views::SimpleView = New Demo::Views::SimpleView(*vm)
 ; 4. Run Application Event Loop
 *app\SetMainWindow(*view)
 *app\Run()
+
+; 5. Clean up application resources
+*view\Free()
+*vm\Free()
+*app\Free()

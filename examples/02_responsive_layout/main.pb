@@ -36,7 +36,7 @@ Define *btnSave.Button = New Button("Enregistrer", 100, 32)
 ; 5. Footer / Status Bar (Dock Bottom)
 Define *statusStack.StackPanel = New StackPanel(#UI_Orientation_Horizontal, 10)
 *statusStack\SetHeight(30)
-Define *lblStatus.Button = New Button("Statut : Prêt - Redimensionnez la fenêtre pour tester le responsive !", 600, 24)
+Define *lblStatus.Button = New Button("Status: Ready - Resize the window to test responsiveness!", 600, 24)
 *statusStack\AddChild(*lblStatus)
 
 *rootDock\SetDock(*statusStack, #UI_Dock_Bottom)
@@ -49,7 +49,7 @@ Define *sidebar.StackPanel = New StackPanel(#UI_Orientation_Vertical, 8)
 Define *btnNav1.Button = New Button("Tableau de bord", 170, 32)
 Define *btnNav2.Button = New Button("Projets", 170, 32)
 Define *btnNav3.Button = New Button("Composants", 170, 32)
-Define *btnNav4.Button = New Button("Paramètres", 170, 32)
+Define *btnNav4.Button = New Button("Settings", 170, 32)
 
 *sidebar\AddChild(*btnNav1)
 *sidebar\AddChild(*btnNav2)
@@ -71,17 +71,17 @@ Define *mainGrid.Grid = New Grid()
 *mainGrid\AddRow("*")
 
 ; Row 0: Search bar & action
-Define *searchBox.TextBox = New TextBox(0, 0, 100, 30, "Rechercher dans les composants...")
+Define *searchBox.TextBox = New TextBox(0, 0, 100, 30, "Search components...")
 *mainGrid\SetCell(*searchBox, 0, 0)
 
-Define *btnFilter.Button = New Button("Filtrer", 100, 30)
+Define *btnFilter.Button = New Button("Filter", 100, 30)
 *mainGrid\SetCell(*btnFilter, 0, 1)
 
 ; Row 1: Main Editor and Properties panel
-Define *mainEditor.TextBox = New TextBox(0, 0, 100, 100, "Zone principale de travail / Éditeur...")
+Define *mainEditor.TextBox = New TextBox(0, 0, 100, 100, "Main workspace / Editor...")
 *mainGrid\SetCell(*mainEditor, 1, 0)
 
-Define *propEditor.TextBox = New TextBox(0, 0, 100, 100, "Propriétés sélectionnées...")
+Define *propEditor.TextBox = New TextBox(0, 0, 100, 100, "Selected properties...")
 *mainGrid\SetCell(*propEditor, 1, 1)
 
 *rootDock\SetDock(*mainGrid, #UI_Dock_Fill)
@@ -92,3 +92,7 @@ Define *propEditor.TextBox = New TextBox(0, 0, 100, 100, "Propriétés sélectio
 ; 9. Run Application
 *app\SetMainWindow(*win)
 *app\Run()
+
+; 10. Clean up application resources
+*win\Free()
+*app\Free()

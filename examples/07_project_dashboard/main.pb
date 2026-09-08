@@ -27,6 +27,5 @@ Define *view.Dashboard::ProjectDashboardView = New Dashboard::ProjectDashboardVi
 *app\Free()
 
 ; IDE Options = PureBasic 6.40 (Windows - x64)
-; CursorPosition = 23
 ; EnableXP
 ; DPIAware

@@ -1,6 +1,6 @@
 ; ============================================================================
-; Application Gestionnaire de Tâches (TodoApp) - Modèle Métier
-; Fichier : models/TaskModel.pbi
+; Application Gestionnaire de Taches (TodoApp) - Business Model
+; File: models/TaskModel.pbi
 ; ============================================================================
 
 Structure TaskItem

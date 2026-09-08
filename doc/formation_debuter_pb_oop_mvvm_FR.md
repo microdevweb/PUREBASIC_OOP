@@ -2,7 +2,7 @@
 
 *Concevoir sa première application réactive moderne pas à pas*  
 **Auteur :** MicrodevWeb  
-**Framework :** PureBasic OOP v1.2 / v2.0  
+**Framework :** PureBasic OOP Alpha 1.3  
 **Compatibilité :** PureBasic 6.x (Windows, Linux, macOS)  
 
 ---
@@ -243,7 +243,7 @@ EndIf
 
 ## 📚 Module 8 : Tableau Récapitulatif & Aide F1
 
-### 8.1. Les 18 Contrôles UI Disponibles
+### 8.1. Les Contrôles UI & Moteurs Disponibles (Alpha 1.3)
 
 | Contrôle OOP | Gadget PureBasic | Usage Type |
 | :--- | :--- | :--- |
@@ -264,6 +264,14 @@ EndIf
 | `UI::Label` | `TextGadget` | Texte statique ou informatif |
 | `UI::ToggleSwitch` | `CanvasGadget` | Interrupteur animé ON/OFF moderne |
 | `UI::TabControl` | `PanelGadget` | Conteneur à onglets modulaires |
+| `UI::CanvasControl` | `CanvasGadget` | Composant vectoriel de base haute performance |
+| `UI::CanvasButton` | `CanvasGadget` | Bouton vectoriel stylable avec états visuels |
+| `UI::CanvasTextBox` | `CanvasGadget` | Saisie de texte vectorielle fluide |
+| `UI::CanvasText` | `CanvasGadget` | Label vectoriel typographique haute précision |
+| `UI::CanvasTree` | `CanvasGadget` | Arborescence vectorielle interactive |
+| `UI::Style` / `Trigger` | Moteur WPF | Styles déclaratifs et déclencheurs visuels réactifs |
+| `UI::AnimationEngine` | Moteur 60 FPS | Micro-animations et transitions avec Easing |
+| `UI::XMLLoader` | Moteur XML | Chargeur déclaratif de vues et databinding |
 
 ### 8.2. Touche d'Aide F1 dans l'IDE
 Dans l'IDE PureBasic, placez à tout moment votre curseur sur un mot-clé (`Class`, `Method`, `Super`, `Property`...) ou un composant UI (`Button`, `Editor`, `Grid`, `ObservableObject`...) et appuyez sur **F1** pour ouvrir directement sa fiche d'aide avec son arbre d'héritage et ses exemples.

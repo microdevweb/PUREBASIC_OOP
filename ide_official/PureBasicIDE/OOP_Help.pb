@@ -109,8 +109,36 @@ Procedure.s GetOOPHelpPage(Keyword.s)
     Case "grid"
       ProcedureReturn "ui/grid.html"
       
+    ; Canvas Vector Controls (Alpha 1.3)
+    Case "canvascontrol"
+      ProcedureReturn "ui/canvascontrol.html"
+      
+    Case "canvasbutton"
+      ProcedureReturn "ui/canvasbutton.html"
+      
+    Case "canvastextbox"
+      ProcedureReturn "ui/canvastextbox.html"
+      
+    Case "canvastext"
+      ProcedureReturn "ui/canvastext.html"
+      
+    Case "canvastree"
+      ProcedureReturn "ui/canvastree.html"
+      
+    ; WPF Styling & Visual Triggers (Alpha 1.3)
+    Case "style", "styles", "resourcedictionary", "trigger", "triggers", "visualstate", "setter", "setters"
+      ProcedureReturn "ui/styles.html"
+      
+    ; Micro-Animations & Easing (Alpha 1.3)
+    Case "animation", "animationengine", "easing", "microanimation", "transition"
+      ProcedureReturn "ui/animation.html"
+      
+    ; XML Declarative UI Loader (Alpha 1.3)
+    Case "xmlloader", "loadview"
+      ProcedureReturn "ui/xmlloader.html"
+      
     ; MVVM Architecture & DataBinding
-    Case "mvvm", "observableobject", "viewmodelbase", "stringproperty", "intproperty", "boolproperty", "doubleproperty", "bindingengine", "xmlloader", "binding"
+    Case "mvvm", "observableobject", "viewmodelbase", "stringproperty", "intproperty", "boolproperty", "doubleproperty", "bindingengine", "binding"
       ProcedureReturn "ui/mvvm.html"
       
     Default

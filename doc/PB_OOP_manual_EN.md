@@ -1,341 +1,222 @@
-; ============================================================================
-; PureBasic OOP - Reference Manual (English)
-; Official documentation for the transpiler, GUI framework, and MVVM engine
-; Author:      MicrodevWeb
-; ============================================================================
+# PureBasic OOP Reference Manual - Version Alpha 1.3
 
-# PureBasic OOP Reference Manual (English)
+Official documentation for the PureBasic Object-Oriented transpiler, modern GUI framework, and declarative MVVM (Model-View-ViewModel) reactive architecture.
 
-Welcome to the official documentation for the PureBasic Object-Oriented transpiler, responsive GUI framework, and MVVM (Model-View-ViewModel) reactive architecture.
+**Author:** MicrodevWeb  
+**Version:** Alpha 1.3  
+**Compatibility:** PureBasic 6.x (Windows, Linux, macOS)  
+
+---
+
+## Table of Contents
+
+1. [Foundations of Object-Oriented Programming (OOP)](#1-foundations-of-object-oriented-programming-oop)
+2. [PureBasic OOP Syntax & Grammar](#2-purebasic-oop-syntax--grammar)
+3. [Responsive GUI Framework](#3-responsive-gui-framework)
+4. [High-Fidelity Vector Controls (CanvasControl)](#4-high-fidelity-vector-controls-canvascontrol)
+5. [WPF Declarative Style System & Dictionaries](#5-wpf-declarative-style-system--dictionaries)
+6. [Visual Triggers & 60 FPS Micro-Animations (Easing)](#6-visual-triggers--60-fps-micro-animations-easing)
+7. [Declarative XML Views & Automated Loader (XMLLoader)](#7-declarative-xml-views--automated-loader-xmlloader)
+8. [Reactive MVVM Architecture (Model-View-ViewModel)](#8-reactive-mvvm-architecture-model-view-viewmodel)
+9. [Memory Lifecycle & Leak-Free Disposal](#9-memory-lifecycle--leak-free-disposal)
+10. [PureBasic IDE Integration & Project Files (.pbp)](#10-purebasic-ide-integration--project-files-pbp)
 
 ---
 
 ## 1. Foundations of Object-Oriented Programming (OOP)
 
-Object-Oriented Programming (OOP) organizes software design around **data** and their **associated operations**, packaged into self-contained units called **Objects**.
+Object-Oriented Programming (OOP) structures software applications around **data** and their **associated operations**, encapsulated within self-contained entities called **Objects**.
 
 ### 1.1 Classes and Objects
-- **Class**: The blueprint defining data fields (attributes) and behaviors (methods).
-- **Object (Instance)**: A concrete entity instantiated in memory via `New ClassName(...)`.
+- **Class**: The blueprint defining member fields (attributes) and behaviors (methods).
+- **Object (Instance)**: A concrete memory instance allocated via `New ClassName(...)`.
 
-### 1.2 Encapsulation & Visibility
-- **`Public`**: Accessible anywhere (inside and outside the object).
-- **`Protected`**: Accessible only within the declaring class and its derived subclasses.
-- **`Private`**: Accessible strictly inside the declaring class.
+### 1.2 Encapsulation and Access Modifiers
+- **`Public`**: Freely accessible from anywhere.
+- **`Protected`**: Accessible only within the declaring class and its inheriting subclasses.
+- **`Private`**: Strictly accessible only within the declaring class.
 
 ### 1.3 Inheritance (`Extends`)
-Inheritance allows a child class to inherit fields and methods from a parent class, promoting code reuse:
+Inheritance allows subclasses to reuse, specialize, and extend parent class capabilities:
 ```oop
+Class Animal {
+  Protected name.s
+  Public Method Init(n.s) {
+    This\name = n
+  }
+  Public Method Speak() {
+    MessageRequester("Animal", This\name + " makes a sound.")
+  }
+}
+
 Class Dog Extends Animal {
   Public Method Speak() {
-    MessageRequester("Dog", "Woof!")
+    MessageRequester("Dog", This\name + " barks: Woof!")
   }
 }
 ```
 
-### 1.4 Polymorphism (Dynamic VTable Dispatch)
-Derived objects can be treated uniformly through their base class pointer. Method invocations dynamically dispatch at runtime through the Virtual Method Table (*VTable*).
+### 1.4 Polymorphism & Virtual Method Tables (VTable)
+Objects dispatch method calls through automated Virtual Method Tables (*VTable*). Subclasses can be manipulated polymorphically through parent type pointers with late-binding dispatch.
 
-### 1.5 Abstraction (Abstract Classes & Abstract Methods)
-- **`Abstract Class`**: A base class that cannot be directly instantiated.
-- **`Public Abstract Method`**: A prototype that concrete subclasses **must** implement.
+### 1.5 Abstraction
+- **`Abstract Class`**: Base template class that cannot be directly instantiated.
+- **`Abstract Method`**: Method contract signature that derived subclasses must implement.
 
 ---
 
 ## 2. PureBasic OOP Syntax & Grammar
 
+The native transpiler transforms object-oriented code into highly optimized procedural PureBasic source code.
+
 ### 2.1 Class Declaration
 ```oop
-Namespace App::Models {
-
-  Abstract Class Shape {
+Namespace MyProject {
+  Class User {
     Protected name.s
-    Protected color.s
+    Protected email.s
 
-    Public Method Init(name_p.s, color_p.s) {
-      This\name = name_p
-      This\color = color_p
+    Public Method Init(n.s, e.s) {
+      This\name = n
+      This\email = e
     }
 
-    Public Abstract Method.d CalculateArea()
-    
-    Public Method DisplayInfo() {
-      Debug "Shape: " + This\name + " | Color: " + This\color
-    }
-
-    Public Method Free() {
+    Public Method.s GetName() {
+      ProcedureReturn This\name
     }
   }
-
-  Class Rectangle Extends Shape {
-    Protected width.d
-    Protected height.d
-
-    Public Method Init(name_p.s, color_p.s, w.d, h.d) {
-      Super\Init(name_p, color_p)
-      This\width = w
-      This\height = h
-    }
-
-    Public Method.d CalculateArea() {
-      ProcedureReturn This\width * This\height
-    }
-  }
-
 }
 ```
 
-### 2.2 Constructor Overloading (`Init`)
-A class can define multiple constructors with different parameter signatures:
+### 2.2 Method & Constructor Overloading (`Init`)
+Methods and constructors support multiple signature variants:
 ```oop
-Class Person {
-  Protected name.s
-  Protected age.i
-
-  Public Method Init() {
-    This\name = "Anonymous" : This\age = 0
-  }
-
-  Public Method Init(name_p.s) {
-    This\name = name_p : This\age = 0
-  }
-
-  Public Method Init(name_p.s, age_p.i) {
-    This\name = name_p : This\age = age_p
-  }
+Public Method Init() {
+  Super\Init()
+}
+Public Method Init(title.s) {
+  Super\Init()
+  This\SetTitle(title)
+}
+Public Method Init(title.s, width.i, height.i) {
+  Super\Init(width, height)
+  This\SetTitle(title)
 }
 ```
 
 ---
 
-## 3. Responsive GUI Framework (`framework/`)
+## 3. Responsive GUI Framework
 
-The PureBasic OOP GUI framework provides automatic layout management and standard UI controls without manual coordinate calculations.
+The `framework/` library wraps native gadgets and windows into a modular component hierarchy:
 
-### 3.1 UI Controls Constructor Reference
-
-| Component | Common Constructors | Description |
-| :--- | :--- | :--- |
-| **`UI::Button`** | `Init(text.s)`<br>`Init(text.s, w.i, h.i)` | Standard clickable push button. Auto 120x30 default. |
-| **`UI::TextBox`** | `Init()`<br>`Init(defaultText.s)`<br>`Init(defaultText.s, w.i, h.i)` | Single-line editable text input. |
-| **`UI::Label`** | `Init(text.s)`<br>`Init(text.s, w.i, h.i)` | Static text label. |
-| **`UI::CheckBox`** | `Init(text.s)`<br>`Init(text.s, checked.b)` | Checkbox toggle with boolean state. |
-| **`UI::RadioButton`** | `Init(text.s)`<br>`Init(text.s, checked.b)` | Radio button with mutual exclusion. |
-| **`UI::ComboBox`** | `Init()`<br>`Init(w.i, h.i)` | Dropdown selection control. |
-| **`UI::SpinBox`** | `Init(min.i, max.i)`<br>`Init(min.i, max.i, current.i)` | Numeric up/down spinner control. |
-| **`UI::Editor`** | `Init()`<br>`Init(w.i, h.i)`<br>`Init(text.s, w.i, h.i)` | Multiline text editor / area. |
-| **`UI::ListView`** | `Init()`<br>`Init(w.i, h.i)` | Simple items list box. |
-| **`UI::TreeView`** | `Init()`<br>`Init(w.i, h.i)` | Hierarchical tree view control. |
-| **`UI::DatePicker`** | `Init()`<br>`Init(mask.s)`<br>`Init(dateVal.i, mask.s)` | Visual date picker and calendar. |
-| **`UI::GroupBox`** | `Init(caption.s)`<br>`Init(caption.s, w.i, h.i)` | Labeled grouping frame. |
-| **`UI::TabControl`** | `Init()`<br>`Init(w.i, h.i)` | Tabbed container panel. |
-| **`UI::ProgressBar`** | `Init()` *(0..100)*<br>`Init(min.i, max.i)` | Visual progress bar indicator. |
-| **`UI::Slider`** | `Init()` *(0..100)*<br>`Init(min.i, max.i)` | TrackBar slider control. |
-| **`UI::ListIcon`** | `Init(title.s, colWidth.i)` | Multi-column table / data grid. |
-| **`UI::ToggleSwitch`** | `Init()`<br>`Init(checked.b)` | Modern vector toggle switch (Canvas). |
-
-### 3.2 Responsive Layout Panels
-
-| Layout Panel | Constructors | Behavior |
-| :--- | :--- | :--- |
-| **`UI::StackPanel`** | `Init()`<br>`Init(orientation.i, spacing.i)` | Linear layout arranging children horizontally or vertically. |
-| **`UI::DockPanel`** | `Init(lastChildFill.b = #True)` | Edge docking (`#UI_Dock_Top`, `#UI_Dock_Bottom`, `#UI_Dock_Left`, `#UI_Dock_Right`, `#UI_Dock_Fill`). |
-| **`UI::Grid`** | `Init()` | 2D flexible grid supporting fixed pixels, Auto, and Star (`*`, `2*`) sizing. |
-| **`UI::Window`** | `Init(title.s, w.i, h.i)` | Top-level window with automated resize handling. |
+### 3.1 Responsive Layout Containers
+- **`UI::Layouts::StackPanel`**: Linear layout arranging child components sequentially (horizontal or vertical) with configurable `Spacing`.
+- **`UI::Layouts::DockPanel`**: Docking panel anchoring children along borders (`Left`, `Top`, `Right`, `Bottom`) with automatic fill of remaining center space.
+- **`UI::Layouts::Grid`**: Matrix layout grid with row and column sizing in pixels (`120`), automatic fit (`Auto`), or proportional star distribution (`*`, `2*`).
 
 ---
 
-## 4. Declarative XML / XAML UI Engine
+## 4. High-Fidelity Vector Controls (CanvasControl)
 
-Layouts can be defined declaratively in XML files or directly in-memory as strings.
+Major addition in **Alpha 1.3**, `UI::CanvasControl` is the 2D vector foundation built over native `CanvasGadget()` with hardware double-buffering:
 
-### 4.1 Loading Methods
-- **From File**: `This\LoadView(filePath.s, *dataContext = 0)`
-- **From String (In-Memory)**: `This\LoadViewFromString(xmlString.s, *dataContext = 0)`
+- **`UI::CanvasButton`**: Modern vector button with predefined palettes (Primary, Secondary, Success, Danger), vector icons, and focus rings.
+- **`UI::CanvasTextBox`**: Vector input field with placeholder text, blinking caret, secure password mode, and automatic horizontal scrolling.
+- **`UI::CanvasText`**: Crisp typography with geometric measurement and automated ellipsis truncation (`...`).
+- **`UI::CanvasTree`**: Interactive vector tree view featuring animated chevrons, checkboxes, and inline per-row action buttons.
 
-### 4.2 XML Syntax Reference
+---
+
+## 5. WPF Declarative Style System & Dictionaries
+
+Alpha 1.3 brings total separation between UI design and business logic using XML style dictionaries (e.g. `styles/Styles.xml`):
+
 ```xml
-<Window Title="Application" Width="600" Height="400">
-  <DockPanel LastChildFill="true">
-    <StackPanel Dock="Top" Orientation="Horizontal" Margin="10,5" Spacing="8">
-      <Button Text="Refresh" Click="RefreshCmd" Width="90" Height="30"/>
+<ResourceDictionary>
+  <Style TargetType="CanvasButton" Key="PrimaryButton">
+    <Setter Property="Background" Value="#4F46E5"/>
+    <Setter Property="TextColor" Value="#FFFFFF"/>
+    <Setter Property="CornerRadius" Value="8"/>
+    <Setter Property="FontName" Value="Segoe UI"/>
+    <Setter Property="FontSize" Value="10"/>
+
+    <Trigger Property="IsMouseOver" Value="True">
+      <Setter Property="Background" Value="#4338CA"/>
+      <Setter Property="Scale" Value="1.04" Easing="Back" Duration="120"/>
+    </Trigger>
+
+    <Trigger Property="IsPressed" Value="True">
+      <Setter Property="Background" Value="#3730A3"/>
+      <Setter Property="Scale" Value="0.98" Easing="Cubic" Duration="80"/>
+    </Trigger>
+  </Style>
+</ResourceDictionary>
+```
+
+---
+
+## 6. Visual Triggers & 60 FPS Micro-Animations (Easing)
+
+Modern user experience requires fluid transitions. `UI::AnimationEngine` provides mathematical easing without procedural animation code:
+- **`Linear`**: Constant speed interpolation.
+- **`Cubic`**: Progressive ease-in and ease-out acceleration.
+- **`Back`**: Tactile spring overshoot before settling.
+
+---
+
+## 7. Declarative XML Views & Automated Loader (XMLLoader)
+
+Construct user interfaces declaratively in XML (`views/MainView.xml`):
+```xml
+<Window Title="Dashboard" Width="960" Height="640">
+  <DockPanel>
+    <StackPanel Dock="Left" Width="220" Background="#18181B" Spacing="8" Padding="16">
+      <CanvasButton Style="NavButton" Text="Dashboard" Click="CmdNavHome"/>
+      <CanvasButton Style="NavButtonActive" Text="Projects" Click="CmdNavProjects"/>
     </StackPanel>
-    <StackPanel Dock="Fill" Orientation="Vertical" Margin="15" Spacing="10">
-      <Label Text="User Details:" Height="20"/>
-      <TextBox Text="{Binding UserName}" Height="28"/>
-      <Label Text="{Binding StatusMessage}" Height="20"/>
-    </StackPanel>
+
+    <Grid Margin="24">
+      <Grid.RowDefinitions>
+        <RowDefinition Height="Auto"/>
+        <RowDefinition Height="*"/>
+      </Grid.RowDefinitions>
+      <CanvasText Grid.Row="0" Text="Project Management" FontSize="16" FontBold="True"/>
+      <CanvasTextBox Grid.Row="1" Style="FormInput" Text="{Binding ProjectName, Mode=TwoWay}" Placeholder="Project name..."/>
+    </Grid>
   </DockPanel>
 </Window>
 ```
 
----
-
-## 5. The MVVM Architectural Pattern
- 
- The **MVVM (Model-View-ViewModel)** architectural pattern strictly decouples business domain logic from graphical UI rendering:
- - **Model**: Domain data, structures, and business operations.
- - **ViewModel**: State management, observable properties, and user commands. **Never references windows or gadgets directly**.
- - **View**: Visual presentation layer binding to ViewModel properties via `{Binding ...}` syntax.
-
-### 5.0 Recommended Directory Layout & Include Strategy
-
-A clean, standard MVVM project structure is organized as follows:
-
-```text
-MyMVVMProject/
-│
-├── src/                          <-- PureBasic OOP Framework
-│   └── ui/
-│       └── UI.pbi               <-- SINGLE ENTRY POINT for UI & MVVM Framework
-│
-├── constants/
-│   └── AppConstants.pbi         <-- Shared Constants (Properties & Commands)
-│
-├── models/
-│   └── MyModel.pbi              <-- Data structures & domain logic
-│
-├── viewmodels/
-│   └── MyViewModel.pbo          <-- ViewModel class (.pbo) extending MVVM::ViewModelBase
-│
-├── views/
-│   └── MainView.xml             <-- Declarative XML View or Window class
-│
-└── main.pb                      <-- Main executable entry point
-```
-
-**Standard Include Order in `main.pb`:**
+Loaded in a single line of code:
 ```purebasic
-EnableExplicit
-
-; 1. First: Framework Engine (brings all UI, Layouts, MVVM & XMLLoader)
-IncludeFile "framework/UI.pbi"
-
-; 2. Second: Shared Property and Command Constants
-IncludeFile "constants/AppConstants.pbi"
-
-; 3. Third: ViewModel Classes
-IncludeFile "viewmodels/MyViewModel.pbo"
-```
-
-### 5.1 Strongly-Typed Observable Properties (`framework/mvvm/Property.pbi`)
-
-| Property Class | Accessors | Notification |
-| :--- | :--- | :--- |
-| **`StringProperty`** | `Get()`, `Set(val.s)`, `ToString()` | Automatic on `Set()` |
-| **`IntProperty`** | `Get()`, `Set(val.i)`, `Increment()`, `Decrement()`, `GetString()`, `ToString()` | Automatic on `Set()`, `Increment()`, `Decrement()` |
-| **`BoolProperty`** | `Get()`, `Set(val.b)`, `Toggle()`, `GetString()`, `ToString()` | Automatic on `Set()`, `Toggle()` |
-| **`DoubleProperty`** | `Get()`, `Set(val.d)`, `GetString()`, `ToString(decimals.i)` | Automatic on `Set()` |
-
-### 5.2 ViewModel Creation Helpers
-Within any class extending `MVVM::ViewModelBase`:
-- `This\BindString(name.s, defaultVal.s = "")`
-- `This\BindInt(name.s, defaultVal.i = 0)`
-- `This\BindBool(name.s, defaultVal.b = #False)`
-- `This\BindDouble(name.s, defaultVal.d = 0.0)`
-
-### 5.3 Command Dispatching
-Buttons with `Command="CommandName"` trigger the `OnCommand(cmd.s)` method in the ViewModel:
-```purebasic
-Public Method OnCommand(cmd.s) {
-  Select cmd
-    Case "MyAction"
-      This\*MyProperty\SetValue("Updated!")
-  EndSelect
-}
+Define *view.UI::Window = UI::XMLLoader::LoadView("views/MainView.xml", *myViewModel)
 ```
 
 ---
 
-## 6. Complete MVVM Step-by-Step Example
+## 8. Reactive MVVM Architecture (Model-View-ViewModel)
 
-### File 1: `SimpleConstants.pbi` (Shared Contract)
-```purebasic
-#PROP_MESSAGE = "Message"
-#PROP_COUNT   = "Count"
-#CMD_CLICK    = "ClickCmd"
-#CMD_RESET    = "ResetCmd"
-```
-
-### File 2: `SimpleViewModel.pbi` (State & Logic)
-```purebasic
-XIncludeFile "SimpleConstants.pbi"
-
-Namespace Demo {
-
-  Class SimpleViewModel Extends MVVM::ViewModelBase {
-    Public *Message.MVVM::StringProperty
-    Public *Count.MVVM::IntProperty
-
-    Public Method Init() {
-      Super\Init()
-      This\*Message = This\BindString(#PROP_MESSAGE, "Click the button below")
-      This\*Count   = This\BindInt(#PROP_COUNT, 0)
-    }
-
-    Public Method OnCommand(cmd.s) {
-      Select cmd
-        Case #CMD_CLICK
-          Protected newCount.i = This\*Count\GetValue() + 1
-          This\*Count\SetValue(newCount)
-          This\*Message\SetValue("Total Clicks: " + Str(newCount))
-
-        Case #CMD_RESET
-          This\*Count\SetValue(0)
-          This\*Message\SetValue("Reset to 0")
-      EndSelect
-    }
-  }
-
-}
-```
-
-### File 3: `SimpleView.xml` (Declarative View)
-```xml
-<Window Title="MVVM Example" Width="450" Height="250">
-  <StackPanel Margin="20" Spacing="12">
-    <Label Text="PureBasic OOP MVVM Demo" />
-    <TextBox Text="{Binding Message}" />
-    <StackPanel Orientation="Horizontal" Spacing="10">
-      <Button Text="Click Me" Command="ClickCmd" Width="110" Height="32" />
-      <Button Text="Reset"    Command="ResetCmd" Width="90"  Height="32" />
-    </StackPanel>
-  </StackPanel>
-</Window>
-```
-
-### File 4: `Main.pb` (Application Entry Point)
-```purebasic
-EnableExplicit
-
-XIncludeFile "SimpleConstants.pbi"
-XIncludeFile "SimpleViewModel.pbi"
-
-Protected *app.UI::Application = NewObject(UI::Application)
-Protected *vm.Demo::SimpleViewModel = NewObject(Demo::SimpleViewModel)
-*vm\Init()
-
-Protected *win.UI::Window = UI::XMLLoader::LoadView("SimpleView.xml", *vm)
-If *win
-  *win\Show()
-  *app\Run()
-  *win\Free()
-EndIf
-
-*vm\Free()
-*app\Free()
-```
+The **MVVM** pattern enforces clean architectural decoupling:
+- **Model**: Pure business entity data.
+- **View**: Declarative XML user interface.
+- **ViewModel**: Extends `MVVM::ViewModelBase`, binds observable properties (`BindString`, `BindInt`), and dispatches commands (`OnCommand`).
+- **Two-Way Binding (`Mode=TwoWay`)**: Automatically synchronizes UI input and ViewModel state bidirectionally in real-time.
 
 ---
 
-## 7. Compilation & Build Guide
+## 9. Memory Lifecycle & Leak-Free Disposal
 
-### Step 1: Transpile `.pbo` / `.pb` using Native Transpiler
-```cmd
-compiler\transpiler.exe "examples/03_simple_mvvm/Main.pb" "examples/03_simple_mvvm/Main_transpiled.pb" --base-dir "examples/03_simple_mvvm"
-```
+PureBasic OOP guarantees strict cascading resource cleanup:
+- Calling `*view\Free()` recursively disposes of all child panels, gadgets, and canvas controls.
+- Calling `*viewModel\Free()` releases all observable property bindings.
+- Applications terminate with **zero memory leaks**.
 
-### Step 2: Compile with PureBasic Compiler
-```cmd
-"C:\Program Files\PureBasic\Compilers\pbcompiler.exe" "examples/03_simple_mvvm/Main_transpiled.pb" /CONSOLE /DEBUGGER /EXE "examples/03_simple_mvvm/simple_mvvm.exe" /THREAD /UNICODE /XP /USER /DPIAWARE
-```
+---
+
+## 10. PureBasic IDE Integration & Project Files (.pbp)
+
+Every application includes a clean `.pbp` project file:
+- References only user application source files (`main.pb`, views, models, styles).
+- Framework classes are automatically included by the native transpiler.
+- All comments use simplified ASCII English, eliminating encoding conflicts in the IDE.

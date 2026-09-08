@@ -2,7 +2,7 @@
 
 *Step-by-step creation of your first modern reactive application*  
 **Author:** MicrodevWeb  
-**Framework:** PureBasic OOP v1.2 / v2.0  
+**Framework:** PureBasic OOP Alpha 1.3  
 **Compatibility:** PureBasic 6.x (Windows, Linux, macOS)  
 
 ---
@@ -243,7 +243,7 @@ EndIf
 
 ## 📚 Module 8: UI Controls Reference & F1 Help
 
-### 8.1. 18 Encapsulated UI Controls
+### 8.1. Encapsulated UI Controls & Alpha 1.3 Engines
 
 | OOP Control | Native PB Gadget | Primary Use Case |
 | :--- | :--- | :--- |
@@ -264,6 +264,14 @@ EndIf
 | `UI::Label` | `TextGadget` | Static or bound informative text |
 | `UI::ToggleSwitch` | `CanvasGadget` | Animated modern ON/OFF switch |
 | `UI::TabControl` | `PanelGadget` | Tabbed multi-view container |
+| `UI::CanvasControl` | `CanvasGadget` | Base vector canvas control for custom rendering |
+| `UI::CanvasButton` | `CanvasGadget` | Stylable vector button with visual states |
+| `UI::CanvasTextBox` | `CanvasGadget` | Smooth vector text input field |
+| `UI::CanvasText` | `CanvasGadget` | High-precision vector typography text block |
+| `UI::CanvasTree` | `CanvasGadget` | Interactive vector tree view control |
+| `UI::Style` / `Trigger` | WPF Styling | Declarative styles and visual state triggers |
+| `UI::AnimationEngine` | 60 FPS Engine | Micro-animations and transitions with easing |
+| `UI::XMLLoader` | XML Engine | Declarative view loader and MVVM databinding |
 
 ### 8.2. F1 Contextual Help in the IDE
 In the PureBasic IDE, place your cursor on any OOP keyword (`Class`, `Method`, `Super`, `Property`...) or UI component (`Button`, `Editor`, `Grid`, `ObservableObject`...) and press **F1** to open its documentation page with full inheritance trees and examples.

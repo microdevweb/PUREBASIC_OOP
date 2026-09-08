@@ -365,6 +365,7 @@ def generate_french():
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Guide de Formation : Débuter avec PureBasic OOP & MVVM</title>
   <style>
@@ -395,7 +396,7 @@ def generate_french():
     <div class="cover-footer">
       <div class="cover-author">
         Auteur : <strong>MicrodevWeb</strong><br>
-        Framework : PureBasic OOP v1.2 / v2.0
+        Framework : PureBasic OOP Alpha 1.3
       </div>
       <div class="cover-meta">
         Support de formation pas à pas<br>
@@ -682,7 +683,7 @@ MonProjetMVVM/
   <!-- MODULE 8 -->
   <h1><span>📚</span> Module 8 : Tableau Récapitulatif & Aide F1</h1>
 
-  <h2>8.1. Les 18 Contrôles UI Disponibles</h2>
+  <h2>8.1. Les Contrôles UI & Moteurs Disponibles (Alpha 1.3)</h2>
   <table>
     <tr><th>Contrôle OOP</th><th>Gadget PureBasic</th><th>Usage Type</th></tr>
     <tr><td><code>UI::Button</code></td><td><code>ButtonGadget</code></td><td>Boutons poussoirs avec commandes MVVM</td></tr>
@@ -702,6 +703,14 @@ MonProjetMVVM/
     <tr><td><code>UI::Label</code></td><td><code>TextGadget</code></td><td>Texte statique ou informatif</td></tr>
     <tr><td><code>UI::ToggleSwitch</code></td><td><code>CanvasGadget</code></td><td>Interrupteur animé ON/OFF moderne</td></tr>
     <tr><td><code>UI::TabControl</code></td><td><code>PanelGadget</code></td><td>Conteneur à onglets modulaires</td></tr>
+    <tr><td><code>UI::CanvasControl</code></td><td><code>CanvasGadget</code></td><td>Composant de base pour contrôles vectoriels sur mesure</td></tr>
+    <tr><td><code>UI::CanvasButton</code></td><td><code>CanvasGadget</code></td><td>Bouton vectoriel stylable avec états Hover/Pressed</td></tr>
+    <tr><td><code>UI::CanvasTextBox</code></td><td><code>CanvasGadget</code></td><td>Champ de saisie vectoriel avec caret et sélection</td></tr>
+    <tr><td><code>UI::CanvasText</code></td><td><code>CanvasGadget</code></td><td>Affichage de texte vectoriel avec typographie fine</td></tr>
+    <tr><td><code>UI::CanvasTree</code></td><td><code>CanvasGadget</code></td><td>Arborescence vectorielle fluide et interactive</td></tr>
+    <tr><td><code>UI::Style</code> / <code>Trigger</code></td><td>Moteur WPF</td><td>Styles déclaratifs et déclencheurs visuels réactifs</td></tr>
+    <tr><td><code>UI::AnimationEngine</code></td><td>Moteur 60 FPS</td><td>Micro-animations et transitions avec Easing mathématique</td></tr>
+    <tr><td><code>UI::XMLLoader</code></td><td>Moteur XML</td><td>Chargeur déclaratif de vues et databinding automatique</td></tr>
   </table>
 
   <h2>8.2. Touche d'Aide F1 dans l'IDE</h2>
@@ -725,6 +734,7 @@ def generate_english():
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Training Guide : Getting Started with PureBasic OOP & MVVM</title>
   <style>
@@ -755,7 +765,7 @@ def generate_english():
     <div class="cover-footer">
       <div class="cover-author">
         Author: <strong>MicrodevWeb</strong><br>
-        Framework: PureBasic OOP v1.2 / v2.0
+        Framework: PureBasic OOP Alpha 1.3
       </div>
       <div class="cover-meta">
         Step-by-step training manual<br>
@@ -1046,7 +1056,7 @@ MyMVVMProject/
   <!-- MODULE 8 -->
   <h1><span>📚</span> Module 8: UI Controls Reference & F1 Help</h1>
 
-  <h2>8.1. 18 Encapsulated UI Controls</h2>
+  <h2>8.1. Encapsulated UI Controls & Alpha 1.3 Engines</h2>
   <table>
     <tr><th>OOP Control</th><th>Native PB Gadget</th><th>Primary Use Case</th></tr>
     <tr><td><code>UI::Button</code></td><td><code>ButtonGadget</code></td><td>Clickable action buttons with MVVM commands</td></tr>
@@ -1066,6 +1076,14 @@ MyMVVMProject/
     <tr><td><code>UI::Label</code></td><td><code>TextGadget</code></td><td>Static or bound informative text</td></tr>
     <tr><td><code>UI::ToggleSwitch</code></td><td><code>CanvasGadget</code></td><td>Animated modern ON/OFF switch</td></tr>
     <tr><td><code>UI::TabControl</code></td><td><code>PanelGadget</code></td><td>Tabbed multi-view container</td></tr>
+    <tr><td><code>UI::CanvasControl</code></td><td><code>CanvasGadget</code></td><td>High-performance custom vector canvas base control</td></tr>
+    <tr><td><code>UI::CanvasButton</code></td><td><code>CanvasGadget</code></td><td>Vector button with Hover/Pressed visual states</td></tr>
+    <tr><td><code>UI::CanvasTextBox</code></td><td><code>CanvasGadget</code></td><td>Smooth vector text input with caret and selection</td></tr>
+    <tr><td><code>UI::CanvasText</code></td><td><code>CanvasGadget</code></td><td>High-precision vector typography text block</td></tr>
+    <tr><td><code>UI::CanvasTree</code></td><td><code>CanvasGadget</code></td><td>Smooth interactive vector tree view control</td></tr>
+    <tr><td><code>UI::Style</code> / <code>Trigger</code></td><td>WPF Styling</td><td>Declarative styles, setters, and reactive visual triggers</td></tr>
+    <tr><td><code>UI::AnimationEngine</code></td><td>60 FPS Engine</td><td>Micro-animations and transitions with mathematical easing</td></tr>
+    <tr><td><code>UI::XMLLoader</code></td><td>XML Engine</td><td>Declarative view loader and automatic MVVM databinding</td></tr>
   </table>
 
   <h2>8.2. F1 Contextual Help in the IDE</h2>
@@ -1089,7 +1107,7 @@ def generate_markdown_french():
 
 *Concevoir sa première application réactive moderne pas à pas*  
 **Auteur :** MicrodevWeb  
-**Framework :** PureBasic OOP v1.2 / v2.0  
+**Framework :** PureBasic OOP Alpha 1.3  
 **Compatibilité :** PureBasic 6.x (Windows, Linux, macOS)  
 
 ---
@@ -1330,7 +1348,7 @@ EndIf
 
 ## 📚 Module 8 : Tableau Récapitulatif & Aide F1
 
-### 8.1. Les 18 Contrôles UI Disponibles
+### 8.1. Les Contrôles UI & Moteurs Disponibles (Alpha 1.3)
 
 | Contrôle OOP | Gadget PureBasic | Usage Type |
 | :--- | :--- | :--- |
@@ -1351,6 +1369,14 @@ EndIf
 | `UI::Label` | `TextGadget` | Texte statique ou informatif |
 | `UI::ToggleSwitch` | `CanvasGadget` | Interrupteur animé ON/OFF moderne |
 | `UI::TabControl` | `PanelGadget` | Conteneur à onglets modulaires |
+| `UI::CanvasControl` | `CanvasGadget` | Composant vectoriel de base haute performance |
+| `UI::CanvasButton` | `CanvasGadget` | Bouton vectoriel stylable avec états visuels |
+| `UI::CanvasTextBox` | `CanvasGadget` | Saisie de texte vectorielle fluide |
+| `UI::CanvasText` | `CanvasGadget` | Label vectoriel typographique haute précision |
+| `UI::CanvasTree` | `CanvasGadget` | Arborescence vectorielle interactive |
+| `UI::Style` / `Trigger` | Moteur WPF | Styles déclaratifs et déclencheurs visuels réactifs |
+| `UI::AnimationEngine` | Moteur 60 FPS | Micro-animations et transitions avec Easing |
+| `UI::XMLLoader` | Moteur XML | Chargeur déclaratif de vues et databinding |
 
 ### 8.2. Touche d'Aide F1 dans l'IDE
 Dans l'IDE PureBasic, placez à tout moment votre curseur sur un mot-clé (`Class`, `Method`, `Super`, `Property`...) ou un composant UI (`Button`, `Editor`, `Grid`, `ObservableObject`...) et appuyez sur **F1** pour ouvrir directement sa fiche d'aide avec son arbre d'héritage et ses exemples.
@@ -1365,7 +1391,7 @@ def generate_markdown_english():
 
 *Step-by-step creation of your first modern reactive application*  
 **Author:** MicrodevWeb  
-**Framework:** PureBasic OOP v1.2 / v2.0  
+**Framework:** PureBasic OOP Alpha 1.3  
 **Compatibility:** PureBasic 6.x (Windows, Linux, macOS)  
 
 ---
@@ -1606,7 +1632,7 @@ EndIf
 
 ## 📚 Module 8: UI Controls Reference & F1 Help
 
-### 8.1. 18 Encapsulated UI Controls
+### 8.1. Encapsulated UI Controls & Alpha 1.3 Engines
 
 | OOP Control | Native PB Gadget | Primary Use Case |
 | :--- | :--- | :--- |
@@ -1627,6 +1653,14 @@ EndIf
 | `UI::Label` | `TextGadget` | Static or bound informative text |
 | `UI::ToggleSwitch` | `CanvasGadget` | Animated modern ON/OFF switch |
 | `UI::TabControl` | `PanelGadget` | Tabbed multi-view container |
+| `UI::CanvasControl` | `CanvasGadget` | Base vector canvas control for custom rendering |
+| `UI::CanvasButton` | `CanvasGadget` | Stylable vector button with visual states |
+| `UI::CanvasTextBox` | `CanvasGadget` | Smooth vector text input field |
+| `UI::CanvasText` | `CanvasGadget` | High-precision vector typography text block |
+| `UI::CanvasTree` | `CanvasGadget` | Interactive vector tree view control |
+| `UI::Style` / `Trigger` | WPF Styling | Declarative styles and visual state triggers |
+| `UI::AnimationEngine` | 60 FPS Engine | Micro-animations and transitions with easing |
+| `UI::XMLLoader` | XML Engine | Declarative view loader and MVVM databinding |
 
 ### 8.2. F1 Contextual Help in the IDE
 In the PureBasic IDE, place your cursor on any OOP keyword (`Class`, `Method`, `Super`, `Property`...) or UI component (`Button`, `Editor`, `Grid`, `ObservableObject`...) and press **F1** to open its documentation page with full inheritance trees and examples.

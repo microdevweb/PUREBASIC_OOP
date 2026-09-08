@@ -1,6 +1,6 @@
 ; ============================================================================
-; Application Gestionnaire de Tâches (TodoApp) - ViewModel Réactif
-; Fichier : viewmodels/TaskViewModel.pbi
+; Application Gestionnaire de Taches (TodoApp) - ViewModel Reactif
+; File: viewmodels/TaskViewModel.pbi
 ; ============================================================================
 
 XIncludeFile "../constants/AppConstants.pbi"
@@ -14,14 +14,14 @@ Namespace TodoApp {
     Public *StatusMessage.MVVM::StringProperty
     Public *TaskListContent.MVVM::StringProperty
 
-    ; --- Constructeur : Initialisation et enregistrement des propriétés ---
+    ; --- Constructeur : Initialisation et enregistrement des proprietes ---
     Public Method Init() {
       Super\Init()
       
-      ; Enregistrement des propriétés observables dans le registre MVVM
+      ; Register observable properties dans le registre MVVM
       This\*TaskTitle       = This\BindString(#PROP_TASK_TITLE, "")
       This\*TaskCount       = This\BindInt(#PROP_TASK_COUNT, 0)
-      This\*StatusMessage   = This\BindString(#PROP_STATUS_MSG, "Prêt - Aucune tâche enregistrée.")
+      This\*StatusMessage   = This\BindString(#PROP_STATUS_MSG, "Ready - No tasks recorded.")
       This\*TaskListContent = This\BindString(#PROP_LIST_CONTENT, "")
     }
 
@@ -34,20 +34,20 @@ Namespace TodoApp {
           If title <> ""
             Protected currentCount.i = This\*TaskCount\GetValue() + 1
             
-            ; Mise à jour des propriétés -> Notification automatique de la Vue !
+            ; Mise a jour des proprietes -> Notification automatique de la Vue !
             This\*TaskCount\SetValue(currentCount)
-            This\*StatusMessage\SetValue("Tâche ajoutée avec succès : '" + title + "'")
+            This\*StatusMessage\SetValue("Task added successfully: '" + title + "'")
             
             Protected curList.s = This\*TaskListContent\GetValue()
             If curList <> "" : curList + #CRLF$ : EndIf
-            curList + "• [" + Str(currentCount) + "] " + title
+            curList + "- [" + Str(currentCount) + "] " + title
             This\*TaskListContent\SetValue(curList)
             
-            ; Réinitialise le champ de saisie
+            ; Reinitialise le champ de saisie
             This\*TaskTitle\SetValue("")
             ProcedureReturn #True
           Else
-            This\*StatusMessage\SetValue("Erreur : Veuillez saisir un libellé de tâche.")
+            This\*StatusMessage\SetValue("Error: Please enter a task title.")
             ProcedureReturn #True
           EndIf
 
@@ -55,7 +55,7 @@ Namespace TodoApp {
           This\*TaskCount\SetValue(0)
           This\*TaskTitle\SetValue("")
           This\*TaskListContent\SetValue("")
-          This\*StatusMessage\SetValue("Toutes les tâches ont été réinitialisées.")
+          This\*StatusMessage\SetValue("All tasks have been reset.")
           ProcedureReturn #True
       EndSelect
       

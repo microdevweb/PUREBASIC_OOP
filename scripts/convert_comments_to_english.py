@@ -10,7 +10,7 @@ import re
 WORKSPACE = r"c:\PB\PB_PROJECT\PB_OOP_WORKSPACE\PUREBASIC_OOP_WORKSPACE"
 
 TARGET_DIRS = [
-    os.path.join(WORKSPACE, "examples", "07_project_dashboard"),
+    os.path.join(WORKSPACE, "examples"),
     os.path.join(WORKSPACE, "framework")
 ]
 
