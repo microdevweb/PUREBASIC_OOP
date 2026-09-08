@@ -47,6 +47,7 @@ CompilerIf #CompileLinux | #CompileMac
   Declare HelpWindowEvents(EventID)  ; linux/mac only
 CompilerEndIf
 CompilerIf #CompileWindows
+  Declare.s GetPureBasicChmPath()
   Declare ClosePlatformSDKWindow()          ; windows only (called at program end)
 CompilerEndIf
 

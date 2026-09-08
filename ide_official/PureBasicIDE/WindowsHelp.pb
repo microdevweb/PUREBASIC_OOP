@@ -162,7 +162,47 @@ CompilerIf #CompileWindows
     
   EndProcedure
   
+  Procedure.s GetPureBasicChmPath()
+    ; 1. Direct check in PureBasicPath$
+    If FileSize(PureBasicPath$ + "PureBasic.chm") > 0
+      ProcedureReturn PureBasicPath$ + "PureBasic.chm"
+    EndIf
+    
+    ; 2. Check standard installation folders
+    If FileSize("C:\Program Files\PureBasic\PureBasic.chm") > 0
+      ProcedureReturn "C:\Program Files\PureBasic\PureBasic.chm"
+    ElseIf FileSize("C:\PureBasic\PureBasic.chm") > 0
+      ProcedureReturn "C:\PureBasic\PureBasic.chm"
+    EndIf
+    
+    ; 3. Check PUREBASIC_HOME environment variable
+    Protected Env$ = GetEnvironmentVariable("PUREBASIC_HOME")
+    If Env$ <> ""
+      If Right(Env$, 1) <> "\" And Right(Env$, 1) <> "/" : Env$ + "\" : EndIf
+      If FileSize(Env$ + "PureBasic.chm") > 0
+        ProcedureReturn Env$ + "PureBasic.chm"
+      EndIf
+    EndIf
+    
+    ; 4. Check compiler home constant
+    If FileSize(#PB_Compiler_Home + "PureBasic.chm") > 0
+      ProcedureReturn #PB_Compiler_Home + "PureBasic.chm"
+    EndIf
+    
+    ; 5. Fallback check with #ProductName$
+    If FileSize(PureBasicPath$ + #ProductName$ + ".chm") > 0
+      ProcedureReturn PureBasicPath$ + #ProductName$ + ".chm"
+    EndIf
+    
+    ProcedureReturn PureBasicPath$ + "PureBasic.chm"
+  EndProcedure
+
   Procedure HtmlHelp(File$, Page$)
+    ; Ensure valid chm path if File$ does not exist
+    If FileSize(File$) <= 0
+      File$ = GetPureBasicChmPath()
+    EndIf
+    
     ; Open the help tool if configured to do so, or html help otherwise
     ;
     If UseHelpToolF1 And HelpToolOpen
@@ -194,11 +234,11 @@ CompilerIf #CompileWindows
       OpenHelp(PureBasicPath$+"Help\ASM.hlp", CurrentWord$)
       
     ElseIf CurrentWord$ = ""
-      HtmlHelp(PureBasicPath$ + #ProductName$ + ".chm", "")
+      HtmlHelp(GetPureBasicChmPath(), "")
       
       
     ElseIf CheckPureBasicKeyWords(CurrentWord$) <> ""
-      HtmlHelp(PureBasicPath$ + #ProductName$ + ".chm", CheckPureBasicKeyWords(CurrentWord$)+".html")
+      HtmlHelp(GetPureBasicChmPath(), CheckPureBasicKeyWords(CurrentWord$)+".html")
       
       
     Else
@@ -215,18 +255,18 @@ CompilerIf #CompileWindows
             OpenHelp(PureBasicpath$+"Help\Win32.hlp", CurrentWord$)
           Else
             If DisplayPlatformSDKHelp(CurrentWord$) = 0
-              HtmlHelp(PureBasicPath$+#ProductName$ + ".chm", "") ; Fallback to PB help if all API help fail
+              HtmlHelp(GetPureBasicChmPath(), "") ; Fallback to PB help if all API help fail
             EndIf
           EndIf
           
         ElseIf HelpDirectory$ = "UNKNOWN"
-          HtmlHelp(PureBasicPath$+#ProductName$ + ".chm", "")
+          HtmlHelp(GetPureBasicChmPath(), "")
           
         Else ; build in command or userlib
           If LCase(GetExtensionPart(HelpDirectory$)) = "chm"  ; A .chm has been defined in the .DESC -> It's a user lib with its own help
             HtmlHelp(PureBasicPath$+"Help\"+HelpDirectory$, GetFilePart(HelpDirectory$, #PB_FileSystem_NoExtension)+"/"+CurrentWord$+".html")
           Else
-            HtmlHelp(PureBasicPath$+#ProductName$ + ".chm", HelpDirectory$+"/"+CurrentWord$+".html")
+            HtmlHelp(GetPureBasicChmPath(), HelpDirectory$+"/"+CurrentWord$+".html")
           EndIf
           
         EndIf

@@ -1085,6 +1085,7 @@ Enumeration 0
   #MENU_AddTools
   
   #MENU_Help
+  #MENU_OOP_Help
   #MENU_UpdateCheck
   
   CompilerIf #CompileMac

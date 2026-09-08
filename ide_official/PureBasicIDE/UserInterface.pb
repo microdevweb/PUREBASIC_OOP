@@ -327,6 +327,11 @@ Procedure CreateIDEMenu()
     
     MenuTitle(Language("MenuTitle","Help"))
     ShortcutMenuItem(#MENU_Help , Language("MenuItem","Help"))
+    If UCase(CurrentLanguage$) = "FRANCAIS"
+      MenuItem(#MENU_OOP_Help, "Aide PureBasic OOP (HTML)")
+    Else
+      MenuItem(#MENU_OOP_Help, "PureBasic OOP Help (HTML)")
+    EndIf
     
     If AddHelpFiles_Count > 0
       MenuBar()
@@ -1446,6 +1451,9 @@ Procedure MainMenuEvent(MenuItemID)
       
     Case #MENU_Help
       DisplayHelp(GetCurrentWord())
+      
+    Case #MENU_OOP_Help
+      OpenOOPHelp("index.html")
       
     Case #MENU_UpdateCheck
       CheckForUpdatesManual()
