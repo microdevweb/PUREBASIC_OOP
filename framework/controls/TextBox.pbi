@@ -11,7 +11,7 @@ Namespace UI {
 
   Class TextBox Extends Gadget {
 
-    ; Constructeur 0: Par défaut (vide, 0,0, 150x25)
+    ; Constructor 0: Default (vide, 0,0, 150x25)
     Public Method Init() {
       Super\Init()
       This\x = 0 : This\y = 0 : This\width = 150 : This\height = 25
@@ -23,7 +23,7 @@ Namespace UI {
       }
     }
 
-    ; Constructeur 1: Texte par défaut uniquement (0,0, 150x25)
+    ; Constructor 1: Default text only (0,0, 150x25)
     Public Method Init(defaultText_p.s) {
       Super\Init()
       This\x = 0 : This\y = 0 : This\width = 150 : This\height = 25
@@ -35,7 +35,7 @@ Namespace UI {
       }
     }
 
-    ; Constructeur 2: Texte et dimensions
+    ; Constructor 2: Text and dimensions
     Public Method Init(defaultText_p.s, w_p.i, h_p.i) {
       Super\Init()
       This\x = 0 : This\y = 0 : This\width = w_p : This\height = h_p
@@ -47,7 +47,7 @@ Namespace UI {
       }
     }
 
-    ; Constructeur 3: Position, dimensions et texte
+    ; Constructor 3: Position, dimensions and text
     Public Method Init(x_p.i, y_p.i, w_p.i, h_p.i, defaultText_p.s) {
       Super\Init()
       This\x = x_p : This\y = y_p : This\width = w_p : This\height = h_p
@@ -59,7 +59,7 @@ Namespace UI {
       }
     }
 
-    ; Constructeur 4: Complet
+    ; Constructor 4: Full
     Public Method Init(x_p.i, y_p.i, w_p.i, h_p.i, defaultText_p.s, flags_p.i) {
       Super\Init()
       This\x = x_p : This\y = y_p : This\width = w_p : This\height = h_p

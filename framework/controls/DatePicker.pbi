@@ -12,7 +12,7 @@ Namespace UI {
   Class DatePicker Extends Gadget {
     Protected mask.s
 
-    ; Constructeur 0: Par defaut (date du jour, 0,0, 140x25)
+    ; Constructor 0: Default (Current date, 0,0, 140x25)
     Public Method Init() {
       Super\Init()
       This\x = 0 : This\y = 0 : This\width = 140 : This\height = 25
@@ -25,7 +25,7 @@ Namespace UI {
       }
     }
 
-    ; Constructeur 1: Masque personnalise
+    ; Constructor 1: Custom mask
     Public Method Init(mask_p.s) {
       Super\Init()
       This\x = 0 : This\y = 0 : This\width = 140 : This\height = 25
@@ -38,7 +38,7 @@ Namespace UI {
       }
     }
 
-    ; Constructeur 2: Date et Masque
+    ; Constructor 2: Date and Mask
     Public Method Init(dateVal_p.i, mask_p.s) {
       Super\Init()
       This\x = 0 : This\y = 0 : This\width = 140 : This\height = 25
@@ -51,7 +51,7 @@ Namespace UI {
       }
     }
 
-    ; Constructeur 3: Date, Masque et dimensions
+    ; Constructor 3: Date, Mask and dimensions
     Public Method Init(dateVal_p.i, mask_p.s, w_p.i, h_p.i) {
       Super\Init()
       This\x = 0 : This\y = 0 : This\width = w_p : This\height = h_p

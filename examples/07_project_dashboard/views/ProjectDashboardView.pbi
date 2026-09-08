@@ -1,6 +1,6 @@
 ; ============================================================================
-; Project Dashboard (WPF Modern UI) - Vue Fenêtre PureBasic OOP
-; Fichier : views/ProjectDashboardView.pbi
+; Project Dashboard (WPF Modern UI) - PureBasic OOP Window View
+; File: views/ProjectDashboardView.pbi
 ; ============================================================================
 
 XIncludeFile "../viewmodels/ProjectDashboardViewModel.pbi"

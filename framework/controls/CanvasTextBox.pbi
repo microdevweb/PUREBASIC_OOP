@@ -38,12 +38,12 @@ Namespace UI {
     Protected selectionColor.i
     Protected selectionTextColor.i
 
-    ; --- Initialisation des styles par défaut ---
+    ; --- Initialize default styles ---
     Protected Method InitTextBoxDefaults() {
       This\placeholder = ""
       This\placeholderColor = RGB(156, 163, 175) ; Tailwind gray-400
       This\isPassword = #False
-      This\passwordChar = Chr(9679) ; Bullet '●'
+      This\passwordChar = Chr(9679) ; Bullet character
       If This\passwordChar = "" : This\passwordChar = "*" : EndIf
       This\isReadOnly = #False
       This\maxLength = 0
@@ -55,7 +55,7 @@ Namespace UI {
       This\scrollOffset = 0
       This\caretHeight = 16
 
-      ; Thème moderne WinUI 3
+      ; Modern WinUI 3 theme
       This\background = RGB(255, 255, 255)
       This\foreground = RGB(17, 24, 39)
       This\hoverBackground = RGB(255, 255, 255)
@@ -80,18 +80,18 @@ Namespace UI {
       This\paddingRight = 10
       This\paddingBottom = 6
 
-      ; Typographie par défaut
+      ; Default typography
       This\SetTypography("Segoe UI", 10, #False)
     }
 
-    ; Constructeur 1: Par défaut (200x32)
+    ; Constructor 1: Default (200x32)
     Public Method Init() {
       Super\Init(200, 32)
       This\InitTextBoxDefaults()
       This\Redraw()
     }
 
-    ; Constructeur 2: Placeholder seul
+    ; Constructor 2: Placeholder only
     Public Method Init(placeholder_p.s) {
       Super\Init(200, 32)
       This\InitTextBoxDefaults()
@@ -99,7 +99,7 @@ Namespace UI {
       This\Redraw()
     }
 
-    ; Constructeur 3: Placeholder et dimensions
+    ; Constructor 3: Placeholder and dimensions
     Public Method Init(placeholder_p.s, w_p.i, h_p.i) {
       Super\Init(w_p, h_p)
       This\InitTextBoxDefaults()
@@ -107,7 +107,7 @@ Namespace UI {
       This\Redraw()
     }
 
-    ; Constructeur 4: Position, dimensions et placeholder
+    ; Constructor 4: Position, dimensions and placeholder
     Public Method Init(x_p.i, y_p.i, w_p.i, h_p.i, placeholder_p.s) {
       Super\Init(x_p, y_p, w_p, h_p)
       This\InitTextBoxDefaults()
@@ -115,7 +115,7 @@ Namespace UI {
       This\Redraw()
     }
 
-    ; Constructeur 5: Position, dimensions, placeholder et mode mot de passe
+    ; Constructor 5: Position, dimensions, placeholder and password mode
     Public Method Init(x_p.i, y_p.i, w_p.i, h_p.i, placeholder_p.s, isPassword_p.b) {
       Super\Init(x_p, y_p, w_p, h_p)
       This\InitTextBoxDefaults()
@@ -211,7 +211,7 @@ Namespace UI {
       This\Redraw()
     }
 
-    ; --- Helpers d'Affichage & Sélection ---
+    ; --- Helpers d'Affichage & Selection ---
 
     Public Method.s GetDisplayText() {
       If (This\isPassword) {
@@ -263,7 +263,7 @@ Namespace UI {
       }
     }
 
-    ; --- Actions d'Édition ---
+    ; --- Actions d'Edition ---
 
     Public Method InsertText(str_p.s) {
       If (This\isReadOnly) : ProcedureReturn : EndIf
@@ -340,7 +340,7 @@ Namespace UI {
       If (This\isReadOnly) : ProcedureReturn : EndIf
       Protected clip.s = GetClipboardText()
       If clip <> ""
-        ; Supprimer les retours à la ligne pour un champ simple ligne
+        ; Remove line breaks for single-line field
         clip = RemoveString(clip, #CR$)
         clip = RemoveString(clip, #LF$)
         This\InsertText(clip)
@@ -350,7 +350,7 @@ Namespace UI {
     Public Method OnSubmit() {
     }
 
-    ; --- Calcul de position de caractère selon coordonnée X ---
+    ; --- Calcul de position de caractere selon coordonnee X ---
 
     Protected Method.i CharPosFromMouseX(targetX_p.i) {
       Protected dText.s = This\GetDisplayText()
@@ -384,7 +384,7 @@ Namespace UI {
       ProcedureReturn pos
     }
 
-    ; --- Ajustement du défilement pour visibilité du curseur ---
+    ; --- Adjust scroll offset to keep cursor visible ---
 
     Protected Method EnsureCursorVisible(availW_p.i) {
       Protected dText.s = This\GetDisplayText()
@@ -400,7 +400,7 @@ Namespace UI {
       EndIf
     }
 
-    ; --- Événements Souris, Clavier & Focus ---
+    ; --- Mouse, Keyboard & Focus Events ---
 
     Public Method OnFocus() {
       Super\OnFocus()
@@ -575,7 +575,7 @@ Namespace UI {
         DrawingFont(This\fontID)
       EndIf
 
-      ; 4. Zone intérieure de texte
+      ; 4. Zone interieure de texte
       Protected padL.i = DesktopScaledX(This\paddingLeft)
       Protected padT.i = DesktopScaledY(This\paddingTop)
       Protected padR.i = DesktopScaledX(This\paddingRight)
@@ -599,10 +599,10 @@ Namespace UI {
       Protected caretDrawX.i = availX + curPixX - This\scrollOffset
       Protected caretDrawY.i = availY + (availH - This\caretHeight) / 2
 
-      ; 5. Découpage pour éviter les débordements de texte
+      ; 5. Clip text to prevent overflow
       ClipOutput(availX, availY, availW, availH)
 
-      ; 6. Affichage du Placeholder si vide et non-focus
+      ; 6. Display placeholder if empty and unfocused
       If (This\text = "" And Not This\isFocused And This\placeholder <> "") {
         DrawingMode(#PB_2DDrawing_Transparent)
         Protected phY.i = availY + (availH - TextHeight(This\placeholder)) / 2
@@ -621,13 +621,13 @@ Namespace UI {
           Protected preW.i = TextWidth(preText)
           Protected selW.i = TextWidth(selText)
 
-          ; Texte avant sélection
+          ; Texte avant selection
           If preText <> ""
             DrawingMode(#PB_2DDrawing_Transparent)
             DrawText(drawX, textY, preText, This\GetCurrentForegroundColor())
           EndIf
 
-          ; Surlignage de sélection
+          ; Surlignage de selection
           Protected selX.i = drawX + preW
           Protected selBoxY.i = textY - 1
           Protected selBoxH.i = TextHeight(dText) + 2
@@ -636,7 +636,7 @@ Namespace UI {
           DrawingMode(#PB_2DDrawing_Transparent)
           DrawText(selX, textY, selText, This\selectionTextColor)
 
-          ; Texte après sélection
+          ; Texte apres selection
           If postText <> ""
             DrawingMode(#PB_2DDrawing_Transparent)
             DrawText(selX + selW, textY, postText, This\GetCurrentForegroundColor())
@@ -649,7 +649,7 @@ Namespace UI {
 
       UnclipOutput()
 
-      ; 7. Gestion du Curseur / Caret Système Windows
+      ; 7. Windows system caret management
       CompilerIf #PB_Compiler_OS = #PB_OS_Windows
         If (This\isFocused And Not This\HasSelection() And This\id And IsGadget(This\id))
           CreateCaret_(GadgetID(This\id), 0, 2, This\caretHeight)

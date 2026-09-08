@@ -116,7 +116,7 @@ Namespace UI {
 
             Protected *style.UI::Style = New UI::Style(targetType, keyStr, basedOnStr)
 
-            ; Parcourir les Setters et Triggers du Style
+            ; Iterate over Style Setters and Triggers
             Protected *propNode = ChildXMLNode(*child)
             While *propNode
               If XMLNodeType(*propNode) = #PB_XML_Normal
@@ -130,7 +130,7 @@ Namespace UI {
                   Protected tVal.s = GetXMLAttribute(*propNode, "Value")
                   Protected trigIdx.i = *style\AddTrigger(tProp, tVal)
 
-                  ; Setters du trigger
+                  ; Trigger setters
                   Protected *tChild = ChildXMLNode(*propNode)
                   While *tChild
                     If XMLNodeType(*tChild) = #PB_XML_Normal And UCase(GetXMLNodeName(*tChild)) = "SETTER"
@@ -206,14 +206,14 @@ Namespace UI {
     Protected Method ApplyCanvasControlAttributes(*ctrl.UI::CanvasControl, node.i, *targetWindow.UI::Window, *parentContainer.UI::Layouts::Container = 0) {
       If Not *ctrl : ProcedureReturn : EndIf
 
-      ; Hériter de la couleur de fond du conteneur parent ou de la fenêtre
+      ; Inherit background color from parent container or window
       If *parentContainer And *parentContainer\GetBackground() <> 0
         *ctrl\SetParentBackground(*parentContainer\GetBackground())
       ElseIf *targetWindow
         *ctrl\SetParentBackground(*targetWindow\GetBackgroundColor())
       EndIf
 
-      ; 0. Recherche et application du Style WPF (nommé ou implicite par TargetType)
+      ; 0. Find and apply WPF Style (named or implicit by TargetType)
       If *targetWindow
         Protected *resDict.UI::ResourceDictionary = *targetWindow\GetResources()
         If *resDict
@@ -263,7 +263,7 @@ Namespace UI {
         *ctrl\SetHoverBorderColor(This\ParseColor(hovBorderStr, *ctrl\GetHoverBorderColor()))
       EndIf
 
-      ; 3. Pressed Colors (Clic enfoncé)
+      ; 3. Pressed Colors (Mouse pressed)
       Protected prBgStr.s = GetXMLAttribute(node, "PressedBackground")
       If prBgStr = "" : prBgStr = GetXMLAttribute(node, "PressedBg") : EndIf
       If prBgStr <> ""
@@ -315,7 +315,7 @@ Namespace UI {
         *ctrl\SetPadding(pL\i, pT\i, pR\i, pB\i)
       EndIf
 
-      ; 6. Typographie Haute-Fidélité
+      ; 6. High-Fidelity Typography
       Protected fontNameStr.s = GetXMLAttribute(node, "FontName")
       If fontNameStr = "" : fontNameStr = GetXMLAttribute(node, "FontFamily") : EndIf
       Protected fontSizeStr.s = GetXMLAttribute(node, "FontSize")

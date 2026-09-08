@@ -17,7 +17,7 @@ Namespace UI {
     Protected iconSpacing.i
     Protected textAlignment.i ; 0: Center, 1: Left, 2: Right
 
-    ; Constructeur 1: Par défaut (100x32, "")
+    ; Constructor 1: Default (100x32, "")
     Public Method Init() {
       Super\Init(100, 32)
       This\text = "Button"
@@ -31,7 +31,7 @@ Namespace UI {
       This\Redraw()
     }
 
-    ; Constructeur 2: Texte seul (100x32)
+    ; Constructor 2: Text only (100x32)
     Public Method Init(text_p.s) {
       Super\Init(100, 32)
       This\text = text_p
@@ -45,7 +45,7 @@ Namespace UI {
       This\Redraw()
     }
 
-    ; Constructeur 3: Texte et dimensions
+    ; Constructor 3: Text and dimensions
     Public Method Init(text_p.s, w_p.i, h_p.i) {
       Super\Init(w_p, h_p)
       This\text = text_p
@@ -59,7 +59,7 @@ Namespace UI {
       This\Redraw()
     }
 
-    ; Constructeur 4: Position, dimensions et texte
+    ; Constructor 4: Position, dimensions and text
     Public Method Init(x_p.i, y_p.i, w_p.i, h_p.i, text_p.s) {
       Super\Init(x_p, y_p, w_p, h_p)
       This\text = text_p
@@ -73,7 +73,7 @@ Namespace UI {
       This\Redraw()
     }
 
-    ; --- Palettes Prédéfinies Modernes (WPF / WinUI 3 / Tailwind) ---
+    ; --- Modern Predefined Palettes (WPF / WinUI 3 / Tailwind) ---
 
     Public Method SetDefaultStyle() {
       This\background = RGB(243, 244, 246)
@@ -161,12 +161,12 @@ Namespace UI {
       This\borderColor = baseColor_p
       This\borderThickness = 1
 
-      ; Hover légèrement teinté
+      ; Lightly tinted hover
       This\hoverBackground = RGB(241, 245, 249)
       This\hoverForeground = baseColor_p
       This\hoverBorderColor = baseColor_p
 
-      ; Pressed un peu plus soutenu
+      ; Darker pressed state
       This\pressedBackground = RGB(226, 232, 240)
       This\pressedForeground = baseColor_p
       This\pressedBorderColor = baseColor_p
@@ -195,7 +195,7 @@ Namespace UI {
       This\Redraw()
     }
 
-    ; --- Icône et Alignement ---
+    ; --- Icon and Alignment ---
 
     Public Method SetIcon(img_p.i) {
       This\iconImage = img_p
@@ -221,13 +221,13 @@ Namespace UI {
     ; --- Rendu Vectoriel Moderne (OnPaint) ---
 
     Public Method OnPaint(w_p.i, h_p.i) {
-      ; 1. Fond et bordure arrondis selon l'état visuel actif
+      ; 1. Rounded background and border based on active visual state
       This\DrawControlBackground(w_p, h_p)
 
-      ; 2. Anneau de focus si le gadget a le focus clavier
+      ; 2. Focus ring if gadget has keyboard focus
       This\DrawFocusRing(w_p, h_p)
 
-      ; 3. Préparation de la police et du texte
+      ; 3. Prepare font and text
       If (This\fontID)
         DrawingFont(This\fontID)
       EndIf
@@ -260,7 +260,7 @@ Namespace UI {
       Protected startX.i = padL
 
       Select This\textAlignment
-        Case 0: ; Centré
+        Case 0: ; Centered
           startX = (w_p - totalW) / 2
         Case 1: ; Gauche
           startX = padL
@@ -270,14 +270,14 @@ Namespace UI {
 
       If startX < padL : startX = padL : EndIf
 
-      ; 4. Dessin de l'icône si présente
+      ; 4. Draw icon if present
       If This\iconImage And IsImage(This\iconImage)
         Protected iconY.i = (h_p - iconH) / 2
         DrawAlphaImage(ImageID(This\iconImage), startX, iconY)
         startX + iconW + sp
       EndIf
 
-      ; 5. Dessin du texte
+      ; 5. Draw text
       If This\text <> ""
         Protected txtY.i = (h_p - txtH) / 2
         DrawingMode(#PB_2DDrawing_Transparent)

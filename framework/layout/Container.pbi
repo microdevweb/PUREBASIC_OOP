@@ -21,7 +21,7 @@ Namespace UI::Layouts {
     Protected cornerRadius.i
     Protected hasBackground.b
 
-    ; Constructeur 1: Par défaut
+    ; Constructor 1: Default
     Public Method Init() {
       Super\Init()
       This\paddingLeft = 0
@@ -38,7 +38,7 @@ Namespace UI::Layouts {
       This\hasBackground = #False
     }
 
-    ; Constructeur 2: Dimensions
+    ; Constructor 2: Dimensions
     Public Method Init(w_p.i, h_p.i) {
       Super\Init()
       This\width = w_p : This\height = h_p
@@ -57,7 +57,7 @@ Namespace UI::Layouts {
       This\hasBackground = #False
     }
 
-    ; Constructeur 3: Position et dimensions
+    ; Constructor 3: Position and dimensions
     Public Method Init(x_p.i, y_p.i, w_p.i, h_p.i) {
       Super\Init()
       This\x = x_p : This\y = y_p : This\width = w_p : This\height = h_p

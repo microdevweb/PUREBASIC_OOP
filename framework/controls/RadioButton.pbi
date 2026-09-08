@@ -12,7 +12,7 @@ Namespace UI {
   Class RadioButton Extends Gadget {
     Protected groupID.i
 
-    ; Constructeur 0: Texte par defaut (0,0, 120x24)
+    ; Constructor 0: Default text (0,0, 120x24)
     Public Method Init(text_p.s) {
       Super\Init()
       This\x = 0 : This\y = 0 : This\width = 120 : This\height = 24
@@ -25,7 +25,7 @@ Namespace UI {
       }
     }
 
-    ; Constructeur 1: Texte et etat coche
+    ; Constructor 1: Text and checked state
     Public Method Init(text_p.s, checked_p.b) {
       Super\Init()
       This\x = 0 : This\y = 0 : This\width = 120 : This\height = 24
@@ -39,7 +39,7 @@ Namespace UI {
       }
     }
 
-    ; Constructeur 2: Texte, dimensions et etat
+    ; Constructor 2: Text, dimensions and state
     Public Method Init(text_p.s, w_p.i, h_p.i, checked_p.b = #False) {
       Super\Init()
       This\x = 0 : This\y = 0 : This\width = w_p : This\height = h_p
@@ -53,7 +53,7 @@ Namespace UI {
       }
     }
 
-    ; Constructeur 3: Complet (x, y, w, h, texte, etat)
+    ; Constructor 3: Full (x, y, w, h, texte, etat)
     Public Method Init(x_p.i, y_p.i, w_p.i, h_p.i, text_p.s, checked_p.b = #False) {
       Super\Init()
       This\x = x_p : This\y = y_p : This\width = w_p : This\height = h_p

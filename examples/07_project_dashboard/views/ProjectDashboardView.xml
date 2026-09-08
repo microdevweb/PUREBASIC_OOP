@@ -6,14 +6,14 @@
   <DockPanel LastChildFill="True">
 
     <!-- ================================================================= -->
-    <!-- 1. SIDEBAR NAVIGATION GAUCHE (Theme Sombre #18181B)               -->
+    <!-- 1. LEFT NAVIGATION SIDEBAR (Dark Theme #18181B)               -->
     <!-- ================================================================= -->
     <StackPanel Dock="Left" Orientation="Vertical" Width="200" Background="#18181B" Padding="14,14,14,14" Spacing="4">
       
-      <!-- Bouton Menu Hamburger -->
+      <!-- Hamburger Menu Button -->
       <CanvasButton Style="NavHamburger" Text="☰" Width="36" Height="36" Margin="0,0,0,16"/>
 
-      <!-- Items de Navigation avec micro-animations et survol -->
+      <!-- Navigation Items with micro-animations and hover -->
       <CanvasButton Style="NavButton"       Text="🏠   Dashboard"  Height="40" Click="CmdNavDashboard"/>
       <CanvasButton Style="NavButtonActive" Text="📁   Projects"   Height="40" Click="CmdNavProjects"/>
       <CanvasButton Style="NavButton"       Text="☑   Tasks"      Height="40" Click="CmdNavTasks"/>
@@ -23,11 +23,11 @@
     </StackPanel>
 
     <!-- ================================================================= -->
-    <!-- 2. CONTENU PRINCIPAL (Fond Propre #F8FAFC)                        -->
+    <!-- 2. MAIN CONTENT AREA (Light Background #F8FAFC)                        -->
     <!-- ================================================================= -->
     <StackPanel Dock="Fill" Orientation="Vertical" Margin="28,20,28,24" Spacing="16">
 
-      <!-- En-tete Superieur : Titre Hub, Recherche et Profil Utilisateur -->
+      <!-- Top Header: Title, Search and User Profile -->
       <Grid Columns="*, 220, 140" Height="40">
         <CanvasText Grid.Column="0" Text="Project Management Hub" 
                     FontName="Segoe UI" FontSize="16" FontBold="True" 
@@ -42,7 +42,7 @@
                     Foreground="#334155" HAlign="Right" Height="32"/>
       </Grid>
 
-      <!-- Section Actions Rapides (Quick Actions) -->
+      <!-- Quick Actions Section -->
       <StackPanel Orientation="Vertical" Spacing="8">
         <CanvasText Text="Quick Actions" FontName="Segoe UI" FontSize="11" FontBold="True" Foreground="#334155" Height="20"/>
         
@@ -52,12 +52,12 @@
         </StackPanel>
       </StackPanel>
 
-      <!-- Carte Principale Épurée : Formulaire Edit Project Details -->
+      <!-- Main Card: Edit Project Details Form -->
       <StackPanel Orientation="Vertical" Background="#FFFFFF" BorderColor="#E2E8F0" BorderThickness="1" CornerRadius="8" Padding="20,18,20,18" Spacing="14">
         
         <CanvasText Text="Edit Project Details" FontName="Segoe UI" FontSize="11" FontBold="True" Foreground="#0F172A" Height="20"/>
 
-        <!-- Ligne 1 : Nom du Projet, Date Début, Date Fin -->
+        <!-- Row 1: Project Name, Start Date, End Date -->
         <Grid Columns="2*, 1*, 1*" Height="56">
           <StackPanel Grid.Column="0" Orientation="Vertical" Spacing="4" Margin="0,0,12,0">
             <CanvasText Text="Project Name" FontName="Segoe UI" FontSize="9" FontBold="True" Foreground="#475569" Height="16"/>
@@ -75,7 +75,7 @@
           </StackPanel>
         </Grid>
 
-        <!-- Ligne 2 : Priorite (Dropdown) et Statut (Boutons Radio) -->
+        <!-- Row 2: Priority (Dropdown) and Status (Radio Buttons) -->
         <Grid Columns="1*, 1*" Height="56">
           <StackPanel Grid.Column="0" Orientation="Vertical" Spacing="4" Margin="0,0,12,0">
             <CanvasText Text="Priority" FontName="Segoe UI" FontSize="9" FontBold="True" Foreground="#475569" Height="16"/>
@@ -92,16 +92,16 @@
           </StackPanel>
         </Grid>
 
-        <!-- Ligne 3 : Description -->
+        <!-- Row 3: Description -->
         <StackPanel Orientation="Vertical" Spacing="4">
           <CanvasText Text="Description" FontName="Segoe UI" FontSize="9" FontBold="True" Foreground="#475569" Height="16"/>
           <CanvasTextBox Style="FormInput" Text="{Binding Description, Mode=TwoWay}" Placeholder="Enter project details..." Height="70"/>
         </StackPanel>
 
-        <!-- Ligne 4 : Option Urgent -->
+        <!-- Row 4: Urgent Option -->
         <CheckBox Text="Mark as Urgent" Width="130" Height="24"/>
 
-        <!-- Ligne 5 : Barre d'Actions Inférieure (Save, Cancel, Delete) -->
+        <!-- Row 5: Bottom Action Bar (Save, Cancel, Delete) -->
         <StackPanel Orientation="Horizontal" Spacing="10" Height="36">
           <CanvasButton Style="PrimaryButton" Text="Save Changes" Click="CmdSaveChanges" Width="120" Height="34"/>
           <CanvasButton Style="OutlineButton" Text="Cancel"       Click="CmdCancel"      Width="80"  Height="34"/>

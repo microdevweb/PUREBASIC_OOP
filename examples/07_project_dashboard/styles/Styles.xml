@@ -1,10 +1,10 @@
 <ResourceDictionary>
   <!-- ===================================================================== -->
-  <!-- PureBasic OOP - Styles Déclaratifs WPF & Micro-Animations 60 FPS      -->
-  <!-- Fichier : styles/Styles.xml                                           -->
+  <!-- PureBasic OOP - Declarative WPF Styles & 60 FPS Micro-Animations      -->
+  <!-- File: styles/Styles.xml                                           -->
   <!-- ===================================================================== -->
 
-  <!-- 1. Style Implicite par défaut pour tous les CanvasButton -->
+  <!-- 1. Default Implicit Style for all CanvasButtons -->
   <Style TargetType="CanvasButton">
     <Setter Property="CornerRadius" Value="6"/>
     <Setter Property="BorderThickness" Value="1"/>
@@ -25,7 +25,7 @@
     </Trigger>
   </Style>
 
-  <!-- 2. Style Implicite pour tous les CanvasTextBox -->
+  <!-- 2. Implicit Style for all CanvasTextBox -->
   <Style TargetType="CanvasTextBox">
     <Setter Property="CornerRadius" Value="6"/>
     <Setter Property="BorderThickness" Value="1"/>
@@ -36,7 +36,7 @@
     <Setter Property="FontSize" Value="10"/>
   </Style>
 
-  <!-- 3. Navigation Bar : Bouton Normal Sidebar Sombre -->
+  <!-- 3. Navigation Bar: Normal Dark Sidebar Button -->
   <Style x:Key="NavButton" TargetType="CanvasButton">
     <Setter Property="CornerRadius" Value="6"/>
     <Setter Property="BorderThickness" Value="0"/>
@@ -61,7 +61,7 @@
     </Trigger>
   </Style>
 
-  <!-- 4. Navigation Bar : Bouton Actif Sélectionné (Barre bleue latérale) -->
+  <!-- 4. Navigation Bar: Active Selected Button (Blue side indicator) -->
   <Style x:Key="NavButtonActive" TargetType="CanvasButton" BasedOn="NavButton">
     <Setter Property="Background" Value="#27272A"/>
     <Setter Property="Foreground" Value="#FFFFFF"/>
@@ -80,7 +80,7 @@
     </Trigger>
   </Style>
 
-  <!-- 5. Navigation Bar : Bouton Menu Hamburger -->
+  <!-- 5. Navigation Bar: Hamburger Menu Button -->
   <Style x:Key="NavHamburger" TargetType="CanvasButton">
     <Setter Property="CornerRadius" Value="6"/>
     <Setter Property="BorderThickness" Value="0"/>
@@ -99,7 +99,7 @@
     </Trigger>
   </Style>
 
-  <!-- 6. Bouton Primaire Bleu Indigo (+ Add New Project, Save Changes) -->
+  <!-- 6. Indigo Primary Button (+ Add New Project, Save Changes) -->
   <Style x:Key="PrimaryButton" TargetType="CanvasButton">
     <Setter Property="CornerRadius" Value="6"/>
     <Setter Property="BorderThickness" Value="1"/>
@@ -121,7 +121,7 @@
     </Trigger>
   </Style>
 
-  <!-- 7. Bouton Contour Neutre (Generate Report, Cancel) -->
+  <!-- 7. Neutral Outline Button (Generate Report, Cancel) -->
   <Style x:Key="OutlineButton" TargetType="CanvasButton">
     <Setter Property="CornerRadius" Value="6"/>
     <Setter Property="BorderThickness" Value="1"/>
@@ -143,7 +143,7 @@
     </Trigger>
   </Style>
 
-  <!-- 8. Bouton Danger Contour Rouge (Delete) -->
+  <!-- 8. Red Outline Danger Button (Delete) -->
   <Style x:Key="DangerButton" TargetType="CanvasButton">
     <Setter Property="CornerRadius" Value="6"/>
     <Setter Property="BorderThickness" Value="1"/>
@@ -165,7 +165,7 @@
     </Trigger>
   </Style>
 
-  <!-- 9. Barre de Recherche Arrondie (SearchBox) -->
+  <!-- 9. Rounded Search Bar (SearchBox) -->
   <Style x:Key="SearchBox" TargetType="CanvasTextBox">
     <Setter Property="CornerRadius" Value="16"/>
     <Setter Property="BorderThickness" Value="1"/>
@@ -176,7 +176,7 @@
     <Setter Property="FontSize" Value="9"/>
   </Style>
 
-  <!-- 10. Champs de Saisie de Formulaire (FormInput) -->
+  <!-- 10. Form Input Fields (FormInput) -->
   <Style x:Key="FormInput" TargetType="CanvasTextBox">
     <Setter Property="CornerRadius" Value="6"/>
     <Setter Property="BorderThickness" Value="1"/>

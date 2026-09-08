@@ -138,7 +138,7 @@ Namespace UI {
     }
 
     Public Method Redraw() {
-      ; Méthode virtuelle surchargée par les contrôles Canvas
+      ; Virtual method overridden by Canvas controls
     }
 
     ; Virtual Event Handlers (Can be overridden by child classes)

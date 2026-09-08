@@ -11,7 +11,7 @@ Namespace UI {
 
   Class ComboBox Extends Gadget {
 
-    ; Constructeur 1: Par défaut (Positionné par Layout 0,0, 150x25)
+    ; Constructor 1: Default (Positioned by Layout 0,0, 150x25)
     Public Method Init() {
       Super\Init()
       This\x = 0 : This\y = 0 : This\width = 150 : This\height = 25
@@ -23,7 +23,7 @@ Namespace UI {
       }
     }
 
-    ; Constructeur 2: Dimensions personnalisées
+    ; Constructor 2: Custom dimensions
     Public Method Init(w_p.i, h_p.i) {
       Super\Init()
       This\x = 0 : This\y = 0 : This\width = w_p : This\height = h_p
@@ -35,7 +35,7 @@ Namespace UI {
       }
     }
 
-    ; Constructeur 3: Position et dimensions
+    ; Constructor 3: Position and dimensions
     Public Method Init(x_p.i, y_p.i, w_p.i, h_p.i) {
       Super\Init()
       This\x = x_p : This\y = y_p : This\width = w_p : This\height = h_p
@@ -47,7 +47,7 @@ Namespace UI {
       }
     }
 
-    ; Constructeur 4: Complet avec flags
+    ; Constructor 4: Full with flags
     Public Method Init(x_p.i, y_p.i, w_p.i, h_p.i, flags_p.i) {
       Super\Init()
       This\x = x_p : This\y = y_p : This\width = w_p : This\height = h_p

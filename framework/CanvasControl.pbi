@@ -66,15 +66,15 @@ Namespace UI {
     ; Typographie autonome
     Protected ownedFont.i
 
-    ; Arrière-plan du conteneur parent (pour transparence et coins arrondis propres)
+    ; Parent container background (for clean transparency and rounded corners)
     Protected parentBackground.i
 
-    ; Propriétés d'animation et de micro-interactions fluides
+    ; Animation and smooth micro-interaction properties
     Protected currentScale.f
     Protected targetScale.f
     Protected animateHoverScale.b
 
-    ; Moteur de Styles et Triggers Déclaratifs (WPF/XAML)
+    ; Declarative Style & Trigger Engine (WPF/XAML)
     Protected *style.UI::Style
     Protected baseBackground.i
     Protected baseForeground.i
@@ -91,7 +91,7 @@ Namespace UI {
     Protected baseBorderLeftColor.i
     Protected baseScale.f
 
-    ; --- Initialisation des valeurs par défaut ---
+    ; --- Initialize default values ---
     Protected Method InitDefaults() {
       This\visualState = #UI_VisualState_Normal
       This\isHovered = #False
@@ -101,12 +101,12 @@ Namespace UI {
       This\mouseY = 0
       This\text = ""
       This\ownedFont = 0
-      This\parentBackground = RGB(241, 245, 249) ; Fond par défaut du thème clair / fenêtre
+      This\parentBackground = RGB(241, 245, 249) ; Default light theme / window background
       This\currentScale = 1.0
       This\targetScale = 1.0
       This\animateHoverScale = #False
 
-      ; Palette par défaut moderne (Light)
+      ; Modern default palette (Light)
       This\background = RGB(255, 255, 255)
       This\foreground = RGB(33, 37, 41)
       This\hoverBackground = RGB(242, 246, 250)
@@ -129,7 +129,7 @@ Namespace UI {
       This\paddingRight = 8
       This\paddingBottom = 4
 
-      ; Enregistrement des valeurs de base pour les triggers
+      ; Store base values for triggers
       This\style = 0
       This\baseBackground = This\background
       This\baseForeground = This\foreground
@@ -147,7 +147,7 @@ Namespace UI {
       This\baseScale = 1.0
     }
 
-    ; Constructeur 1: Par défaut (100x30)
+    ; Constructor 1: Default (100x30)
     Public Method Init() {
       Super\Init()
       This\x = 0 : This\y = 0 : This\width = 100 : This\height = 30
@@ -161,7 +161,7 @@ Namespace UI {
       }
     }
 
-    ; Constructeur 2: Dimensions spécifiées
+    ; Constructor 2: Specified dimensions
     Public Method Init(w_p.i, h_p.i) {
       Super\Init()
       This\x = 0 : This\y = 0 : This\width = w_p : This\height = h_p
@@ -175,7 +175,7 @@ Namespace UI {
       }
     }
 
-    ; Constructeur 3: Position et dimensions
+    ; Constructor 3: Position and dimensions
     Public Method Init(x_p.i, y_p.i, w_p.i, h_p.i) {
       Super\Init()
       This\x = x_p : This\y = y_p : This\width = w_p : This\height = h_p
@@ -189,7 +189,7 @@ Namespace UI {
       }
     }
 
-    ; Constructeur 4: Position, dimensions et flags personnalisés
+    ; Constructor 4: Position, dimensions and custom flags
     Public Method Init(x_p.i, y_p.i, w_p.i, h_p.i, flags_p.i) {
       Super\Init()
       This\x = x_p : This\y = y_p : This\width = w_p : This\height = h_p
@@ -219,7 +219,7 @@ Namespace UI {
       ProcedureReturn sc
     }
 
-    ; --- Machine d'États Visuels (WPF VisualStateManager) ---
+    ; --- Machine d'Etats Visuels (WPF VisualStateManager) ---
 
     Public Method.i GetVisualState() {
       ProcedureReturn This\visualState
@@ -239,7 +239,7 @@ Namespace UI {
         newState = #UI_VisualState_Focused
       }
 
-      ; Application des triggers WPF actifs selon le nouvel état
+      ; Apply active WPF triggers for the new state
       This\ApplyStyleTriggers()
 
       If (oldState <> newState) {
@@ -252,7 +252,7 @@ Namespace UI {
     Public Method OnVisualStateChanged(oldState_p.i, newState_p.i) {
     }
 
-    ; --- Getters / Setters pour les États ---
+    ; --- State Getters / Setters ---
 
     Public Method.b IsHovered() {
       ProcedureReturn This\isHovered
@@ -296,7 +296,7 @@ Namespace UI {
       This\UpdateVisualState()
     }
 
-    ; --- Getters / Setters pour le Texte ---
+    ; --- Text Getters / Setters ---
 
     Public Method.s GetText() {
       ProcedureReturn This\text
@@ -307,7 +307,7 @@ Namespace UI {
       This\Redraw()
     }
 
-    ; --- Getters / Setters pour les Couleurs et Styles ---
+    ; --- Color & Style Getters / Setters ---
 
     Public Method.i GetBackground() {
       ProcedureReturn This\background
@@ -477,7 +477,7 @@ Namespace UI {
       ProcedureReturn This\paddingBottom
     }
 
-    ; --- Helpers de Couleurs Actives selon l'État ---
+    ; --- Helpers de Couleurs Actives selon l'Etat ---
 
     Public Method.i GetCurrentBackgroundColor() {
       Select (This\visualState)
@@ -518,11 +518,11 @@ Namespace UI {
       EndSelect
     }
 
-    ; --- Helpers Graphiques Intégrés ---
+    ; --- Built-in Graphics Helpers ---
 
     Public Method DrawControlBackground(w_p.i, h_p.i) {
-      ; Effacer l'arriere-plan du canvas avec la couleur du conteneur parent
-      ; pour eviter les artefacts carres autour des coins arrondis
+      ; Clear canvas background with parent container color
+      ; Avoid square artifacts around rounded corners
       Box(0, 0, w_p, h_p, This\parentBackground)
 
       Protected curBg.i = This\GetCurrentBackgroundColor()
@@ -550,7 +550,7 @@ Namespace UI {
       If drawH < 4 : drawH = 4 : EndIf
 
       If (scaledRadius > 0) {
-        ; Fond arrondi avec bordure
+        ; Rounded background with border
         If (scaledThick > 0) {
           RoundBox(drawX, drawY, drawW, drawH, scaledRadius, scaledRadius, curBorder)
           If (drawW > scaledThick * 2 And drawH > scaledThick * 2) {
@@ -562,7 +562,7 @@ Namespace UI {
           RoundBox(drawX, drawY, drawW, drawH, scaledRadius, scaledRadius, curBg)
         }
       } Else {
-        ; Rectangle standard avec bordure
+        ; Standard rectangle with border
         If (scaledThick > 0) {
           Box(drawX, drawY, drawW, drawH, curBorder)
           If (drawW > scaledThick * 2 And drawH > scaledThick * 2) {
@@ -573,7 +573,7 @@ Namespace UI {
         }
       }
 
-      ; Bordure d'accentuation latérale gauche (ex: indicateur d'onglet actif WPF)
+      ; Left accent border (e.g. WPF active tab indicator)
       If (This\borderLeftThickness > 0)
         Protected scaledBLT.i = DesktopScaledX(This\borderLeftThickness)
         Protected curBLCol.i = This\borderLeftColor
@@ -605,7 +605,7 @@ Namespace UI {
       }
     }
 
-    ; --- Événements Souris, Clavier & Focus ---
+    ; --- Mouse, Keyboard & Focus Events ---
 
     Public Method OnMouseEnter() {
       This\isHovered = #True
@@ -728,7 +728,7 @@ Namespace UI {
       EndSelect
     }
 
-    ; --- Typographie Haute-Fidélité ---
+    ; --- High-Fidelity Typography ---
 
     Public Method SetTypography(fontName_p.s, fontSize_p.i, bold_p.b) {
       Protected scaledSize.i = DesktopScaledY(fontSize_p)
@@ -755,7 +755,7 @@ Namespace UI {
       ProcedureReturn This\parentBackground
     }
 
-    ; Virtual Layout Arrange method: redessine imperativement le canvas des que sa taille reelle est fixee
+    ; Virtual Layout Arrange method: redraws canvas as soon as real size is set
     Public Method Arrange(nx.i, ny.i, nw.i, nh.i) {
       This\SetPosition(nx, ny, nw, nh)
       If (This\id And IsGadget(This\id)) {
@@ -780,7 +780,7 @@ Namespace UI {
       ProcedureReturn This\animateHoverScale
     }
 
-    ; --- Intégration du Système de Styles & Triggers Déclaratifs (WPF/XAML) ---
+    ; --- Declarative Style & Trigger System Integration (WPF/XAML) ---
 
     Public Method ApplyStyle(*s.UI::Style) {
       If Not *s : ProcedureReturn : EndIf
@@ -791,7 +791,7 @@ Namespace UI {
       Protected fontBoldVal.b = #False
       Protected hasTypography.b = #False
 
-      ; Appliquer les Setters de base définis dans le Style
+      ; Apply base Setters defined in Style
       Protected count.i = *s\GetSetterCount()
       Protected i.i
       For i = 0 To count - 1
@@ -874,7 +874,7 @@ Namespace UI {
         EndSelect
       Next
 
-      ; Mémorisation des valeurs appliquées comme référence de base pour les triggers
+      ; Store applied values as base reference for triggers
       This\baseBackground = This\background
       This\baseForeground = This\foreground
       This\baseBorderColor = This\borderColor
@@ -903,7 +903,7 @@ Namespace UI {
     Public Method ApplyStyleTriggers() {
       If Not This\style : ProcedureReturn : EndIf
 
-      ; 1. Rétablir les valeurs de base
+      ; 1. Restore base values
       This\background = This\baseBackground
       This\foreground = This\baseForeground
       This\borderColor = This\baseBorderColor
@@ -918,7 +918,7 @@ Namespace UI {
       This\borderLeftThickness = This\baseBorderLeftThickness
       This\borderLeftColor = This\baseBorderLeftColor
 
-      ; 2. Parcourir les triggers et activer ceux dont la condition est remplie
+      ; 2. Iterate triggers and activate matching ones
       Protected tCount.i = This\style\GetTriggerCount()
       Protected t.i, s.i
       Protected hasScaleTrigger.b = #False
@@ -983,7 +983,7 @@ Namespace UI {
         EndIf
       Next
 
-      ; Si aucun trigger Scale n'est actif, et qu'on a bougé de l'échelle de base, retour fluide
+      ; If no scale trigger is active and scale changed, smoothly return to base
       If (Not hasScaleTrigger) And (Not This\isHovered) And (Not This\isPressed) And This\currentScale <> This\baseScale
         UI_InitAnimationEngine()
         UI_GlobalAnimEngine\StartFloatAnimation(This, "Scale", This\currentScale, This\baseScale, 150, #UI_ANIM_EASING_EASEOUT_CUBIC)

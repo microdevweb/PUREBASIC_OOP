@@ -2689,7 +2689,7 @@ EndProcedure
 
 Procedure UI_Gadget_Redraw(*This.UI_Gadget_Inst)
   Protected *This_vt.UI_Gadget_vt = *This
-        ; Méthode virtuelle surchargée par les contrôles Canvas
+        ; Virtual method overridden by Canvas controls
 EndProcedure
 
 Procedure UI_Gadget_OnClick(*This.UI_Gadget_Inst)
@@ -2834,7 +2834,7 @@ Procedure UI_AnimationEngine_Update(*This.UI_AnimationEngine_Inst)
   
           If *anim\propType = 1 ; Float (Scale)
             *anim\currentVal = *This_vt\LerpFloat(*anim\startVal, *anim\targetVal, easedT)
-            ; Dispatch valeur au contrôle Canvas
+            ; Dispatch value to Canvas control
             If *anim\control
               *anim\control\OnAnimationTick("Scale", *anim\currentVal)
             EndIf
@@ -2914,7 +2914,7 @@ EndProcedure
 
 Procedure UI_Style_AddSetter(*This.UI_Style_Inst, prop_p.s, val_p.s)
   Protected *This_vt.UI_Style_vt = *This
-        ; Remplacer si déjà existant, sinon ajouter
+        ; Replace if already exists, otherwise add
         ForEach *This\setters()
           If UCase(*This\setters()\property) = UCase(prop_p)
             *This\setters()\value = val_p
@@ -3038,7 +3038,7 @@ Procedure UI_Style_MergeBaseStyle(*This.UI_Style_Inst, *baseStyle.UI_Style_vt)
   Protected *This_vt.UI_Style_vt = *This
         If Not *baseStyle : ProcedureReturn : EndIf
   
-        ; 1. Copier les Setters du style parent qui ne sont pas redéfinis ici
+        ; 1. Copy parent style Setters that are not overridden here
         Protected bCount.i = *baseStyle\GetSetterCount()
         Protected i.i
         For i = 0 To bCount - 1
@@ -3049,7 +3049,7 @@ Procedure UI_Style_MergeBaseStyle(*This.UI_Style_Inst, *baseStyle.UI_Style_vt)
           EndIf
         Next
   
-        ; 2. Copier les Triggers du style parent
+        ; 2. Copy parent style Triggers
         Protected tCount.i = *baseStyle\GetTriggerCount()
         Protected t.i, s.i
         For t = 0 To tCount - 1
@@ -3090,7 +3090,7 @@ Procedure UI_ResourceDictionary_AddStyle(*This.UI_ResourceDictionary_Inst, *styl
   Protected *This_vt.UI_ResourceDictionary_vt = *This
         If Not *style : ProcedureReturn : EndIf
   
-        ; Résolution de l'héritage éventuel (BasedOn)
+        ; Resolve potential inheritance (BasedOn)
         Protected basedOnKey.s = *style\GetBasedOn()
         If basedOnKey <> ""
           Protected *base.UI_Style_vt = *This_vt\GetStyle(basedOnKey)
@@ -3103,7 +3103,7 @@ Procedure UI_ResourceDictionary_AddStyle(*This.UI_ResourceDictionary_Inst, *styl
         If keyStr <> ""
           *This\styles(UCase(keyStr)) = *style
         ElseIf *style\GetTargetType() <> ""
-          ; Style implicite lié au nom du composant (ex: TargetType="CanvasButton")
+          ; Implicit style linked to component name (e.g. TargetType="CanvasButton")
           *This\implicitStyles(UCase(*style\GetTargetType())) = *style
         EndIf
 EndProcedure
@@ -3111,7 +3111,7 @@ EndProcedure
 Procedure.i UI_ResourceDictionary_GetStyle(*This.UI_ResourceDictionary_Inst, key_p.s)
   Protected *This_vt.UI_ResourceDictionary_vt = *This
         Protected normKey.s = UCase(Trim(key_p))
-        ; Support des syntaxes XAML "{StaticResource PrimaryButton}" ou "PrimaryButton"
+        ; Support XAML syntaxes "{StaticResource PrimaryButton}" or "PrimaryButton"
         If Left(normKey, 16) = "{STATICRESOURCE "
           normKey = Trim(Mid(normKey, 17))
           If Right(normKey, 1) = "}" : normKey = Left(normKey, Len(normKey) - 1) : EndIf
@@ -3694,12 +3694,12 @@ Procedure UI_CanvasControl_InitDefaults(*This.UI_CanvasControl_Inst)
         *This\mouseY = 0
         *This\text = ""
         *This\ownedFont = 0
-        *This\parentBackground = RGB(241, 245, 249) ; Fond par défaut du thème clair / fenêtre
+        *This\parentBackground = RGB(241, 245, 249) ; Default light theme / window background
         *This\currentScale = 1.0
         *This\targetScale = 1.0
         *This\animateHoverScale = #False
   
-        ; Palette par défaut moderne (Light)
+        ; Modern default palette (Light)
         *This\background = RGB(255, 255, 255)
         *This\foreground = RGB(33, 37, 41)
         *This\hoverBackground = RGB(242, 246, 250)
@@ -3722,7 +3722,7 @@ Procedure UI_CanvasControl_InitDefaults(*This.UI_CanvasControl_Inst)
         *This\paddingRight = 8
         *This\paddingBottom = 4
   
-        ; Enregistrement des valeurs de base pour les triggers
+        ; Store base values for triggers
         *This\style = 0
         *This\baseBackground = *This\background
         *This\baseForeground = *This\foreground
@@ -3833,7 +3833,7 @@ Procedure UI_CanvasControl_UpdateVisualState(*This.UI_CanvasControl_Inst)
           newState = #UI_VisualState_Focused
   EndIf
   
-        ; Application des triggers WPF actifs selon le nouvel état
+        ; Apply active WPF triggers for the new state
         *This_vt\ApplyStyleTriggers()
   
   If (oldState <> newState)
@@ -4154,8 +4154,8 @@ EndProcedure
 
 Procedure UI_CanvasControl_DrawControlBackground(*This.UI_CanvasControl_Inst, w_p.i, h_p.i)
   Protected *This_vt.UI_CanvasControl_vt = *This
-        ; Effacer l'arriere-plan du canvas avec la couleur du conteneur parent
-        ; pour eviter les artefacts carres autour des coins arrondis
+        ; Clear canvas background with parent container color
+        ; Avoid square artifacts around rounded corners
         Box(0, 0, w_p, h_p, *This\parentBackground)
   
         Protected curBg.i = *This_vt\GetCurrentBackgroundColor()
@@ -4183,7 +4183,7 @@ Procedure UI_CanvasControl_DrawControlBackground(*This.UI_CanvasControl_Inst, w_
         If drawH < 4 : drawH = 4 : EndIf
   
   If (scaledRadius > 0)
-          ; Fond arrondi avec bordure
+          ; Rounded background with border
   If (scaledThick > 0)
             RoundBox(drawX, drawY, drawW, drawH, scaledRadius, scaledRadius, curBorder)
   If (drawW > scaledThick * 2 And drawH > scaledThick * 2)
@@ -4195,7 +4195,7 @@ Procedure UI_CanvasControl_DrawControlBackground(*This.UI_CanvasControl_Inst, w_
             RoundBox(drawX, drawY, drawW, drawH, scaledRadius, scaledRadius, curBg)
   EndIf
   Else
-          ; Rectangle standard avec bordure
+          ; Standard rectangle with border
   If (scaledThick > 0)
             Box(drawX, drawY, drawW, drawH, curBorder)
   If (drawW > scaledThick * 2 And drawH > scaledThick * 2)
@@ -4206,7 +4206,7 @@ Procedure UI_CanvasControl_DrawControlBackground(*This.UI_CanvasControl_Inst, w_
   EndIf
   EndIf
   
-        ; Bordure d'accentuation latérale gauche (ex: indicateur d'onglet actif WPF)
+        ; Left accent border (e.g. WPF active tab indicator)
         If (*This\borderLeftThickness > 0)
           Protected scaledBLT.i = DesktopScaledX(*This\borderLeftThickness)
           Protected curBLCol.i = *This\borderLeftColor
@@ -4435,7 +4435,7 @@ Procedure UI_CanvasControl_ApplyStyle(*This.UI_CanvasControl_Inst, *s.UI_Style_v
         Protected fontBoldVal.b = #False
         Protected hasTypography.b = #False
   
-        ; Appliquer les Setters de base définis dans le Style
+        ; Apply base Setters defined in Style
         Protected count.i = *s\GetSetterCount()
         Protected i.i
         For i = 0 To count - 1
@@ -4518,7 +4518,7 @@ Procedure UI_CanvasControl_ApplyStyle(*This.UI_CanvasControl_Inst, *s.UI_Style_v
           EndSelect
         Next
   
-        ; Mémorisation des valeurs appliquées comme référence de base pour les triggers
+        ; Store applied values as base reference for triggers
         *This\baseBackground = *This\background
         *This\baseForeground = *This\foreground
         *This\baseBorderColor = *This\borderColor
@@ -4548,7 +4548,7 @@ Procedure UI_CanvasControl_ApplyStyleTriggers(*This.UI_CanvasControl_Inst)
   Protected *This_vt.UI_CanvasControl_vt = *This
         If Not *This\style : ProcedureReturn : EndIf
   
-        ; 1. Rétablir les valeurs de base
+        ; 1. Restore base values
         *This\background = *This\baseBackground
         *This\foreground = *This\baseForeground
         *This\borderColor = *This\baseBorderColor
@@ -4563,7 +4563,7 @@ Procedure UI_CanvasControl_ApplyStyleTriggers(*This.UI_CanvasControl_Inst)
         *This\borderLeftThickness = *This\baseBorderLeftThickness
         *This\borderLeftColor = *This\baseBorderLeftColor
   
-        ; 2. Parcourir les triggers et activer ceux dont la condition est remplie
+        ; 2. Iterate triggers and activate matching ones
         Protected tCount.i = *This\style\GetTriggerCount()
         Protected t.i, s.i
         Protected hasScaleTrigger.b = #False
@@ -4628,7 +4628,7 @@ Procedure UI_CanvasControl_ApplyStyleTriggers(*This.UI_CanvasControl_Inst)
           EndIf
         Next
   
-        ; Si aucun trigger Scale n'est actif, et qu'on a bougé de l'échelle de base, retour fluide
+        ; If no scale trigger is active and scale changed, smoothly return to base
         If (Not hasScaleTrigger) And (Not *This\isHovered) And (Not *This\isPressed) And *This\currentScale <> *This\baseScale
           UI_InitAnimationEngine()
           UI_GlobalAnimEngine\StartFloatAnimation(*This, "Scale", *This\currentScale, *This\baseScale, 150, #UI_ANIM_EASING_EASEOUT_CUBIC)
@@ -7753,12 +7753,12 @@ Procedure UI_CanvasButton_SetOutlineStyle(*This.UI_CanvasButton_Inst, baseColor_
         *This\borderColor = baseColor_p
         *This\borderThickness = 1
   
-        ; Hover légèrement teinté
+        ; Lightly tinted hover
         *This\hoverBackground = RGB(241, 245, 249)
         *This\hoverForeground = baseColor_p
         *This\hoverBorderColor = baseColor_p
   
-        ; Pressed un peu plus soutenu
+        ; Darker pressed state
         *This\pressedBackground = RGB(226, 232, 240)
         *This\pressedForeground = baseColor_p
         *This\pressedBorderColor = baseColor_p
@@ -7815,13 +7815,13 @@ EndProcedure
 
 Procedure UI_CanvasButton_OnPaint(*This.UI_CanvasButton_Inst, w_p.i, h_p.i)
   Protected *This_vt.UI_CanvasButton_vt = *This
-        ; 1. Fond et bordure arrondis selon l'état visuel actif
+        ; 1. Rounded background and border based on active visual state
         *This_vt\DrawControlBackground(w_p, h_p)
   
-        ; 2. Anneau de focus si le gadget a le focus clavier
+        ; 2. Focus ring if gadget has keyboard focus
         *This_vt\DrawFocusRing(w_p, h_p)
   
-        ; 3. Préparation de la police et du texte
+        ; 3. Prepare font and text
         If (*This\fontID)
           DrawingFont(*This\fontID)
         EndIf
@@ -7854,7 +7854,7 @@ Procedure UI_CanvasButton_OnPaint(*This.UI_CanvasButton_Inst, w_p.i, h_p.i)
         Protected startX.i = padL
   
         Select *This\textAlignment
-          Case 0: ; Centré
+          Case 0: ; Centered
             startX = (w_p - totalW) / 2
           Case 1: ; Gauche
             startX = padL
@@ -7864,14 +7864,14 @@ Procedure UI_CanvasButton_OnPaint(*This.UI_CanvasButton_Inst, w_p.i, h_p.i)
   
         If startX < padL : startX = padL : EndIf
   
-        ; 4. Dessin de l'icône si présente
+        ; 4. Draw icon if present
         If *This\iconImage And IsImage(*This\iconImage)
           Protected iconY.i = (h_p - iconH) / 2
           DrawAlphaImage(ImageID(*This\iconImage), startX, iconY)
           startX + iconW + sp
         EndIf
   
-        ; 5. Dessin du texte
+        ; 5. Draw text
         If *This\text <> ""
           Protected txtY.i = (h_p - txtH) / 2
           DrawingMode(#PB_2DDrawing_Transparent)
@@ -8082,7 +8082,7 @@ Procedure UI_CanvasText_OnPaint(*This.UI_CanvasText_Inst, w_p.i, h_p.i)
         If (Not *This\isTransparent) Or *This\borderThickness > 0
           *This_vt\DrawControlBackground(w_p, h_p)
         Else
-          ; Effacement avec la couleur du conteneur parent
+          ; Clear with parent container color
           Box(0, 0, w_p, h_p, *This\parentBackground)
         EndIf
   
@@ -8139,7 +8139,7 @@ Procedure UI_CanvasTextBox_InitTextBoxDefaults(*This.UI_CanvasTextBox_Inst)
         *This\placeholder = ""
         *This\placeholderColor = RGB(156, 163, 175) ; Tailwind gray-400
         *This\isPassword = #False
-        *This\passwordChar = Chr(9679) ; Bullet '●'
+        *This\passwordChar = Chr(9679) ; Bullet character
         If *This\passwordChar = "" : *This\passwordChar = "*" : EndIf
         *This\isReadOnly = #False
         *This\maxLength = 0
@@ -8151,7 +8151,7 @@ Procedure UI_CanvasTextBox_InitTextBoxDefaults(*This.UI_CanvasTextBox_Inst)
         *This\scrollOffset = 0
         *This\caretHeight = 16
   
-        ; Thème moderne WinUI 3
+        ; Modern WinUI 3 theme
         *This\background = RGB(255, 255, 255)
         *This\foreground = RGB(17, 24, 39)
         *This\hoverBackground = RGB(255, 255, 255)
@@ -8176,7 +8176,7 @@ Procedure UI_CanvasTextBox_InitTextBoxDefaults(*This.UI_CanvasTextBox_Inst)
         *This\paddingRight = 10
         *This\paddingBottom = 6
   
-        ; Typographie par défaut
+        ; Default typography
         *This_vt\SetTypography("Segoe UI", 10, #False)
 EndProcedure
 
@@ -8459,7 +8459,7 @@ Procedure UI_CanvasTextBox_Paste(*This.UI_CanvasTextBox_Inst)
         If (*This\isReadOnly) : ProcedureReturn : EndIf
         Protected clip.s = GetClipboardText()
         If clip <> ""
-          ; Supprimer les retours à la ligne pour un champ simple ligne
+          ; Remove line breaks for single-line field
           clip = RemoveString(clip, #CR$)
           clip = RemoveString(clip, #LF$)
           *This_vt\InsertText(clip)
@@ -8698,7 +8698,7 @@ Procedure UI_CanvasTextBox_OnPaint(*This.UI_CanvasTextBox_Inst, w_p.i, h_p.i)
           DrawingFont(*This\fontID)
         EndIf
   
-        ; 4. Zone intérieure de texte
+        ; 4. Zone interieure de texte
         Protected padL.i = DesktopScaledX(*This\paddingLeft)
         Protected padT.i = DesktopScaledY(*This\paddingTop)
         Protected padR.i = DesktopScaledX(*This\paddingRight)
@@ -8722,10 +8722,10 @@ Procedure UI_CanvasTextBox_OnPaint(*This.UI_CanvasTextBox_Inst, w_p.i, h_p.i)
         Protected caretDrawX.i = availX + curPixX - *This\scrollOffset
         Protected caretDrawY.i = availY + (availH - *This\caretHeight) / 2
   
-        ; 5. Découpage pour éviter les débordements de texte
+        ; 5. Clip text to prevent overflow
         ClipOutput(availX, availY, availW, availH)
   
-        ; 6. Affichage du Placeholder si vide et non-focus
+        ; 6. Display placeholder if empty and unfocused
   If (*This\text = "" And Not *This\isFocused And *This\placeholder <> "")
           DrawingMode(#PB_2DDrawing_Transparent)
           Protected phY.i = availY + (availH - TextHeight(*This\placeholder)) / 2
@@ -8744,13 +8744,13 @@ Procedure UI_CanvasTextBox_OnPaint(*This.UI_CanvasTextBox_Inst, w_p.i, h_p.i)
             Protected preW.i = TextWidth(preText)
             Protected selW.i = TextWidth(selText)
   
-            ; Texte avant sélection
+            ; Texte avant selection
             If preText <> ""
               DrawingMode(#PB_2DDrawing_Transparent)
               DrawText(drawX, textY, preText, *This_vt\GetCurrentForegroundColor())
             EndIf
   
-            ; Surlignage de sélection
+            ; Surlignage de selection
             Protected selX.i = drawX + preW
             Protected selBoxY.i = textY - 1
             Protected selBoxH.i = TextHeight(dText) + 2
@@ -8759,7 +8759,7 @@ Procedure UI_CanvasTextBox_OnPaint(*This.UI_CanvasTextBox_Inst, w_p.i, h_p.i)
             DrawingMode(#PB_2DDrawing_Transparent)
             DrawText(selX, textY, selText, *This\selectionTextColor)
   
-            ; Texte après sélection
+            ; Texte apres selection
             If postText <> ""
               DrawingMode(#PB_2DDrawing_Transparent)
               DrawText(selX + selW, textY, postText, *This_vt\GetCurrentForegroundColor())
@@ -8772,7 +8772,7 @@ Procedure UI_CanvasTextBox_OnPaint(*This.UI_CanvasTextBox_Inst, w_p.i, h_p.i)
   
         UnclipOutput()
   
-        ; 7. Gestion du Curseur / Caret Système Windows
+        ; 7. Windows system caret management
         CompilerIf #PB_Compiler_OS = #PB_OS_Windows
           If (*This\isFocused And Not *This_vt\HasSelection() And *This\id And IsGadget(*This\id))
             CreateCaret_(GadgetID(*This\id), 0, 2, *This\caretHeight)
@@ -9407,7 +9407,7 @@ Procedure UI_CanvasTree_InitDefaults(*This.UI_CanvasTree_Inst)
         *This\onCheckCallback = 0
         *This\onButtonClickCallback = 0
   
-        ; Thème moderne clair par défaut
+        ; Default modern light theme
         *This\bgColor = RGB(255, 255, 255)
         *This\fgColor = RGB(33, 37, 41)
         *This\lineColor = RGB(225, 228, 232)
@@ -9726,14 +9726,14 @@ Procedure UI_CanvasTree_OnPaint(*This.UI_CanvasTree_Inst, w.i, h.i)
           availableRowW = w - scaledBarW - 2
   EndIf
   
-        ; 2. Parcours et dessin des nœuds visibles
+        ; 2. Render visible nodes
   ForEach *This\visibleNodes()
           Protected *node.UI_TreeNode_vt = *This\visibleNodes()
           If Not *node : Continue : EndIf
   
-          ; Vérifier visibilité dans la zone de découpe verticale
+          ; Check visibility in vertical viewport
   If (currentY + scaledLineH >= 0 And currentY <= h)
-            ; Calcul du niveau hiérarchique
+            ; Calculate hierarchy level
             Protected level.i = 0
             Protected *parentCheck.UI_TreeNode_vt = *node\GetParent()
             While (*parentCheck And *parentCheck <> *This\rootNode)
@@ -9741,7 +9741,7 @@ Procedure UI_CanvasTree_OnPaint(*This.UI_CanvasTree_Inst, w.i, h.i)
               *parentCheck = *parentCheck\GetParent()
             Wend
   
-            ; Fond du nœud (Sélectionné ou Survolé)
+            ; Node background (Selected or Hovered)
             Protected rowBg.i = *This\bgColor
             Protected rowFg.i = *This\fgColor
   If (*node\IsSelected())
@@ -9756,14 +9756,14 @@ Procedure UI_CanvasTree_OnPaint(*This.UI_CanvasTree_Inst, w.i, h.i)
             Protected cursorX.i = scaledMargin + (level * scaledIndent)
             Protected midY.i = currentY + (scaledLineH / 2)
   
-            ; 2.1 Lignes de liaison hiérarchique (si activées)
+            ; 2.1 Lignes de liaison hierarchique (si activees)
   If (*This\showLines And level > 0)
               Protected lineStartX.i = cursorX - (scaledIndent / 2)
               LineXY(lineStartX, currentY, lineStartX, midY, *This\lineColor)
               LineXY(lineStartX, midY, cursorX, midY, *This\lineColor)
   EndIf
   
-            ; 2.2 Chevron d'expansion vectoriel (si enfants présents)
+            ; 2.2 Chevron d'expansion vectoriel (si enfants presents)
             Protected expX.i = 0, expY.i = 0, expSize.i = 0
   If (*node\GetChildCount() > 0)
               expX = cursorX
@@ -9780,31 +9780,31 @@ Procedure UI_CanvasTree_OnPaint(*This.UI_CanvasTree_Inst, w.i, h.i)
               Protected chCenterY.i = midY
   
   If (*node\IsExpanded())
-                ; Chevron vers le bas (v)
+                ; Down chevron (v)
                 LineXY(chCenterX - chRadius, chCenterY - (chRadius / 2), chCenterX, chCenterY + (chRadius / 2), chevCol)
                 LineXY(chCenterX, chCenterY + (chRadius / 2), chCenterX + chRadius, chCenterY - (chRadius / 2), chevCol)
-                ; Épaisseur vectorielle
+                ; Epaisseur vectorielle
                 LineXY(chCenterX - chRadius, chCenterY - (chRadius / 2) + 1, chCenterX, chCenterY + (chRadius / 2) + 1, chevCol)
                 LineXY(chCenterX, chCenterY + (chRadius / 2) + 1, chCenterX + chRadius, chCenterY - (chRadius / 2) + 1, chevCol)
   Else
-                ; Chevron vers la droite (>)
+                ; Right chevron (>)
                 LineXY(chCenterX - (chRadius / 2), chCenterY - chRadius, chCenterX + (chRadius / 2), chCenterY, chevCol)
                 LineXY(chCenterX + (chRadius / 2), chCenterY, chCenterX - (chRadius / 2), chCenterY + chRadius, chevCol)
-                ; Épaisseur vectorielle
+                ; Epaisseur vectorielle
                 LineXY(chCenterX - (chRadius / 2) + 1, chCenterY - chRadius, chCenterX + (chRadius / 2) + 1, chCenterY, chevCol)
                 LineXY(chCenterX + (chRadius / 2) + 1, chCenterY, chCenterX - (chRadius / 2) + 1, chCenterY + chRadius, chevCol)
   EndIf
   EndIf
             cursorX + scaledChevron + DesktopScaledX(4)
   
-            ; 2.3 Case à cocher (si globale ou spécifique au nœud)
+            ; 2.3 Case a cocher (si globale ou specifique au noeud)
             Protected chkX.i = 0, chkY.i = 0, chkSize.i = 0
   If (*This\showCheckBoxes Or *node\HasCheckBox())
               chkX = cursorX
               chkY = midY - (scaledCheck / 2)
               chkSize = scaledCheck
   
-              ; Boîte de la case
+              ; Checkbox box
               RoundBox(cursorX, chkY, scaledCheck, scaledCheck, 3, 3, *This\lineColor)
               RoundBox(cursorX + 1, chkY + 1, scaledCheck - 2, scaledCheck - 2, 2, 2, *This\checkBgColor)
   
@@ -9822,7 +9822,7 @@ Procedure UI_CanvasTree_OnPaint(*This.UI_CanvasTree_Inst, w.i, h.i)
               cursorX + scaledCheck + DesktopScaledX(6)
   EndIf
   
-            ; 2.4 Icône du nœud (si définie)
+            ; 2.4 Node icon (if defined)
   If (*node\GetIcon() > 0 And IsImage(*node\GetIcon()))
               Protected iconY.i = midY - (scaledIcon / 2)
               DrawingMode(#PB_2DDrawing_AlphaBlend)
@@ -9831,13 +9831,13 @@ Procedure UI_CanvasTree_OnPaint(*This.UI_CanvasTree_Inst, w.i, h.i)
               cursorX + scaledIcon + DesktopScaledX(6)
   EndIf
   
-            ; 2.5 Texte du nœud
+            ; 2.5 Node text
             Protected txtY.i = currentY + (scaledLineH - TextHeight(*node\GetText())) / 2
             DrawingMode(#PB_2DDrawing_Transparent)
             DrawText(cursorX, txtY, *node\GetText(), rowFg)
             DrawingMode(#PB_2DDrawing_Default)
   
-            ; 2.6 Boutons d'actions alignés à droite de la ligne
+            ; 2.6 Action buttons aligned to right of line
             Protected btnCount.i = *node\GetButtonCount()
   If (btnCount > 0)
               Protected btnX.i = availableRowW - DesktopScaledX(6) - (btnCount * (scaledBtn + DesktopScaledX(4)))
@@ -9859,20 +9859,20 @@ Procedure UI_CanvasTree_OnPaint(*This.UI_CanvasTree_Inst, w.i, h.i)
                   DrawImage(ImageID(bIco), btnX, btnY, scaledBtn, scaledBtn)
                   DrawingMode(#PB_2DDrawing_Default)
   Else
-                  ; Bouton vectoriel par défaut (petit cercle avec point)
+                  ; Default vector button (circle with dot)
                   Circle(btnX + scaledBtn / 2, midY, scaledBtn / 2 - 1, *This\chevronColor)
   EndIf
                 btnX + scaledBtn + DesktopScaledX(4)
               Next
   EndIf
   
-            ; Stocker les coordonnées de rendu sur le nœud pour le hit-testing
+            ; Store render coordinates on node for hit-testing
             *node\SetRenderLayout(currentY, scaledLineH, availableRowW, level, expX, expY, expSize, chkX, chkY, chkSize)
   EndIf
           currentY + scaledLineH
   Next
   
-        ; 3. Barre de défilement verticale virtuelle
+        ; 3. Barre de defilement verticale virtuelle
   If (*This\totalContentHeight > h)
           Protected barX.i = w - scaledBarW
           Box(barX, 0, scaledBarW, h, *This\scrollbarBgColor)
@@ -9900,7 +9900,7 @@ Procedure UI_CanvasTree_OnMouseDown(*This.UI_CanvasTree_Inst, mx.i, my.i, button
         Protected scaledBarW.i = DesktopScaledX(8)
         Protected barX.i = *This\width - scaledBarW
   
-        ; Clic sur la barre de défilement
+        ; Click on scrollbar
   If (*This\totalContentHeight > *This\height And mx >= barX)
           *This\isDraggingThumb = #True
           *This\dragStartY = my
@@ -9909,7 +9909,7 @@ Procedure UI_CanvasTree_OnMouseDown(*This.UI_CanvasTree_Inst, mx.i, my.i, button
           ProcedureReturn
   EndIf
   
-        ; Détermination du nœud cliqué
+        ; Determine clicked node
         Protected scaledLineH.i = DesktopScaledY(*This\lineHeight)
         Protected clickedRow.i = (my + *This\scrollY) / scaledLineH
   
@@ -9918,7 +9918,7 @@ Procedure UI_CanvasTree_OnMouseDown(*This.UI_CanvasTree_Inst, mx.i, my.i, button
           Protected *node.UI_TreeNode_vt = *This\visibleNodes()
   
   If (*node)
-            ; 1. Clic sur le chevron d'expansion ?
+            ; 1. Click on expand chevron?
   If (*node\HitTestExpand(mx, my))
               *node\SetExpanded(1 - *node\IsExpanded())
   If (*This\onExpandCallback)
@@ -9929,7 +9929,7 @@ Procedure UI_CanvasTree_OnMouseDown(*This.UI_CanvasTree_Inst, mx.i, my.i, button
               ProcedureReturn
   EndIf
   
-            ; 2. Clic sur la case à cocher ?
+            ; 2. Click on checkbox?
   If (*node\HitTestCheck(mx, my))
               *node\SetChecked(1 - *node\IsChecked())
   If (*This\onCheckCallback)
@@ -9939,7 +9939,7 @@ Procedure UI_CanvasTree_OnMouseDown(*This.UI_CanvasTree_Inst, mx.i, my.i, button
               ProcedureReturn
   EndIf
   
-            ; 3. Clic sur un bouton d'action ?
+            ; 3. Click on action button?
             Protected hitBtnId.i = *node\HitTestButton(mx, my)
   If (hitBtnId >= 0)
               Protected bIdx.i, count.i = *node\GetButtonCount()
@@ -9958,7 +9958,7 @@ Procedure UI_CanvasTree_OnMouseDown(*This.UI_CanvasTree_Inst, mx.i, my.i, button
               ProcedureReturn
   EndIf
   
-            ; 4. Clic sur le nœud (Sélection)
+            ; 4. Click on node (Selection)
             *This_vt\SetSelectedNode(*node)
   If (*This\onSelectCallback)
               CallFunctionFast(*This\onSelectCallback, *node)
@@ -9978,7 +9978,7 @@ EndProcedure
 
 Procedure UI_CanvasTree_OnMouseMove(*This.UI_CanvasTree_Inst, mx.i, my.i)
   Protected *This_vt.UI_CanvasTree_vt = *This
-        ; Déplacement de la molette / barre de défilement
+        ; Mouse wheel / scrollbar movement
   If (*This\isDraggingThumb)
           Protected deltaY.i = my - *This\dragStartY
           Protected thumbH.i = (*This\height * *This\height) / *This\totalContentHeight
@@ -9994,7 +9994,7 @@ Procedure UI_CanvasTree_OnMouseMove(*This.UI_CanvasTree_Inst, mx.i, my.i)
           ProcedureReturn
   EndIf
   
-        ; Détection du survol
+        ; Hover detection
         Protected scaledLineH.i = DesktopScaledY(*This\lineHeight)
         Protected rowIdx.i = (my + *This\scrollY) / scaledLineH
   
@@ -10007,7 +10007,7 @@ Procedure UI_CanvasTree_OnMouseMove(*This.UI_CanvasTree_Inst, mx.i, my.i)
           Protected *node.UI_TreeNode_vt = *This\visibleNodes()
   If (*node)
             *This\hoveredNode = *node
-            *This\hoveredElementType = 4 ; Row par défaut
+            *This\hoveredElementType = 4 ; Default row
   
             ; Chevron
   If (*node\HitTestExpand(mx, my))
@@ -10198,7 +10198,7 @@ Procedure UI_XMLLoader_ParseResources(*This.UI_XMLLoader_Inst, resNode.i, *targe
   
               Protected *style.UI_Style_vt = New_UI_Style_s_s_s(targetType, keyStr, basedOnStr)
   
-              ; Parcourir les Setters et Triggers du Style
+              ; Iterate over Style Setters and Triggers
               Protected *propNode = ChildXMLNode(*child)
               While *propNode
                 If XMLNodeType(*propNode) = #PB_XML_Normal
@@ -10212,7 +10212,7 @@ Procedure UI_XMLLoader_ParseResources(*This.UI_XMLLoader_Inst, resNode.i, *targe
                     Protected tVal.s = GetXMLAttribute(*propNode, "Value")
                     Protected trigIdx.i = *style\AddTrigger(tProp, tVal)
   
-                    ; Setters du trigger
+                    ; Trigger setters
                     Protected *tChild = ChildXMLNode(*propNode)
                     While *tChild
                       If XMLNodeType(*tChild) = #PB_XML_Normal And UCase(GetXMLNodeName(*tChild)) = "SETTER"
@@ -10286,14 +10286,14 @@ Procedure UI_XMLLoader_ApplyCanvasControlAttributes(*This.UI_XMLLoader_Inst, *ct
   Protected *This_vt.UI_XMLLoader_vt = *This
         If Not *ctrl : ProcedureReturn : EndIf
   
-        ; Hériter de la couleur de fond du conteneur parent ou de la fenêtre
+        ; Inherit background color from parent container or window
         If *parentContainer And *parentContainer\GetBackground() <> 0
           *ctrl\SetParentBackground(*parentContainer\GetBackground())
         ElseIf *targetWindow
           *ctrl\SetParentBackground(*targetWindow\GetBackgroundColor())
         EndIf
   
-        ; 0. Recherche et application du Style WPF (nommé ou implicite par TargetType)
+        ; 0. Find and apply WPF Style (named or implicit by TargetType)
         If *targetWindow
           Protected *resDict.UI_ResourceDictionary_vt = *targetWindow\GetResources()
           If *resDict
@@ -10343,7 +10343,7 @@ Procedure UI_XMLLoader_ApplyCanvasControlAttributes(*This.UI_XMLLoader_Inst, *ct
           *ctrl\SetHoverBorderColor(*This_vt\ParseColor(hovBorderStr, *ctrl\GetHoverBorderColor()))
         EndIf
   
-        ; 3. Pressed Colors (Clic enfoncé)
+        ; 3. Pressed Colors (Mouse pressed)
         Protected prBgStr.s = GetXMLAttribute(node, "PressedBackground")
         If prBgStr = "" : prBgStr = GetXMLAttribute(node, "PressedBg") : EndIf
         If prBgStr <> ""
@@ -10395,7 +10395,7 @@ Procedure UI_XMLLoader_ApplyCanvasControlAttributes(*This.UI_XMLLoader_Inst, *ct
           *ctrl\SetPadding(pL\i, pT\i, pR\i, pB\i)
         EndIf
   
-        ; 6. Typographie Haute-Fidélité
+        ; 6. High-Fidelity Typography
         Protected fontNameStr.s = GetXMLAttribute(node, "FontName")
         If fontNameStr = "" : fontNameStr = GetXMLAttribute(node, "FontFamily") : EndIf
         Protected fontSizeStr.s = GetXMLAttribute(node, "FontSize")
@@ -11458,7 +11458,7 @@ Procedure Dashboard_ProjectDashboardViewModel_Init(*This.Dashboard_ProjectDashbo
   
         *This\model = New_Dashboard_ProjectModel()
   
-        ; Enregistrement des propriétés observables
+        ; Register observable properties
         *This\ProjectName        = *This_vt\BindString("ProjectName", *This\model\GetName())
         *This\StartDate          = *This_vt\BindString("StartDate", *This\model\GetStartDate())
         *This\EndDate            = *This_vt\BindString("EndDate", *This\model\GetEndDate())
@@ -11466,7 +11466,7 @@ Procedure Dashboard_ProjectDashboardViewModel_Init(*This.Dashboard_ProjectDashbo
         *This\Status             = *This_vt\BindString("Status", *This\model\GetStatus())
         *This\Description        = *This_vt\BindString("Description", *This\model\GetDescription())
         *This\SearchQuery        = *This_vt\BindString("SearchQuery", "")
-        *This\StatusNotification = *This_vt\BindString("StatusNotification", "Prêt.")
+        *This\StatusNotification = *This_vt\BindString("StatusNotification", "Ready.")
         *This\ActiveNavTab       = *This_vt\BindString("ActiveNavTab", "Projects")
 EndProcedure
 
@@ -11482,11 +11482,11 @@ EndProcedure
 Procedure.b Dashboard_ProjectDashboardViewModel_OnCommand(*This.Dashboard_ProjectDashboardViewModel_Inst, cmdName.s, *param)
   Protected *This_vt.Dashboard_ProjectDashboardViewModel_vt = *This
         Select cmdName
-          ; Action : Enregistrer les modifications
+          ; Action: Save changes
           Case "CmdSaveChanges"
             Protected pName.s = Trim(*This\ProjectName\GetValue())
             If pName = ""
-              *This\StatusNotification\SetValue("⚠ Le nom du projet ne peut pas être vide.")
+              *This\StatusNotification\SetValue("[!] Project name cannot be empty.")
               ProcedureReturn #True
             EndIf
             
@@ -11494,66 +11494,66 @@ Procedure.b Dashboard_ProjectDashboardViewModel_OnCommand(*This.Dashboard_Projec
             *This\model\SetStartDate(*This\StartDate\GetValue())
             *This\model\SetEndDate(*This\EndDate\GetValue())
             *This\model\SetDescription(*This\Description\GetValue())
-            *This\StatusNotification\SetValue("✔ Projet '" + pName + "' enregistré avec succès.")
+            *This\StatusNotification\SetValue("[OK] Project '" + pName + "' saved successfully.")
             ProcedureReturn #True
   
-          ; Action : Annuler les modifications
+          ; Action: Cancel changes
           Case "CmdCancel"
             *This\ProjectName\SetValue(*This\model\GetName())
             *This\StartDate\SetValue(*This\model\GetStartDate())
             *This\EndDate\SetValue(*This\model\GetEndDate())
             *This\Description\SetValue(*This\model\GetDescription())
-            *This\StatusNotification\SetValue("↩ Modifications annulées.")
+            *This\StatusNotification\SetValue("Modifications cancelled.")
             ProcedureReturn #True
   
-          ; Action : Supprimer le projet
+          ; Action: Delete project
           Case "CmdDelete"
             *This\ProjectName\SetValue("")
             *This\StartDate\SetValue("")
             *This\EndDate\SetValue("")
             *This\Description\SetValue("")
-            *This\StatusNotification\SetValue("🗑 Données du projet réinitialisées.")
+            *This\StatusNotification\SetValue("Project data reset.")
             ProcedureReturn #True
   
-          ; Action : Ajouter un nouveau projet
+          ; Action: Add new project
           Case "CmdAddProject"
-            *This\ProjectName\SetValue("Nouveau Projet")
+            *This\ProjectName\SetValue("New Project")
             *This\StartDate\SetValue("01/01/2027")
             *This\EndDate\SetValue("30/06/2027")
-            *This\Description\SetValue("Nouveau projet initialisé...")
-            *This\StatusNotification\SetValue("✨ Nouveau modèle de projet créé.")
+            *This\Description\SetValue("New project initialized...")
+            *This\StatusNotification\SetValue("New project template created.")
             ProcedureReturn #True
   
-          ; Action : Générer un rapport
+          ; Action: Generate report
           Case "CmdGenerateReport"
             Protected curName.s = *This\ProjectName\GetValue()
-            *This\StatusNotification\SetValue("📊 Rapport synthétique généré pour '" + curName + "'.")
+            *This\StatusNotification\SetValue("Summary report generated for '" + curName + "'.")
             ProcedureReturn #True
   
-          ; Actions : Navigation Sidebar
+          ; Actions: Sidebar Navigation
           Case "CmdNavDashboard"
             *This\ActiveNavTab\SetValue("Dashboard")
-            *This\StatusNotification\SetValue("Navigation : Vue Dashboard.")
+            *This\StatusNotification\SetValue("Navigation: Dashboard view.")
             ProcedureReturn #True
   
           Case "CmdNavProjects"
             *This\ActiveNavTab\SetValue("Projects")
-            *This\StatusNotification\SetValue("Navigation : Vue Projets.")
+            *This\StatusNotification\SetValue("Navigation: Projects view.")
             ProcedureReturn #True
   
           Case "CmdNavTasks"
             *This\ActiveNavTab\SetValue("Tasks")
-            *This\StatusNotification\SetValue("Navigation : Vue Tâches.")
+            *This\StatusNotification\SetValue("Navigation: Tasks view.")
             ProcedureReturn #True
   
           Case "CmdNavAnalytics"
             *This\ActiveNavTab\SetValue("Analytics")
-            *This\StatusNotification\SetValue("Navigation : Vue Statistiques & Analytics.")
+            *This\StatusNotification\SetValue("Navigation: Analytics view.")
             ProcedureReturn #True
   
           Case "CmdNavSettings"
             *This\ActiveNavTab\SetValue("Settings")
-            *This\StatusNotification\SetValue("Navigation : Vue Paramètres.")
+            *This\StatusNotification\SetValue("Navigation: Settings view.")
             ProcedureReturn #True
   
         EndSelect
@@ -16859,26 +16859,26 @@ EndProcedure
 ; Window & Application Dispatcher
 
 ; ============================================================================
-; Project Dashboard (WPF Modern UI) - Point d'Entrée Principal
-; Fichier : main.pb
+; Project Dashboard (WPF Modern UI) - Main Entry Point
+; File: main.pb
 ; ============================================================================
 
 EnableExplicit
 
-; 1. Inclusion de la Vue Principale (Le Framework UI & MVVM est auto-inclus par le transpileur !)
+; 1. Include Main View (UI & MVVM framework is auto-included by transpiler)
 ; ============================================================================
-; Project Dashboard (WPF Modern UI) - Vue Fenêtre PureBasic OOP
-; Fichier : views/ProjectDashboardView.pbi
-; ============================================================================
-
-; ============================================================================
-; Project Dashboard (WPF Modern UI) - ViewModel MVVM Réactif
-; Fichier : viewmodels/ProjectDashboardViewModel.pbi
+; Project Dashboard (WPF Modern UI) - PureBasic OOP Window View
+; File: views/ProjectDashboardView.pbi
 ; ============================================================================
 
 ; ============================================================================
-; Project Dashboard (WPF Modern UI) - Modèle Métier
-; Fichier : models/ProjectModel.pbi
+; Project Dashboard (WPF Modern UI) - Reactive MVVM ViewModel
+; File: viewmodels/ProjectDashboardViewModel.pbi
+; ============================================================================
+
+; ============================================================================
+; Project Dashboard (WPF Modern UI) - Business Model
+; File: models/ProjectModel.pbi
 ; ============================================================================
 
 
@@ -16896,20 +16896,20 @@ EnableExplicit
 
 
 
-; 2. Instanciation de l'Application PureBasic OOP
+; 2. Instantiate PureBasic OOP Application
 Define *app.UI_Application_vt = New_UI_Application_s("Project Dashboard - [WPF_ModernUI_App]")
 
-; 3. Instanciation du ViewModel (état réactif et logique métier)
+; 3. Instantiate ViewModel (Reactive state and business logic)
 Define *vm.Dashboard_ProjectDashboardViewModel_vt = New_Dashboard_ProjectDashboardViewModel()
 
-; 4. Instanciation de la Vue (Injection du ViewModel en DataContext)
+; 4. Instantiate View (Inject ViewModel into DataContext)
 Define *view.Dashboard_ProjectDashboardView_vt = New_Dashboard_ProjectDashboardView(*vm)
 
-; 5. Définition de la fenêtre principale et lancement de la boucle d'événements
+; 5. Set main window and run event loop
 *app\SetMainWindow(*view)
 *app\Run_void()
 
-; 6. Libération propre
+; 6. Clean teardown
 *view\Free()
 *vm\Free()
 *app\Free()

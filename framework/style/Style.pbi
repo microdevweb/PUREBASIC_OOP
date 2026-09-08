@@ -103,7 +103,7 @@ Namespace UI {
     ; --- Setters ---
 
     Public Method AddSetter(prop_p.s, val_p.s) {
-      ; Remplacer si déjà existant, sinon ajouter
+      ; Replace if already exists, otherwise add
       ForEach This\setters()
         If UCase(This\setters()\property) = UCase(prop_p)
           This\setters()\value = val_p
@@ -212,12 +212,12 @@ Namespace UI {
       ProcedureReturn ""
     }
 
-    ; --- Héritage de Style (BasedOn) ---
+    ; --- Style Inheritance (BasedOn) ---
 
     Public Method MergeBaseStyle(*baseStyle.UI::Style) {
       If Not *baseStyle : ProcedureReturn : EndIf
 
-      ; 1. Copier les Setters du style parent qui ne sont pas redéfinis ici
+      ; 1. Copy parent style Setters that are not overridden here
       Protected bCount.i = *baseStyle\GetSetterCount()
       Protected i.i
       For i = 0 To bCount - 1
@@ -228,7 +228,7 @@ Namespace UI {
         EndIf
       Next
 
-      ; 2. Copier les Triggers du style parent
+      ; 2. Copy parent style Triggers
       Protected tCount.i = *baseStyle\GetTriggerCount()
       Protected t.i, s.i
       For t = 0 To tCount - 1

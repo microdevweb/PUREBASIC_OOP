@@ -13,7 +13,7 @@ Namespace UI {
     Protected activeColor.i
     Protected inactiveColor.i
 
-    ; Constructeur 1: Par défaut (#False, 0,0, 50x26)
+    ; Constructor 1: Default (#False, 0,0, 50x26)
     Public Method Init() {
       Super\Init(50, 26)
       This\isChecked = #False
@@ -22,7 +22,7 @@ Namespace UI {
       This\Redraw()
     }
 
-    ; Constructeur 2: État initial spécifié (0,0, 50x26)
+    ; Constructor 2: Specified initial state (0,0, 50x26)
     Public Method Init(defaultState_p.b) {
       Super\Init(50, 26)
       This\isChecked = defaultState_p
@@ -31,7 +31,7 @@ Namespace UI {
       This\Redraw()
     }
 
-    ; Constructeur 3: Dimensions et état initial
+    ; Constructor 3: Dimensions and initial state
     Public Method Init(w_p.i, h_p.i, defaultState_p.b) {
       Super\Init(w_p, h_p)
       This\isChecked = defaultState_p
@@ -40,7 +40,7 @@ Namespace UI {
       This\Redraw()
     }
 
-    ; Constructeur 4: Position, dimensions et état initial
+    ; Constructor 4: Position, dimensions and initial state
     Public Method Init(x_p.i, y_p.i, w_p.i, h_p.i, defaultState_p.b) {
       Super\Init(x_p, y_p, w_p, h_p)
       This\isChecked = defaultState_p

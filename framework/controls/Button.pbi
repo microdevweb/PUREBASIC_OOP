@@ -11,7 +11,7 @@ Namespace UI {
 
   Class Button Extends Gadget {
 
-    ; Constructeur 1: Texte seul (Positionné par Layout 0,0, 120x30)
+    ; Constructor 1: Text only (Positioned by Layout 0,0, 120x30)
     Public Method Init(text_p.s) {
       Super\Init()
       This\x = 0 : This\y = 0 : This\width = 120 : This\height = 30
@@ -23,7 +23,7 @@ Namespace UI {
       }
     }
 
-    ; Constructeur 2: Texte et dimensions
+    ; Constructor 2: Text and dimensions
     Public Method Init(text_p.s, w_p.i, h_p.i) {
       Super\Init()
       This\x = 0 : This\y = 0 : This\width = w_p : This\height = h_p
@@ -35,7 +35,7 @@ Namespace UI {
       }
     }
 
-    ; Constructeur 3: Position, dimensions et texte
+    ; Constructor 3: Position, dimensions and text
     Public Method Init(x_p.i, y_p.i, w_p.i, h_p.i, text_p.s) {
       Super\Init()
       This\x = x_p : This\y = y_p : This\width = w_p : This\height = h_p
@@ -47,7 +47,7 @@ Namespace UI {
       }
     }
 
-    ; Constructeur 4: Complet
+    ; Constructor 4: Full
     Public Method Init(x_p.i, y_p.i, w_p.i, h_p.i, text_p.s, flags_p.i) {
       Super\Init()
       This\x = x_p : This\y = y_p : This\width = w_p : This\height = h_p

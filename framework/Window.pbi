@@ -56,7 +56,7 @@ Namespace UI {
     ; 1. Multiple Overloaded Constructors
     ; ------------------------------------------------------------------------
 
-    ; Constructeur 0: Vierge (pret pour LoadView)
+    ; Constructor 0: Blank (ready for LoadView)
     Public Method Init() {
       Super\Init()
       This\id = 0
@@ -65,41 +65,41 @@ Namespace UI {
       This\height = 600
     }
 
-    ; Constructeur 1: Titre uniquement (800x600, Centree a l'ecran, Menu Systeme + Reduire + Agrandir + Redimensionnable)
+    ; Constructor 1: Title only (800x600, Centered on screen, System Menu + Minimize + Maximize + Resizable)
     Public Method Init(title_p.s) {
       Protected defFlags.i = #PB_Window_SystemMenu | #PB_Window_ScreenCentered | #PB_Window_MinimizeGadget | #PB_Window_MaximizeGadget | #PB_Window_SizeGadget
       This\CreateWindowInternal(title_p, #PB_Ignore, #PB_Ignore, 800, 600, defFlags, 0)
     }
 
-    ; Constructeur 2: Titre, Largeur, Hauteur (Centree a l'ecran, Redimensionnable)
+    ; Constructor 2: Title, Width, Height (Centered on screen, Resizable)
     Public Method Init(title_p.s, w_p.i, h_p.i) {
       Protected defFlags.i = #PB_Window_SystemMenu | #PB_Window_ScreenCentered | #PB_Window_MinimizeGadget | #PB_Window_MaximizeGadget | #PB_Window_SizeGadget
       This\CreateWindowInternal(title_p, #PB_Ignore, #PB_Ignore, w_p, h_p, defFlags, 0)
     }
 
-    ; Constructeur 3: Titre, Largeur, Hauteur, Flags
+    ; Constructor 3: Title, Width, Height, Flags
     Public Method Init(title_p.s, w_p.i, h_p.i, flags_p.i) {
       This\CreateWindowInternal(title_p, #PB_Ignore, #PB_Ignore, w_p, h_p, flags_p, 0)
     }
 
-    ; Constructeur 4: Titre, X, Y, Largeur, Hauteur
+    ; Constructor 4: Title, X, Y, Width, Height
     Public Method Init(title_p.s, x_p.i, y_p.i, w_p.i, h_p.i) {
       Protected defFlags.i = #PB_Window_SystemMenu | #PB_Window_MinimizeGadget | #PB_Window_MaximizeGadget | #PB_Window_SizeGadget
       This\CreateWindowInternal(title_p, x_p, y_p, w_p, h_p, defFlags, 0)
     }
 
-    ; Constructeur 5: Titre, X, Y, Largeur, Hauteur, Flags
+    ; Constructor 5: Title, X, Y, Width, Height, Flags
     Public Method Init(title_p.s, x_p.i, y_p.i, w_p.i, h_p.i, flags_p.i) {
       This\CreateWindowInternal(title_p, x_p, y_p, w_p, h_p, flags_p, 0)
     }
 
-    ; Constructeur 6: Complet (Titre, X, Y, Largeur, Hauteur, Flags, ParentID)
+    ; Constructor 6: Full (Title, X, Y, Width, Height, Flags, ParentID)
     Public Method Init(title_p.s, x_p.i, y_p.i, w_p.i, h_p.i, flags_p.i, parent_p.i) {
       This\CreateWindowInternal(title_p, x_p, y_p, w_p, h_p, flags_p, parent_p)
     }
 
     ; ------------------------------------------------------------------------
-    ; 2. Getters & Setters Synchronisés
+    ; 2. Synchronized Getters & Setters
     ; ------------------------------------------------------------------------
 
     Public Method SetTitle(t.s) {

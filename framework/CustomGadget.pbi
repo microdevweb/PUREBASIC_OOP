@@ -11,22 +11,22 @@ Namespace UI {
 
   Abstract Class CustomGadget Extends CanvasControl {
 
-    ; Constructeur 1: Par défaut (100x30)
+    ; Constructor 1: Default (100x30)
     Public Method Init() {
       Super\Init()
     }
 
-    ; Constructeur 2: Dimensions personnalisées
+    ; Constructor 2: Custom dimensions
     Public Method Init(w_p.i, h_p.i) {
       Super\Init(w_p, h_p)
     }
 
-    ; Constructeur 3: Position et dimensions
+    ; Constructor 3: Position and dimensions
     Public Method Init(x_p.i, y_p.i, w_p.i, h_p.i) {
       Super\Init(x_p, y_p, w_p, h_p)
     }
 
-    ; Constructeur 4: Complet avec flags
+    ; Constructor 4: Full with flags
     Public Method Init(x_p.i, y_p.i, w_p.i, h_p.i, flags_p.i) {
       Super\Init(x_p, y_p, w_p, h_p, flags_p)
     }

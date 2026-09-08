@@ -11,7 +11,7 @@ Namespace UI {
 
   Class GroupBox Extends Gadget {
 
-    ; Constructeur 0: Titre par defaut (0,0, 200x150)
+    ; Constructor 0: Default title (0,0, 200x150)
     Public Method Init(caption_p.s) {
       Super\Init()
       This\x = 0 : This\y = 0 : This\width = 200 : This\height = 150
@@ -23,7 +23,7 @@ Namespace UI {
       }
     }
 
-    ; Constructeur 1: Titre et dimensions
+    ; Constructor 1: Title and dimensions
     Public Method Init(caption_p.s, w_p.i, h_p.i) {
       Super\Init()
       This\x = 0 : This\y = 0 : This\width = w_p : This\height = h_p
@@ -35,7 +35,7 @@ Namespace UI {
       }
     }
 
-    ; Constructeur 2: Complet
+    ; Constructor 2: Full
     Public Method Init(x_p.i, y_p.i, w_p.i, h_p.i, caption_p.s, flags_p.i = 0) {
       Super\Init()
       This\x = x_p : This\y = y_p : This\width = w_p : This\height = h_p

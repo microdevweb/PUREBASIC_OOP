@@ -11,7 +11,7 @@ Namespace UI {
 
   Class TabControl Extends Gadget {
 
-    ; Constructeur 0: Par defaut (0,0, 300x200)
+    ; Constructor 0: Default (0,0, 300x200)
     Public Method Init() {
       Super\Init()
       This\x = 0 : This\y = 0 : This\width = 300 : This\height = 200
@@ -24,7 +24,7 @@ Namespace UI {
       }
     }
 
-    ; Constructeur 1: Dimensions
+    ; Constructor 1: Dimensions
     Public Method Init(w_p.i, h_p.i) {
       Super\Init()
       This\x = 0 : This\y = 0 : This\width = w_p : This\height = h_p

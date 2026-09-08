@@ -50,7 +50,7 @@ Namespace UI {
       This\isRunning = #False
     }
 
-    ; --- Fonctions d'Amorti Mathématiques (Easing) ---
+    ; --- Mathematical Easing Functions ---
 
     Public Method.f ApplyEasing(t.f, easing.i) {
       If t <= 0.0 : ProcedureReturn 0.0 : EndIf
@@ -129,7 +129,7 @@ Namespace UI {
       This\isRunning = #True
     }
 
-    ; --- Vérification et Boucle de Rendu (Tick 60 FPS) ---
+    ; --- Render Loop and Check (60 FPS Tick) ---
 
     Public Method.b HasActiveAnimations() {
       ProcedureReturn Bool(MapSize(This\activeAnimations()) > 0)
@@ -158,7 +158,7 @@ Namespace UI {
 
         If *anim\propType = 1 ; Float (Scale)
           *anim\currentVal = This\LerpFloat(*anim\startVal, *anim\targetVal, easedT)
-          ; Dispatch valeur au contrôle Canvas
+          ; Dispatch value to Canvas control
           If *anim\control
             *anim\control\OnAnimationTick("Scale", *anim\currentVal)
           EndIf

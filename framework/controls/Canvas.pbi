@@ -10,7 +10,7 @@ Namespace UI {
 
   Class Canvas Extends Gadget {
 
-    ; Constructeur 1: Par défaut (positionné par Layout 0,0, 200x200)
+    ; Constructor 1: Default (Positioned by Layout 0,0, 200x200)
     Public Method Init() {
       Super\Init()
       This\x = 0 : This\y = 0 : This\width = 200 : This\height = 200
@@ -22,7 +22,7 @@ Namespace UI {
       }
     }
 
-    ; Constructeur 2: Dimensions
+    ; Constructor 2: Dimensions
     Public Method Init(w_p.i, h_p.i) {
       Super\Init()
       This\x = 0 : This\y = 0 : This\width = w_p : This\height = h_p
@@ -34,7 +34,7 @@ Namespace UI {
       }
     }
 
-    ; Constructeur 3: Position et dimensions
+    ; Constructor 3: Position and dimensions
     Public Method Init(x_p.i, y_p.i, w_p.i, h_p.i) {
       Super\Init()
       This\x = x_p : This\y = y_p : This\width = w_p : This\height = h_p
@@ -46,7 +46,7 @@ Namespace UI {
       }
     }
 
-    ; Constructeur 4: Complet avec flags
+    ; Constructor 4: Full with flags
     Public Method Init(x_p.i, y_p.i, w_p.i, h_p.i, flags_p.i) {
       Super\Init()
       This\x = x_p : This\y = y_p : This\width = w_p : This\height = h_p

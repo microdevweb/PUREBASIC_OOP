@@ -11,7 +11,7 @@ Namespace UI {
 
   Class Editor Extends Gadget {
 
-    ; Constructeur 0: Par defaut (0,0, 200x120)
+    ; Constructor 0: Default (0,0, 200x120)
     Public Method Init() {
       Super\Init()
       This\x = 0 : This\y = 0 : This\width = 200 : This\height = 120
@@ -23,7 +23,7 @@ Namespace UI {
       }
     }
 
-    ; Constructeur 1: Dimensions
+    ; Constructor 1: Dimensions
     Public Method Init(w_p.i, h_p.i) {
       Super\Init()
       This\x = 0 : This\y = 0 : This\width = w_p : This\height = h_p
@@ -35,7 +35,7 @@ Namespace UI {
       }
     }
 
-    ; Constructeur 2: Texte initial et dimensions
+    ; Constructor 2: Initial text and dimensions
     Public Method Init(text_p.s, w_p.i, h_p.i) {
       Super\Init()
       This\x = 0 : This\y = 0 : This\width = w_p : This\height = h_p
@@ -48,7 +48,7 @@ Namespace UI {
       }
     }
 
-    ; Constructeur 3: Complet
+    ; Constructor 3: Full
     Public Method Init(x_p.i, y_p.i, w_p.i, h_p.i, text_p.s, flags_p.i = 0) {
       Super\Init()
       This\x = x_p : This\y = y_p : This\width = w_p : This\height = h_p

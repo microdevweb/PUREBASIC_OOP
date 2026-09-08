@@ -11,7 +11,7 @@ Namespace UI {
 
   Class CheckBox Extends Gadget {
 
-    ; Constructeur 1: Texte seul (Positionné par Layout 0,0, 150x25)
+    ; Constructor 1: Text only (Positioned by Layout 0,0, 150x25)
     Public Method Init(text_p.s) {
       Super\Init()
       This\x = 0 : This\y = 0 : This\width = 150 : This\height = 25
@@ -23,7 +23,7 @@ Namespace UI {
       }
     }
 
-    ; Constructeur 2: Texte et état coché
+    ; Constructor 2: Text and checked state
     Public Method Init(text_p.s, checked_p.b) {
       Super\Init()
       This\x = 0 : This\y = 0 : This\width = 150 : This\height = 25
@@ -36,7 +36,7 @@ Namespace UI {
       }
     }
 
-    ; Constructeur 3: Texte, dimensions et état coché
+    ; Constructor 3: Text, dimensions and checked state
     Public Method Init(text_p.s, w_p.i, h_p.i, checked_p.b) {
       Super\Init()
       This\x = 0 : This\y = 0 : This\width = w_p : This\height = h_p
@@ -49,7 +49,7 @@ Namespace UI {
       }
     }
 
-    ; Constructeur 4: Complet avec position et flags
+    ; Constructor 4: Full with position and flags
     Public Method Init(x_p.i, y_p.i, w_p.i, h_p.i, text_p.s, flags_p.i) {
       Super\Init()
       This\x = x_p : This\y = y_p : This\width = w_p : This\height = h_p

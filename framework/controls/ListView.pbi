@@ -11,7 +11,7 @@ Namespace UI {
 
   Class ListView Extends Gadget {
 
-    ; Constructeur 0: Par defaut (0,0, 180x140)
+    ; Constructor 0: Default (0,0, 180x140)
     Public Method Init() {
       Super\Init()
       This\x = 0 : This\y = 0 : This\width = 180 : This\height = 140
@@ -23,7 +23,7 @@ Namespace UI {
       }
     }
 
-    ; Constructeur 1: Dimensions
+    ; Constructor 1: Dimensions
     Public Method Init(w_p.i, h_p.i) {
       Super\Init()
       This\x = 0 : This\y = 0 : This\width = w_p : This\height = h_p
@@ -35,7 +35,7 @@ Namespace UI {
       }
     }
 
-    ; Constructeur 2: Complet
+    ; Constructor 2: Full
     Public Method Init(x_p.i, y_p.i, w_p.i, h_p.i, flags_p.i = 0) {
       Super\Init()
       This\x = x_p : This\y = y_p : This\width = w_p : This\height = h_p

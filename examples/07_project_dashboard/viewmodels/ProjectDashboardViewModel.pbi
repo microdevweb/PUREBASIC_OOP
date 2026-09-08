@@ -1,6 +1,6 @@
 ; ============================================================================
-; Project Dashboard (WPF Modern UI) - ViewModel MVVM Réactif
-; Fichier : viewmodels/ProjectDashboardViewModel.pbi
+; Project Dashboard (WPF Modern UI) - Reactive MVVM ViewModel
+; File: viewmodels/ProjectDashboardViewModel.pbi
 ; ============================================================================
 
 XIncludeFile "../models/ProjectModel.pbi"
@@ -10,7 +10,7 @@ Namespace Dashboard {
   Class ProjectDashboardViewModel Extends MVVM::ViewModelBase {
     Public *model.Dashboard::ProjectModel
     
-    ; Propriétés Observables DataBound à l'interface
+    ; Observable Properties DataBound to UI
     Public *ProjectName.MVVM::StringProperty
     Public *StartDate.MVVM::StringProperty
     Public *EndDate.MVVM::StringProperty
@@ -26,7 +26,7 @@ Namespace Dashboard {
 
       This\*model = New Dashboard::ProjectModel()
 
-      ; Enregistrement des propriétés observables
+      ; Register observable properties
       This\*ProjectName        = This\BindString("ProjectName", This\*model\GetName())
       This\*StartDate          = This\BindString("StartDate", This\*model\GetStartDate())
       This\*EndDate            = This\BindString("EndDate", This\*model\GetEndDate())
@@ -34,7 +34,7 @@ Namespace Dashboard {
       This\*Status             = This\BindString("Status", This\*model\GetStatus())
       This\*Description        = This\BindString("Description", This\*model\GetDescription())
       This\*SearchQuery        = This\BindString("SearchQuery", "")
-      This\*StatusNotification = This\BindString("StatusNotification", "Prêt.")
+      This\*StatusNotification = This\BindString("StatusNotification", "Ready.")
       This\*ActiveNavTab       = This\BindString("ActiveNavTab", "Projects")
     }
 
@@ -46,14 +46,14 @@ Namespace Dashboard {
       Super\Free()
     }
 
-    ; --- Traitement des Commandes UI (RelayCommands) ---
+    ; --- UI Commands Processing (RelayCommands) ---
     Public Method.b OnCommand(cmdName.s, *param = 0) {
       Select cmdName
-        ; Action : Enregistrer les modifications
+        ; Action: Save changes
         Case "CmdSaveChanges"
           Protected pName.s = Trim(This\*ProjectName\GetValue())
           If pName = ""
-            This\*StatusNotification\SetValue("⚠ Le nom du projet ne peut pas être vide.")
+            This\*StatusNotification\SetValue("[!] Project name cannot be empty.")
             ProcedureReturn #True
           EndIf
           
@@ -61,66 +61,66 @@ Namespace Dashboard {
           This\*model\SetStartDate(This\*StartDate\GetValue())
           This\*model\SetEndDate(This\*EndDate\GetValue())
           This\*model\SetDescription(This\*Description\GetValue())
-          This\*StatusNotification\SetValue("✔ Projet '" + pName + "' enregistré avec succès.")
+          This\*StatusNotification\SetValue("[OK] Project '" + pName + "' saved successfully.")
           ProcedureReturn #True
 
-        ; Action : Annuler les modifications
+        ; Action: Cancel changes
         Case "CmdCancel"
           This\*ProjectName\SetValue(This\*model\GetName())
           This\*StartDate\SetValue(This\*model\GetStartDate())
           This\*EndDate\SetValue(This\*model\GetEndDate())
           This\*Description\SetValue(This\*model\GetDescription())
-          This\*StatusNotification\SetValue("↩ Modifications annulées.")
+          This\*StatusNotification\SetValue("Modifications cancelled.")
           ProcedureReturn #True
 
-        ; Action : Supprimer le projet
+        ; Action: Delete project
         Case "CmdDelete"
           This\*ProjectName\SetValue("")
           This\*StartDate\SetValue("")
           This\*EndDate\SetValue("")
           This\*Description\SetValue("")
-          This\*StatusNotification\SetValue("🗑 Données du projet réinitialisées.")
+          This\*StatusNotification\SetValue("Project data reset.")
           ProcedureReturn #True
 
-        ; Action : Ajouter un nouveau projet
+        ; Action: Add new project
         Case "CmdAddProject"
-          This\*ProjectName\SetValue("Nouveau Projet")
+          This\*ProjectName\SetValue("New Project")
           This\*StartDate\SetValue("01/01/2027")
           This\*EndDate\SetValue("30/06/2027")
-          This\*Description\SetValue("Nouveau projet initialisé...")
-          This\*StatusNotification\SetValue("✨ Nouveau modèle de projet créé.")
+          This\*Description\SetValue("New project initialized...")
+          This\*StatusNotification\SetValue("New project template created.")
           ProcedureReturn #True
 
-        ; Action : Générer un rapport
+        ; Action: Generate report
         Case "CmdGenerateReport"
           Protected curName.s = This\*ProjectName\GetValue()
-          This\*StatusNotification\SetValue("📊 Rapport synthétique généré pour '" + curName + "'.")
+          This\*StatusNotification\SetValue("Summary report generated for '" + curName + "'.")
           ProcedureReturn #True
 
-        ; Actions : Navigation Sidebar
+        ; Actions: Sidebar Navigation
         Case "CmdNavDashboard"
           This\*ActiveNavTab\SetValue("Dashboard")
-          This\*StatusNotification\SetValue("Navigation : Vue Dashboard.")
+          This\*StatusNotification\SetValue("Navigation: Dashboard view.")
           ProcedureReturn #True
 
         Case "CmdNavProjects"
           This\*ActiveNavTab\SetValue("Projects")
-          This\*StatusNotification\SetValue("Navigation : Vue Projets.")
+          This\*StatusNotification\SetValue("Navigation: Projects view.")
           ProcedureReturn #True
 
         Case "CmdNavTasks"
           This\*ActiveNavTab\SetValue("Tasks")
-          This\*StatusNotification\SetValue("Navigation : Vue Tâches.")
+          This\*StatusNotification\SetValue("Navigation: Tasks view.")
           ProcedureReturn #True
 
         Case "CmdNavAnalytics"
           This\*ActiveNavTab\SetValue("Analytics")
-          This\*StatusNotification\SetValue("Navigation : Vue Statistiques & Analytics.")
+          This\*StatusNotification\SetValue("Navigation: Analytics view.")
           ProcedureReturn #True
 
         Case "CmdNavSettings"
           This\*ActiveNavTab\SetValue("Settings")
-          This\*StatusNotification\SetValue("Navigation : Vue Paramètres.")
+          This\*StatusNotification\SetValue("Navigation: Settings view.")
           ProcedureReturn #True
 
       EndSelect

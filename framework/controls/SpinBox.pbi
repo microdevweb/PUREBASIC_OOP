@@ -13,7 +13,7 @@ Namespace UI {
     Protected minVal.i
     Protected maxVal.i
 
-    ; Constructeur 0: Par defaut (0..100, 0,0, 100x25)
+    ; Constructor 0: Default (0..100, 0,0, 100x25)
     Public Method Init() {
       Super\Init()
       This\x = 0 : This\y = 0 : This\width = 100 : This\height = 25
@@ -28,7 +28,7 @@ Namespace UI {
       }
     }
 
-    ; Constructeur 1: Min et Max
+    ; Constructor 1: Min and Max
     Public Method Init(min_p.i, max_p.i) {
       Super\Init()
       This\x = 0 : This\y = 0 : This\width = 100 : This\height = 25
@@ -43,7 +43,7 @@ Namespace UI {
       }
     }
 
-    ; Constructeur 2: Min, Max et valeur initiale (100x25 par defaut)
+    ; Constructor 2: Min, Max and initial value (100x25 default)
     Public Method Init(min_p.i, max_p.i, current_p.i) {
       Super\Init()
       This\x = 0 : This\y = 0 : This\width = 100 : This\height = 25
@@ -58,7 +58,7 @@ Namespace UI {
       }
     }
 
-    ; Constructeur 3: Min, Max, valeur initiale et dimensions
+    ; Constructor 3: Min, Max, initial value and dimensions
     Public Method Init(min_p.i, max_p.i, current_p.i, w_p.i, h_p.i) {
       Super\Init()
       This\x = 0 : This\y = 0 : This\width = w_p : This\height = h_p

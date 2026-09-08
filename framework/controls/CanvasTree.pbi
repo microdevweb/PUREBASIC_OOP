@@ -54,7 +54,7 @@ Namespace UI {
     Protected checkSize.i
     Protected rowW.i
 
-    ; Constructeur 1: Par défaut
+    ; Constructor 1: Default
     Public Method Init() {
       This\text = ""
       This\icon = 0
@@ -67,7 +67,7 @@ Namespace UI {
       This\*parent = 0
     }
 
-    ; Constructeur 2: Texte seul
+    ; Constructor 2: Text only
     Public Method Init(text_p.s) {
       This\text = text_p
       This\icon = 0
@@ -80,7 +80,7 @@ Namespace UI {
       This\*parent = 0
     }
 
-    ; Constructeur 3: Texte et Icône
+    ; Constructor 3: Text and Icon
     Public Method Init(text_p.s, icon_p.i) {
       This\text = text_p
       This\icon = icon_p
@@ -93,7 +93,7 @@ Namespace UI {
       This\*parent = 0
     }
 
-    ; Constructeur 4: Texte, Icône et Tag
+    ; Constructor 4: Text, Icon and Tag
     Public Method Init(text_p.s, icon_p.i, tag_p.s) {
       This\text = text_p
       This\icon = icon_p
@@ -180,7 +180,7 @@ Namespace UI {
       This\*parent = *parent_p
     }
 
-    ; --- Gestion des enfants ---
+    ; --- Child elements management ---
 
     Public Method AddChild(*child_p.UI::TreeNode) {
       If (*child_p) {
@@ -213,7 +213,7 @@ Namespace UI {
       ProcedureReturn 0
     }
 
-    ; --- Boutons d'action par nœud ---
+    ; --- Per-node action buttons ---
 
     Public Method AddButton(id_p.i, icon_p.i, *callback_p, tooltip_p.s, tag_p.s) {
       AddElement(This\buttons())
@@ -307,7 +307,7 @@ Namespace UI {
       ProcedureReturn -1
     }
 
-    ; --- Dépliage / Repliage récursif ---
+    ; --- Recursive expand / collapse ---
 
     Public Method ExpandAll() {
       This\isExpanded = #True
@@ -329,7 +329,7 @@ Namespace UI {
       }
     }
 
-    ; --- Libération récursive de la mémoire ---
+    ; --- Recursive memory teardown ---
     Public Method Free() {
       ForEach This\children() {
         Protected *c.UI::TreeNode = This\children()
@@ -385,7 +385,7 @@ Namespace UI {
     ; Flat list of visible nodes for fast virtual rendering & keyboard nav
     Protected List *visibleNodes.UI::TreeNode()
 
-    ; --- Helper constructeur interne ---
+    ; --- Internal constructor helper ---
     Protected Method InitDefaults() {
       This\*rootNode = New UI::TreeNode("ROOT")
       This\*selectedNode = 0
@@ -405,7 +405,7 @@ Namespace UI {
       This\*onCheckCallback = 0
       This\*onButtonClickCallback = 0
 
-      ; Thème moderne clair par défaut
+      ; Default modern light theme
       This\bgColor = RGB(255, 255, 255)
       This\fgColor = RGB(33, 37, 41)
       This\lineColor = RGB(225, 228, 232)
@@ -419,35 +419,35 @@ Namespace UI {
       This\scrollbarThumbColor = RGB(190, 192, 196)
     }
 
-    ; Constructeur 1: Dimensions par défaut (250x300)
+    ; Constructor 1: Default dimensions (250x300)
     Public Method Init() {
       Super\Init(250, 300)
       This\InitDefaults()
       This\Redraw()
     }
 
-    ; Constructeur 2: Dimensions personnalisées
+    ; Constructor 2: Custom dimensions
     Public Method Init(w_p.i, h_p.i) {
       Super\Init(w_p, h_p)
       This\InitDefaults()
       This\Redraw()
     }
 
-    ; Constructeur 3: Position et dimensions
+    ; Constructor 3: Position and dimensions
     Public Method Init(x_p.i, y_p.i, w_p.i, h_p.i) {
       Super\Init(x_p, y_p, w_p, h_p)
       This\InitDefaults()
       This\Redraw()
     }
 
-    ; Constructeur 4: Position, dimensions et flags
+    ; Constructor 4: Position, dimensions and flags
     Public Method Init(x_p.i, y_p.i, w_p.i, h_p.i, flags_p.i) {
       Super\Init(x_p, y_p, w_p, h_p, flags_p)
       This\InitDefaults()
       This\Redraw()
     }
 
-    ; --- Configuration & Propriétés ---
+    ; --- Configuration & Proprietes ---
 
     Public Method.i GetRoot() {
       ProcedureReturn This\*rootNode
@@ -605,7 +605,7 @@ Namespace UI {
       }
     }
 
-    ; --- Construction de la liste virtuelle à plat ---
+    ; --- Build flat virtual list ---
 
     Protected Method PopulateFlatList(*parent_p.UI::TreeNode) {
       If Not *parent_p : ProcedureReturn : EndIf
@@ -706,14 +706,14 @@ Namespace UI {
         availableRowW = w - scaledBarW - 2
       }
 
-      ; 2. Parcours et dessin des nœuds visibles
+      ; 2. Render visible nodes
       ForEach This\visibleNodes() {
         Protected *node.UI::TreeNode = This\visibleNodes()
         If Not *node : Continue : EndIf
 
-        ; Vérifier visibilité dans la zone de découpe verticale
+        ; Check visibility in vertical viewport
         If (currentY + scaledLineH >= 0 And currentY <= h) {
-          ; Calcul du niveau hiérarchique
+          ; Calculate hierarchy level
           Protected level.i = 0
           Protected *parentCheck.UI::TreeNode = *node\GetParent()
           While (*parentCheck And *parentCheck <> This\*rootNode)
@@ -721,7 +721,7 @@ Namespace UI {
             *parentCheck = *parentCheck\GetParent()
           Wend
 
-          ; Fond du nœud (Sélectionné ou Survolé)
+          ; Node background (Selected or Hovered)
           Protected rowBg.i = This\bgColor
           Protected rowFg.i = This\fgColor
           If (*node\IsSelected()) {
@@ -736,14 +736,14 @@ Namespace UI {
           Protected cursorX.i = scaledMargin + (level * scaledIndent)
           Protected midY.i = currentY + (scaledLineH / 2)
 
-          ; 2.1 Lignes de liaison hiérarchique (si activées)
+          ; 2.1 Lignes de liaison hierarchique (si activees)
           If (This\showLines And level > 0) {
             Protected lineStartX.i = cursorX - (scaledIndent / 2)
             LineXY(lineStartX, currentY, lineStartX, midY, This\lineColor)
             LineXY(lineStartX, midY, cursorX, midY, This\lineColor)
           }
 
-          ; 2.2 Chevron d'expansion vectoriel (si enfants présents)
+          ; 2.2 Chevron d'expansion vectoriel (si enfants presents)
           Protected expX.i = 0, expY.i = 0, expSize.i = 0
           If (*node\GetChildCount() > 0) {
             expX = cursorX
@@ -760,31 +760,31 @@ Namespace UI {
             Protected chCenterY.i = midY
 
             If (*node\IsExpanded()) {
-              ; Chevron vers le bas (v)
+              ; Down chevron (v)
               LineXY(chCenterX - chRadius, chCenterY - (chRadius / 2), chCenterX, chCenterY + (chRadius / 2), chevCol)
               LineXY(chCenterX, chCenterY + (chRadius / 2), chCenterX + chRadius, chCenterY - (chRadius / 2), chevCol)
-              ; Épaisseur vectorielle
+              ; Epaisseur vectorielle
               LineXY(chCenterX - chRadius, chCenterY - (chRadius / 2) + 1, chCenterX, chCenterY + (chRadius / 2) + 1, chevCol)
               LineXY(chCenterX, chCenterY + (chRadius / 2) + 1, chCenterX + chRadius, chCenterY - (chRadius / 2) + 1, chevCol)
             } Else {
-              ; Chevron vers la droite (>)
+              ; Right chevron (>)
               LineXY(chCenterX - (chRadius / 2), chCenterY - chRadius, chCenterX + (chRadius / 2), chCenterY, chevCol)
               LineXY(chCenterX + (chRadius / 2), chCenterY, chCenterX - (chRadius / 2), chCenterY + chRadius, chevCol)
-              ; Épaisseur vectorielle
+              ; Epaisseur vectorielle
               LineXY(chCenterX - (chRadius / 2) + 1, chCenterY - chRadius, chCenterX + (chRadius / 2) + 1, chCenterY, chevCol)
               LineXY(chCenterX + (chRadius / 2) + 1, chCenterY, chCenterX - (chRadius / 2) + 1, chCenterY + chRadius, chevCol)
             }
           }
           cursorX + scaledChevron + DesktopScaledX(4)
 
-          ; 2.3 Case à cocher (si globale ou spécifique au nœud)
+          ; 2.3 Case a cocher (si globale ou specifique au noeud)
           Protected chkX.i = 0, chkY.i = 0, chkSize.i = 0
           If (This\showCheckBoxes Or *node\HasCheckBox()) {
             chkX = cursorX
             chkY = midY - (scaledCheck / 2)
             chkSize = scaledCheck
 
-            ; Boîte de la case
+            ; Checkbox box
             RoundBox(cursorX, chkY, scaledCheck, scaledCheck, 3, 3, This\lineColor)
             RoundBox(cursorX + 1, chkY + 1, scaledCheck - 2, scaledCheck - 2, 2, 2, This\checkBgColor)
 
@@ -802,7 +802,7 @@ Namespace UI {
             cursorX + scaledCheck + DesktopScaledX(6)
           }
 
-          ; 2.4 Icône du nœud (si définie)
+          ; 2.4 Node icon (if defined)
           If (*node\GetIcon() > 0 And IsImage(*node\GetIcon())) {
             Protected iconY.i = midY - (scaledIcon / 2)
             DrawingMode(#PB_2DDrawing_AlphaBlend)
@@ -811,13 +811,13 @@ Namespace UI {
             cursorX + scaledIcon + DesktopScaledX(6)
           }
 
-          ; 2.5 Texte du nœud
+          ; 2.5 Node text
           Protected txtY.i = currentY + (scaledLineH - TextHeight(*node\GetText())) / 2
           DrawingMode(#PB_2DDrawing_Transparent)
           DrawText(cursorX, txtY, *node\GetText(), rowFg)
           DrawingMode(#PB_2DDrawing_Default)
 
-          ; 2.6 Boutons d'actions alignés à droite de la ligne
+          ; 2.6 Action buttons aligned to right of line
           Protected btnCount.i = *node\GetButtonCount()
           If (btnCount > 0) {
             Protected btnX.i = availableRowW - DesktopScaledX(6) - (btnCount * (scaledBtn + DesktopScaledX(4)))
@@ -839,20 +839,20 @@ Namespace UI {
                 DrawImage(ImageID(bIco), btnX, btnY, scaledBtn, scaledBtn)
                 DrawingMode(#PB_2DDrawing_Default)
               } Else {
-                ; Bouton vectoriel par défaut (petit cercle avec point)
+                ; Default vector button (circle with dot)
                 Circle(btnX + scaledBtn / 2, midY, scaledBtn / 2 - 1, This\chevronColor)
               }
               btnX + scaledBtn + DesktopScaledX(4)
             Next
           }
 
-          ; Stocker les coordonnées de rendu sur le nœud pour le hit-testing
+          ; Store render coordinates on node for hit-testing
           *node\SetRenderLayout(currentY, scaledLineH, availableRowW, level, expX, expY, expSize, chkX, chkY, chkSize)
         }
         currentY + scaledLineH
       }
 
-      ; 3. Barre de défilement verticale virtuelle
+      ; 3. Barre de defilement verticale virtuelle
       If (This\totalContentHeight > h) {
         Protected barX.i = w - scaledBarW
         Box(barX, 0, scaledBarW, h, This\scrollbarBgColor)
@@ -875,13 +875,13 @@ Namespace UI {
       }
     }
 
-    ; --- Gestion des Événements Souris & Molette ---
+    ; --- Mouse & Wheel Events Handling ---
 
     Public Method OnMouseDown(mx.i, my.i, button.i) {
       Protected scaledBarW.i = DesktopScaledX(8)
       Protected barX.i = This\width - scaledBarW
 
-      ; Clic sur la barre de défilement
+      ; Click on scrollbar
       If (This\totalContentHeight > This\height And mx >= barX) {
         This\isDraggingThumb = #True
         This\dragStartY = my
@@ -890,7 +890,7 @@ Namespace UI {
         ProcedureReturn
       }
 
-      ; Détermination du nœud cliqué
+      ; Determine clicked node
       Protected scaledLineH.i = DesktopScaledY(This\lineHeight)
       Protected clickedRow.i = (my + This\scrollY) / scaledLineH
 
@@ -899,7 +899,7 @@ Namespace UI {
         Protected *node.UI::TreeNode = This\visibleNodes()
 
         If (*node) {
-          ; 1. Clic sur le chevron d'expansion ?
+          ; 1. Click on expand chevron?
           If (*node\HitTestExpand(mx, my)) {
             *node\SetExpanded(1 - *node\IsExpanded())
             If (This\*onExpandCallback) {
@@ -910,7 +910,7 @@ Namespace UI {
             ProcedureReturn
           }
 
-          ; 2. Clic sur la case à cocher ?
+          ; 2. Click on checkbox?
           If (*node\HitTestCheck(mx, my)) {
             *node\SetChecked(1 - *node\IsChecked())
             If (This\*onCheckCallback) {
@@ -920,7 +920,7 @@ Namespace UI {
             ProcedureReturn
           }
 
-          ; 3. Clic sur un bouton d'action ?
+          ; 3. Click on action button?
           Protected hitBtnId.i = *node\HitTestButton(mx, my)
           If (hitBtnId >= 0) {
             Protected bIdx.i, count.i = *node\GetButtonCount()
@@ -939,7 +939,7 @@ Namespace UI {
             ProcedureReturn
           }
 
-          ; 4. Clic sur le nœud (Sélection)
+          ; 4. Click on node (Selection)
           This\SetSelectedNode(*node)
           If (This\*onSelectCallback) {
             CallFunctionFast(This\*onSelectCallback, *node)
@@ -957,7 +957,7 @@ Namespace UI {
     }
 
     Public Method OnMouseMove(mx.i, my.i) {
-      ; Déplacement de la molette / barre de défilement
+      ; Mouse wheel / scrollbar movement
       If (This\isDraggingThumb) {
         Protected deltaY.i = my - This\dragStartY
         Protected thumbH.i = (This\height * This\height) / This\totalContentHeight
@@ -973,7 +973,7 @@ Namespace UI {
         ProcedureReturn
       }
 
-      ; Détection du survol
+      ; Hover detection
       Protected scaledLineH.i = DesktopScaledY(This\lineHeight)
       Protected rowIdx.i = (my + This\scrollY) / scaledLineH
 
@@ -986,7 +986,7 @@ Namespace UI {
         Protected *node.UI::TreeNode = This\visibleNodes()
         If (*node) {
           This\*hoveredNode = *node
-          This\hoveredElementType = 4 ; Row par défaut
+          This\hoveredElementType = 4 ; Default row
 
           ; Chevron
           If (*node\HitTestExpand(mx, my)) {

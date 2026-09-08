@@ -25,7 +25,7 @@ Namespace UI {
     Protected showEllipsis.b
     Protected isTransparent.b
 
-    ; Constructeur 1: Par défaut (100x24, "")
+    ; Constructor 1: Default (100x24, "")
     Public Method Init() {
       Super\Init(100, 24)
       This\text = ""
@@ -44,7 +44,7 @@ Namespace UI {
       This\Redraw()
     }
 
-    ; Constructeur 2: Texte seul (100x24)
+    ; Constructor 2: Text only (100x24)
     Public Method Init(text_p.s) {
       Super\Init(100, 24)
       This\text = text_p
@@ -63,7 +63,7 @@ Namespace UI {
       This\Redraw()
     }
 
-    ; Constructeur 3: Texte et dimensions
+    ; Constructor 3: Text and dimensions
     Public Method Init(text_p.s, w_p.i, h_p.i) {
       Super\Init(w_p, h_p)
       This\text = text_p
@@ -82,7 +82,7 @@ Namespace UI {
       This\Redraw()
     }
 
-    ; Constructeur 4: Position, dimensions et texte
+    ; Constructor 4: Position, dimensions and text
     Public Method Init(x_p.i, y_p.i, w_p.i, h_p.i, text_p.s) {
       Super\Init(x_p, y_p, w_p, h_p)
       This\text = text_p
@@ -101,7 +101,7 @@ Namespace UI {
       This\Redraw()
     }
 
-    ; --- Alignement & Propriétés de Texte ---
+    ; --- Alignment & Text Properties ---
 
     Public Method SetAlignment(horizontal_p.i, vertical_p.i = #UI_TextAlign_Middle) {
       This\hAlign = horizontal_p
@@ -117,7 +117,7 @@ Namespace UI {
       ProcedureReturn This\vAlign
     }
 
-    ; Mesure précise et dynamique de la largeur du texte vectoriel
+    ; Precise dynamic measurement of vector text width
     Public Method.i GetDesiredWidth() {
       If This\hasExplicitWidth And This\width > 0
         ProcedureReturn This\width
@@ -168,7 +168,7 @@ Namespace UI {
       ProcedureReturn This\isTransparent
     }
 
-    ; --- Troncature intelligente avec Ellipsis (...) ---
+    ; --- Smart Ellipsis Truncation (...) ---
     Protected Method.s FormatDisplayText(availWidth_p.i) {
       If availWidth_p <= 0 : ProcedureReturn "" : EndIf
       If TextWidth(This\text) <= availWidth_p
@@ -204,7 +204,7 @@ Namespace UI {
       If (Not This\isTransparent) Or This\borderThickness > 0
         This\DrawControlBackground(w_p, h_p)
       Else
-        ; Effacement avec la couleur du conteneur parent
+        ; Clear with parent container color
         Box(0, 0, w_p, h_p, This\parentBackground)
       EndIf
 

@@ -36,7 +36,7 @@ Namespace UI {
     Public Method AddStyle(*style.UI::Style) {
       If Not *style : ProcedureReturn : EndIf
 
-      ; Résolution de l'héritage éventuel (BasedOn)
+      ; Resolve potential inheritance (BasedOn)
       Protected basedOnKey.s = *style\GetBasedOn()
       If basedOnKey <> ""
         Protected *base.UI::Style = This\GetStyle(basedOnKey)
@@ -49,14 +49,14 @@ Namespace UI {
       If keyStr <> ""
         This\styles(UCase(keyStr)) = *style
       ElseIf *style\GetTargetType() <> ""
-        ; Style implicite lié au nom du composant (ex: TargetType="CanvasButton")
+        ; Implicit style linked to component name (e.g. TargetType="CanvasButton")
         This\implicitStyles(UCase(*style\GetTargetType())) = *style
       EndIf
     }
 
     Public Method.i GetStyle(key_p.s) {
       Protected normKey.s = UCase(Trim(key_p))
-      ; Support des syntaxes XAML "{StaticResource PrimaryButton}" ou "PrimaryButton"
+      ; Support XAML syntaxes "{StaticResource PrimaryButton}" or "PrimaryButton"
       If Left(normKey, 16) = "{STATICRESOURCE "
         normKey = Trim(Mid(normKey, 17))
         If Right(normKey, 1) = "}" : normKey = Left(normKey, Len(normKey) - 1) : EndIf

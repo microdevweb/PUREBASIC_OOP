@@ -1,6 +1,6 @@
 ; ============================================================================
-; Project Dashboard (WPF Modern UI) - Modèle Métier
-; Fichier : models/ProjectModel.pbi
+; Project Dashboard (WPF Modern UI) - Business Model
+; File: models/ProjectModel.pbi
 ; ============================================================================
 
 Namespace Dashboard {

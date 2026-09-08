@@ -1,27 +1,27 @@
 ; ============================================================================
-; Project Dashboard (WPF Modern UI) - Point d'Entrée Principal
-; Fichier : main.pb
+; Project Dashboard (WPF Modern UI) - Main Entry Point
+; File: main.pb
 ; ============================================================================
 
 EnableExplicit
 
-; 1. Inclusion de la Vue Principale (Le Framework UI & MVVM est auto-inclus par le transpileur !)
+; 1. Include Main View (UI & MVVM framework is auto-included by transpiler)
 XIncludeFile "views/ProjectDashboardView.pbi"
 
-; 2. Instanciation de l'Application PureBasic OOP
+; 2. Instantiate PureBasic OOP Application
 Define *app.UI::Application = New UI::Application("Project Dashboard - [WPF_ModernUI_App]")
 
-; 3. Instanciation du ViewModel (état réactif et logique métier)
+; 3. Instantiate ViewModel (Reactive state and business logic)
 Define *vm.Dashboard::ProjectDashboardViewModel = New Dashboard::ProjectDashboardViewModel()
 
-; 4. Instanciation de la Vue (Injection du ViewModel en DataContext)
+; 4. Instantiate View (Inject ViewModel into DataContext)
 Define *view.Dashboard::ProjectDashboardView = New Dashboard::ProjectDashboardView(*vm)
 
-; 5. Définition de la fenêtre principale et lancement de la boucle d'événements
+; 5. Set main window and run event loop
 *app\SetMainWindow(*view)
 *app\Run()
 
-; 6. Libération propre
+; 6. Clean teardown
 *view\Free()
 *vm\Free()
 *app\Free()

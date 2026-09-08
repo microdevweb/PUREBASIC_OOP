@@ -13,7 +13,7 @@ Namespace UI {
     Protected minVal.i
     Protected maxVal.i
 
-    ; Constructeur 1: Par défaut 0..100 (Positionné par Layout 0,0, 200x25)
+    ; Constructor 1: Default 0..100 (Positioned by Layout 0,0, 200x25)
     Public Method Init() {
       Super\Init()
       This\x = 0 : This\y = 0 : This\width = 200 : This\height = 25
@@ -26,7 +26,7 @@ Namespace UI {
       }
     }
 
-    ; Constructeur 2: Min et Max spécifiés
+    ; Constructor 2: Specified Min and Max
     Public Method Init(min_p.i, max_p.i) {
       Super\Init()
       This\x = 0 : This\y = 0 : This\width = 200 : This\height = 25
@@ -39,7 +39,7 @@ Namespace UI {
       }
     }
 
-    ; Constructeur 3: Min, Max et dimensions
+    ; Constructor 3: Min, Max and dimensions
     Public Method Init(min_p.i, max_p.i, w_p.i, h_p.i) {
       Super\Init()
       This\x = 0 : This\y = 0 : This\width = w_p : This\height = h_p
@@ -52,7 +52,7 @@ Namespace UI {
       }
     }
 
-    ; Constructeur 4: Complet avec position et flags
+    ; Constructor 4: Full with position and flags
     Public Method Init(x_p.i, y_p.i, w_p.i, h_p.i, min_p.i, max_p.i, flags_p.i) {
       Super\Init()
       This\x = x_p : This\y = y_p : This\width = w_p : This\height = h_p
