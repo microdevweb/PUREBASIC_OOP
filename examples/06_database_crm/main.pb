@@ -1,276 +1,457 @@
 ; =============================================================================
-; 06_database_crm - Complete CRM Demo with ORM Engine
-; PureBasic OOP Framework - Alpha 1.4
+; 06_database_crm / main.pb
+; PureBasic OOP Framework - Alpha 1.4 - Exemple ORM Complet
 ; =============================================================================
-; Demonstrates:
-;   - ORM::ConfigureSQLite() and AutoMigrate()
-;   - Class Client with List Contacts.Contact() (1-N relation)
-;   - Async save and load (non-blocking UI)
-;   - Explicit record locking (Lock/Unlock)
-;   - RestrictDelete: cannot delete a client that has contacts
-;   - CascadeSave: saving client saves all its contacts in one transaction
-;
-; Run this example directly from the PureBasic OOP IDE.
-; A file "crm_demo.db" will be created in the same directory.
+; Démontre l'utilisation du moteur ORM Phase 2:
+;   - Définition d'entités (Client, Contact)
+;   - Sérialisation / Désérialisation
+;   - AutoMigrate (création automatique des tables)
+;   - SaveAsync (INSERT/UPDATE + cascade children)
+;   - QueryAsync (liste non-bloquante)
+;   - FindByIdAsync (chargement non-bloquant)
+;   - DeleteAsync (avec contrôle FK configurable)
+;   - LockManager (verrous distribués)
+;   - Retour thread -> UI via PostEvent
 ; =============================================================================
 
-; Include the ORM engine (single include, everything is inside)
+; --- Charger tout le framework ---
 XIncludeFile "../../framework/database/ORM.pbi"
 
 ; =============================================================================
-; Entity: Contact (child of Client)
+; DÉCLARATION DES CONSTANTES DB
 ; =============================================================================
-Class Contact Extends ORM::Entity {
-  Public id.i           ; PK - managed by ORM
-  Public clientId.i     ; FK -> clients.id  (managed by ORM)
-  Public firstName.s
-  Public lastName.s
-  Public email.s
-  Public phone.s
-}
+; Sur SQLite : chemin du fichier
+; Sur MySQL   : nom de la base / hôte / port / user / password (futur)
+#DB_PATH      = "crm.db"    ; fichier SQLite créé dans le dossier courant
+#DB_FILE_PATH = #DB_PATH    ; alias pour ORM_AsyncWorker
 
-; Registration procedure called by ORM::Register()
-; Fills the field list so AutoMigrate knows what columns to create.
-Procedure Contact_Register()
-  Protected entityName.s = "Contact"
-  Protected tableName.s  = "contacts"
+; =============================================================================
+; ENTITÉS
+; =============================================================================
 
-  NewList fields.ORM_FieldDef()
-  NewList relations.ORM_Schema::ORM_RelationDef()
+; --- Client ---
+Structure Client Extends ORM::ORM_EntityBase
+  companyName.s
+  email.s
+  phone.s
+  city.s
+  isActive.i
+EndStructure
 
-  ; Define columns (the id column is always implicit - added by BuildCreateTable)
-  AddElement(fields()) : fields()\name = "clientId"   : fields()\typeCode = #ORM_Type_FK      : fields()\isFK = #True : fields()\fkTable = "clients"
-  AddElement(fields()) : fields()\name = "firstName"  : fields()\typeCode = #ORM_Type_String
-  AddElement(fields()) : fields()\name = "lastName"   : fields()\typeCode = #ORM_Type_String
-  AddElement(fields()) : fields()\name = "email"      : fields()\typeCode = #ORM_Type_String
-  AddElement(fields()) : fields()\name = "phone"      : fields()\typeCode = #ORM_Type_String
+; --- Contact (lié à un Client via clientId) ---
+Structure Contact Extends ORM::ORM_EntityBase
+  clientId.i
+  firstName.s
+  lastName.s
+  email.s
+  isPrimary.i
+EndStructure
 
-  ORM_Schema::RegisterEntity(entityName, tableName, fields(), relations())
+; =============================================================================
+; SÉRIALISATION (entity -> map de strings pour SQL)
+; =============================================================================
+
+Procedure Client_Serialize(*entity.Client, Map values.s())
+  values("companyName") = *entity\companyName
+  values("email")       = *entity\email
+  values("phone")       = *entity\phone
+  values("city")        = *entity\city
+  values("isActive")    = Str(*entity\isActive)
+EndProcedure
+
+Procedure Client_Deserialize(*entity.Client, Map values.s())
+  *entity\companyName = values("companyName")
+  *entity\email       = values("email")
+  *entity\phone       = values("phone")
+  *entity\city        = values("city")
+  *entity\isActive    = Val(values("isActive"))
+EndProcedure
+
+Procedure.i Client_New()
+  Protected *c.Client = AllocateStructure(Client)
+  *c\orm_isNew   = #True
+  *c\orm_isDirty = #False
+  ProcedureReturn *c
+EndProcedure
+
+Procedure Contact_Serialize(*entity.Contact, Map values.s())
+  values("clientId")  = Str(*entity\clientId)
+  values("firstName") = *entity\firstName
+  values("lastName")  = *entity\lastName
+  values("email")     = *entity\email
+  values("isPrimary") = Str(*entity\isPrimary)
+EndProcedure
+
+Procedure Contact_Deserialize(*entity.Contact, Map values.s())
+  *entity\clientId  = Val(values("clientId"))
+  *entity\firstName = values("firstName")
+  *entity\lastName  = values("lastName")
+  *entity\email     = values("email")
+  *entity\isPrimary = Val(values("isPrimary"))
+EndProcedure
+
+Procedure.i Contact_New()
+  Protected *c.Contact = AllocateStructure(Contact)
+  *c\orm_isNew   = #True
+  *c\orm_isDirty = #False
+  ProcedureReturn *c
 EndProcedure
 
 ; =============================================================================
-; Entity: Client (parent, owns a list of Contacts)
+; PROCÉDURE CASCADE : sauvegarde des contacts d'un client
 ; =============================================================================
-Class Client Extends ORM::Entity {
-  Public id.i           ; PK - managed by ORM
-  Public companyName.s
-  Public vatNumber.s
-  Public address.s
-  Public creditLimit.d
-  Public isActive.b
+; Cette procédure est enregistrée comme saveChildrenProc dans la relation.
+; Elle est appelée automatiquement par ORM_Relations::SaveWithChildren
+; après que le client parent a été sauvegardé.
+;
+; La liste de contacts à sauvegarder est stockée dans une variable globale
+; orm_pendingContacts() qui est remplie avant l'appel async.
+; Pour une application réelle, une Map<clientId, List<Contact>> est préférable.
 
-  ; 1-N relation: cascade save + restrict delete (defaults)
-  Public List Contacts.Contact()
-}
+Global NewList orm_pendingContacts.i()   ; liste de pointeurs *Contact
 
-; Registration procedure for Client
-Procedure Client_Register()
-  Protected entityName.s = "Client"
-  Protected tableName.s  = "clients"
-
-  NewList fields.ORM_FieldDef()
-  NewList relations.ORM_Schema::ORM_RelationDef()
-
-  ; Define columns
-  AddElement(fields()) : fields()\name = "companyName"  : fields()\typeCode = #ORM_Type_String
-  AddElement(fields()) : fields()\name = "vatNumber"    : fields()\typeCode = #ORM_Type_String
-  AddElement(fields()) : fields()\name = "address"      : fields()\typeCode = #ORM_Type_String
-  AddElement(fields()) : fields()\name = "creditLimit"  : fields()\typeCode = #ORM_Type_Double
-  AddElement(fields()) : fields()\name = "isActive"     : fields()\typeCode = #ORM_Type_Bool
-
-  ; Define 1-N relation to contacts
-  AddElement(relations())
-  relations()\childTable   = "contacts"
-  relations()\fkColumn     = "clientId"
-  relations()\cascadeSave  = #True                              ; Save client -> save contacts
-  relations()\deletePolicy = #ORM_Restrict_Delete               ; Block delete if contacts exist
-
-  ORM_Schema::RegisterEntity(entityName, tableName, fields(), relations())
+Procedure SaveClientContacts(*parent, db.i)
+  Protected *c.Contact
+  Protected parentId.i = 0
+  ; Cast le parent pour récupérer l'id (écrit par INSERT avant cet appel)
+  Protected *base.ORM_CRUD::ORM_EntityBase = *parent
+  parentId = *base\id
+  Debug "SaveClientContacts: saving contacts for clientId=" + Str(parentId)
+  ForEach orm_pendingContacts()
+    *c = orm_pendingContacts()
+    If *c
+      ; SaveOne force le clientId = parentId et choisit INSERT ou UPDATE
+      ORM_CRUD::SaveOne(db, "Contact", *c, parentId, "clientId", @Contact_Serialize())
+    EndIf
+  Next
 EndProcedure
 
 ; =============================================================================
-; UI Constants
-; =============================================================================
-#Window_Main    = 0
-#Gadget_List    = 0
-#Gadget_Name    = 1
-#Gadget_Add     = 2
-#Gadget_Save    = 3
-#Gadget_Delete  = 4
-#Gadget_Lock    = 5
-#Gadget_Unlock  = 6
-#Gadget_Status  = 7
-#Gadget_Contacts = 8
-
-; =============================================================================
-; Async Callback Procedures
-; These run on the UI thread (called via PostEvent dispatch from worker)
+; ENREGISTREMENT DES ENTITÉS (fait une seule fois au démarrage)
 ; =============================================================================
 
-Procedure OnClientSaved(*client.Client, result.i)
+Procedure RegisterEntities()
+  ; --- Champs Client ---
+  NewList clientFields.ORM_Schema::ORM_FieldDef()
+  With clientFields()
+    AddElement(clientFields()) : \name = "id"          : \typeCode = #ORM_Entity::#ORM_Type_Integer
+    AddElement(clientFields()) : \name = "companyName" : \typeCode = #ORM_Entity::#ORM_Type_String
+    AddElement(clientFields()) : \name = "email"       : \typeCode = #ORM_Entity::#ORM_Type_String
+    AddElement(clientFields()) : \name = "phone"       : \typeCode = #ORM_Entity::#ORM_Type_String
+    AddElement(clientFields()) : \name = "city"        : \typeCode = #ORM_Entity::#ORM_Type_String
+    AddElement(clientFields()) : \name = "isActive"    : \typeCode = #ORM_Entity::#ORM_Type_Bool
+  EndWith
+
+  ; --- Relation Client -> Contacts ---
+  NewList clientRelations.ORM_Schema::ORM_RelationDef()
+  AddElement(clientRelations())
+  clientRelations()\childTable       = "contacts"
+  clientRelations()\fkColumn         = "clientId"
+  clientRelations()\cascadeSave      = #True
+  clientRelations()\deletePolicy     = #ORM_Entity::#ORM_Restrict_Delete  ; défaut : bloquer si contacts existent
+  clientRelations()\saveChildrenProc = @SaveClientContacts()
+
+  ORM_Schema::RegisterEntity("Client", "clients",
+                              clientFields(), clientRelations(),
+                              @Client_Serialize(), @Client_Deserialize(), @Client_New())
+
+  ; --- Champs Contact ---
+  NewList contactFields.ORM_Schema::ORM_FieldDef()
+  With contactFields()
+    AddElement(contactFields()) : \name = "id"        : \typeCode = #ORM_Entity::#ORM_Type_Integer
+    AddElement(contactFields()) : \name = "clientId"  : \typeCode = #ORM_Entity::#ORM_Type_Integer : \isFK = #True : \fkTable = "clients"
+    AddElement(contactFields()) : \name = "firstName" : \typeCode = #ORM_Entity::#ORM_Type_String
+    AddElement(contactFields()) : \name = "lastName"  : \typeCode = #ORM_Entity::#ORM_Type_String
+    AddElement(contactFields()) : \name = "email"     : \typeCode = #ORM_Entity::#ORM_Type_String
+    AddElement(contactFields()) : \name = "isPrimary" : \typeCode = #ORM_Entity::#ORM_Type_Bool
+  EndWith
+
+  ; Contact n'a pas de sous-enfants
+  NewList contactRelations.ORM_Schema::ORM_RelationDef()
+
+  ORM_Schema::RegisterEntity("Contact", "contacts",
+                              contactFields(), contactRelations(),
+                              @Contact_Serialize(), @Contact_Deserialize(), @Contact_New())
+
+EndProcedure
+
+; =============================================================================
+; CALLBACKS UI (appelés depuis le thread principal via PostEvent)
+; =============================================================================
+
+Global *g_currentClient.Client   ; client actuellement affiché
+Global orm_mainDb.i              ; connexion principale (migration)
+Global MainWindow.i
+Global QueryList.i, StatusText.i, SaveBtn.i, LoadBtn.i, QueryBtn.i, DeleteBtn.i, LockBtn.i
+
+#WinWidth  = 820
+#WinHeight = 540
+
+Procedure OnClientSaved(*entity, result.i)
+  Protected msg.s
   If result = #ORM_Entity::#ORM_Success
-    SetGadgetText(#Gadget_Status, "Client saved successfully. ID=" + Str(*client\id))
-  ElseIf result = #ORM_Entity::#ORM_Error_HasChildren
-    SetGadgetText(#Gadget_Status, "ERROR: Cannot delete - client has linked contacts!")
+    Protected *c.Client = *entity
+    msg = "✓ Client sauvegardé: id=" + Str(*c\id) + " (" + *c\companyName + ")"
+    SetGadgetText(StatusText, msg)
   Else
-    SetGadgetText(#Gadget_Status, "ERROR: Save failed (code " + Str(result) + ")")
+    SetGadgetText(StatusText, "✗ ERREUR sauvegarde (code=" + Str(result) + ")")
   EndIf
 EndProcedure
 
-Procedure OnListLoaded(*resultList, result.i)
-  SetGadgetText(#Gadget_Status, "List loaded asynchronously (non-blocking).")
-  ; In a real app: iterate the returned list and populate the ListGadget
+Procedure OnClientLoaded(*entity, result.i)
+  If result = #ORM_Entity::#ORM_Success
+    Protected *c.Client = *entity
+    SetGadgetText(StatusText, "✓ Client chargé: " + *c\companyName + " <" + *c\email + ">")
+  Else
+    SetGadgetText(StatusText, "✗ Client introuvable ou erreur DB.")
+  EndIf
+EndProcedure
+
+Procedure OnQueryDone(result.i)
+  If result <> #ORM_Entity::#ORM_Success
+    SetGadgetText(StatusText, "✗ Erreur requête (code=" + Str(result) + ")")
+    ProcedureReturn
+  EndIf
+
+  ; Lire la liste résultat sous mutex (thread-safe)
+  LockMutex(ORM_AsyncWorker::orm_queryResultMutex)
+    ClearGadgetItems(QueryList)
+    Protected cnt.i = 0
+    ForEach ORM_AsyncWorker::orm_queryResultList()
+      Protected *c.Client = ORM_AsyncWorker::orm_queryResultList()
+      If *c
+        AddGadgetItem(QueryList, -1, Str(*c\id) + Chr(10) + *c\companyName + Chr(10) + *c\email + Chr(10) + *c\city)
+        ; Libérer la mémoire (le worker a alloué via Client_New)
+        FreeStructure(*c)
+      EndIf
+      cnt + 1
+    Next
+    ClearList(ORM_AsyncWorker::orm_queryResultList())
+  UnlockMutex(ORM_AsyncWorker::orm_queryResultMutex)
+  SetGadgetText(StatusText, "✓ Requête: " + Str(cnt) + " client(s) actifs chargés")
+EndProcedure
+
+Procedure OnClientDeleted(*entity, result.i)
+  Select result
+    Case #ORM_Entity::#ORM_Success
+      SetGadgetText(StatusText, "✓ Client supprimé avec succès")
+    Case #ORM_Entity::#ORM_Error_HasChildren
+      SetGadgetText(StatusText, "✗ Suppression bloquée: ce client a encore des contacts")
+    Default
+      SetGadgetText(StatusText, "✗ Erreur suppression (code=" + Str(result) + ")")
+  EndSelect
 EndProcedure
 
 ; =============================================================================
-; Main Application
+; CONSTRUCTION DE L'INTERFACE
 ; =============================================================================
 
-; --- Step 1: Initialize ORM with SQLite ---
-Protected dbPath.s = GetPathPart(ProgramFilename()) + "crm_demo.db"
-ORM::ConfigureSQLite(dbPath)
+Procedure BuildUI()
+  MainWindow = OpenWindow(#PB_Any, 0, 0, #WinWidth, #WinHeight,
+                          "CRM Demo - ORM Alpha 1.4",
+                          #PB_Window_SystemMenu | #PB_Window_ScreenCentered)
 
-; --- Step 2: Register entities (parent before child!) ---
-Contact_Register()   ; Register Contact first (no relation to parent at meta level)
-Client_Register()    ; Register Client with its 1-N relation to contacts
+  ; -- Colonne gauche : formulaire client --
+  TextGadget(#PB_Any, 10, 10, 100, 20, "Raison sociale:")
+  Global InputCompany.i  = StringGadget(#PB_Any, 10, 30, 380, 25, "Acme SARL")
+  TextGadget(#PB_Any, 10, 62, 100, 20, "Email:")
+  Global InputEmail.i    = StringGadget(#PB_Any, 10, 82, 380, 25, "info@acme.fr")
+  TextGadget(#PB_Any, 10, 114, 100, 20, "Téléphone:")
+  Global InputPhone.i    = StringGadget(#PB_Any, 10, 134, 380, 25, "+33 1 00 00 00 00")
+  TextGadget(#PB_Any, 10, 166, 100, 20, "Ville:")
+  Global InputCity.i     = StringGadget(#PB_Any, 10, 186, 380, 25, "Paris")
+  Global CheckActive.i   = CheckBoxGadget(#PB_Any, 10, 218, 200, 22, "Client actif")
+  SetGadgetState(CheckActive, 1)
 
-; --- Step 3: AutoMigrate (creates or updates tables) ---
-If Not ORM::AutoMigrate()
-  MessageRequester("ORM Error", "AutoMigrate failed! Check debug output.", #PB_MessageRequester_Error)
+  ; -- Champ ID de recherche --
+  TextGadget(#PB_Any, 10, 250, 120, 20, "Charger ID:")
+  Global InputLoadId.i = StringGadget(#PB_Any, 135, 248, 80, 25, "1")
+
+  ; -- Boutons --
+  SaveBtn   = ButtonGadget(#PB_Any, 10,  280, 140, 32, "💾 Sauvegarder")
+  LoadBtn   = ButtonGadget(#PB_Any, 160, 280, 140, 32, "📂 Charger")
+  QueryBtn  = ButtonGadget(#PB_Any, 10,  320, 140, 32, "🔍 Clients actifs")
+  DeleteBtn = ButtonGadget(#PB_Any, 160, 320, 140, 32, "🗑 Supprimer")
+  LockBtn   = ButtonGadget(#PB_Any, 310, 280, 100, 72, "🔒 Verrouiller")
+
+  ; -- Liste résultat droite --
+  Protected ListX.i = 420
+  TextGadget(#PB_Any, ListX, 10, 380, 20, "Résultats requête:")
+  QueryList = ListViewGadget(#PB_Any, ListX, 30, 380, 460)
+
+  ; -- Barre de statut --
+  StatusText = TextGadget(#PB_Any, 10, 500, 790, 28, "Prêt.")
+  SetGadgetFont(StatusText, LoadFont(#PB_Any, "Consolas", 9))
+EndProcedure
+
+; =============================================================================
+; PROGRAMME PRINCIPAL
+; =============================================================================
+
+; 1. Ouvrir la connexion principale (pour AutoMigrate)
+orm_mainDb = OpenDatabase(#PB_Any, #DB_PATH, "", "", #PB_Database_SQLite)
+If Not IsDatabase(orm_mainDb)
+  MessageRequester("ORM CRM", "Impossible d'ouvrir la base SQLite: " + #DB_PATH, #PB_MessageRequester_Error)
   End
 EndIf
 
-; --- Step 4: Open the main window ---
-If OpenWindow(#Window_Main, 200, 200, 700, 500, "CRM Demo - ORM Alpha 1.4", #PB_Window_SystemMenu | #PB_Window_SizeGadget)
-  ORM::SetMainWindow(WindowID(#Window_Main))
+; 2. Enregistrer les entités
+RegisterEntities()
 
-  ; Layout gadgets
-  ListViewGadget(#Gadget_List,    10,  10, 340, 200)
-  StringGadget  (#Gadget_Name,   360,  10, 320,  28, "")
-  SetGadgetText (#Gadget_Name, "Client name...")
-
-  ButtonGadget  (#Gadget_Add,    360,  50, 150,  28, "Add Client")
-  ButtonGadget  (#Gadget_Save,   520,  50, 150,  28, "Save Async")
-  ButtonGadget  (#Gadget_Delete, 360,  90, 150,  28, "Delete Client")
-  ButtonGadget  (#Gadget_Lock,   520,  90, 150,  28, "Lock Record")
-  ButtonGadget  (#Gadget_Unlock, 360, 130, 150,  28, "Unlock Record")
-
-  ListViewGadget(#Gadget_Contacts, 10, 230, 340, 200)
-  AddGadgetItem (#Gadget_Contacts, -1, "Contacts will appear here...")
-
-  TextGadget    (#Gadget_Status,   10, 460, 680,  28, "ORM Ready. Database: " + dbPath)
-
-  ; --- Seed with demo data (first run only) ---
-  ; Check if any clients already exist before seeding
-  Protected demoClient.Client
-  Protected demoContact.Contact
-
-  ; This would normally use FindByIdAsync - shown as a sync concept for demo clarity
-  ; ORM::QueryAsync("Client", "ORDER BY companyName", @OnListLoaded())
-
-  ; ---- EVENT LOOP ----
-  Protected *currentClient.Client = 0
-  Protected lockThreadId.i = 0
-
-  Repeat
-    Protected event.i = WaitWindowEvent()
-
-    Select event
-      ; --- Async worker notification (from background thread via PostEvent) ---
-      Case #PB_Event_Custom
-        Protected evCode.i     = EventType()
-        Protected callbackPtr.i = EventData()
-        Protected entityPtr.i   = EventObject()
-
-        ; Dispatch to the right callback
-        Select evCode
-          Case #ORM_AsyncWorker::#ORM_Event_SaveDone
-            Protected saveCallback.i = callbackPtr
-            CallFunctionFast(saveCallback, entityPtr, #ORM_Entity::#ORM_Success)
-          Case #ORM_AsyncWorker::#ORM_Event_LoadDone
-            Protected loadCallback.i = callbackPtr
-            CallFunctionFast(loadCallback, entityPtr, #ORM_Entity::#ORM_Success)
-          Case #ORM_AsyncWorker::#ORM_Event_Error
-            Protected errCallback.i = callbackPtr
-            CallFunctionFast(errCallback, entityPtr, #ORM_Entity::#ORM_Error_DbConnection)
-        EndSelect
-
-      Case #PB_Event_Gadget
-        Select EventGadget()
-
-          Case #Gadget_Add
-            ; Create a new client object and add to list view (not saved yet)
-            Protected *c.Client = NewObject(Client)
-            *c\companyName = GetGadgetText(#Gadget_Name)
-            *c\isActive    = #True
-            ; Add a demo contact
-            AddElement(*c\Contacts())
-              *c\Contacts()\firstName = "Jean"
-              *c\Contacts()\lastName  = "Dupont"
-              *c\Contacts()\email     = "jean@" + LCase(*c\companyName) + ".com"
-            AddGadgetItem(#Gadget_List, -1, *c\companyName + " (not saved)")
-            *currentClient = *c
-            SetGadgetText(#Gadget_Status, "New client created in memory. Click 'Save Async' to persist.")
-
-          Case #Gadget_Save
-            If *currentClient <> 0
-              SetGadgetText(#Gadget_Status, "Saving in background thread (UI stays responsive)...")
-              ; This call returns IMMEDIATELY - no UI freeze!
-              ORM_AsyncWorker::SaveAsync(*currentClient, "Client", @OnClientSaved(), WindowID(#Window_Main))
-            Else
-              SetGadgetText(#Gadget_Status, "No client selected. Click 'Add Client' first.")
-            EndIf
-
-          Case #Gadget_Lock
-            If *currentClient <> 0 And *currentClient\id > 0
-              Protected lockResult.i = ORM_LockManager::Lock(ORM::orm_mainDb, "Client", *currentClient\id)
-              Select lockResult
-                Case #ORM_Lock_Granted
-                  lockThreadId = ORM_LockManager::StartHeartbeat(ORM::orm_mainDb, "Client", *currentClient\id)
-                  SetGadgetText(#Gadget_Status, "Lock GRANTED. Heartbeat active (30s renewal).")
-                Case #ORM_Lock_AlreadyLocked
-                  Protected info.s = ORM_LockManager::GetLockHolderInfo(ORM::orm_mainDb, "Client", *currentClient\id)
-                  MessageRequester("Record Locked",
-                                   "This record is being edited by:" + #CRLF$ + info,
-                                   #PB_MessageRequester_Warning)
-                Case #ORM_Lock_Error
-                  MessageRequester("Lock Error", "Cannot contact database.", #PB_MessageRequester_Error)
-              EndSelect
-            Else
-              SetGadgetText(#Gadget_Status, "Save the client first (needs a DB id to lock).")
-            EndIf
-
-          Case #Gadget_Unlock
-            If *currentClient <> 0 And *currentClient\id > 0
-              If lockThreadId > 0
-                ORM_LockManager::StopHeartbeat(lockThreadId)
-                lockThreadId = 0
-              EndIf
-              ORM_LockManager::Unlock(ORM::orm_mainDb, "Client", *currentClient\id)
-              SetGadgetText(#Gadget_Status, "Lock released.")
-            EndIf
-
-          Case #Gadget_Delete
-            If *currentClient <> 0
-              ; In Phase 2: ORM_AsyncWorker::DeleteAsync() will check for contacts
-              ; and return #ORM_Error_HasChildren if RestrictDelete policy is in effect.
-              SetGadgetText(#Gadget_Status, "DeleteAsync() - Phase 2 implementation pending.")
-            EndIf
-
-        EndSelect
-
-      Case #PB_Event_CloseWindow
-        Break
-
-    EndSelect
-  ForEver
-
-  ; Cleanup on exit
-  If lockThreadId > 0 : ORM_LockManager::StopHeartbeat(lockThreadId) : EndIf
-  If *currentClient <> 0 : ORM_LockManager::Unlock(ORM::orm_mainDb, "Client", *currentClient\id) : EndIf
-  ORM::Shutdown()
+; 3. AutoMigrate (synchrone, une seule fois au démarrage)
+If Not ORM_Schema::Migrate(orm_mainDb)
+  MessageRequester("ORM CRM", "Erreur AutoMigrate", #PB_MessageRequester_Error)
+  End
 EndIf
 
+; 4. Démarrer le pool de workers asynchrones
+ORM_AsyncWorker::Init(#DB_FILE_PATH, 2, 0)
+
+; 5. Créer le client courant (nouveau par défaut)
+*g_currentClient = Client_New()
+
+; 6. Construire l'UI
+BuildUI()
+ORM_AsyncWorker::orm_windowId = MainWindow
+
 ; =============================================================================
-; EOF main.pb
+; BOUCLE ÉVÉNEMENTS
+; =============================================================================
+
+Repeat
+  Protected ev.i = WaitWindowEvent()
+
+  Select ev
+    ; --- Événements boutons ---
+    Case #PB_Event_Gadget
+      Select EventGadget()
+
+        ; ==== SAUVEGARDER ====
+        Case SaveBtn
+          *g_currentClient\companyName = GetGadgetText(InputCompany)
+          *g_currentClient\email       = GetGadgetText(InputEmail)
+          *g_currentClient\phone       = GetGadgetText(InputPhone)
+          *g_currentClient\city        = GetGadgetText(InputCity)
+          *g_currentClient\isActive    = GetGadgetState(CheckActive)
+          *g_currentClient\orm_isDirty = #True
+
+          ; Ajouter 2 contacts de démo (seulement si nouveau client)
+          If *g_currentClient\orm_isNew
+            ClearList(orm_pendingContacts())
+            Protected *contact1.Contact = Contact_New()
+            *contact1\firstName = "Jean"  : *contact1\lastName = "Dupont" : *contact1\email = "j.dupont@acme.fr" : *contact1\isPrimary = 1
+            AddElement(orm_pendingContacts()) : orm_pendingContacts() = *contact1
+
+            Protected *contact2.Contact = Contact_New()
+            *contact2\firstName = "Marie" : *contact2\lastName = "Martin" : *contact2\email = "m.martin@acme.fr" : *contact2\isPrimary = 0
+            AddElement(orm_pendingContacts()) : orm_pendingContacts() = *contact2
+          EndIf
+
+          SetGadgetText(StatusText, "⏳ Sauvegarde en cours...")
+          ORM_AsyncWorker::SaveAsync(*g_currentClient, "Client",
+                                     @Client_Serialize(), @OnClientSaved(), MainWindow)
+
+        ; ==== CHARGER ====
+        Case LoadBtn
+          Protected loadId.i = Val(GetGadgetText(InputLoadId))
+          If loadId > 0
+            SetGadgetText(StatusText, "⏳ Chargement id=" + Str(loadId) + "...")
+            ORM_AsyncWorker::FindByIdAsync(*g_currentClient, "Client", loadId,
+                                           @Client_Deserialize(), @OnClientLoaded(), MainWindow)
+          Else
+            SetGadgetText(StatusText, "⚠ Entrez un ID valide")
+          EndIf
+
+        ; ==== REQUÊTE CLIENTS ACTIFS ====
+        Case QueryBtn
+          SetGadgetText(StatusText, "⏳ Requête en cours...")
+          ORM_AsyncWorker::QueryAsync("Client", "WHERE isActive=1 ORDER BY companyName",
+                                      @Client_New(), @Client_Deserialize(),
+                                      @OnQueryDone(), MainWindow)
+
+        ; ==== SUPPRIMER ====
+        Case DeleteBtn
+          If *g_currentClient\id > 0
+            SetGadgetText(StatusText, "⏳ Suppression id=" + Str(*g_currentClient\id) + "...")
+            ORM_AsyncWorker::DeleteAsync(*g_currentClient, "Client",
+                                         @OnClientDeleted(), MainWindow)
+          Else
+            SetGadgetText(StatusText, "⚠ Aucun client chargé à supprimer")
+          EndIf
+
+        ; ==== VERROUILLER ====
+        Case LockBtn
+          If *g_currentClient\id > 0
+            If ORM_LockManager::Lock(orm_mainDb, "Client", *g_currentClient\id, "PC01", "admin")
+              SetGadgetText(StatusText, "🔒 Verrou acquis pour Client#" + Str(*g_currentClient\id))
+            Else
+              SetGadgetText(StatusText, "✗ Verrou refusé (record déjà verrouillé sur un autre poste)")
+            EndIf
+          Else
+            SetGadgetText(StatusText, "⚠ Chargez un client avant de verrouiller")
+          EndIf
+
+      EndSelect
+
+    ; --- Réponse asynchrone des workers ---
+    Case #PB_Event_Custom
+      Protected cb.i  = EventData()     ; adresse du callback
+      Protected ent.i = EventObject()   ; *entity (0 pour QueryDone)
+
+      Select EventType()
+        Case #ORM_AsyncWorker::#ORM_Event_SaveDone
+          ; Met à jour le formulaire si c'est notre client courant
+          If ent = *g_currentClient
+            Protected *sc.Client = *g_currentClient
+            SetGadgetText(InputCompany, *sc\companyName)
+          EndIf
+          ; Appeler le callback UI (@OnClientSaved)
+          CallFunctionFast(cb, ent, #ORM_Entity::#ORM_Success)
+
+        Case #ORM_AsyncWorker::#ORM_Event_LoadDone
+          If ent = *g_currentClient
+            Protected *lc.Client = *g_currentClient
+            SetGadgetText(InputCompany, *lc\companyName)
+            SetGadgetText(InputEmail,   *lc\email)
+            SetGadgetText(InputPhone,   *lc\phone)
+            SetGadgetText(InputCity,    *lc\city)
+            SetGadgetState(CheckActive,  *lc\isActive)
+          EndIf
+          CallFunctionFast(cb, ent, #ORM_Entity::#ORM_Success)
+
+        Case #ORM_AsyncWorker::#ORM_Event_QueryDone
+          ; Le code résultat est dans ORM_AsyncWorker::orm_queryResultCode
+          CallFunctionFast(cb, ORM_AsyncWorker::orm_queryResultCode)
+
+        Case #ORM_AsyncWorker::#ORM_Event_DeleteDone
+          CallFunctionFast(cb, ent, #ORM_Entity::#ORM_Success)
+
+        Case #ORM_AsyncWorker::#ORM_Event_Error
+          SetGadgetText(StatusText, "✗ Erreur async inattendue")
+
+      EndSelect
+
+    ; --- Fermeture fenêtre ---
+    Case #PB_Event_CloseWindow
+      ; Libérer le verrou éventuel sur le client courant
+      If *g_currentClient\id > 0
+        ORM_LockManager::Release(orm_mainDb, "Client", *g_currentClient\id, "PC01")
+      EndIf
+      Break
+
+  EndSelect
+
+Until ev = #PB_Event_CloseWindow
+
+; Arrêt propre
+ORM_AsyncWorker::Shutdown()
+CloseDatabase(orm_mainDb)
+FreeStructure(*g_currentClient)
+ClearList(orm_pendingContacts())
+
+Debug "CRM Demo terminé proprement."
+End
+
+; =============================================================================
+; EOF examples/06_database_crm/main.pb
 ; =============================================================================
