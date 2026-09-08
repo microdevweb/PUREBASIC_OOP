@@ -45,6 +45,11 @@ Namespace UI {
       This\lastTick = ElapsedMilliseconds()
     }
 
+    Public Method Free() {
+      ClearMap(This\activeAnimations())
+      This\isRunning = #False
+    }
+
     ; --- Fonctions d'Amorti Mathématiques (Easing) ---
 
     Public Method.f ApplyEasing(t.f, easing.i) {
@@ -196,5 +201,12 @@ EndProcedure
 Procedure UI_UpdateAnimations()
   If UI_GlobalAnimEngine
     UI_GlobalAnimEngine\Update()
+  EndIf
+EndProcedure
+
+Procedure UI_ShutdownAnimationEngine()
+  If UI_GlobalAnimEngine
+    UI_GlobalAnimEngine\Free()
+    UI_GlobalAnimEngine = #Null
   EndIf
 EndProcedure

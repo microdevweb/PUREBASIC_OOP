@@ -91,9 +91,13 @@ Namespace UI {
 
     Public Method Free() {
       If (This\id And IsGadget(This\id)) {
+        UI_UnregisterGadget(This\id)
         FreeGadget(This\id)
         This\id = 0
       }
+      CompilerIf Defined(UI_MVVM_UnregisterAll, #PB_Procedure)
+        UI_MVVM_UnregisterAll(This)
+      CompilerEndIf
     }
 
     Public Method.i GetState() {

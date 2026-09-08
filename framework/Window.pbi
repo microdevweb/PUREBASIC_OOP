@@ -318,10 +318,18 @@ Namespace UI {
 
     Public Method Free() {
       This\Close()
+      If This\rootContent
+        This\rootContent\Free()
+        This\rootContent = 0
+      EndIf
       If This\resources
         This\resources\Free()
         This\resources = 0
       EndIf
+      ClearMap(This\namedControls())
+      CompilerIf Defined(UI_MVVM_UnregisterAll, #PB_Procedure)
+        UI_MVVM_UnregisterAll(This)
+      CompilerEndIf
     }
 
     Public Method.b OnClose() {

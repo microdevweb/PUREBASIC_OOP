@@ -212,6 +212,11 @@ Namespace UI {
 
     Public Method Free() {
       This\Quit()
+      CompilerIf Defined(UI_ShutdownAnimationEngine, #PB_Procedure)
+        UI_ShutdownAnimationEngine()
+      CompilerEndIf
+      ClearMap(UI_WindowMap())
+      ClearMap(UI_GadgetMap())
     }
   }
 

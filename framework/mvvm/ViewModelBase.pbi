@@ -23,6 +23,9 @@ Namespace MVVM {
         EndIf
       Next
       ClearMap(This\*commands())
+      CompilerIf Defined(UI_MVVM_UnregisterAll, #PB_Procedure)
+        UI_MVVM_UnregisterAll(This)
+      CompilerEndIf
       Super\Free()
     }
 

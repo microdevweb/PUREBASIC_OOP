@@ -261,6 +261,13 @@ Namespace UI::Layouts {
         EndIf
       Next
     }
+
+    Public Method Free() {
+      ClearList(This\rows())
+      ClearList(This\cols())
+      ClearList(This\items())
+      Super\Free()
+    }
   }
 
 }

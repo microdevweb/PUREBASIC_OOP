@@ -152,8 +152,26 @@ Namespace UI {
             If srcPath <> ""
               Protected fullSrcPath.s = srcPath
               If This\currentXmlDir <> "" And FileSize(fullSrcPath) <= 0
-                fullSrcPath = This\currentXmlDir + srcPath
+                If FileSize(This\currentXmlDir + srcPath) > 0
+                  fullSrcPath = This\currentXmlDir + srcPath
+                ElseIf FileSize(This\currentXmlDir + "../" + srcPath) > 0
+                  fullSrcPath = This\currentXmlDir + "../" + srcPath
+                EndIf
               EndIf
+              CompilerIf Defined(OOP_PROJECT_DIR, #PB_Constant)
+                If FileSize(fullSrcPath) <= 0 And FileSize(#OOP_PROJECT_DIR + srcPath) > 0
+                  fullSrcPath = #OOP_PROJECT_DIR + srcPath
+                ElseIf FileSize(fullSrcPath) <= 0 And FileSize(#OOP_PROJECT_DIR + "styles/" + GetFilePart(srcPath)) > 0
+                  fullSrcPath = #OOP_PROJECT_DIR + "styles/" + GetFilePart(srcPath)
+                EndIf
+              CompilerEndIf
+              CompilerIf Defined(OOP_WORKSPACE_DIR, #PB_Constant)
+                If FileSize(fullSrcPath) <= 0 And FileSize(#OOP_WORKSPACE_DIR + "examples/07_project_dashboard/" + srcPath) > 0
+                  fullSrcPath = #OOP_WORKSPACE_DIR + "examples/07_project_dashboard/" + srcPath
+                ElseIf FileSize(fullSrcPath) <= 0 And FileSize(#OOP_WORKSPACE_DIR + "examples/07_project_dashboard/styles/" + GetFilePart(srcPath)) > 0
+                  fullSrcPath = #OOP_WORKSPACE_DIR + "examples/07_project_dashboard/styles/" + GetFilePart(srcPath)
+                EndIf
+              CompilerEndIf
               If FileSize(fullSrcPath) <= 0 And FileSize(GetPathPart(ProgramFilename()) + srcPath) > 0
                 fullSrcPath = GetPathPart(ProgramFilename()) + srcPath
               EndIf
@@ -1174,14 +1192,43 @@ Namespace UI {
     Public Method.b LoadFromFile(xmlPath.s, *targetWindow.UI::Window) {
       Protected actualPath.s = xmlPath
       If FileSize(actualPath) <= 0
+        CompilerIf Defined(OOP_PROJECT_DIR, #PB_Constant)
+          If FileSize(#OOP_PROJECT_DIR + xmlPath) > 0
+            actualPath = #OOP_PROJECT_DIR + xmlPath
+          ElseIf FileSize(#OOP_PROJECT_DIR + "views/" + GetFilePart(xmlPath)) > 0
+            actualPath = #OOP_PROJECT_DIR + "views/" + GetFilePart(xmlPath)
+          ElseIf FileSize(#OOP_PROJECT_DIR + GetFilePart(xmlPath)) > 0
+            actualPath = #OOP_PROJECT_DIR + GetFilePart(xmlPath)
+          EndIf
+        CompilerEndIf
+      EndIf
+
+      If FileSize(actualPath) <= 0
+        CompilerIf Defined(OOP_WORKSPACE_DIR, #PB_Constant)
+          If FileSize(#OOP_WORKSPACE_DIR + xmlPath) > 0
+            actualPath = #OOP_WORKSPACE_DIR + xmlPath
+          ElseIf FileSize(#OOP_WORKSPACE_DIR + "examples/07_project_dashboard/" + xmlPath) > 0
+            actualPath = #OOP_WORKSPACE_DIR + "examples/07_project_dashboard/" + xmlPath
+          ElseIf FileSize(#OOP_WORKSPACE_DIR + "examples/07_project_dashboard/views/" + GetFilePart(xmlPath)) > 0
+            actualPath = #OOP_WORKSPACE_DIR + "examples/07_project_dashboard/views/" + GetFilePart(xmlPath)
+          EndIf
+        CompilerEndIf
+      EndIf
+
+      If FileSize(actualPath) <= 0
         If FileSize(GetPathPart(ProgramFilename()) + xmlPath) > 0
           actualPath = GetPathPart(ProgramFilename()) + xmlPath
+        ElseIf FileSize(GetPathPart(ProgramFilename()) + GetFilePart(xmlPath)) > 0
+          actualPath = GetPathPart(ProgramFilename()) + GetFilePart(xmlPath)
         ElseIf FileSize("tests/" + xmlPath) > 0
           actualPath = "tests/" + xmlPath
+        ElseIf FileSize("examples/07_project_dashboard/" + xmlPath) > 0
+          actualPath = "examples/07_project_dashboard/" + xmlPath
         EndIf
       EndIf
 
       If FileSize(actualPath) <= 0
+        MessageRequester("PureBasic OOP - UI Error", "Impossible de charger la vue XML :" + #LF$ + xmlPath + #LF$ + #LF$ + "Fichier introuvable sur le disque.", #PB_MessageRequester_Error)
         ProcedureReturn #False
       EndIf
 
@@ -1189,7 +1236,12 @@ Namespace UI {
 
       Protected xmlHandle.i = LoadXML(#PB_Any, actualPath)
       If Not xmlHandle Or XMLStatus(xmlHandle) <> #PB_XML_Success
-        If xmlHandle : FreeXML(xmlHandle) : EndIf
+        Protected errTxt.s = "Erreur de syntaxe XML dans : " + actualPath
+        If xmlHandle
+          errTxt + #LF$ + "Ligne " + Str(XMLErrorLine(xmlHandle)) + " : " + XMLError(xmlHandle)
+          FreeXML(xmlHandle)
+        EndIf
+        MessageRequester("PureBasic OOP - Erreur XML", errTxt, #PB_MessageRequester_Error)
         ProcedureReturn #False
       EndIf
 

@@ -6,7 +6,7 @@
   <DockPanel LastChildFill="True">
 
     <!-- ================================================================= -->
-    <!-- 1. SIDEBAR NAVIGATION GAUCHE (Thème Sombre #18181B)               -->
+    <!-- 1. SIDEBAR NAVIGATION GAUCHE (Theme Sombre #18181B)               -->
     <!-- ================================================================= -->
     <StackPanel Dock="Left" Orientation="Vertical" Width="200" Background="#18181B" Padding="14,14,14,14" Spacing="4">
       
@@ -27,7 +27,7 @@
     <!-- ================================================================= -->
     <StackPanel Dock="Fill" Orientation="Vertical" Margin="28,20,28,24" Spacing="16">
 
-      <!-- En-tête Supérieur : Titre Hub, Recherche et Profil Utilisateur -->
+      <!-- En-tete Superieur : Titre Hub, Recherche et Profil Utilisateur -->
       <Grid Columns="*, 220, 140" Height="40">
         <CanvasText Grid.Column="0" Text="Project Management Hub" 
                     FontName="Segoe UI" FontSize="16" FontBold="True" 
@@ -75,7 +75,7 @@
           </StackPanel>
         </Grid>
 
-        <!-- Ligne 2 : Priorité (Dropdown) et Statut (Boutons Radio) -->
+        <!-- Ligne 2 : Priorite (Dropdown) et Statut (Boutons Radio) -->
         <Grid Columns="1*, 1*" Height="56">
           <StackPanel Grid.Column="0" Orientation="Vertical" Spacing="4" Margin="0,0,12,0">
             <CanvasText Text="Priority" FontName="Segoe UI" FontSize="9" FontBold="True" Foreground="#475569" Height="16"/>

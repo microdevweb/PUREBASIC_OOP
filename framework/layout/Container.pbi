@@ -240,6 +240,13 @@ Namespace UI::Layouts {
     }
 
     Public Method Free() {
+      ForEach This\children()
+        Protected *child.UI::Component = This\children()
+        If *child
+          *child\Free()
+        EndIf
+      Next
+      ClearList(This\children())
       If (This\bgGadgetId And IsGadget(This\bgGadgetId)) {
         FreeGadget(This\bgGadgetId)
         This\bgGadgetId = 0

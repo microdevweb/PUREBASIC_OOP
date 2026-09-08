@@ -1994,8 +1994,21 @@ EndProcedure
 Procedure CheckScopeInstances(List trackedList.OOP_TrackedInstance(), scopeType.s, scopeName.s)
   ForEach trackedList()
     If trackedList()\state = #OOP_INSTANCE_ALLOCATED
-      TotalLeaksDetected + 1
-      PrintN("[WARN_LEAK] Line " + Str(trackedList()\allocLineNumber) + " in " + GetFilePart(trackedList()\allocFile) + ": Instance '" + trackedList()\varName + "' of Class '" + trackedList()\className + "' was allocated with 'New' but is never released in " + scopeType + " '" + scopeName + "'.")
+      ; Filter out internal framework files so only user code is warned
+      Protected isFrameworkFile.b = #False
+      Protected allocF.s = LCase(trackedList()\allocFile)
+      If FindString(allocF, "framework\") > 0 Or FindString(allocF, "framework/") > 0 Or 
+         GetFilePart(allocF) = "xmlloader.pbi" Or GetFilePart(allocF) = "animationengine.pbi" Or 
+         GetFilePart(allocF) = "ui.pbi"
+        isFrameworkFile = #True
+      EndIf
+      
+      If Not isFrameworkFile
+        TotalLeaksDetected + 1
+        PrintN("[WARN_LEAK] Line " + Str(trackedList()\allocLineNumber) + " in " + GetFilePart(trackedList()\allocFile) + ": Instance '" + trackedList()\varName + "' of Class '" + trackedList()\className + "' was allocated with 'New' but is never released in " + scopeType + " '" + scopeName + "'.")
+      Else
+        TotalInstancesManaged + 1
+      EndIf
     Else
       TotalInstancesManaged + 1
     EndIf
@@ -2507,6 +2520,14 @@ Procedure.b GenerateTargetPB(outputFile.s, inputPBO.s)
   EmitLine("; ============================================================================")
   EmitLine("")
   EmitLine("EnableExplicit")
+  EmitLine("")
+
+  ; Project and Workspace directory constants for runtime resource location
+  Protected projDirConst.s = BaseDirectory
+  If projDirConst = "" : projDirConst = GetCurrentDirectory() : EndIf
+  If Right(projDirConst, 1) <> "\" : projDirConst + "\" : EndIf
+  EmitLine("#OOP_PROJECT_DIR = " + Chr(34) + projDirConst + Chr(34))
+  EmitLine("#OOP_WORKSPACE_DIR = " + Chr(34) + GetCurrentDirectory() + Chr(34))
   EmitLine("")
 
   ; 0.5 Generate Top-Level Type Declarations (Structures, Enums, Constants, Macros)

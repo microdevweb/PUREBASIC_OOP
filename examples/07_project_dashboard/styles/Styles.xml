@@ -4,7 +4,7 @@
   <!-- Fichier : styles/Styles.xml                                           -->
   <!-- ===================================================================== -->
 
-  <!-- 1. Style Implicite par dÃ©faut pour tous les CanvasButton -->
+  <!-- 1. Style Implicite par défaut pour tous les CanvasButton -->
   <Style TargetType="CanvasButton">
     <Setter Property="CornerRadius" Value="6"/>
     <Setter Property="BorderThickness" Value="1"/>

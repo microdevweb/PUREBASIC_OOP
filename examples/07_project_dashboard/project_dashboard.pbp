@@ -7,31 +7,31 @@
   <section name="data">
     <explorer view="views\" pattern="0"/>
     <log show="1"/>
-    <lastopen date="2026-09-08 11:35" user="u237685" host="CSL0111"/>
+    <lastopen date="2026-09-08 12:01" user="u237685" host="CSL0111"/>
   </section>
   <section name="files">
     <file name="main.pb">
       <config load="0" scan="1" panel="1" warn="1" lastopen="1" sortindex="1" panelstate="+"/>
-      <fingerprint md5="f3b4fdd57668ee6d1368c2dff199ba8f"/>
+      <fingerprint md5="5a0d3ee2e0b4ff0add4ba302463019aa"/>
     </file>
     <file name="views\ProjectDashboardView.pbi">
       <config load="0" scan="1" panel="1" warn="1" lastopen="1" sortindex="2" panelstate="++"/>
-      <fingerprint md5="1b30175063617843bd00e029d18a65ca"/>
+      <fingerprint md5="0d2225b892cb46a90fd3aad307d52fa8"/>
     </file>
     <file name="views\ProjectDashboardView.xml">
       <config load="0" scan="1" panel="1" warn="1" lastopen="1" sortindex="3" panelstate="++"/>
-      <fingerprint md5="2e255914e80272749efbb70079da6c91"/>
+      <fingerprint md5="9e89e415a41bb56b4af2b61a5f6d4e34"/>
     </file>
     <file name="styles\Styles.xml">
       <config load="0" scan="1" panel="1" warn="1" lastopen="1" sortindex="4" panelstate="++"/>
-      <fingerprint md5="7d235373d2a74622f3d73b4f18221ddd"/>
+      <fingerprint md5="18e686d8512b0e387acc88694d047731"/>
     </file>
     <file name="viewmodels\ProjectDashboardViewModel.pbi">
       <config load="0" scan="1" panel="1" warn="1" lastopen="1" sortindex="5" panelstate="++"/>
-      <fingerprint md5="830008b17f923fad733a7bec3d2c6301"/>
+      <fingerprint md5="8f2460ed116cfb7e46244ac6f126cb69"/>
     </file>
     <file name="models\ProjectModel.pbi">
-      <config load="0" scan="1" panel="1" warn="1" lastopen="0" sortindex="6" panelstate="++"/>
+      <config load="0" scan="1" panel="1" warn="1" lastopen="0" sortindex="999" panelstate="++"/>
       <fingerprint md5="3f76a2e8389451f60adf486db4b2db9a"/>
     </file>
   </section>

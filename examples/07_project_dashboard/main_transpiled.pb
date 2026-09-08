@@ -5,6 +5,9 @@
 
 EnableExplicit
 
+#OOP_PROJECT_DIR = "c:\PB\PB_PROJECT\PB_OOP_WORKSPACE\PUREBASIC_OOP_WORKSPACE\"
+#OOP_WORKSPACE_DIR = "C:\PB\PB_PROJECT\PB_OOP_WORKSPACE\PUREBASIC_OOP_WORKSPACE\"
+
 ; ----------------------------------------------------------------------------
 ; 0.5 GLOBAL TYPE DECLARATIONS, STRUCTURES & CONSTANTS
 ; ----------------------------------------------------------------------------
@@ -242,6 +245,7 @@ Interface UI_Gadget_vt Extends UI_Component_vt
 EndInterface
 
 Interface UI_AnimationEngine_vt
+  Free()
   ApplyEasing.f(t.f, easing.i)
   LerpFloat.f(vStart.f, vEnd.f, t.f)
   LerpColor.i(cStart.i, cEnd.i, t.f)
@@ -1342,6 +1346,7 @@ Declare UI_Gadget_OnLostFocus(*This.UI_Gadget_Inst)
 Declare UI_Gadget_OnRightClick(*This.UI_Gadget_Inst)
 Declare UI_Gadget_OnCustomEvent(*This.UI_Gadget_Inst, eventType.i)
 Declare UI_AnimationEngine_Init(*This.UI_AnimationEngine_Inst)
+Declare UI_AnimationEngine_Free(*This.UI_AnimationEngine_Inst)
 Declare.f UI_AnimationEngine_ApplyEasing(*This.UI_AnimationEngine_Inst, t.f, easing.i)
 Declare.f UI_AnimationEngine_LerpFloat(*This.UI_AnimationEngine_Inst, vStart.f, vEnd.f, t.f)
 Declare.i UI_AnimationEngine_LerpColor(*This.UI_AnimationEngine_Inst, cStart.i, cEnd.i, t.f)
@@ -1664,6 +1669,7 @@ Declare UI_Layouts_DockPanel_AddDockChild(*This.UI_Layouts_DockPanel_Inst, *chil
 Declare UI_Layouts_DockPanel_SetDock(*This.UI_Layouts_DockPanel_Inst, *child.UI_Component_vt, dockType.i)
 Declare.i UI_Layouts_DockPanel_GetDock(*This.UI_Layouts_DockPanel_Inst, *child.UI_Component_vt)
 Declare UI_Layouts_DockPanel_Arrange(*This.UI_Layouts_DockPanel_Inst, nx.i, ny.i, nw.i, nh.i)
+Declare UI_Layouts_DockPanel_Free(*This.UI_Layouts_DockPanel_Inst)
 Declare UI_Layouts_Grid_Init_void(*This.UI_Layouts_Grid_Inst)
 Declare UI_Layouts_Grid_Init_i_i(*This.UI_Layouts_Grid_Inst, w_p.i, h_p.i)
 Declare UI_Layouts_Grid_ParseDefinition(*This.UI_Layouts_Grid_Inst, *outDef.UI_GridDef, defStr.s)
@@ -1672,6 +1678,7 @@ Declare UI_Layouts_Grid_AddColumn(*This.UI_Layouts_Grid_Inst, defStr.s)
 Declare UI_Layouts_Grid_SetCell(*This.UI_Layouts_Grid_Inst, *child.UI_Component_vt, r.i, c.i)
 Declare UI_Layouts_Grid_SetCellSpan(*This.UI_Layouts_Grid_Inst, *child.UI_Component_vt, r.i, c.i, rSpan.i, cSpan.i)
 Declare UI_Layouts_Grid_Arrange(*This.UI_Layouts_Grid_Inst, nx.i, ny.i, nw.i, nh.i)
+Declare UI_Layouts_Grid_Free(*This.UI_Layouts_Grid_Inst)
 Declare UI_Button_Init_s(*This.UI_Button_Inst, text_p.s)
 Declare UI_Button_Init_s_i_i(*This.UI_Button_Inst, text_p.s, w_p.i, h_p.i)
 Declare UI_Button_Init_i_i_i_i_s(*This.UI_Button_Inst, x_p.i, y_p.i, w_p.i, h_p.i, text_p.s)
@@ -2626,9 +2633,13 @@ EndProcedure
 Procedure UI_Gadget_Free(*This.UI_Gadget_Inst)
   Protected *This_vt.UI_Gadget_vt = *This
   If (*This\id And IsGadget(*This\id))
+          UI_UnregisterGadget(*This\id)
           FreeGadget(*This\id)
           *This\id = 0
   EndIf
+        CompilerIf Defined(UI_MVVM_UnregisterAll, #PB_Procedure)
+          UI_MVVM_UnregisterAll(*This)
+        CompilerEndIf
 EndProcedure
 
 Procedure.i UI_Gadget_GetState(*This.UI_Gadget_Inst)
@@ -2709,6 +2720,12 @@ Procedure UI_AnimationEngine_Init(*This.UI_AnimationEngine_Inst)
   Protected *This_vt.UI_AnimationEngine_vt = *This
         *This\isRunning = #False
         *This\lastTick = ElapsedMilliseconds()
+EndProcedure
+
+Procedure UI_AnimationEngine_Free(*This.UI_AnimationEngine_Inst)
+  Protected *This_vt.UI_AnimationEngine_vt = *This
+        ClearMap(*This\activeAnimations())
+        *This\isRunning = #False
 EndProcedure
 
 Procedure.f UI_AnimationEngine_ApplyEasing(*This.UI_AnimationEngine_Inst, t.f, easing.i)
@@ -3442,10 +3459,18 @@ EndProcedure
 Procedure UI_Window_Free(*This.UI_Window_Inst)
   Protected *This_vt.UI_Window_vt = *This
         *This_vt\Close()
+        If *This\rootContent
+          *This\rootContent\Free()
+          *This\rootContent = 0
+        EndIf
         If *This\resources
           *This\resources\Free()
           *This\resources = 0
         EndIf
+        ClearMap(*This\namedControls())
+        CompilerIf Defined(UI_MVVM_UnregisterAll, #PB_Procedure)
+          UI_MVVM_UnregisterAll(*This)
+        CompilerEndIf
 EndProcedure
 
 Procedure.b UI_Window_OnClose(*This.UI_Window_Inst)
@@ -3652,6 +3677,11 @@ EndProcedure
 Procedure UI_Application_Free(*This.UI_Application_Inst)
   Protected *This_vt.UI_Application_vt = *This
         *This_vt\Quit()
+        CompilerIf Defined(UI_ShutdownAnimationEngine, #PB_Procedure)
+          UI_ShutdownAnimationEngine()
+        CompilerEndIf
+        ClearMap(UI_WindowMap())
+        ClearMap(UI_GadgetMap())
 EndProcedure
 
 Procedure UI_CanvasControl_InitDefaults(*This.UI_CanvasControl_Inst)
@@ -5106,6 +5136,9 @@ Procedure MVVM_ViewModelBase_Free(*This.MVVM_ViewModelBase_Inst)
           EndIf
         Next
         ClearMap(*This\commands())
+        CompilerIf Defined(UI_MVVM_UnregisterAll, #PB_Procedure)
+          UI_MVVM_UnregisterAll(*This)
+        CompilerEndIf
         MVVM_ObservableObject_Free(*This)
 EndProcedure
 
@@ -5563,6 +5596,13 @@ EndProcedure
 
 Procedure UI_Layouts_Container_Free(*This.UI_Layouts_Container_Inst)
   Protected *This_vt.UI_Layouts_Container_vt = *This
+        ForEach *This\children()
+          Protected *child.UI_Component_vt = *This\children()
+          If *child
+            *child\Free()
+          EndIf
+        Next
+        ClearList(*This\children())
   If (*This\bgGadgetId And IsGadget(*This\bgGadgetId))
           FreeGadget(*This\bgGadgetId)
           *This\bgGadgetId = 0
@@ -5995,6 +6035,12 @@ Procedure UI_Layouts_DockPanel_Arrange(*This.UI_Layouts_DockPanel_Inst, nx.i, ny
         Next
 EndProcedure
 
+Procedure UI_Layouts_DockPanel_Free(*This.UI_Layouts_DockPanel_Inst)
+  Protected *This_vt.UI_Layouts_DockPanel_vt = *This
+        ClearList(*This\items())
+        UI_Layouts_Container_Free(*This)
+EndProcedure
+
 Procedure UI_Layouts_Grid_Init_void(*This.UI_Layouts_Grid_Inst)
   Protected *This_vt.UI_Layouts_Grid_vt = *This
         UI_Layouts_Container_Init_void(*This)
@@ -6245,6 +6291,14 @@ Procedure UI_Layouts_Grid_Arrange(*This.UI_Layouts_Grid_Inst, nx.i, ny.i, nw.i, 
             *childG\Arrange(targetX, targetY, targetW, targetH)
           EndIf
         Next
+EndProcedure
+
+Procedure UI_Layouts_Grid_Free(*This.UI_Layouts_Grid_Inst)
+  Protected *This_vt.UI_Layouts_Grid_vt = *This
+        ClearList(*This\rows())
+        ClearList(*This\cols())
+        ClearList(*This\items())
+        UI_Layouts_Container_Free(*This)
 EndProcedure
 
 Procedure UI_Button_Init_s(*This.UI_Button_Inst, text_p.s)
@@ -10180,8 +10234,26 @@ Procedure UI_XMLLoader_ParseResources(*This.UI_XMLLoader_Inst, resNode.i, *targe
               If srcPath <> ""
                 Protected fullSrcPath.s = srcPath
                 If *This\currentXmlDir <> "" And FileSize(fullSrcPath) <= 0
-                  fullSrcPath = *This\currentXmlDir + srcPath
+                  If FileSize(*This\currentXmlDir + srcPath) > 0
+                    fullSrcPath = *This\currentXmlDir + srcPath
+                  ElseIf FileSize(*This\currentXmlDir + "../" + srcPath) > 0
+                    fullSrcPath = *This\currentXmlDir + "../" + srcPath
+                  EndIf
                 EndIf
+                CompilerIf Defined(OOP_PROJECT_DIR, #PB_Constant)
+                  If FileSize(fullSrcPath) <= 0 And FileSize(#OOP_PROJECT_DIR + srcPath) > 0
+                    fullSrcPath = #OOP_PROJECT_DIR + srcPath
+                  ElseIf FileSize(fullSrcPath) <= 0 And FileSize(#OOP_PROJECT_DIR + "styles/" + GetFilePart(srcPath)) > 0
+                    fullSrcPath = #OOP_PROJECT_DIR + "styles/" + GetFilePart(srcPath)
+                  EndIf
+                CompilerEndIf
+                CompilerIf Defined(OOP_WORKSPACE_DIR, #PB_Constant)
+                  If FileSize(fullSrcPath) <= 0 And FileSize(#OOP_WORKSPACE_DIR + "examples/07_project_dashboard/" + srcPath) > 0
+                    fullSrcPath = #OOP_WORKSPACE_DIR + "examples/07_project_dashboard/" + srcPath
+                  ElseIf FileSize(fullSrcPath) <= 0 And FileSize(#OOP_WORKSPACE_DIR + "examples/07_project_dashboard/styles/" + GetFilePart(srcPath)) > 0
+                    fullSrcPath = #OOP_WORKSPACE_DIR + "examples/07_project_dashboard/styles/" + GetFilePart(srcPath)
+                  EndIf
+                CompilerEndIf
                 If FileSize(fullSrcPath) <= 0 And FileSize(GetPathPart(ProgramFilename()) + srcPath) > 0
                   fullSrcPath = GetPathPart(ProgramFilename()) + srcPath
                 EndIf
@@ -11194,14 +11266,43 @@ Procedure.b UI_XMLLoader_LoadFromFile(*This.UI_XMLLoader_Inst, xmlPath.s, *targe
   Protected *This_vt.UI_XMLLoader_vt = *This
         Protected actualPath.s = xmlPath
         If FileSize(actualPath) <= 0
+          CompilerIf Defined(OOP_PROJECT_DIR, #PB_Constant)
+            If FileSize(#OOP_PROJECT_DIR + xmlPath) > 0
+              actualPath = #OOP_PROJECT_DIR + xmlPath
+            ElseIf FileSize(#OOP_PROJECT_DIR + "views/" + GetFilePart(xmlPath)) > 0
+              actualPath = #OOP_PROJECT_DIR + "views/" + GetFilePart(xmlPath)
+            ElseIf FileSize(#OOP_PROJECT_DIR + GetFilePart(xmlPath)) > 0
+              actualPath = #OOP_PROJECT_DIR + GetFilePart(xmlPath)
+            EndIf
+          CompilerEndIf
+        EndIf
+  
+        If FileSize(actualPath) <= 0
+          CompilerIf Defined(OOP_WORKSPACE_DIR, #PB_Constant)
+            If FileSize(#OOP_WORKSPACE_DIR + xmlPath) > 0
+              actualPath = #OOP_WORKSPACE_DIR + xmlPath
+            ElseIf FileSize(#OOP_WORKSPACE_DIR + "examples/07_project_dashboard/" + xmlPath) > 0
+              actualPath = #OOP_WORKSPACE_DIR + "examples/07_project_dashboard/" + xmlPath
+            ElseIf FileSize(#OOP_WORKSPACE_DIR + "examples/07_project_dashboard/views/" + GetFilePart(xmlPath)) > 0
+              actualPath = #OOP_WORKSPACE_DIR + "examples/07_project_dashboard/views/" + GetFilePart(xmlPath)
+            EndIf
+          CompilerEndIf
+        EndIf
+  
+        If FileSize(actualPath) <= 0
           If FileSize(GetPathPart(ProgramFilename()) + xmlPath) > 0
             actualPath = GetPathPart(ProgramFilename()) + xmlPath
+          ElseIf FileSize(GetPathPart(ProgramFilename()) + GetFilePart(xmlPath)) > 0
+            actualPath = GetPathPart(ProgramFilename()) + GetFilePart(xmlPath)
           ElseIf FileSize("tests/" + xmlPath) > 0
             actualPath = "tests/" + xmlPath
+          ElseIf FileSize("examples/07_project_dashboard/" + xmlPath) > 0
+            actualPath = "examples/07_project_dashboard/" + xmlPath
           EndIf
         EndIf
   
         If FileSize(actualPath) <= 0
+          MessageRequester("PureBasic OOP - UI Error", "Impossible de charger la vue XML :" + #LF$ + xmlPath + #LF$ + #LF$ + "Fichier introuvable sur le disque.", #PB_MessageRequester_Error)
           ProcedureReturn #False
         EndIf
   
@@ -11209,7 +11310,12 @@ Procedure.b UI_XMLLoader_LoadFromFile(*This.UI_XMLLoader_Inst, xmlPath.s, *targe
   
         Protected xmlHandle.i = LoadXML(#PB_Any, actualPath)
         If Not xmlHandle Or XMLStatus(xmlHandle) <> #PB_XML_Success
-          If xmlHandle : FreeXML(xmlHandle) : EndIf
+          Protected errTxt.s = "Erreur de syntaxe XML dans : " + actualPath
+          If xmlHandle
+            errTxt + #LF$ + "Ligne " + Str(XMLErrorLine(xmlHandle)) + " : " + XMLError(xmlHandle)
+            FreeXML(xmlHandle)
+          EndIf
+          MessageRequester("PureBasic OOP - Erreur XML", errTxt, #PB_MessageRequester_Error)
           ProcedureReturn #False
         EndIf
   
@@ -11352,7 +11458,7 @@ Procedure Dashboard_ProjectDashboardViewModel_Init(*This.Dashboard_ProjectDashbo
   
         *This\model = New_Dashboard_ProjectModel()
   
-        ; Enregistrement des propriétés observables
+        ; Enregistrement des propri�t�s observables
         *This\ProjectName        = *This_vt\BindString("ProjectName", *This\model\GetName())
         *This\StartDate          = *This_vt\BindString("StartDate", *This\model\GetStartDate())
         *This\EndDate            = *This_vt\BindString("EndDate", *This\model\GetEndDate())
@@ -11406,7 +11512,7 @@ Procedure.b Dashboard_ProjectDashboardViewModel_OnCommand(*This.Dashboard_Projec
             *This\StartDate\SetValue("")
             *This\EndDate\SetValue("")
             *This\Description\SetValue("")
-            *This\StatusNotification\SetValue("🗑 Données du projet réinitialisées.")
+            *This\StatusNotification\SetValue("🗑 Donn�es du projet r�initialis�es.")
             ProcedureReturn #True
   
           ; Action : Ajouter un nouveau projet
@@ -11461,12 +11567,32 @@ Procedure Dashboard_ProjectDashboardView_Init(*This.Dashboard_ProjectDashboardVi
   
         Protected xmlPath.s = "views/ProjectDashboardView.xml"
         If FileSize(xmlPath) <= 0
-          If FileSize("examples/07_project_dashboard/" + xmlPath) > 0
-            xmlPath = "examples/07_project_dashboard/" + xmlPath
-          ElseIf FileSize(GetPathPart(ProgramFilename()) + xmlPath) > 0
-            xmlPath = GetPathPart(ProgramFilename()) + xmlPath
-          ElseIf FileSize("ProjectDashboardView.xml") > 0
-            xmlPath = "ProjectDashboardView.xml"
+          CompilerIf Defined(OOP_PROJECT_DIR, #PB_Constant)
+            If FileSize(#OOP_PROJECT_DIR + xmlPath) > 0
+              xmlPath = #OOP_PROJECT_DIR + xmlPath
+            ElseIf FileSize(#OOP_PROJECT_DIR + "views/" + GetFilePart(xmlPath)) > 0
+              xmlPath = #OOP_PROJECT_DIR + "views/" + GetFilePart(xmlPath)
+            ElseIf FileSize(#OOP_PROJECT_DIR + GetFilePart(xmlPath)) > 0
+              xmlPath = #OOP_PROJECT_DIR + GetFilePart(xmlPath)
+            EndIf
+          CompilerEndIf
+          CompilerIf Defined(OOP_WORKSPACE_DIR, #PB_Constant)
+            If FileSize(xmlPath) <= 0
+              If FileSize(#OOP_WORKSPACE_DIR + "examples/07_project_dashboard/" + xmlPath) > 0
+                xmlPath = #OOP_WORKSPACE_DIR + "examples/07_project_dashboard/" + xmlPath
+              ElseIf FileSize(#OOP_WORKSPACE_DIR + xmlPath) > 0
+                xmlPath = #OOP_WORKSPACE_DIR + xmlPath
+              EndIf
+            EndIf
+          CompilerEndIf
+          If FileSize(xmlPath) <= 0
+            If FileSize("examples/07_project_dashboard/" + xmlPath) > 0
+              xmlPath = "examples/07_project_dashboard/" + xmlPath
+            ElseIf FileSize(GetPathPart(ProgramFilename()) + xmlPath) > 0
+              xmlPath = GetPathPart(ProgramFilename()) + xmlPath
+            ElseIf FileSize("ProjectDashboardView.xml") > 0
+              xmlPath = "ProjectDashboardView.xml"
+            EndIf
           EndIf
         EndIf
   
@@ -11479,6 +11605,7 @@ EndProcedure
 
 DataSection
   UI_AnimationEngine_VTable_Data:
+    Data.i @UI_AnimationEngine_Free()
     Data.i @UI_AnimationEngine_ApplyEasing()
     Data.i @UI_AnimationEngine_LerpFloat()
     Data.i @UI_AnimationEngine_LerpColor()
@@ -11936,7 +12063,7 @@ DataSection
     Data.i @UI_Layouts_Container_SetBorderColor()
     Data.i @UI_Layouts_Container_SetBorderThickness()
     Data.i @UI_Layouts_Container_SetCornerRadius()
-    Data.i @UI_Layouts_Container_Free()
+    Data.i @UI_Layouts_DockPanel_Free()
     Data.i @UI_Layouts_Container_EnsureBgGadget()
     Data.i @UI_Layouts_Container_SetBorder()
     Data.i @UI_Layouts_Container_DrawBackground()
@@ -12013,7 +12140,7 @@ DataSection
     Data.i @UI_Layouts_Container_SetBorderColor()
     Data.i @UI_Layouts_Container_SetBorderThickness()
     Data.i @UI_Layouts_Container_SetCornerRadius()
-    Data.i @UI_Layouts_Container_Free()
+    Data.i @UI_Layouts_Grid_Free()
     Data.i @UI_Layouts_Container_EnsureBgGadget()
     Data.i @UI_Layouts_Container_SetBorder()
     Data.i @UI_Layouts_Container_DrawBackground()
@@ -14469,6 +14596,7 @@ EndProcedure
 
 Procedure Free_UI_AnimationEngine(*obj.UI_AnimationEngine_Inst)
   If *obj
+    UI_AnimationEngine_Free(*obj)
     FreeStructure(*obj)
   EndIf
 EndProcedure
@@ -14862,7 +14990,7 @@ EndProcedure
 
 Procedure Free_UI_Layouts_DockPanel(*obj.UI_Layouts_DockPanel_Inst)
   If *obj
-    UI_Layouts_Container_Free(*obj)
+    UI_Layouts_DockPanel_Free(*obj)
     FreeStructure(*obj)
   EndIf
 EndProcedure
@@ -14887,7 +15015,7 @@ EndProcedure
 
 Procedure Free_UI_Layouts_Grid(*obj.UI_Layouts_Grid_Inst)
   If *obj
-    UI_Layouts_Container_Free(*obj)
+    UI_Layouts_Grid_Free(*obj)
     FreeStructure(*obj)
   EndIf
 EndProcedure
@@ -15989,6 +16117,13 @@ Procedure UI_UpdateAnimations()
     UI_GlobalAnimEngine\Update()
   EndIf
 EndProcedure
+
+Procedure UI_ShutdownAnimationEngine()
+  If UI_GlobalAnimEngine
+    UI_GlobalAnimEngine\Free()
+    UI_GlobalAnimEngine = #Null
+  EndIf
+EndProcedure
 ; ============================================================================
 ; PureBasic OOP GUI Framework - Style.pbi
 ; WPF/XAML-style Declarative Style & Trigger System for CanvasControl
@@ -16752,23 +16887,34 @@ EnableExplicit
 
 
 
+; IDE Options = PureBasic 6.40 (Windows - x64)
+; CursorPosition = 81
+; FirstLine = 63
+; EnableXP
+; DPIAware
+
 
 
 
 ; 2. Instanciation de l'Application PureBasic OOP
 Define *app.UI_Application_vt = New_UI_Application_s("Project Dashboard - [WPF_ModernUI_App]")
 
-; 3. Instanciation du ViewModel (État réactif et logique métier)
+; 3. Instanciation du ViewModel (�tat r�actif et logique m�tier)
 Define *vm.Dashboard_ProjectDashboardViewModel_vt = New_Dashboard_ProjectDashboardViewModel()
 
 ; 4. Instanciation de la Vue (Injection du ViewModel en DataContext)
 Define *view.Dashboard_ProjectDashboardView_vt = New_Dashboard_ProjectDashboardView(*vm)
 
-; 5. Définition de la fenêtre principale et lancement de la boucle d'événements
+; 5. D�finition de la fen�tre principale et lancement de la boucle d'�v�nements
 *app\SetMainWindow(*view)
 *app\Run_void()
 
-; 6. Libération propre
+; 6. Lib�ration propre
 *view\Free()
 *vm\Free()
 *app\Free()
+
+; IDE Options = PureBasic 6.40 (Windows - x64)
+; CursorPosition = 23
+; EnableXP
+; DPIAware
