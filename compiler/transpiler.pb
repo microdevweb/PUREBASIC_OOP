@@ -118,6 +118,27 @@ Structure OOP_GeneratedLine
 EndStructure
 
 ; ----------------------------------------------------------------------------
+; Static Memory Leak Analysis Subsystem
+; ----------------------------------------------------------------------------
+
+#OOP_INSTANCE_ALLOCATED   = 0
+#OOP_INSTANCE_FREED       = 1
+#OOP_INSTANCE_TRANSFERRED = 2
+
+Structure OOP_TrackedInstance
+  varName.s
+  className.s
+  scopeName.s
+  allocLineNumber.i
+  allocFile.s
+  state.i
+EndStructure
+
+Global StrictLeaks.b = #False
+Global TotalLeaksDetected.i = 0
+Global TotalInstancesManaged.i = 0
+
+; ----------------------------------------------------------------------------
 ; Global Transpiler State
 ; ----------------------------------------------------------------------------
 
@@ -218,6 +239,20 @@ Procedure.s StripComment(text.s)
     EndIf
   Next
   ProcedureReturn Trim(text)
+EndProcedure
+
+Procedure.i FindCharOutsideQuotes(text.s, charToFind.s, startPos.i = 1)
+  Protected inQuotes.b = #False
+  Protected i.i, lenT.i = Len(text)
+  For i = startPos To lenT
+    Protected c.s = Mid(text, i, 1)
+    If c = Chr(34)
+      inQuotes = ~inQuotes & 1
+    ElseIf Not inQuotes And c = charToFind
+      ProcedureReturn i
+    EndIf
+  Next
+  ProcedureReturn 0
 EndProcedure
 
 ; Splits parameter string by comma taking quotes and parentheses into account
@@ -1788,6 +1823,226 @@ Procedure.b ValidateOOPModel()
 EndProcedure
 
 ; ----------------------------------------------------------------------------
+; Static Memory Leak Checker Engine
+; ----------------------------------------------------------------------------
+
+Procedure ProcessLineAllocation(cleanLine.s, lineNum.i, srcFile.s, scopeType.s, scopeName.s, List trackedList.OOP_TrackedInstance())
+  Protected pEq.i = FindCharOutsideQuotes(cleanLine, "=")
+  If pEq <= 1 : ProcedureReturn : EndIf
+  
+  Protected leftSide.s = Trim(Left(cleanLine, pEq - 1))
+  Protected rightSide.s = Trim(Mid(cleanLine, pEq + 1))
+  
+  ; Check if rightSide starts with "New " or "New("
+  Protected upRight.s = UCase(rightSide)
+  Protected isNew.b = #False
+  Protected clsName.s = ""
+  
+  If Left(upRight, 4) = "NEW " Or Left(upRight, 5) = "NEW  "
+    Protected afterNew.s = Trim(Mid(rightSide, 5))
+    Protected pOpen.i = FindString(afterNew, "(")
+    If pOpen > 0
+      clsName = Trim(Left(afterNew, pOpen - 1))
+      isNew = #True
+    EndIf
+  ElseIf Left(upRight, 4) = "NEW("
+    Protected afterParen.s = Trim(Mid(rightSide, 5))
+    Protected pComma.i = FindString(afterParen, ",")
+    Protected pClose.i = FindString(afterParen, ")")
+    Protected pEndCls.i = pComma
+    If pEndCls = 0 Or (pClose > 0 And pClose < pEndCls)
+      pEndCls = pClose
+    EndIf
+    If pEndCls > 0
+      clsName = Trim(Left(afterParen, pEndCls - 1))
+      isNew = #True
+    EndIf
+  EndIf
+  
+  If Not isNew Or clsName = "" : ProcedureReturn : EndIf
+  
+  ; Extract variable name from leftSide
+  Protected upLeft.s = UCase(leftSide)
+  If Left(upLeft, 7) = "DEFINE " : leftSide = Trim(Mid(leftSide, 8)) : EndIf
+  If Left(upLeft, 10) = "PROTECTED " : leftSide = Trim(Mid(leftSide, 11)) : EndIf
+  If Left(upLeft, 7) = "GLOBAL " : leftSide = Trim(Mid(leftSide, 8)) : EndIf
+  If Left(upLeft, 7) = "STATIC " : leftSide = Trim(Mid(leftSide, 8)) : EndIf
+  If Left(upLeft, 9) = "THREADED " : leftSide = Trim(Mid(leftSide, 10)) : EndIf
+  If Left(upLeft, 7) = "SHARED " : leftSide = Trim(Mid(leftSide, 8)) : EndIf
+  
+  Protected varName.s = leftSide
+  Protected pDot.i = FindString(varName, ".")
+  If pDot > 0
+    varName = Trim(Left(varName, pDot - 1))
+  EndIf
+  Protected pSpace.i = FindString(varName, " ")
+  If pSpace > 0
+    varName = Trim(Left(varName, pSpace - 1))
+  EndIf
+  
+  If varName = "" : ProcedureReturn : EndIf
+  
+  ; Check if variable was already allocated in this scope without being freed (Reassignment leak)
+  ForEach trackedList()
+    If trackedList()\varName = varName And trackedList()\state = #OOP_INSTANCE_ALLOCATED
+      PrintN("[WARN_LEAK] Line " + Str(lineNum) + " in " + GetFilePart(srcFile) + ": Variable '" + varName + "' is reassigned with 'New' without releasing its previous instance of Class '" + trackedList()\className + "' (allocated at Line " + Str(trackedList()\allocLineNumber) + ").")
+      TotalLeaksDetected + 1
+      trackedList()\state = #OOP_INSTANCE_FREED ; Mark old as warned to avoid duplicate warning
+      Break
+    EndIf
+  Next
+  
+  ; Register new tracked instance
+  AddElement(trackedList())
+  trackedList()\varName = varName
+  trackedList()\className = clsName
+  trackedList()\scopeName = scopeName
+  trackedList()\allocLineNumber = lineNum
+  trackedList()\allocFile = srcFile
+  trackedList()\state = #OOP_INSTANCE_ALLOCATED
+EndProcedure
+
+Procedure ProcessLineLifecycle(cleanLine.s, List trackedList.OOP_TrackedInstance())
+  If ListSize(trackedList()) = 0 : ProcedureReturn : EndIf
+  
+  Protected upLine.s = UCase(cleanLine)
+  Protected isProcRet.b = Bool(Left(upLine, 15) = "PROCEDURERETURN")
+  Protected hasAddChild.b = Bool(FindString(cleanLine, "AddChild(") > 0 Or FindString(cleanLine, "AddChild (") > 0)
+  Protected hasAddElement.b = Bool(FindString(cleanLine, "AddElement(") > 0 Or FindString(cleanLine, "AddElement (") > 0)
+  Protected hasRegister.b = Bool(FindString(cleanLine, "Register") > 0)
+  Protected isFieldAssign.b = Bool((FindString(cleanLine, "This\") > 0 Or FindString(cleanLine, "*This\") > 0) And FindString(cleanLine, "=") > 0)
+
+  ForEach trackedList()
+    If trackedList()\state = #OOP_INSTANCE_ALLOCATED
+      Protected vName.s = trackedList()\varName
+      Protected cName.s = trackedList()\className
+
+      ; 1. Check for Free
+      If FindString(cleanLine, vName + "\Free(") > 0 Or 
+         FindString(cleanLine, vName + "\Free (") > 0 Or 
+         FindString(cleanLine, "Free(" + vName + ")") > 0 Or 
+         FindString(cleanLine, "Free (" + vName + ")") > 0 Or 
+         FindString(cleanLine, "FreeStructure(" + vName + ")") > 0 Or 
+         FindString(cleanLine, "FreeStructure (" + vName + ")") > 0 Or 
+         FindString(cleanLine, "Free_" + cName + "(" + vName + ")") > 0 Or 
+         FindString(cleanLine, "Free " + vName) > 0
+        trackedList()\state = #OOP_INSTANCE_FREED
+        Continue
+      EndIf
+
+      ; 2. Check for Ownership Transfer (ProcedureReturn, This\field =, AddChild, AddElement, Register)
+      If isProcRet And FindString(cleanLine, vName) > 0
+        trackedList()\state = #OOP_INSTANCE_TRANSFERRED
+        Continue
+      EndIf
+
+      If isFieldAssign And FindString(cleanLine, vName) > 0
+        trackedList()\state = #OOP_INSTANCE_TRANSFERRED
+        Continue
+      EndIf
+
+      If (hasAddChild Or hasAddElement Or hasRegister) And FindString(cleanLine, vName) > 0
+        trackedList()\state = #OOP_INSTANCE_TRANSFERRED
+        Continue
+      EndIf
+    EndIf
+  Next
+EndProcedure
+
+Procedure CheckScopeInstances(List trackedList.OOP_TrackedInstance(), scopeType.s, scopeName.s)
+  ForEach trackedList()
+    If trackedList()\state = #OOP_INSTANCE_ALLOCATED
+      TotalLeaksDetected + 1
+      PrintN("[WARN_LEAK] Line " + Str(trackedList()\allocLineNumber) + " in " + GetFilePart(trackedList()\allocFile) + ": Instance '" + trackedList()\varName + "' of Class '" + trackedList()\className + "' was allocated with 'New' but is never released in " + scopeType + " '" + scopeName + "'.")
+    Else
+      TotalInstancesManaged + 1
+    EndIf
+  Next
+  ClearList(trackedList())
+EndProcedure
+
+Procedure.b CheckMemoryLeaks()
+  TotalLeaksDetected = 0
+  TotalInstancesManaged = 0
+  
+  ; 1. Check all Class Method Bodies
+  ForEach MethodBodies()
+    Protected NewList methodTracked.OOP_TrackedInstance()
+    Protected methScope.s = MethodBodies()\className + "::" + MethodBodies()\methodName
+    
+    ForEach MethodBodies()\BodyLines()
+      Protected rawL.s = MethodBodies()\BodyLines()\content
+      Protected cleanL.s = StripComment(rawL)
+      If cleanL = "" : Continue : EndIf
+      
+      ProcessLineAllocation(cleanL, MethodBodies()\BodyLines()\srcLineNumber, MethodBodies()\BodyLines()\srcFile, "Method", methScope, methodTracked())
+      ProcessLineLifecycle(cleanL, methodTracked())
+    Next
+    
+    CheckScopeInstances(methodTracked(), "Method", methScope)
+  Next
+  
+  ; 2. Check MainLines (Top-level + regular Procedures)
+  Protected NewList mainTracked.OOP_TrackedInstance()
+  Protected NewList procTracked.OOP_TrackedInstance()
+  Protected inProc.b = #False
+  Protected curProcName.s = ""
+  
+  ForEach MainLines()
+    rawL = MainLines()\content
+    cleanL = StripComment(rawL)
+    If cleanL = "" : Continue : EndIf
+    
+    Protected upL.s = UCase(cleanL)
+    If Left(upL, 10) = "PROCEDURE " Or Left(upL, 10) = "PROCEDURE." Or Left(upL, 11) = "PROCEDUREC " Or Left(upL, 11) = "PROCEDUREC."
+      inProc = #True
+      curProcName = Trim(Mid(cleanL, FindString(cleanL, " ") + 1))
+      Protected pParen.i = FindString(curProcName, "(")
+      If pParen > 0 : curProcName = Trim(Left(curProcName, pParen - 1)) : EndIf
+      Protected pDotProc.i = FindString(curProcName, ".")
+      If pDotProc > 0 : curProcName = Trim(Mid(curProcName, pDotProc + 1)) : EndIf
+      ClearList(procTracked())
+      Continue
+    ElseIf upL = "ENDPROCEDURE"
+      If inProc
+        CheckScopeInstances(procTracked(), "Procedure", curProcName)
+        inProc = #False
+        curProcName = ""
+      EndIf
+      Continue
+    EndIf
+    
+    If inProc
+      ProcessLineAllocation(cleanL, MainLines()\srcLineNumber, MainLines()\srcFile, "Procedure", curProcName, procTracked())
+      ProcessLineLifecycle(cleanL, procTracked())
+    Else
+      ProcessLineAllocation(cleanL, MainLines()\srcLineNumber, MainLines()\srcFile, "Scope", "Main", mainTracked())
+      ProcessLineLifecycle(cleanL, mainTracked())
+    EndIf
+  Next
+  
+  If inProc
+    CheckScopeInstances(procTracked(), "Procedure", curProcName)
+  EndIf
+  CheckScopeInstances(mainTracked(), "Scope", "Main")
+  
+  ; Summary
+  If TotalLeaksDetected > 0
+    PrintN("")
+    PrintN("[INFO] Static Memory Analysis: " + Str(TotalLeaksDetected) + " potential memory leak(s) detected, " + Str(TotalInstancesManaged) + " instance(s) properly managed.")
+    PrintN("")
+    If StrictLeaks
+      SetOOPError(0, "Strict leak check failed: " + Str(TotalLeaksDetected) + " potential memory leak(s) detected.")
+      ProcedureReturn #False
+    EndIf
+  ElseIf TotalInstancesManaged > 0
+    PrintN("[INFO] Static Memory Analysis: 0 leaks detected, all " + Str(TotalInstancesManaged) + " instance(s) properly managed.")
+  EndIf
+  
+  ProcedureReturn #True
+EndProcedure
+
+; ----------------------------------------------------------------------------
 ; Code Generation Phase: Emit PureBasic Code & Source Map
 ; ----------------------------------------------------------------------------
 
@@ -2526,6 +2781,10 @@ Procedure.b TranspileSourceFile(inputFile.s, outputFile.s)
     ProcedureReturn #False
   EndIf
 
+  If Not CheckMemoryLeaks()
+    ProcedureReturn #False
+  EndIf
+
   If Not GenerateTargetPB(outputFile, inputFile)
     ProcedureReturn #False
   EndIf
@@ -2543,6 +2802,10 @@ Procedure.b CheckSourceFileSyntax(inputFile.s)
   EndIf
 
   If Not ValidateOOPModel()
+    ProcedureReturn #False
+  EndIf
+
+  If Not CheckMemoryLeaks()
     ProcedureReturn #False
   EndIf
 
@@ -2577,6 +2840,8 @@ Procedure.i Main()
       If i < argCount
         checkFile = ProgramParameter(i)
       EndIf
+    ElseIf UCase(param) = "--STRICT-LEAKS"
+      StrictLeaks = #True
     Else
       If inputPBO = ""
         inputPBO = param

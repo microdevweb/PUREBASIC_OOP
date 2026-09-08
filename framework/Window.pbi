@@ -254,6 +254,12 @@ Namespace UI {
       ProcedureReturn This\dataContext
     }
 
+    Public Method SetBackgroundColor(col_p.i) {
+      If (This\id And IsWindow(This\id)) {
+        SetWindowColor(This\id, col_p)
+      }
+    }
+
     Public Method.b LoadView(xmlPath.s, *dataContext_p = 0) {
       If (*dataContext_p) {
         This\SetDataContext(*dataContext_p)

@@ -2323,6 +2323,18 @@ Procedure.s TranspileOOPFile(SourceFileName$, BaseDir$ = "")
         LoadOOPSourceMap(transpiledFile$ + ".map")
         RegisterDeleteFile(transpiledFile$ + ".map")
       EndIf
+      
+      ; Forward Transpiler warnings & memory leak analysis to IDE Log panel
+      If *ActiveSource
+        Protected wIdx.i, wTotal.i = CountString(outputLog$, #NewLine)
+        For wIdx = 1 To wTotal
+          Protected wLine$ = Trim(StringField(outputLog$, wIdx, #NewLine))
+          If Left(wLine$, 11) = "[WARN_LEAK]" Or Left(wLine$, 7) = "[INFO] " Or Left(wLine$, 6) = "[WARN]"
+            Debugger_AddLog_BySource(*ActiveSource, wLine$, Date())
+          EndIf
+        Next
+      EndIf
+      
       ProcedureReturn transpiledFile$
     Else
       ; Parse OOP Error output

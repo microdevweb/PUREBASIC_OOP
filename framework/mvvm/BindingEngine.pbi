@@ -63,16 +63,29 @@ Procedure UI_BindingEngine_OnVMPropertyChanged(*vm, *pKeyPtr)
             
             Select tProp
               Case "text", "value"
-                SetGadgetText(*ctrl\GetID(), valStr)
+                *ctrl\SetText(valStr)
               Case "checked", "state"
                 Protected bVal.b = #False
                 If UCase(valStr) = "TRUE" Or valStr = "1" : bVal = #True : EndIf
-                SetGadgetState(*ctrl\GetID(), bVal)
+                *ctrl\SetChecked(bVal)
               Case "progress", "progressvalue"
-                SetGadgetState(*ctrl\GetID(), Val(valStr))
+                *ctrl\SetState(Val(valStr))
+              Case "background"
+                *ctrl\SetBackground(Val(valStr))
+              Case "foreground"
+                *ctrl\SetForeground(Val(valStr))
+              Case "isenabled"
+                Protected isEn.b = #False
+                If UCase(valStr) = "TRUE" Or valStr = "1" : isEn = #True : EndIf
+                *ctrl\SetEnabled(isEn)
+              Case "isvisible"
+                Protected isVis.b = #False
+                If UCase(valStr) = "TRUE" Or valStr = "1" : isVis = #True : EndIf
+                *ctrl\SetVisible(isVis)
               Default:
-                SetGadgetText(*ctrl\GetID(), valStr)
+                *ctrl\SetText(valStr)
             EndSelect
+            *ctrl\Redraw()
           EndIf
           UI_ActivePropertyBindings()\isUpdating = #False
         EndIf
@@ -125,17 +138,30 @@ Procedure UI_MVVM_RegisterBinding(*control.UI_Gadget_vt, targetProp.s, *viewMode
   If initialVal <> "" And IsGadget(*control\GetID())
     Protected tProp.s = LCase(targetProp)
     Select tProp
-      Case "text"
-        SetGadgetText(*control\GetID(), initialVal)
+      Case "text", "value"
+        *control\SetText(initialVal)
       Case "checked", "state"
-        Protected bVal.b = #False
-        If UCase(initialVal) = "TRUE" Or initialVal = "1" : bVal = #True : EndIf
-        SetGadgetState(*control\GetID(), bVal)
+        Protected bInitVal.b = #False
+        If UCase(initialVal) = "TRUE" Or initialVal = "1" : bInitVal = #True : EndIf
+        *control\SetChecked(bInitVal)
       Case "progress", "progressvalue"
-        SetGadgetState(*control\GetID(), Val(initialVal))
+        *control\SetState(Val(initialVal))
+      Case "background"
+        *control\SetBackground(Val(initialVal))
+      Case "foreground"
+        *control\SetForeground(Val(initialVal))
+      Case "isenabled"
+        Protected isInitEn.b = #False
+        If UCase(initialVal) = "TRUE" Or initialVal = "1" : isInitEn = #True : EndIf
+        *control\SetEnabled(isInitEn)
+      Case "isvisible"
+        Protected isInitVis.b = #False
+        If UCase(initialVal) = "TRUE" Or initialVal = "1" : isInitVis = #True : EndIf
+        *control\SetVisible(isInitVis)
       Default:
-        SetGadgetText(*control\GetID(), initialVal)
+        *control\SetText(initialVal)
     EndSelect
+    *control\Redraw()
   EndIf
 EndProcedure
 
@@ -177,18 +203,20 @@ Procedure.b UI_MVVM_DispatchUIEvent(*control.UI_Gadget_vt, eventType.i)
 
   Protected handled.b = #False
 
-  ; 1. Check Command Bindings (Button click / Toggle change)
-  ForEach UI_ActiveCommandBindings()
-    If UI_ActiveCommandBindings()\control = *control
-      Protected *cmdVM.MVVM_ViewModelBase_vt = UI_ActiveCommandBindings()\viewModel
-      If *cmdVM
-        *cmdVM\ExecuteCommand(UI_ActiveCommandBindings()\commandName, *control)
-        handled = #True
+  ; 1. Check Command Bindings (Button click / Canvas click / Toggle change)
+  If eventType = #PB_EventType_LeftClick Or eventType = #PB_EventType_LeftButtonUp Or eventType = #PB_EventType_Change
+    ForEach UI_ActiveCommandBindings()
+      If UI_ActiveCommandBindings()\control = *control
+        Protected *cmdVM.MVVM_ViewModelBase_vt = UI_ActiveCommandBindings()\viewModel
+        If *cmdVM
+          *cmdVM\ExecuteCommand(UI_ActiveCommandBindings()\commandName, *control)
+          handled = #True
+        EndIf
       EndIf
-    EndIf
-  Next
+    Next
+  EndIf
 
-  ; 2. Check Two-Way Property Bindings (TextBox change / CheckBox click)
+  ; 2. Check Two-Way Property Bindings (TextBox change / CheckBox click / Hover / Press / Focus)
   ForEach UI_ActivePropertyBindings()
     If UI_ActivePropertyBindings()\control = *control
       If UI_ActivePropertyBindings()\mode = #UI_BindingMode_TwoWay
@@ -196,18 +224,48 @@ Procedure.b UI_MVVM_DispatchUIEvent(*control.UI_Gadget_vt, eventType.i)
           UI_ActivePropertyBindings()\isUpdating = #True
           Protected *propVM.MVVM_ViewModelBase_vt = UI_ActivePropertyBindings()\viewModel
           If *propVM And IsGadget(*control\GetID())
-            Protected curText.s = GetGadgetText(*control\GetID())
             Protected tProp.s = LCase(UI_ActivePropertyBindings()\targetProp)
-            If tProp = "checked" Or tProp = "state"
-              If GetGadgetState(*control\GetID())
-                *propVM\SetBool(UI_ActivePropertyBindings()\sourceProp, #True)
-              Else
-                *propVM\SetBool(UI_ActivePropertyBindings()\sourceProp, #False)
-              EndIf
-            Else
-              *propVM\SetString(UI_ActivePropertyBindings()\sourceProp, curText)
-            EndIf
-            handled = #True
+            Select tProp
+              Case "ismouseover", "ishovered"
+                If eventType = #PB_EventType_MouseEnter
+                  *propVM\SetBool(UI_ActivePropertyBindings()\sourceProp, #True)
+                  handled = #True
+                ElseIf eventType = #PB_EventType_MouseLeave
+                  *propVM\SetBool(UI_ActivePropertyBindings()\sourceProp, #False)
+                  handled = #True
+                EndIf
+
+              Case "ispressed"
+                If eventType = #PB_EventType_LeftButtonDown
+                  *propVM\SetBool(UI_ActivePropertyBindings()\sourceProp, #True)
+                  handled = #True
+                ElseIf eventType = #PB_EventType_LeftButtonUp
+                  *propVM\SetBool(UI_ActivePropertyBindings()\sourceProp, #False)
+                  handled = #True
+                EndIf
+
+              Case "isfocused"
+                If eventType = #PB_EventType_Focus
+                  *propVM\SetBool(UI_ActivePropertyBindings()\sourceProp, #True)
+                  handled = #True
+                ElseIf eventType = #PB_EventType_LostFocus
+                  *propVM\SetBool(UI_ActivePropertyBindings()\sourceProp, #False)
+                  handled = #True
+                EndIf
+
+              Case "checked", "state"
+                If eventType = #PB_EventType_LeftClick Or eventType = #PB_EventType_LeftButtonUp Or eventType = #PB_EventType_Change
+                  *propVM\SetBool(UI_ActivePropertyBindings()\sourceProp, *control\IsChecked())
+                  handled = #True
+                EndIf
+
+              Case "text", "value"
+                If eventType = #PB_EventType_Change Or eventType = #PB_EventType_Input
+                  Protected curText.s = *control\GetText()
+                  *propVM\SetString(UI_ActivePropertyBindings()\sourceProp, curText)
+                  handled = #True
+                EndIf
+            EndSelect
           EndIf
           UI_ActivePropertyBindings()\isUpdating = #False
         EndIf

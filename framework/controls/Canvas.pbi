@@ -16,7 +16,7 @@ Namespace UI {
       This\x = 0 : This\y = 0 : This\width = 200 : This\height = 200
       This\desiredWidth = 200 : This\desiredHeight = 200
       This\isVisible = #True : This\isEnabled = #True
-      This\id = CanvasGadget(#PB_Any, 0, 0, 200, 200, #PB_Canvas_Keyboard | #PB_Canvas_ClipMouse)
+      This\id = CanvasGadget(#PB_Any, 0, 0, 200, 200, #PB_Canvas_Keyboard)
       If (This\id) {
         UI::RegisterGadget(This\id, This)
       }
@@ -28,7 +28,7 @@ Namespace UI {
       This\x = 0 : This\y = 0 : This\width = w_p : This\height = h_p
       This\desiredWidth = w_p : This\desiredHeight = h_p
       This\isVisible = #True : This\isEnabled = #True
-      This\id = CanvasGadget(#PB_Any, 0, 0, w_p, h_p, #PB_Canvas_Keyboard | #PB_Canvas_ClipMouse)
+      This\id = CanvasGadget(#PB_Any, 0, 0, w_p, h_p, #PB_Canvas_Keyboard)
       If (This\id) {
         UI::RegisterGadget(This\id, This)
       }
@@ -40,7 +40,7 @@ Namespace UI {
       This\x = x_p : This\y = y_p : This\width = w_p : This\height = h_p
       This\desiredWidth = w_p : This\desiredHeight = h_p
       This\isVisible = #True : This\isEnabled = #True
-      This\id = CanvasGadget(#PB_Any, x_p, y_p, w_p, h_p, #PB_Canvas_Keyboard | #PB_Canvas_ClipMouse)
+      This\id = CanvasGadget(#PB_Any, x_p, y_p, w_p, h_p, #PB_Canvas_Keyboard)
       If (This\id) {
         UI::RegisterGadget(This\id, This)
       }

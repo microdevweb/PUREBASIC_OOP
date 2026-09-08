@@ -6,6 +6,7 @@
 
 XIncludeFile "Component.pbi"
 XIncludeFile "Gadget.pbi"
+XIncludeFile "CanvasControl.pbi"
 XIncludeFile "CustomGadget.pbi"
 
 ; MVVM (Model-View-ViewModel) Architecture
@@ -35,9 +36,13 @@ XIncludeFile "controls/GroupBox.pbi"
 XIncludeFile "controls/TabControl.pbi"
 
 ; Custom Controls
+XIncludeFile "controls/CanvasButton.pbi"
+XIncludeFile "controls/CanvasText.pbi"
+XIncludeFile "controls/CanvasTextBox.pbi"
 XIncludeFile "controls/ToggleSwitch.pbi"
 XIncludeFile "controls/ListIcon.pbi"
 XIncludeFile "controls/Canvas.pbi"
+XIncludeFile "controls/CanvasTree.pbi"
 
 ; Declarative XML / XAML Layout Loader
 XIncludeFile "XMLLoader.pbi"

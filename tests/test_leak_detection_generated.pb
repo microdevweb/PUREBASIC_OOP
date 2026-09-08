@@ -14,8 +14,8 @@ EnableExplicit
 ; 1. PUREBASIC INTERFACES (VTABLE PROTOTYPES)
 ; ----------------------------------------------------------------------------
 
-Interface Chien_vt
-  Aboyer()
+Interface Document_vt
+  Afficher()
   Free()
 EndInterface
 
@@ -23,10 +23,9 @@ EndInterface
 ; 2. INSTANCE STRUCTURES
 ; ----------------------------------------------------------------------------
 
-Structure Chien_Inst
-  *VTable.Chien_vt
-  nom.s
-  age.i
+Structure Document_Inst
+  *VTable.Document_vt
+  titre.s
 EndStructure
 
 ; ----------------------------------------------------------------------------
@@ -38,21 +37,25 @@ EndStructure
 ; 3. METHOD PROCEDURES IMPLEMENTATION
 ; ----------------------------------------------------------------------------
 
-Declare Chien_Init(*This.Chien_Inst, nom_p.s, age_p.i)
-Declare Chien_Aboyer(*This.Chien_Inst)
+Declare Document_Init(*This.Document_Inst, titre_p.s)
+Declare Document_Afficher(*This.Document_Inst)
+Declare Document_Free(*This.Document_Inst)
 
-Declare.i New_Chien(nom_p.s, age_p.i)
-Declare Free_Chien(*obj.Chien_Inst)
+Declare.i New_Document(titre_p.s)
+Declare Free_Document(*obj.Document_Inst)
 
-Procedure Chien_Init(*This.Chien_Inst, nom_p.s, age_p.i)
-  Protected *This_vt.Chien_vt = *This
-    *This\nom = nom_p
-    *This\age = age_p
+Procedure Document_Init(*This.Document_Inst, titre_p.s)
+  Protected *This_vt.Document_vt = *This
+      *This\titre = titre_p
 EndProcedure
 
-Procedure Chien_Aboyer(*This.Chien_Inst)
-  Protected *This_vt.Chien_vt = *This
-    PrintN(*This\nom + " dit : Wouaf ! Wouaf ! (Age : " + Str(*This\age) + " ans)")
+Procedure Document_Afficher(*This.Document_Inst)
+  Protected *This_vt.Document_vt = *This
+      PrintN("Document: " + *This\titre)
+EndProcedure
+
+Procedure Document_Free(*This.Document_Inst)
+  Protected *This_vt.Document_vt = *This
 EndProcedure
 
 ; ----------------------------------------------------------------------------
@@ -60,27 +63,27 @@ EndProcedure
 ; ----------------------------------------------------------------------------
 
 DataSection
-  Chien_VTable_Data:
-    Data.i @Chien_Aboyer()
-    Data.i @Chien_Free()
+  Document_VTable_Data:
+    Data.i @Document_Afficher()
+    Data.i @Document_Free()
 EndDataSection
 
 ; ----------------------------------------------------------------------------
 ; 5. CONSTRUCTORS & FACTORY FUNCTIONS
 ; ----------------------------------------------------------------------------
 
-Procedure.i New_Chien(nom_p.s, age_p.i)
-  Protected *obj.Chien_Inst = AllocateStructure(Chien_Inst)
+Procedure.i New_Document(titre_p.s)
+  Protected *obj.Document_Inst = AllocateStructure(Document_Inst)
   If *obj
-    *obj\VTable = ?Chien_VTable_Data
-    Chien_Init(*obj, nom_p, age_p)
+    *obj\VTable = ?Document_VTable_Data
+    Document_Init(*obj, titre_p)
   EndIf
   ProcedureReturn *obj
 EndProcedure
 
-Procedure Free_Chien(*obj.Chien_Inst)
+Procedure Free_Document(*obj.Document_Inst)
   If *obj
-    Chien_Free(*obj)
+    Document_Free(*obj)
     FreeStructure(*obj)
   EndIf
 EndProcedure
@@ -89,24 +92,45 @@ EndProcedure
 ; 6. MAIN PROGRAM EXECUTION
 ; ----------------------------------------------------------------------------
 
-
-
-
 ; ============================================================================
-; EXEMPLE D'UTILISATION DE LA SYNTAXE POO (.pb)
+; Test: Static Memory Leak Detection System (Transpiler Warning)
 ; ============================================================================
 
-; Instanciation simple de deux objets Chien
-Define *chien1.Chien_vt = New_Chien("Médor", 3)
-Define *chien2.Chien_vt = New_Chien("Rox", 5)
+OpenConsole("PureBasic OOP - Test Leak Detection")
 
-; Utilisation des méthodes
-If *chien1
-  *chien1\Aboyer()
-  *chien1\Free()
-EndIf
 
-If *chien2
-  *chien2\Aboyer()
-  *chien2\Free()
-EndIf
+Procedure TraiterRapport()
+  ; CAS 1 : ALERTE ! Cette instance n'est jamais liberee avant la fin de la procedure
+  Protected *docTemporaire.Document_vt = New_Document("Rapport Annuel")
+  *docTemporaire\Afficher()
+  ; -> Manque Free(*docTemporaire) ou *docTemporaire\Free()
+EndProcedure
+
+Procedure.i CreerDocumentModele()
+  ; CAS 2 : SAIN. L'objet est retourne (transfert de propriete a l'appelant)
+  Protected *modele.Document_vt = New_Document("Modele V1")
+  ProcedureReturn *modele
+EndProcedure
+
+; ============================================================================
+; MAIN PROGRAM
+; ============================================================================
+
+PrintN("--- Execution des tests ---")
+
+; Execution de la procedure avec fuite
+TraiterRapport()
+
+; CAS 3 : SAIN dans Main (Alloue puis libere)
+Define *monDoc.Document_vt = New_Document("Doc Main")
+*monDoc\Afficher()
+*monDoc\Free()
+
+; CAS 4 : ALERTE dans Main ! (Alloue mais jamais libere)
+Define *docOublie.Document_vt = New_Document("Oubli Final")
+; -> Manque *docOublie\Free()
+
+PrintN("")
+PrintN("Tests termines ! Appuyez sur Entree pour quitter...")
+Input()
+CloseConsole()

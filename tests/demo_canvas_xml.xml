@@ -1,0 +1,142 @@
+<Window Title="PureBasic WPF CanvasControl Studio - Declarative Vector GUI" Width="820" Height="700" Background="#F1F5F9">
+  <StackPanel Orientation="Vertical" Margin="24">
+
+    <!-- 1. En-tête Principal de l'Application -->
+    <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+      <StackPanel Orientation="Vertical" Width="600">
+        <CanvasText Text="Tableau de Bord &amp; Studio Vectoriel" 
+                    FontName="Segoe UI" FontSize="15" FontBold="True" 
+                    Foreground="#0F172A" Height="30" HAlign="Left" />
+        <CanvasText Text="Interface déclarative XML avec styles WPF, machine d'états, survol et champs de saisie vectoriels." 
+                    FontName="Segoe UI" FontSize="9" 
+                    Foreground="#64748B" Height="20" HAlign="Left" />
+      </StackPanel>
+
+      <!-- Badge de Statut Pill Vectoriel -->
+      <CanvasText Text="● En ligne" Width="100" Height="26" Margin="40,4,0,0"
+                  FontName="Segoe UI" FontSize="9" FontBold="True"
+                  Background="#DCFCE7" Foreground="#15803D" 
+                  BorderColor="#86EFAC" BorderThickness="1" CornerRadius="13" 
+                  HAlign="Center" Transparent="False" />
+    </StackPanel>
+
+    <!-- 2. Bannière d'Information Dynamique -->
+    <CanvasText Text="Survolez ou cliquez sur les boutons et testez la frappe, la sélection à la souris et les raccourcis dans les CanvasTextBox." 
+                Height="38" Margin="0,0,0,16"
+                FontName="Segoe UI" FontSize="9"
+                Background="#EFF6FF" Foreground="#1D4ED8" 
+                BorderColor="#BFDBFE" BorderThickness="1" CornerRadius="8" 
+                Padding="16,0,16,0" HAlign="Left" Transparent="False" />
+
+    <!-- 3. Section Saisie de Texte Vectorielle (CanvasTextBox) -->
+    <CanvasText Text="Champs de Saisie Vectoriels (CanvasTextBox WinUI 3)" 
+                FontName="Segoe UI" FontSize="11" FontBold="True" 
+                Foreground="#334155" Height="24" Margin="0,0,0,8" HAlign="Left" />
+
+    <!-- Barre de Recherche Vectorielle Pleine Largeur -->
+    <CanvasTextBox Name="txtSearch" Height="36" Margin="0,0,0,12"
+                   Placeholder="Rechercher un composant, une classe ou une ressource..."
+                   CornerRadius="8" BorderColor="#CBD5E1" ActiveBorderColor="#3B82F6"
+                   FontName="Segoe UI" FontSize="10" />
+
+    <!-- Ligne de Formulaire: Nom d'utilisateur & Mot de passe -->
+    <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+      <StackPanel Orientation="Vertical" Width="360" Margin="0,0,16,0">
+        <CanvasText Text="Nom d'utilisateur :" Height="20" Margin="0,0,0,4"
+                    FontName="Segoe UI" FontSize="9" FontBold="True" Foreground="#475569" HAlign="Left" />
+        <CanvasTextBox Name="txtUser" Text="microdev_web" Height="36"
+                       Placeholder="Entrez votre identifiant"
+                       CornerRadius="6" BorderColor="#CBD5E1" ActiveBorderColor="#2563EB"
+                       FontName="Segoe UI" FontSize="9" />
+      </StackPanel>
+
+      <StackPanel Orientation="Vertical" Width="260" Margin="0,0,16,0">
+        <CanvasText Text="Mot de passe sécurisé :" Height="20" Margin="0,0,0,4"
+                    FontName="Segoe UI" FontSize="9" FontBold="True" Foreground="#475569" HAlign="Left" />
+        <CanvasTextBox Name="txtPass" Text="Secret1234" IsPassword="True" Height="36"
+                       Placeholder="••••••••"
+                       CornerRadius="6" BorderColor="#CBD5E1" ActiveBorderColor="#2563EB"
+                       FontName="Segoe UI" FontSize="9" />
+      </StackPanel>
+
+      <CanvasButton Text="Connexion" Width="110" Height="36" Margin="0,24,0,0"
+                    Variant="Primary" CornerRadius="6"
+                    FontName="Segoe UI" FontSize="9" FontBold="True" />
+    </StackPanel>
+
+    <!-- 4. Section 1: Variantes Prédéfinies WPF / WinUI 3 -->
+    <CanvasText Text="Variantes de Boutons Prédéfinies" 
+                FontName="Segoe UI" FontSize="11" FontBold="True" 
+                Foreground="#334155" Height="24" Margin="0,0,0,8" HAlign="Left" />
+
+    <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+      <CanvasButton Text="Action Primary" Width="140" Height="36" 
+                    Variant="Primary" CornerRadius="6" Margin="0,0,12,0" 
+                    FontName="Segoe UI" FontSize="9" FontBold="True" />
+
+      <CanvasButton Text="Valider (Success)" Width="140" Height="36" 
+                    Variant="Success" CornerRadius="6" Margin="0,0,12,0" 
+                    FontName="Segoe UI" FontSize="9" FontBold="True" />
+
+      <CanvasButton Text="Style Outline" Width="130" Height="36" 
+                    Variant="Outline" CornerRadius="6" Margin="0,0,12,0" 
+                    FontName="Segoe UI" FontSize="9" />
+
+      <CanvasButton Text="Style Ghost" Width="120" Height="36" 
+                    Variant="Ghost" CornerRadius="6" Margin="0,0,12,0" 
+                    FontName="Segoe UI" FontSize="9" />
+
+      <CanvasButton Text="Dark Edition" Width="130" Height="36" 
+                    Variant="Dark" CornerRadius="6" 
+                    FontName="Segoe UI" FontSize="9" />
+    </StackPanel>
+
+    <!-- 5. Section 2: Survol et Couleurs Personnalisées en Direct en XML -->
+    <CanvasText Text="Boutons avec Survol et Styles Personnalisés Déclarés en XML" 
+                FontName="Segoe UI" FontSize="11" FontBold="True" 
+                Foreground="#334155" Height="24" Margin="0,0,0,8" HAlign="Left" />
+
+    <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+      <CanvasButton Text="Violet Glow" Width="140" Height="38" Margin="0,0,12,0"
+                    Background="#8B5CF6" Foreground="#FFFFFF"
+                    HoverBackground="#7C3AED" HoverForeground="#FFFFFF"
+                    PressedBackground="#6D28D9" PressedForeground="#FFFFFF"
+                    BorderColor="#7C3AED" BorderThickness="1" CornerRadius="8"
+                    FontName="Segoe UI" FontSize="9" FontBold="True" />
+
+      <CanvasButton Text="Warning Amber" Width="140" Height="38" Margin="0,0,12,0"
+                    Background="#F59E0B" Foreground="#FFFFFF"
+                    HoverBackground="#D97706" HoverForeground="#FFFFFF"
+                    PressedBackground="#B45309" PressedForeground="#FFFFFF"
+                    BorderColor="#D97706" BorderThickness="1" CornerRadius="8"
+                    FontName="Segoe UI" FontSize="9" FontBold="True" />
+
+      <CanvasButton Text="Cyan Lagoon" Width="130" Height="38" Margin="0,0,12,0"
+                    Background="#06B6D4" Foreground="#FFFFFF"
+                    HoverBackground="#0891B2" HoverForeground="#FFFFFF"
+                    PressedBackground="#0E7490" PressedForeground="#FFFFFF"
+                    BorderColor="#0891B2" BorderThickness="1" CornerRadius="8"
+                    FontName="Segoe UI" FontSize="9" FontBold="True" />
+
+      <CanvasButton Text="Pilule Magenta" Width="140" Height="38" Margin="0,0,12,0"
+                    Background="#EC4899" Foreground="#FFFFFF"
+                    HoverBackground="#DB2777" HoverForeground="#FFFFFF"
+                    PressedBackground="#BE185D" PressedForeground="#FFFFFF"
+                    BorderColor="#DB2777" BorderThickness="1" CornerRadius="19"
+                    FontName="Segoe UI" FontSize="9" FontBold="True" />
+
+      <CanvasButton Text="Supprimer" Width="110" Height="38" 
+                    Variant="Danger" CornerRadius="8" 
+                    FontName="Segoe UI" FontSize="9" FontBold="True" />
+    </StackPanel>
+
+    <!-- 6. Carte Résumé avec Bordure et Typographie fine -->
+    <CanvasText Text="Tous ces contrôles CanvasControl sont 100% dessinés en 2D vectorielle native, sans gadgets OS grisâtres." 
+                Height="36" 
+                FontName="Segoe UI" FontSize="9"
+                Background="#FFFFFF" Foreground="#475569" 
+                BorderColor="#E2E8F0" BorderThickness="1" CornerRadius="8" 
+                Padding="16,0,16,0" HAlign="Center" Transparent="False" />
+
+  </StackPanel>
+</Window>

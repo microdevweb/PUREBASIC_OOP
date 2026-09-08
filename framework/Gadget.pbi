@@ -1,4 +1,4 @@
-﻿; ============================================================================
+; ============================================================================
 ; PureBasic OOP GUI Framework - Gadget.pbi
 ; Base abstract class for all PureBasic UI Controls and Gadgets
 ; Author:      MicrodevWeb
@@ -94,6 +94,47 @@ Namespace UI {
         FreeGadget(This\id)
         This\id = 0
       }
+    }
+
+    Public Method.i GetState() {
+      If (This\id And IsGadget(This\id)) {
+        ProcedureReturn GetGadgetState(This\id)
+      }
+      ProcedureReturn 0
+    }
+
+    Public Method SetState(state.i) {
+      If (This\id And IsGadget(This\id)) {
+        SetGadgetState(This\id, state)
+      }
+    }
+
+    Public Method.b IsChecked() {
+      ProcedureReturn Bool(This\GetState() <> 0)
+    }
+
+    Public Method SetChecked(c.b) {
+      This\SetState(c)
+    }
+
+    Public Method.b IsHovered() {
+      ProcedureReturn #False
+    }
+
+    Public Method.b IsPressed() {
+      ProcedureReturn #False
+    }
+
+    Public Method SetBackground(color.i) {
+      This\SetColor(#PB_Gadget_BackColor, color)
+    }
+
+    Public Method SetForeground(color.i) {
+      This\SetColor(#PB_Gadget_FrontColor, color)
+    }
+
+    Public Method Redraw() {
+      ; Méthode virtuelle surchargée par les contrôles Canvas
     }
 
     ; Virtual Event Handlers (Can be overridden by child classes)

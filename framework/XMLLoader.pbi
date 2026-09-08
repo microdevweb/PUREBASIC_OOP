@@ -66,6 +66,131 @@ Namespace UI {
     }
 
     ; ------------------------------------------------------------------------
+    ; Helper: Parse Color (#RRGGBB, #RGB, $BBGGRR, 0xRRGGBB)
+    ; ------------------------------------------------------------------------
+    Protected Method.i ParseColor(colorStr.s, defaultColor.i) {
+      colorStr = Trim(colorStr)
+      If colorStr = "" : ProcedureReturn defaultColor : EndIf
+      If Left(colorStr, 1) = "#"
+        colorStr = Mid(colorStr, 2)
+      ElseIf Left(colorStr, 2) = "0x" Or Left(colorStr, 2) = "0X"
+        colorStr = Mid(colorStr, 3)
+      ElseIf Left(colorStr, 1) = "$"
+        colorStr = Mid(colorStr, 2)
+      EndIf
+
+      If Len(colorStr) = 6
+        Protected r.i = Val("$" + Mid(colorStr, 1, 2))
+        Protected g.i = Val("$" + Mid(colorStr, 3, 2))
+        Protected b.i = Val("$" + Mid(colorStr, 5, 2))
+        ProcedureReturn RGB(r, g, b)
+      ElseIf Len(colorStr) = 3
+        Protected r3.i = Val("$" + Mid(colorStr, 1, 1) + Mid(colorStr, 1, 1))
+        Protected g3.i = Val("$" + Mid(colorStr, 2, 1) + Mid(colorStr, 2, 1))
+        Protected b3.i = Val("$" + Mid(colorStr, 3, 1) + Mid(colorStr, 3, 1))
+        ProcedureReturn RGB(r3, g3, b3)
+      EndIf
+
+      ProcedureReturn Val(colorStr)
+    }
+
+    ; ------------------------------------------------------------------------
+    ; Helper: Apply CanvasControl styling tokens (WPF Hover, Pressed, Colors, Typo)
+    ; ------------------------------------------------------------------------
+    Protected Method ApplyCanvasControlAttributes(*ctrl.UI::CanvasControl, node.i, *targetWindow.UI::Window) {
+      If Not *ctrl : ProcedureReturn : EndIf
+
+      ; 1. Normal Colors & Background
+      Protected bgStr.s = GetXMLAttribute(node, "Background")
+      If bgStr = "" : bgStr = GetXMLAttribute(node, "Bg") : EndIf
+      If bgStr <> "" And Left(bgStr, 1) <> "{"
+        *ctrl\SetBackground(This\ParseColor(bgStr, *ctrl\GetBackground()))
+      EndIf
+
+      Protected fgStr.s = GetXMLAttribute(node, "Foreground")
+      If fgStr = "" : fgStr = GetXMLAttribute(node, "Fg") : EndIf
+      If fgStr <> "" And Left(fgStr, 1) <> "{"
+        *ctrl\SetForeground(This\ParseColor(fgStr, *ctrl\GetForeground()))
+      EndIf
+
+      ; 2. Hover Colors (Survol souris)
+      Protected hovBgStr.s = GetXMLAttribute(node, "HoverBackground")
+      If hovBgStr = "" : hovBgStr = GetXMLAttribute(node, "HoverBg") : EndIf
+      If hovBgStr <> ""
+        *ctrl\SetHoverBackground(This\ParseColor(hovBgStr, *ctrl\GetHoverBackground()))
+      EndIf
+
+      Protected hovFgStr.s = GetXMLAttribute(node, "HoverForeground")
+      If hovFgStr = "" : hovFgStr = GetXMLAttribute(node, "HoverFg") : EndIf
+      If hovFgStr <> ""
+        *ctrl\SetHoverForeground(This\ParseColor(hovFgStr, *ctrl\GetHoverForeground()))
+      EndIf
+
+      Protected hovBorderStr.s = GetXMLAttribute(node, "HoverBorderColor")
+      If hovBorderStr <> ""
+        *ctrl\SetHoverBorderColor(This\ParseColor(hovBorderStr, *ctrl\GetHoverBorderColor()))
+      EndIf
+
+      ; 3. Pressed Colors (Clic enfoncé)
+      Protected prBgStr.s = GetXMLAttribute(node, "PressedBackground")
+      If prBgStr = "" : prBgStr = GetXMLAttribute(node, "PressedBg") : EndIf
+      If prBgStr <> ""
+        *ctrl\SetPressedBackground(This\ParseColor(prBgStr, *ctrl\GetPressedBackground()))
+      EndIf
+
+      Protected prFgStr.s = GetXMLAttribute(node, "PressedForeground")
+      If prFgStr = "" : prFgStr = GetXMLAttribute(node, "PressedFg") : EndIf
+      If prFgStr <> ""
+        *ctrl\SetPressedForeground(This\ParseColor(prFgStr, *ctrl\GetPressedForeground()))
+      EndIf
+
+      Protected prBorderStr.s = GetXMLAttribute(node, "PressedBorderColor")
+      If prBorderStr <> ""
+        *ctrl\SetPressedBorderColor(This\ParseColor(prBorderStr, *ctrl\GetPressedBorderColor()))
+      EndIf
+
+      ; 4. Border & Geometry
+      Protected borderStr.s = GetXMLAttribute(node, "BorderColor")
+      If borderStr <> ""
+        *ctrl\SetBorderColor(This\ParseColor(borderStr, *ctrl\GetBorderColor()))
+      EndIf
+
+      Protected thickStr.s = GetXMLAttribute(node, "BorderThickness")
+      If thickStr <> ""
+        *ctrl\SetBorderThickness(Val(thickStr))
+      EndIf
+
+      Protected radStr.s = GetXMLAttribute(node, "CornerRadius")
+      If radStr <> ""
+        *ctrl\SetCornerRadius(Val(radStr))
+      EndIf
+
+      ; 5. Padding
+      Protected padStr.s = GetXMLAttribute(node, "Padding")
+      If padStr <> ""
+        Protected pL.INTEGER, pT.INTEGER, pR.INTEGER, pB.INTEGER
+        This\ParseBoxValues(padStr, @pL, @pT, @pR, @pB)
+        *ctrl\SetPadding(pL\i, pT\i, pR\i, pB\i)
+      EndIf
+
+      ; 6. Typographie Haute-Fidélité
+      Protected fontNameStr.s = GetXMLAttribute(node, "FontName")
+      If fontNameStr = "" : fontNameStr = GetXMLAttribute(node, "FontFamily") : EndIf
+      Protected fontSizeStr.s = GetXMLAttribute(node, "FontSize")
+      Protected fontBoldStr.s = UCase(Trim(GetXMLAttribute(node, "FontBold")))
+      If fontBoldStr = "" : fontBoldStr = UCase(Trim(GetXMLAttribute(node, "FontWeight"))) : EndIf
+      Protected isBold.b = #False
+      If fontBoldStr = "TRUE" Or fontBoldStr = "BOLD" Or fontBoldStr = "1" : isBold = #True : EndIf
+
+      If fontNameStr <> "" Or fontSizeStr <> ""
+        If fontNameStr = "" : fontNameStr = "Segoe UI" : EndIf
+        Protected fSize.i = 10
+        If fontSizeStr <> "" : fSize = Val(fontSizeStr) : EndIf
+        *ctrl\SetTypography(fontNameStr, fSize, isBold)
+      EndIf
+    }
+
+    ; ------------------------------------------------------------------------
     ; Helper: Apply common component attributes (Name, Width, Height, Margins, Alignments)
     ; ------------------------------------------------------------------------
     Protected Method ApplyCommonAttributes(*comp.UI::Component, node.i, *targetWindow.UI::Window) {
@@ -244,6 +369,57 @@ Namespace UI {
           UI_MVVM_RegisterCommandBinding(*comp, *vm, cmdAttr)
         EndIf
       EndIf
+
+      ; 5. Hover / MouseOver Binding
+      Protected hovAttr.s = GetXMLAttribute(node, "IsMouseOver")
+      If hovAttr = "" : hovAttr = GetXMLAttribute(node, "IsHovered") : EndIf
+      If This\ParseBindingExpression(hovAttr, @propName, @modeVal)
+        UI_MVVM_RegisterBinding(*comp, "IsMouseOver", *vm, propName\s, modeVal\i)
+      EndIf
+
+      ; 6. Pressed Binding
+      Protected pressAttr.s = GetXMLAttribute(node, "IsPressed")
+      If This\ParseBindingExpression(pressAttr, @propName, @modeVal)
+        UI_MVVM_RegisterBinding(*comp, "IsPressed", *vm, propName\s, modeVal\i)
+      EndIf
+
+      ; 7. Background / Foreground Binding
+      Protected bgAttr.s = GetXMLAttribute(node, "Background")
+      If This\ParseBindingExpression(bgAttr, @propName, @modeVal)
+        UI_MVVM_RegisterBinding(*comp, "Background", *vm, propName\s, modeVal\i)
+      EndIf
+      Protected fgAttr.s = GetXMLAttribute(node, "Foreground")
+      If This\ParseBindingExpression(fgAttr, @propName, @modeVal)
+        UI_MVVM_RegisterBinding(*comp, "Foreground", *vm, propName\s, modeVal\i)
+      EndIf
+    }
+
+    Protected Method ParseCanvasTreeNodes(*tree.UI::CanvasTree, *parentNode.UI::TreeNode, xmlNode.i) {
+      Protected *childXml = ChildXMLNode(xmlNode)
+      While *childXml
+        If XMLNodeType(*childXml) = #PB_XML_Normal And (UCase(GetXMLNodeName(*childXml)) = "NODE" Or UCase(GetXMLNodeName(*childXml)) = "ITEM")
+          Protected nodeTxt.s = GetXMLAttribute(*childXml, "Text")
+          If nodeTxt = "" : nodeTxt = GetXMLAttribute(*childXml, "text") : EndIf
+          If nodeTxt = "" : nodeTxt = GetXMLNodeText(*childXml) : EndIf
+          Protected nodeTag.s = GetXMLAttribute(*childXml, "Tag")
+          If nodeTag = "" : nodeTag = GetXMLAttribute(*childXml, "tag") : EndIf
+
+          Protected *newNode.UI::TreeNode = *tree\AddNode(*parentNode, nodeTxt, 0, nodeTag)
+
+          Protected expStr.s = UCase(Trim(GetXMLAttribute(*childXml, "Expanded")))
+          If expStr = "TRUE" Or expStr = "1" : *newNode\SetExpanded(#True) : EndIf
+
+          Protected chkStr.s = UCase(Trim(GetXMLAttribute(*childXml, "Checked")))
+          If chkStr = "TRUE" Or chkStr = "1" : *newNode\SetChecked(#True) : EndIf
+
+          Protected hasChkStr.s = UCase(Trim(GetXMLAttribute(*childXml, "HasCheckBox")))
+          If hasChkStr = "TRUE" Or hasChkStr = "1" : *newNode\SetHasCheckBox(#True) : EndIf
+
+          This\ParseCanvasTreeNodes(*tree, *newNode, *childXml)
+        EndIf
+        *childXml = NextXMLNode(*childXml)
+      Wend
+      *tree\RebuildVisibleList()
     }
 
     ; ------------------------------------------------------------------------
@@ -278,6 +454,11 @@ Namespace UI {
             Else
               *targetWindow\SetTitle(title)
               *targetWindow\SetSize(winW, winH)
+            EndIf
+            Protected winBgStr.s = GetXMLAttribute(node, "Background")
+            If winBgStr = "" : winBgStr = GetXMLAttribute(node, "Bg") : EndIf
+            If winBgStr <> ""
+              *targetWindow\SetBackgroundColor(This\ParseColor(winBgStr, RGB(248, 249, 250)))
             EndIf
           EndIf
 
@@ -533,12 +714,23 @@ Namespace UI {
         Case "LISTICON"
           Protected colsAttr.s = GetXMLAttribute(node, "Columns")
           Protected *li.UI::ListIcon = 0
+          Protected liTitle.s = "Item"
+          Protected liWidth.i = 150
           If colsAttr <> ""
             Protected firstColDef.s = StringField(colsAttr, 1, ",")
-            Protected firstColTitle.s = Trim(StringField(firstColDef, 1, ":"))
-            Protected firstColWidth.i = Val(Trim(StringField(firstColDef, 2, ":")))
-            If firstColWidth <= 0 : firstColWidth = 100 : EndIf
-            *li = New UI::ListIcon(firstColTitle, firstColWidth)
+            liTitle = Trim(StringField(firstColDef, 1, ":"))
+            liWidth = Val(Trim(StringField(firstColDef, 2, ":")))
+            If liWidth <= 0 : liWidth = 100 : EndIf
+          Else
+            Protected firstColTitleDef.s = GetXMLAttribute(node, "FirstColumnTitle")
+            If firstColTitleDef <> "" : liTitle = firstColTitleDef : EndIf
+            Protected firstColWidthDef.i = Val(GetXMLAttribute(node, "FirstColumnWidth"))
+            If firstColWidthDef > 0 : liWidth = firstColWidthDef : EndIf
+          EndIf
+
+          *li = New UI::ListIcon(liTitle, liWidth)
+
+          If colsAttr <> ""
             Protected colTotal.i = CountString(colsAttr, ",") + 1
             Protected liColIdx.i
             For liColIdx = 2 To colTotal
@@ -548,12 +740,6 @@ Namespace UI {
               If cWidth <= 0 : cWidth = 100 : EndIf
               *li\AddColumn(liColIdx - 1, cTitle, cWidth)
             Next
-          Else
-            Protected firstColTitleDef.s = GetXMLAttribute(node, "FirstColumnTitle")
-            If firstColTitleDef = "" : firstColTitleDef = "Item" : EndIf
-            Protected firstColWidthDef.i = Val(GetXMLAttribute(node, "FirstColumnWidth"))
-            If firstColWidthDef <= 0 : firstColWidthDef = 150 : EndIf
-            *li = New UI::ListIcon(firstColTitleDef, firstColWidthDef)
           EndIf
 
           This\ApplyCommonAttributes(*li, node, *targetWindow)
@@ -677,6 +863,116 @@ Namespace UI {
           This\ApplyCommonAttributes(*cv, node, *targetWindow)
           *createdComp = *cv
 
+        Case "CANVASTREE"
+          Protected *ct.UI::CanvasTree = New UI::CanvasTree()
+          Protected ctChkStr.s = UCase(Trim(GetXMLAttribute(node, "ShowCheckBoxes")))
+          If ctChkStr = "TRUE" Or ctChkStr = "1" : *ct\SetShowCheckBoxes(#True) : EndIf
+          Protected ctLineStr.s = UCase(Trim(GetXMLAttribute(node, "ShowLines")))
+          If ctLineStr = "FALSE" Or ctLineStr = "0" : *ct\SetShowLines(#False) : EndIf
+          Protected ctLineHStr.s = GetXMLAttribute(node, "LineHeight")
+          If ctLineHStr <> "" : *ct\SetLineHeight(Val(ctLineHStr)) : EndIf
+          Protected ctDarkStr.s = UCase(Trim(GetXMLAttribute(node, "DarkMode")))
+          If ctDarkStr = "TRUE" Or ctDarkStr = "1" : *ct\SetDarkMode(#True) : EndIf
+
+          This\ApplyCommonAttributes(*ct, node, *targetWindow)
+          *createdComp = *ct
+
+          ; Parse child <Node> tags recursively
+          This\ParseCanvasTreeNodes(*ct, *ct\GetRoot(), node)
+
+        Case "CANVASBUTTON"
+          Protected cbtnText.s = GetXMLAttribute(node, "Text")
+          If cbtnText = "" : cbtnText = GetXMLAttribute(node, "text") : EndIf
+          Protected *cbtn.UI::CanvasButton = New UI::CanvasButton()
+          If cbtnText <> "" : *cbtn\SetText(cbtnText) : EndIf
+
+          Protected btnVar.s = UCase(Trim(GetXMLAttribute(node, "Variant")))
+          If btnVar = "" : btnVar = UCase(Trim(GetXMLAttribute(node, "Style"))) : EndIf
+          Select btnVar
+            Case "PRIMARY" : *cbtn\SetPrimaryStyle()
+            Case "SUCCESS" : *cbtn\SetSuccessStyle()
+            Case "DANGER"  : *cbtn\SetDangerStyle()
+            Case "DARK"    : *cbtn\SetDarkStyle()
+            Case "OUTLINE" : *cbtn\SetOutlineStyle(RGB(37, 99, 235))
+            Case "GHOST"   : *cbtn\SetGhostStyle(RGB(17, 24, 39))
+            Default        : *cbtn\SetDefaultStyle()
+          EndSelect
+
+          Protected btnRad.s = GetXMLAttribute(node, "CornerRadius")
+          If btnRad <> "" : *cbtn\SetCornerRadius(Val(btnRad)) : EndIf
+
+          This\ApplyCommonAttributes(*cbtn, node, *targetWindow)
+          This\ApplyCanvasControlAttributes(*cbtn, node, *targetWindow)
+          *createdComp = *cbtn
+
+        Case "CANVASTEXT"
+          Protected ctxtText.s = GetXMLAttribute(node, "Text")
+          If ctxtText = "" : ctxtText = GetXMLAttribute(node, "text") : EndIf
+          If ctxtText = "" : ctxtText = GetXMLNodeText(node) : EndIf
+          Protected *ctxt.UI::CanvasText = New UI::CanvasText()
+          If ctxtText <> "" : *ctxt\SetText(ctxtText) : EndIf
+
+          Protected ctxthAlignStr.s = UCase(Trim(GetXMLAttribute(node, "HAlign")))
+          If ctxthAlignStr = "" : ctxthAlignStr = UCase(Trim(GetXMLAttribute(node, "TextAlignment"))) : EndIf
+          Protected hAlignCode.i = #UI_TextAlign_Left
+          Select ctxthAlignStr
+            Case "CENTER" : hAlignCode = #UI_TextAlign_Center
+            Case "RIGHT"  : hAlignCode = #UI_TextAlign_Right
+          EndSelect
+
+          Protected ctxtvAlignStr.s = UCase(Trim(GetXMLAttribute(node, "VAlign")))
+          Protected vAlignCode.i = #UI_TextAlign_Middle
+          Select ctxtvAlignStr
+            Case "TOP"    : vAlignCode = #UI_TextAlign_Top
+            Case "BOTTOM" : vAlignCode = #UI_TextAlign_Bottom
+          EndSelect
+
+          *ctxt\SetAlignment(hAlignCode, vAlignCode)
+
+          Protected ctxtEllipsis.s = UCase(Trim(GetXMLAttribute(node, "Ellipsis")))
+          If ctxtEllipsis = "FALSE" Or ctxtEllipsis = "0" : *ctxt\SetEllipsis(#False) : EndIf
+
+          Protected ctxtTrans.s = UCase(Trim(GetXMLAttribute(node, "Transparent")))
+          If ctxtTrans = "FALSE" Or ctxtTrans = "0" : *ctxt\SetTransparent(#False) : EndIf
+
+          This\ApplyCommonAttributes(*ctxt, node, *targetWindow)
+          This\ApplyCanvasControlAttributes(*ctxt, node, *targetWindow)
+          *createdComp = *ctxt
+
+        Case "CANVASTEXTBOX"
+          Protected ctbText.s = GetXMLAttribute(node, "Text")
+          If ctbText = "" : ctbText = GetXMLAttribute(node, "text") : EndIf
+          Protected ctbPH.s = GetXMLAttribute(node, "Placeholder")
+          If ctbPH = "" : ctbPH = GetXMLAttribute(node, "placeholder") : EndIf
+
+          Protected *ctb.UI::CanvasTextBox = New UI::CanvasTextBox()
+          If ctbText <> "" : *ctb\SetText(ctbText) : EndIf
+          If ctbPH <> "" : *ctb\SetPlaceholder(ctbPH) : EndIf
+
+          Protected ctbPHCol.s = GetXMLAttribute(node, "PlaceholderColor")
+          If ctbPHCol <> ""
+            *ctb\SetPlaceholderColor(This\ParseColor(ctbPHCol, *ctb\GetPlaceholderColor()))
+          EndIf
+
+          Protected ctbActCol.s = GetXMLAttribute(node, "ActiveBorderColor")
+          If ctbActCol = "" : ctbActCol = GetXMLAttribute(node, "FocusBorderColor") : EndIf
+          If ctbActCol <> ""
+            *ctb\SetActiveBorderColor(This\ParseColor(ctbActCol, *ctb\GetActiveBorderColor()))
+          EndIf
+
+          Protected ctbPassStr.s = UCase(Trim(GetXMLAttribute(node, "IsPassword")))
+          If ctbPassStr = "TRUE" Or ctbPassStr = "1" : *ctb\SetIsPassword(#True) : EndIf
+
+          Protected ctbROStr.s = UCase(Trim(GetXMLAttribute(node, "IsReadOnly")))
+          If ctbROStr = "TRUE" Or ctbROStr = "1" : *ctb\SetReadOnly(#True) : EndIf
+
+          Protected ctbMaxLStr.s = GetXMLAttribute(node, "MaxLength")
+          If ctbMaxLStr <> "" : *ctb\SetMaxLength(Val(ctbMaxLStr)) : EndIf
+
+          This\ApplyCommonAttributes(*ctb, node, *targetWindow)
+          This\ApplyCanvasControlAttributes(*ctb, node, *targetWindow)
+          *createdComp = *ctb
+
       EndSelect
 
       ProcedureReturn *createdComp
@@ -686,11 +982,20 @@ Namespace UI {
     ; Public Entry Points: LoadFromFile and LoadFromString
     ; ------------------------------------------------------------------------
     Public Method.b LoadFromFile(xmlPath.s, *targetWindow.UI::Window) {
-      If FileSize(xmlPath) <= 0
+      Protected actualPath.s = xmlPath
+      If FileSize(actualPath) <= 0
+        If FileSize(GetPathPart(ProgramFilename()) + xmlPath) > 0
+          actualPath = GetPathPart(ProgramFilename()) + xmlPath
+        ElseIf FileSize("tests/" + xmlPath) > 0
+          actualPath = "tests/" + xmlPath
+        EndIf
+      EndIf
+
+      If FileSize(actualPath) <= 0
         ProcedureReturn #False
       EndIf
 
-      Protected xmlHandle.i = LoadXML(#PB_Any, xmlPath)
+      Protected xmlHandle.i = LoadXML(#PB_Any, actualPath)
       If Not xmlHandle Or XMLStatus(xmlHandle) <> #PB_XML_Success
         If xmlHandle : FreeXML(xmlHandle) : EndIf
         ProcedureReturn #False
