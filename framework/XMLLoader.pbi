@@ -1155,7 +1155,35 @@ Namespace UI {
           Protected ctblGrid.s = UCase(Trim(GetXMLAttribute(node, "ShowGridLines")))
           If ctblGrid = "FALSE" Or ctblGrid = "0" : *ctbl\SetShowGridLines(#False) : EndIf
           Protected ctblAlt.s = UCase(Trim(GetXMLAttribute(node, "ShowAlternatingColors")))
+          If ctblAlt = "" : ctblAlt = UCase(Trim(GetXMLAttribute(node, "AlternatingColors"))) : EndIf
           If ctblAlt = "FALSE" Or ctblAlt = "0" : *ctbl\SetShowAlternatingColors(#False) : EndIf
+
+          Protected ctblEvenBg.s = GetXMLAttribute(node, "EvenRowBg")
+          If ctblEvenBg = "" : ctblEvenBg = GetXMLAttribute(node, "PairBg") : EndIf
+          Protected ctblEvenFg.s = GetXMLAttribute(node, "EvenRowFg")
+          If ctblEvenFg = "" : ctblEvenFg = GetXMLAttribute(node, "PairFg") : EndIf
+          If ctblEvenBg <> "" Or ctblEvenFg <> ""
+            Protected eBg.i = *ctbl\GetEvenRowBgColor()
+            Protected eFg.i = *ctbl\GetEvenRowFgColor()
+            If ctblEvenBg <> "" : eBg = This\ParseColor(ctblEvenBg, eBg) : EndIf
+            If ctblEvenFg <> "" : eFg = This\ParseColor(ctblEvenFg, eFg) : EndIf
+            *ctbl\SetEvenRowColors(eBg, eFg)
+          EndIf
+
+          Protected ctblOddBg.s = GetXMLAttribute(node, "OddRowBg")
+          If ctblOddBg = "" : ctblOddBg = GetXMLAttribute(node, "DootBg") : EndIf
+          If ctblOddBg = "" : ctblOddBg = GetXMLAttribute(node, "AltRowBg") : EndIf
+          Protected ctblOddFg.s = GetXMLAttribute(node, "OddRowFg")
+          If ctblOddFg = "" : ctblOddFg = GetXMLAttribute(node, "DootFg") : EndIf
+          If ctblOddFg = "" : ctblOddFg = GetXMLAttribute(node, "AltRowFg") : EndIf
+          If ctblOddBg <> "" Or ctblOddFg <> ""
+            Protected oBg.i = *ctbl\GetOddRowBgColor()
+            Protected oFg.i = *ctbl\GetOddRowFgColor()
+            If ctblOddBg <> "" : oBg = This\ParseColor(ctblOddBg, oBg) : EndIf
+            If ctblOddFg <> "" : oFg = This\ParseColor(ctblOddFg, oFg) : EndIf
+            *ctbl\SetOddRowColors(oBg, oFg)
+          EndIf
+
           Protected ctblLineH.s = GetXMLAttribute(node, "LineHeight")
           If ctblLineH <> "" : *ctbl\SetLineHeight(Val(ctblLineH)) : EndIf
           Protected ctblHdrH.s = GetXMLAttribute(node, "HeaderHeight")

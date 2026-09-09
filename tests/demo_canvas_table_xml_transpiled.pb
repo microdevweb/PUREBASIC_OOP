@@ -889,8 +889,22 @@ Interface UI_CanvasTable_vt Extends UI_CustomGadget_vt
   GetShowHeader.b()
   SetShowGridLines(show_p.b)
   GetShowGridLines.b()
+  SetAlternatingColors(show_p.b)
+  GetAlternatingColors.b()
   SetShowAlternatingColors(show_p.b)
   GetShowAlternatingColors.b()
+  SetEvenRowColors(bg_p.i, fg_p.i)
+  GetEvenRowBgColor.i()
+  GetEvenRowFgColor.i()
+  SetOddRowColors(bg_p.i, fg_p.i)
+  GetOddRowBgColor.i()
+  GetOddRowFgColor.i()
+  SetPairColors(bg_p.i, fg_p.i)
+  SetDootColors(bg_p.i, fg_p.i)
+  GetPairBgColor.i()
+  GetPairFgColor.i()
+  GetDootBgColor.i()
+  GetDootFgColor.i()
   SetHeaderHeight(h_p.i)
   GetHeaderHeight.i()
   SetLineHeight(h_p.i)
@@ -1376,6 +1390,7 @@ Structure UI_CanvasTable_Inst Extends UI_CustomGadget_Inst
   bgColor.i
   fgColor.i
   altRowBgColor.i
+  altRowFgColor.i
   headerBgColor.i
   headerFgColor.i
   headerBorderColor.i
@@ -2244,8 +2259,22 @@ Declare UI_CanvasTable_SetShowHeader(*This.UI_CanvasTable_Inst, show_p.b)
 Declare.b UI_CanvasTable_GetShowHeader(*This.UI_CanvasTable_Inst)
 Declare UI_CanvasTable_SetShowGridLines(*This.UI_CanvasTable_Inst, show_p.b)
 Declare.b UI_CanvasTable_GetShowGridLines(*This.UI_CanvasTable_Inst)
+Declare UI_CanvasTable_SetAlternatingColors(*This.UI_CanvasTable_Inst, show_p.b)
+Declare.b UI_CanvasTable_GetAlternatingColors(*This.UI_CanvasTable_Inst)
 Declare UI_CanvasTable_SetShowAlternatingColors(*This.UI_CanvasTable_Inst, show_p.b)
 Declare.b UI_CanvasTable_GetShowAlternatingColors(*This.UI_CanvasTable_Inst)
+Declare UI_CanvasTable_SetEvenRowColors(*This.UI_CanvasTable_Inst, bg_p.i, fg_p.i)
+Declare.i UI_CanvasTable_GetEvenRowBgColor(*This.UI_CanvasTable_Inst)
+Declare.i UI_CanvasTable_GetEvenRowFgColor(*This.UI_CanvasTable_Inst)
+Declare UI_CanvasTable_SetOddRowColors(*This.UI_CanvasTable_Inst, bg_p.i, fg_p.i)
+Declare.i UI_CanvasTable_GetOddRowBgColor(*This.UI_CanvasTable_Inst)
+Declare.i UI_CanvasTable_GetOddRowFgColor(*This.UI_CanvasTable_Inst)
+Declare UI_CanvasTable_SetPairColors(*This.UI_CanvasTable_Inst, bg_p.i, fg_p.i)
+Declare UI_CanvasTable_SetDootColors(*This.UI_CanvasTable_Inst, bg_p.i, fg_p.i)
+Declare.i UI_CanvasTable_GetPairBgColor(*This.UI_CanvasTable_Inst)
+Declare.i UI_CanvasTable_GetPairFgColor(*This.UI_CanvasTable_Inst)
+Declare.i UI_CanvasTable_GetDootBgColor(*This.UI_CanvasTable_Inst)
+Declare.i UI_CanvasTable_GetDootFgColor(*This.UI_CanvasTable_Inst)
 Declare UI_CanvasTable_SetHeaderHeight(*This.UI_CanvasTable_Inst, h_p.i)
 Declare.i UI_CanvasTable_GetHeaderHeight(*This.UI_CanvasTable_Inst)
 Declare UI_CanvasTable_SetLineHeight(*This.UI_CanvasTable_Inst, h_p.i)
@@ -10840,7 +10869,8 @@ Procedure UI_CanvasTable_InitDefaults(*This.UI_CanvasTable_Inst)
         ; Default Modern Light Theme (Clean Tailwind / WinUI Style)
         *This\bgColor = RGB(255, 255, 255)
         *This\fgColor = RGB(17, 24, 39)
-        *This\altRowBgColor = RGB(249, 250, 251)
+        *This\altRowBgColor = RGB(241, 245, 249) ; slate-100: distinct, elegant alternating row
+        *This\altRowFgColor = RGB(17, 24, 39)
         *This\headerBgColor = RGB(243, 244, 246)
         *This\headerFgColor = RGB(55, 65, 81)
         *This\headerBorderColor = RGB(229, 231, 235)
@@ -10889,7 +10919,8 @@ Procedure UI_CanvasTable_SetDarkMode(*This.UI_CanvasTable_Inst, enable_p.b)
   If (enable_p)
           *This\bgColor = RGB(20, 20, 24)
           *This\fgColor = RGB(226, 232, 240)
-          *This\altRowBgColor = RGB(26, 26, 32)
+          *This\altRowBgColor = RGB(28, 30, 38) ; distinct dark alternating row
+          *This\altRowFgColor = RGB(226, 232, 240)
           *This\headerBgColor = RGB(30, 30, 36)
           *This\headerFgColor = RGB(203, 213, 225)
           *This\headerBorderColor = RGB(45, 45, 55)
@@ -10905,7 +10936,8 @@ Procedure UI_CanvasTable_SetDarkMode(*This.UI_CanvasTable_Inst, enable_p.b)
   Else
           *This\bgColor = RGB(255, 255, 255)
           *This\fgColor = RGB(17, 24, 39)
-          *This\altRowBgColor = RGB(249, 250, 251)
+          *This\altRowBgColor = RGB(241, 245, 249)
+          *This\altRowFgColor = RGB(17, 24, 39)
           *This\headerBgColor = RGB(243, 244, 246)
           *This\headerFgColor = RGB(55, 65, 81)
           *This\headerBorderColor = RGB(229, 231, 235)
@@ -10950,6 +10982,17 @@ Procedure.b UI_CanvasTable_GetShowGridLines(*This.UI_CanvasTable_Inst)
         ProcedureReturn *This\showGridLines
 EndProcedure
 
+Procedure UI_CanvasTable_SetAlternatingColors(*This.UI_CanvasTable_Inst, show_p.b)
+  Protected *This_vt.UI_CanvasTable_vt = *This
+        *This\showAlternatingColors = show_p
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure.b UI_CanvasTable_GetAlternatingColors(*This.UI_CanvasTable_Inst)
+  Protected *This_vt.UI_CanvasTable_vt = *This
+        ProcedureReturn *This\showAlternatingColors
+EndProcedure
+
 Procedure UI_CanvasTable_SetShowAlternatingColors(*This.UI_CanvasTable_Inst, show_p.b)
   Protected *This_vt.UI_CanvasTable_vt = *This
         *This\showAlternatingColors = show_p
@@ -10959,6 +11002,70 @@ EndProcedure
 Procedure.b UI_CanvasTable_GetShowAlternatingColors(*This.UI_CanvasTable_Inst)
   Protected *This_vt.UI_CanvasTable_vt = *This
         ProcedureReturn *This\showAlternatingColors
+EndProcedure
+
+Procedure UI_CanvasTable_SetEvenRowColors(*This.UI_CanvasTable_Inst, bg_p.i, fg_p.i)
+  Protected *This_vt.UI_CanvasTable_vt = *This
+        *This\bgColor = bg_p
+        If (fg_p <> -1) : *This\fgColor = fg_p : EndIf
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure.i UI_CanvasTable_GetEvenRowBgColor(*This.UI_CanvasTable_Inst)
+  Protected *This_vt.UI_CanvasTable_vt = *This
+        ProcedureReturn *This\bgColor
+EndProcedure
+
+Procedure.i UI_CanvasTable_GetEvenRowFgColor(*This.UI_CanvasTable_Inst)
+  Protected *This_vt.UI_CanvasTable_vt = *This
+        ProcedureReturn *This\fgColor
+EndProcedure
+
+Procedure UI_CanvasTable_SetOddRowColors(*This.UI_CanvasTable_Inst, bg_p.i, fg_p.i)
+  Protected *This_vt.UI_CanvasTable_vt = *This
+        *This\altRowBgColor = bg_p
+        If (fg_p <> -1) : *This\altRowFgColor = fg_p : EndIf
+        *This_vt\Redraw()
+EndProcedure
+
+Procedure.i UI_CanvasTable_GetOddRowBgColor(*This.UI_CanvasTable_Inst)
+  Protected *This_vt.UI_CanvasTable_vt = *This
+        ProcedureReturn *This\altRowBgColor
+EndProcedure
+
+Procedure.i UI_CanvasTable_GetOddRowFgColor(*This.UI_CanvasTable_Inst)
+  Protected *This_vt.UI_CanvasTable_vt = *This
+        ProcedureReturn *This\altRowFgColor
+EndProcedure
+
+Procedure UI_CanvasTable_SetPairColors(*This.UI_CanvasTable_Inst, bg_p.i, fg_p.i)
+  Protected *This_vt.UI_CanvasTable_vt = *This
+        *This_vt\SetEvenRowColors(bg_p, fg_p)
+EndProcedure
+
+Procedure UI_CanvasTable_SetDootColors(*This.UI_CanvasTable_Inst, bg_p.i, fg_p.i)
+  Protected *This_vt.UI_CanvasTable_vt = *This
+        *This_vt\SetOddRowColors(bg_p, fg_p)
+EndProcedure
+
+Procedure.i UI_CanvasTable_GetPairBgColor(*This.UI_CanvasTable_Inst)
+  Protected *This_vt.UI_CanvasTable_vt = *This
+        ProcedureReturn *This\bgColor
+EndProcedure
+
+Procedure.i UI_CanvasTable_GetPairFgColor(*This.UI_CanvasTable_Inst)
+  Protected *This_vt.UI_CanvasTable_vt = *This
+        ProcedureReturn *This\fgColor
+EndProcedure
+
+Procedure.i UI_CanvasTable_GetDootBgColor(*This.UI_CanvasTable_Inst)
+  Protected *This_vt.UI_CanvasTable_vt = *This
+        ProcedureReturn *This\altRowBgColor
+EndProcedure
+
+Procedure.i UI_CanvasTable_GetDootFgColor(*This.UI_CanvasTable_Inst)
+  Protected *This_vt.UI_CanvasTable_vt = *This
+        ProcedureReturn *This\altRowFgColor
 EndProcedure
 
 Procedure UI_CanvasTable_SetHeaderHeight(*This.UI_CanvasTable_Inst, h_p.i)
@@ -11590,17 +11697,20 @@ Procedure UI_CanvasTable_OnPaint(*This.UI_CanvasTable_Inst, w_p.i, h_p.i)
             Protected *row.UI_TableRow_vt = *This\rows()
             Protected rowY.i = scaledHdrH + (rowIdx * scaledLineH) - *This\scrollY
   
-            ; 2.1 Row Background (Selected, Hovered, Alternating or Normal)
+            ; 2.1 Row Background & Text (Selected, Hovered, Alternating or Normal)
             Protected curRowBg.i = *This\bgColor
             Protected curRowFg.i = *This\fgColor
+  
+            If (*This\showAlternatingColors And (rowIdx % 2 = 1))
+              curRowBg = *This\altRowBgColor
+              curRowFg = *This\altRowFgColor
+            EndIf
   
             If (*row\IsSelected())
               curRowBg = *This\selectBgColor
               curRowFg = *This\selectFgColor
             ElseIf (rowIdx = *This\hoveredRowIndex)
               curRowBg = *This\hoverBgColor
-            ElseIf (*This\showAlternatingColors And (rowIdx % 2 = 1))
-              curRowBg = *This\altRowBgColor
             EndIf
   
             Box(0, rowY, availW, scaledLineH, curRowBg)
@@ -13278,7 +13388,35 @@ Procedure.i UI_XMLLoader_ParseNode(*This.UI_XMLLoader_Inst, node.i, *targetWindo
             Protected ctblGrid.s = UCase(Trim(GetXMLAttribute(node, "ShowGridLines")))
             If ctblGrid = "FALSE" Or ctblGrid = "0" : *ctbl\SetShowGridLines(#False) : EndIf
             Protected ctblAlt.s = UCase(Trim(GetXMLAttribute(node, "ShowAlternatingColors")))
+            If ctblAlt = "" : ctblAlt = UCase(Trim(GetXMLAttribute(node, "AlternatingColors"))) : EndIf
             If ctblAlt = "FALSE" Or ctblAlt = "0" : *ctbl\SetShowAlternatingColors(#False) : EndIf
+  
+            Protected ctblEvenBg.s = GetXMLAttribute(node, "EvenRowBg")
+            If ctblEvenBg = "" : ctblEvenBg = GetXMLAttribute(node, "PairBg") : EndIf
+            Protected ctblEvenFg.s = GetXMLAttribute(node, "EvenRowFg")
+            If ctblEvenFg = "" : ctblEvenFg = GetXMLAttribute(node, "PairFg") : EndIf
+            If ctblEvenBg <> "" Or ctblEvenFg <> ""
+              Protected eBg.i = *ctbl\GetEvenRowBgColor()
+              Protected eFg.i = *ctbl\GetEvenRowFgColor()
+              If ctblEvenBg <> "" : eBg = *This_vt\ParseColor(ctblEvenBg, eBg) : EndIf
+              If ctblEvenFg <> "" : eFg = *This_vt\ParseColor(ctblEvenFg, eFg) : EndIf
+              *ctbl\SetEvenRowColors(eBg, eFg)
+            EndIf
+  
+            Protected ctblOddBg.s = GetXMLAttribute(node, "OddRowBg")
+            If ctblOddBg = "" : ctblOddBg = GetXMLAttribute(node, "DootBg") : EndIf
+            If ctblOddBg = "" : ctblOddBg = GetXMLAttribute(node, "AltRowBg") : EndIf
+            Protected ctblOddFg.s = GetXMLAttribute(node, "OddRowFg")
+            If ctblOddFg = "" : ctblOddFg = GetXMLAttribute(node, "DootFg") : EndIf
+            If ctblOddFg = "" : ctblOddFg = GetXMLAttribute(node, "AltRowFg") : EndIf
+            If ctblOddBg <> "" Or ctblOddFg <> ""
+              Protected oBg.i = *ctbl\GetOddRowBgColor()
+              Protected oFg.i = *ctbl\GetOddRowFgColor()
+              If ctblOddBg <> "" : oBg = *This_vt\ParseColor(ctblOddBg, oBg) : EndIf
+              If ctblOddFg <> "" : oFg = *This_vt\ParseColor(ctblOddFg, oFg) : EndIf
+              *ctbl\SetOddRowColors(oBg, oFg)
+            EndIf
+  
             Protected ctblLineH.s = GetXMLAttribute(node, "LineHeight")
             If ctblLineH <> "" : *ctbl\SetLineHeight(Val(ctblLineH)) : EndIf
             Protected ctblHdrH.s = GetXMLAttribute(node, "HeaderHeight")
@@ -16533,8 +16671,22 @@ DataSection
     Data.i @UI_CanvasTable_GetShowHeader()
     Data.i @UI_CanvasTable_SetShowGridLines()
     Data.i @UI_CanvasTable_GetShowGridLines()
+    Data.i @UI_CanvasTable_SetAlternatingColors()
+    Data.i @UI_CanvasTable_GetAlternatingColors()
     Data.i @UI_CanvasTable_SetShowAlternatingColors()
     Data.i @UI_CanvasTable_GetShowAlternatingColors()
+    Data.i @UI_CanvasTable_SetEvenRowColors()
+    Data.i @UI_CanvasTable_GetEvenRowBgColor()
+    Data.i @UI_CanvasTable_GetEvenRowFgColor()
+    Data.i @UI_CanvasTable_SetOddRowColors()
+    Data.i @UI_CanvasTable_GetOddRowBgColor()
+    Data.i @UI_CanvasTable_GetOddRowFgColor()
+    Data.i @UI_CanvasTable_SetPairColors()
+    Data.i @UI_CanvasTable_SetDootColors()
+    Data.i @UI_CanvasTable_GetPairBgColor()
+    Data.i @UI_CanvasTable_GetPairFgColor()
+    Data.i @UI_CanvasTable_GetDootBgColor()
+    Data.i @UI_CanvasTable_GetDootFgColor()
     Data.i @UI_CanvasTable_SetHeaderHeight()
     Data.i @UI_CanvasTable_GetHeaderHeight()
     Data.i @UI_CanvasTable_SetLineHeight()

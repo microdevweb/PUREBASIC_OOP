@@ -464,10 +464,11 @@ Namespace UI {
     Protected isFullRowSelect.b
     Protected isDarkMode.b
 
-    ; Theme Palette
-    Protected bgColor.i
-    Protected fgColor.i
-    Protected altRowBgColor.i
+    ; Theme Palette (Even & Odd rows, Header, Selection, Scrollbar)
+    Protected bgColor.i        ; Even row background (pairColors\bg)
+    Protected fgColor.i        ; Even row text (pairColors\fg)
+    Protected altRowBgColor.i  ; Odd row background (dootColors\bg)
+    Protected altRowFgColor.i  ; Odd row text (dootColors\fg)
     Protected headerBgColor.i
     Protected headerFgColor.i
     Protected headerBorderColor.i
@@ -536,7 +537,8 @@ Namespace UI {
       ; Default Modern Light Theme (Clean Tailwind / WinUI Style)
       This\bgColor = RGB(255, 255, 255)
       This\fgColor = RGB(17, 24, 39)
-      This\altRowBgColor = RGB(249, 250, 251)
+      This\altRowBgColor = RGB(241, 245, 249) ; slate-100: distinct, elegant alternating row
+      This\altRowFgColor = RGB(17, 24, 39)
       This\headerBgColor = RGB(243, 244, 246)
       This\headerFgColor = RGB(55, 65, 81)
       This\headerBorderColor = RGB(229, 231, 235)
@@ -586,7 +588,8 @@ Namespace UI {
       If (enable_p) {
         This\bgColor = RGB(20, 20, 24)
         This\fgColor = RGB(226, 232, 240)
-        This\altRowBgColor = RGB(26, 26, 32)
+        This\altRowBgColor = RGB(28, 30, 38) ; distinct dark alternating row
+        This\altRowFgColor = RGB(226, 232, 240)
         This\headerBgColor = RGB(30, 30, 36)
         This\headerFgColor = RGB(203, 213, 225)
         This\headerBorderColor = RGB(45, 45, 55)
@@ -602,7 +605,8 @@ Namespace UI {
       } Else {
         This\bgColor = RGB(255, 255, 255)
         This\fgColor = RGB(17, 24, 39)
-        This\altRowBgColor = RGB(249, 250, 251)
+        This\altRowBgColor = RGB(241, 245, 249)
+        This\altRowFgColor = RGB(17, 24, 39)
         This\headerBgColor = RGB(243, 244, 246)
         This\headerFgColor = RGB(55, 65, 81)
         This\headerBorderColor = RGB(229, 231, 235)
@@ -642,6 +646,15 @@ Namespace UI {
       ProcedureReturn This\showGridLines
     }
 
+    Public Method SetAlternatingColors(show_p.b) {
+      This\showAlternatingColors = show_p
+      This\Redraw()
+    }
+
+    Public Method.b GetAlternatingColors()  {
+      ProcedureReturn This\showAlternatingColors
+    }
+
     Public Method SetShowAlternatingColors(show_p.b) {
       This\showAlternatingColors = show_p
       This\Redraw()
@@ -649,6 +662,54 @@ Namespace UI {
 
     Public Method.b GetShowAlternatingColors()  {
       ProcedureReturn This\showAlternatingColors
+    }
+
+    ; --- Custom Even & Odd Row Colors (Lignes Paires / Impaires) ---
+
+    ; Even row colors (paires / pairColors)
+    Public Method SetEvenRowColors(bg_p.i, fg_p.i = -1) {
+      This\bgColor = bg_p
+      If (fg_p <> -1) : This\fgColor = fg_p : EndIf
+      This\Redraw()
+    }
+    Public Method.i GetEvenRowBgColor() {
+      ProcedureReturn This\bgColor
+    }
+    Public Method.i GetEvenRowFgColor() {
+      ProcedureReturn This\fgColor
+    }
+
+    ; Odd row colors (impaires / dootColors)
+    Public Method SetOddRowColors(bg_p.i, fg_p.i = -1) {
+      This\altRowBgColor = bg_p
+      If (fg_p <> -1) : This\altRowFgColor = fg_p : EndIf
+      This\Redraw()
+    }
+    Public Method.i GetOddRowBgColor() {
+      ProcedureReturn This\altRowBgColor
+    }
+    Public Method.i GetOddRowFgColor() {
+      ProcedureReturn This\altRowFgColor
+    }
+
+    ; Aliases matching PB_TABLE naming convention (pairColors / dootColors)
+    Public Method SetPairColors(bg_p.i, fg_p.i = -1) {
+      This\SetEvenRowColors(bg_p, fg_p)
+    }
+    Public Method SetDootColors(bg_p.i, fg_p.i = -1) {
+      This\SetOddRowColors(bg_p, fg_p)
+    }
+    Public Method.i GetPairBgColor() {
+      ProcedureReturn This\bgColor
+    }
+    Public Method.i GetPairFgColor() {
+      ProcedureReturn This\fgColor
+    }
+    Public Method.i GetDootBgColor() {
+      ProcedureReturn This\altRowBgColor
+    }
+    Public Method.i GetDootFgColor() {
+      ProcedureReturn This\altRowFgColor
     }
 
     Public Method SetHeaderHeight(h_p.i) {
@@ -1260,17 +1321,20 @@ Namespace UI {
           Protected *row.UI::TableRow = This\rows()
           Protected rowY.i = scaledHdrH + (rowIdx * scaledLineH) - This\scrollY
 
-          ; 2.1 Row Background (Selected, Hovered, Alternating or Normal)
+          ; 2.1 Row Background & Text (Selected, Hovered, Alternating or Normal)
           Protected curRowBg.i = This\bgColor
           Protected curRowFg.i = This\fgColor
+
+          If (This\showAlternatingColors And (rowIdx % 2 = 1))
+            curRowBg = This\altRowBgColor
+            curRowFg = This\altRowFgColor
+          EndIf
 
           If (*row\IsSelected())
             curRowBg = This\selectBgColor
             curRowFg = This\selectFgColor
           ElseIf (rowIdx = This\hoveredRowIndex)
             curRowBg = This\hoverBgColor
-          ElseIf (This\showAlternatingColors And (rowIdx % 2 = 1))
-            curRowBg = This\altRowBgColor
           EndIf
 
           Box(0, rowY, availW, scaledLineH, curRowBg)
