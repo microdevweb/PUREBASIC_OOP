@@ -584,6 +584,78 @@ Namespace UI {
       *tree\RebuildVisibleList()
     }
 
+    Protected Method ParseCanvasTableColumnsAndRows(*table.UI::CanvasTable, xmlNode.i) {
+      Protected *childXml = ChildXMLNode(xmlNode)
+      While *childXml
+        If XMLNodeType(*childXml) = #PB_XML_Normal
+          Protected childTag.s = UCase(GetXMLNodeName(*childXml))
+          If childTag = "COLUMN"
+            Protected colTitle.s = GetXMLAttribute(*childXml, "Title")
+            If colTitle = "" : colTitle = GetXMLAttribute(*childXml, "title") : EndIf
+            Protected colWidth.i = Val(GetXMLAttribute(*childXml, "Width"))
+            If colWidth <= 0 : colWidth = 100 : EndIf
+
+            Protected colType.i = #UI_TableCol_Text
+            Protected typeStr.s = UCase(Trim(GetXMLAttribute(*childXml, "Type")))
+            Select typeStr
+              Case "NUMBER", "NUMERIC", "INT", "INTEGER", "FLOAT", "DOUBLE":
+                colType = #UI_TableCol_Number
+              Case "IMAGE", "ICON":
+                colType = #UI_TableCol_Image
+              Case "CHECKBOX", "BOOL", "BOOLEAN":
+                colType = #UI_TableCol_CheckBox
+              Case "BUTTONS", "ACTIONBUTTONS", "ACTIONS":
+                colType = #UI_TableCol_ActionButtons
+            EndSelect
+
+            Protected colAlign.i = #UI_TableAlign_Left
+            Protected alignStr.s = UCase(Trim(GetXMLAttribute(*childXml, "Align")))
+            Select alignStr
+              Case "CENTER":
+                colAlign = #UI_TableAlign_Center
+              Case "RIGHT":
+                colAlign = #UI_TableAlign_Right
+            EndSelect
+
+            Protected *newCol.UI::TableColumn = *table\AddColumn(colTitle, colWidth, colType, colAlign)
+
+            Protected editStr.s = UCase(Trim(GetXMLAttribute(*childXml, "Editable")))
+            If editStr = "TRUE" Or editStr = "1" : *newCol\SetEditable(#True) : EndIf
+
+            Protected sortStr.s = UCase(Trim(GetXMLAttribute(*childXml, "Sortable")))
+            If sortStr = "FALSE" Or sortStr = "0" : *newCol\SetSortable(#False) : EndIf
+
+            Protected resizStr.s = UCase(Trim(GetXMLAttribute(*childXml, "Resizable")))
+            If resizStr = "FALSE" Or resizStr = "0" : *newCol\SetResizable(#False) : EndIf
+
+          ElseIf childTag = "ROW"
+            Protected *newRow.UI::TableRow = *table\AddRow()
+            Protected rowTag.s = GetXMLAttribute(*childXml, "Tag")
+            If rowTag <> "" : *newRow\SetTag(rowTag) : EndIf
+
+            Protected rowCells.s = GetXMLAttribute(*childXml, "Cells")
+            If rowCells <> ""
+              Protected cCount.i = CountString(rowCells, ";") + 1
+              Protected cIdx.i
+              For cIdx = 1 To cCount
+                *newRow\AddCell(StringField(rowCells, cIdx, ";"))
+              Next
+            Else
+              ; Child <Cell> tags
+              Protected *cellXml = ChildXMLNode(*childXml)
+              While *cellXml
+                If XMLNodeType(*cellXml) = #PB_XML_Normal And UCase(GetXMLNodeName(*cellXml)) = "CELL"
+                  *newRow\AddCell(GetXMLNodeText(*cellXml))
+                EndIf
+                *cellXml = NextXMLNode(*cellXml)
+              Wend
+            EndIf
+          EndIf
+        EndIf
+        *childXml = NextXMLNode(*childXml)
+      Wend
+    }
+
     ; ------------------------------------------------------------------------
     ; Recursive XML Node Parser
     ; ------------------------------------------------------------------------
@@ -1073,6 +1145,26 @@ Namespace UI {
 
           ; Parse child <Node> tags recursively
           This\ParseCanvasTreeNodes(*ct, *ct\GetRoot(), node)
+
+        Case "CANVASTABLE", "TABLE", "DATAGRID"
+          Protected *ctbl.UI::CanvasTable = New UI::CanvasTable()
+          Protected ctblDark.s = UCase(Trim(GetXMLAttribute(node, "DarkMode")))
+          If ctblDark = "TRUE" Or ctblDark = "1" : *ctbl\SetDarkMode(#True) : EndIf
+          Protected ctblHdr.s = UCase(Trim(GetXMLAttribute(node, "ShowHeader")))
+          If ctblHdr = "FALSE" Or ctblHdr = "0" : *ctbl\SetShowHeader(#False) : EndIf
+          Protected ctblGrid.s = UCase(Trim(GetXMLAttribute(node, "ShowGridLines")))
+          If ctblGrid = "FALSE" Or ctblGrid = "0" : *ctbl\SetShowGridLines(#False) : EndIf
+          Protected ctblAlt.s = UCase(Trim(GetXMLAttribute(node, "ShowAlternatingColors")))
+          If ctblAlt = "FALSE" Or ctblAlt = "0" : *ctbl\SetShowAlternatingColors(#False) : EndIf
+          Protected ctblLineH.s = GetXMLAttribute(node, "LineHeight")
+          If ctblLineH <> "" : *ctbl\SetLineHeight(Val(ctblLineH)) : EndIf
+          Protected ctblHdrH.s = GetXMLAttribute(node, "HeaderHeight")
+          If ctblHdrH <> "" : *ctbl\SetHeaderHeight(Val(ctblHdrH)) : EndIf
+
+          This\ApplyCommonAttributes(*ctbl, node, *targetWindow)
+          *createdComp = *ctbl
+
+          This\ParseCanvasTableColumnsAndRows(*ctbl, node)
 
         Case "CANVASBUTTON"
           Protected cbtnText.s = GetXMLAttribute(node, "Text")

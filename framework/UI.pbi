@@ -46,6 +46,7 @@ XIncludeFile "controls/ToggleSwitch.pbi"
 XIncludeFile "controls/ListIcon.pbi"
 XIncludeFile "controls/Canvas.pbi"
 XIncludeFile "controls/CanvasTree.pbi"
+XIncludeFile "controls/CanvasTable.pbi"
 
 ; Declarative XML / XAML Layout Loader
 XIncludeFile "XMLLoader.pbi"
