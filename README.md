@@ -1,6 +1,6 @@
-# PureBasic OOP Framework & Transpiler
+# PureBasic OOP Framework & Transpiler — Version ALPHA 1.4
 
-A modern Object-Oriented Programming (OOP) transpiler and GUI framework for PureBasic, featuring declarative XML layouts, strongly-typed Observable Properties, and a complete Model-View-ViewModel (MVVM) reactive architecture.
+A modern Object-Oriented Programming (OOP) transpiler and GUI framework for PureBasic, featuring declarative XML layouts, strongly-typed Observable Properties, full vector Canvas controls (`UI::CanvasTable`, `UI::CanvasTree`, etc.), and a complete Model-View-ViewModel (MVVM) reactive architecture.
 
 ---
 
@@ -12,13 +12,15 @@ A modern Object-Oriented Programming (OOP) transpiler and GUI framework for Pure
    - Abstract classes and abstract methods (`Abstract Class`, `Public Abstract Method`).
    - Polymorphic method resolution via automated Virtual Method Tables (*VTable*).
 
-2. **Responsive GUI Framework (`src/ui/`)**:
-   - Automated layout managers: `DockPanel`, `StackPanel`, `Grid`.
-   - Complete set of standard controls: `Button`, `TextBox`, `Label`, `CheckBox`, `ProgressBar`, `Slider`, `ComboBox`, `ListIcon`, `ToggleSwitch`.
-   - Automated responsive window sizing and layout arrangement.
+2. **Vector UI & Modern DataGrid (`src/ui/controls/`)**:
+   - **`UI::CanvasTable` (New in Alpha 1.4)**: High-performance vector data table / grid featuring interactive column resizing, sorting, alternating row backgrounds, virtual vertical scrolling, multi-column definitions, and selection events.
+   - Vector Canvas Controls: `UI::CanvasButton`, `UI::CanvasTextBox`, `UI::CanvasText`, `UI::CanvasTree`, and `UI::CanvasTable`.
+   - Layout managers: `DockPanel`, `StackPanel`, `Grid`.
+   - Native controls: `Button`, `TextBox`, `Label`, `CheckBox`, `ProgressBar`, `Slider`, `ComboBox`, `ListIcon`, `ToggleSwitch`.
 
 3. **Declarative XML / XAML Engine**:
    - Define interfaces in external `.xml` files or directly in-memory as strings (`LoadViewFromString`).
+   - Declarative `<CanvasTable>` with nested `<Column>` definitions and `<Row>` / `<Cell>` population.
    - DataBinding syntax: `{Binding PropertyName}`.
    - Command triggers: `Click="CommandName"`.
 

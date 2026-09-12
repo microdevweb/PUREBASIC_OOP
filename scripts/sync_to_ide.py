@@ -28,7 +28,8 @@ CURATED_EXAMPLES = [
     "02_responsive_layout",
     "03_simple_mvvm",
     "04_todo_app",
-    "05_project_dashboard"
+    "05_project_dashboard",
+    "06_canvas_table"
 ]
 ide_ex_dir = os.path.join(IDE_ROOT, "examples")
 if os.path.exists(ide_ex_dir):

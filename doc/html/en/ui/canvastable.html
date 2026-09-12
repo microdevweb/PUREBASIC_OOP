@@ -4,7 +4,7 @@
   <meta charset='UTF-8'>
   <meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>
   <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-  <title>Component Class - PureBasic OOP Documentation</title>
+  <title>CanvasTable Class - PureBasic OOP Documentation</title>
   <link rel='stylesheet' href='../../css/doc_theme.css'>
 </head>
 <body>
@@ -20,7 +20,7 @@
         <input type='text' class='search-input' id='search-input' placeholder='Search docs...'>
       </div>
       <div class='lang-switch'>
-        <a href='../../fr/ui/component.html' class='lang-btn'>FR</a>
+        <a href='../../fr/ui/canvastable.html' class='lang-btn'>FR</a>
         <a href='#' class='lang-btn active'>EN</a>
       </div>
     </div>
@@ -49,7 +49,7 @@
   <div class='nav-section'>
     <div class='nav-section-title'>UI Foundation & Hierarchy</div>
     <ul class='nav-list'>
-      <li class='nav-item active'><a href='../ui/component.html'><span>Component (Base UI)</span><span class='badge badge-base'>BASE</span></a></li>
+      <li class='nav-item'><a href='../ui/component.html'><span>Component (Base UI)</span><span class='badge badge-base'>BASE</span></a></li>
       <li class='nav-item'><a href='../ui/gadget.html'><span>Gadget (Native Base)</span><span class='badge badge-base'>BASE</span></a></li>
       <li class='nav-item'><a href='../ui/customgadget.html'><span>CustomGadget (Canvas Base)</span><span class='badge badge-base'>BASE</span></a></li>
       <li class='nav-item'><a href='../ui/canvascontrol.html'><span>CanvasControl (Vector Base)</span><span class='badge badge-canvas'>CANVAS</span></a></li>
@@ -63,7 +63,7 @@
       <li class='nav-item'><a href='../ui/canvastextbox.html'><span>CanvasTextBox</span><span class='badge badge-canvas'>CANVAS</span></a></li>
       <li class='nav-item'><a href='../ui/canvastext.html'><span>CanvasText</span><span class='badge badge-canvas'>CANVAS</span></a></li>
       <li class='nav-item'><a href='../ui/canvastree.html'><span>CanvasTree</span><span class='badge badge-canvas'>CANVAS</span></a></li>
-      <li class='nav-item'><a href='../ui/canvastable.html'><span>CanvasTable</span><span class='badge badge-canvas'>CANVAS</span></a></li>
+      <li class='nav-item active'><a href='../ui/canvastable.html'><span>CanvasTable</span><span class='badge badge-canvas'>CANVAS</span></a></li>
     </ul>
   </div>
   <div class='nav-section'>
@@ -122,15 +122,15 @@
       <div class='breadcrumb'>
         <a href='../index.html'>Home</a>
         <span class='breadcrumb-separator'>/</span><span>UI Components</span>
-        <span class='breadcrumb-separator'>/</span><span style='color: var(--accent-blue);'>Component Class</span>
+        <span class='breadcrumb-separator'>/</span><span style='color: var(--accent-blue);'>CanvasTable Class</span>
       </div>
       
       <div class='page-header'>
         <div class='title-row'>
-          <h1 class='page-title'>Component Class</h1>
-          <span class='badge badge-ui'>Base UI</span>
+          <h1 class='page-title'>CanvasTable Class</h1>
+          <span class='badge badge-ui'>CANVAS</span>
         </div>
-        <p class='page-lead'>Abstract root class for all UI elements, gadgets, and responsive layout panels.</p>
+        <p class='page-lead'>High-performance vector data table (DataGrid) featuring virtual scrolling, resizable sorted columns, and interactive cells.</p>
       </div>
       
       <div class='inheritance-box'>
@@ -138,57 +138,109 @@
   <div class='inheritance-chain'>
     <a href='../keywords/class.html' class='inheritance-node'>Core::Object</a>
     <span class='inheritance-arrow'>&rarr;</span>
-    <span class='inheritance-node current'>UI::Component</span>
+    <a href='component.html' class='inheritance-node'>UI::Component</a>
+    <span class='inheritance-arrow'>&rarr;</span>
+    <a href='gadget.html' class='inheritance-node'>UI::Gadget</a>
+    <span class='inheritance-arrow'>&rarr;</span>
+    <a href='canvascontrol.html' class='inheritance-node'>UI::CanvasControl</a>
+    <span class='inheritance-arrow'>&rarr;</span>
+    <span class='inheritance-node current'>UI::CanvasTable</span>
   </div>
-  <div class='derived-classes-box'>
-    <div class='derived-classes-title'>Derived Classes (inheriting from this class) :</div>
-    <div class='derived-classes-list'>
-      <a href='gadget.html' class='derived-badge'>UI::Gadget</a>
-      <a href='container.html' class='derived-badge'>UI::Layouts::Container</a>
+  <div class='inherited-members-summary'>
+    <div class='inherited-members-title'><span>Inherited Methods de <a href='canvascontrol.html' style='color: var(--accent-blue); text-decoration: underline;'>UI::CanvasControl</a></span> <span style='font-size: 0.78rem; font-weight: normal; color: var(--text-muted);'>(3 méthodes)</span></div>
+    <div class='inherited-members-tags'>
+      <a href='canvascontrol.html' class='inherited-tag'>ApplyStyle(*style)</a>
+      <a href='canvascontrol.html' class='inherited-tag'>SetCornerRadius(r)</a>
+      <a href='canvascontrol.html' class='inherited-tag'>SetBorderColor(c)</a>
+    </div>
+  </div>
+  <div class='inherited-members-summary'>
+    <div class='inherited-members-title'><span>Inherited Methods de <a href='gadget.html' style='color: var(--accent-blue); text-decoration: underline;'>UI::Gadget</a></span> <span style='font-size: 0.78rem; font-weight: normal; color: var(--text-muted);'>(3 méthodes)</span></div>
+    <div class='inherited-members-tags'>
+      <a href='gadget.html' class='inherited-tag'>GetID()</a>
+      <a href='gadget.html' class='inherited-tag'>GetHandle()</a>
+      <a href='gadget.html' class='inherited-tag'>FreeGadget()</a>
+    </div>
+  </div>
+  <div class='inherited-members-summary'>
+    <div class='inherited-members-title'><span>Inherited Methods de <a href='component.html' style='color: var(--accent-blue); text-decoration: underline;'>UI::Component</a></span> <span style='font-size: 0.78rem; font-weight: normal; color: var(--text-muted);'>(4 méthodes)</span></div>
+    <div class='inherited-members-tags'>
+      <a href='component.html' class='inherited-tag'>SetPosition()</a>
+      <a href='component.html' class='inherited-tag'>SetSize()</a>
+      <a href='component.html' class='inherited-tag'>SetMargin()</a>
+      <a href='component.html' class='inherited-tag'>Arrange()</a>
     </div>
   </div>
 </div>
       
 
 <div class='doc-section'>
-  <h2 class='section-title'>Description</h2>
-  <p>The abstract <code>UI::Component</code> class (located in <code>framework/Component.pbo</code>) provides the foundational WPF-style box model for all graphical elements in PureBasic OOP: computed bounds, responsive margins, horizontal/vertical alignments, desired dimensions, and automated 2-pass layout arrangement (<code>Arrange</code>).</p>
+  <h2 class='section-title'>Overview</h2>
+  <p><code>UI::CanvasTable</code> inherits from <code>UI::CanvasControl</code> and provides an ultra-responsive 2D vector data grid. Built for rendering and interacting with large datasets smoothly using virtual scrolling, it natively provides column sorting and resizing, alternating row colors (light and dark palettes), inline cell editing, and multiple column types (text, numbers, floats, checkboxes, action buttons, and icons).</p>
 </div>
 
 <div class='doc-section'>
-  <h2 class='section-title'>Alignment Constants</h2>
+  <h2 class='section-title'>Constructors</h2>
   <div class='table-wrapper'>
     <table>
-      <tr><th>Constant</th><th>Value</th><th>Meaning</th></tr>
-      <tr><td><code>#UI_Align_Left</code></td><td>0</td><td>Align to left edge</td></tr>
-      <tr><td><code>#UI_Align_Center</code></td><td>1</td><td>Center horizontally</td></tr>
-      <tr><td><code>#UI_Align_Right</code></td><td>2</td><td>Align to right edge</td></tr>
-      <tr><td><code>#UI_Align_Stretch</code></td><td>3</td><td>Stretch across entire available width (default)</td></tr>
-      <tr><td><code>#UI_Align_Top</code></td><td>0</td><td>Align to top edge</td></tr>
-      <tr><td><code>#UI_Align_Middle</code></td><td>1</td><td>Center vertically</td></tr>
-      <tr><td><code>#UI_Align_Bottom</code></td><td>2</td><td>Align to bottom edge</td></tr>
-      <tr><td><code>#UI_Align_VStretch</code></td><td>3</td><td>Stretch across entire available height (default)</td></tr>
+      <tr><th>Constructor</th><th>Description</th></tr>
+      <tr><td><code>Init()</code></td><td>Initializes a vector table with default dimensions (400x300).</td></tr>
+      <tr><td><code>Init(w.i, h.i)</code></td><td>Initializes a table with explicit width and height.</td></tr>
+      <tr><td><code>Init(x.i, y.i, w.i, h.i)</code></td><td>Initializes a table with absolute position and bounds.</td></tr>
     </table>
   </div>
 </div>
 
 <div class='doc-section'>
-  <h2 class='section-title'>Core Component Methods</h2>
-  <div class='table-wrapper'>
-    <table>
+  <h2 class='section-title'>Columns and Rows Management</h2>
+  <table class='method-table'>
+    <thead>
       <tr><th>Method</th><th>Description</th></tr>
-      <tr><td><code>SetPosition(x.i, y.i)</code></td><td>Manually sets the X, Y position of the component.</td></tr>
-      <tr><td><code>SetSize(w.i, h.i)</code></td><td>Manually sets width and height.</td></tr>
-      <tr><td><code>SetMargin(l.i, t.i, r.i, b.i)</code></td><td>Sets external margins (Left, Top, Right, Bottom) in pixels.</td></tr>
-      <tr><td><code>SetMarginAll(m.i)</code></td><td>Sets identical margin on all 4 sides.</td></tr>
-      <tr><td><code>SetHorizontalAlignment(align.i)</code></td><td>Sets horizontal alignment (<code>#UI_Align_Left</code>, <code>#UI_Align_Center</code>, etc.).</td></tr>
-      <tr><td><code>SetVerticalAlignment(align.i)</code></td><td>Sets vertical alignment (<code>#UI_Align_Top</code>, <code>#UI_Align_Middle</code>, etc.).</td></tr>
-      <tr><td><code>SetDesiredSize(w.i, h.i)</code></td><td>Sets preferred size requested by component to layout panels.</td></tr>
-      <tr><td><code>GetDesiredWidth() / GetDesiredHeight()</code></td><td>Returns desired dimensions including margins.</td></tr>
-      <tr><td><code>SetVisible(v.b) / IsVisible()</code></td><td>Toggles element visibility.</td></tr>
-      <tr><td><code>SetEnabled(e.b) / IsEnabled()</code></td><td>Toggles user interactivity.</td></tr>
-      <tr><td><code>Arrange(targetX.i, targetY.i, targetW.i, targetH.i)</code></td><td>Calculates final bounding box and positions/resizes gadget.</td></tr>
-    </table>
+    </thead>
+    <tbody>
+      <tr><td><code>AddColumn(title.s, width.i, type.i, align.i, editable.b = #False)</code></td><td>Adds a column with type (#UI_TableCol_Text, Number, Float, CheckBox, Button, Image) and alignment.</td></tr>
+      <tr><td><code>AddRow()</code></td><td>Appends an empty row and returns its pointer <code>*row.UI::TableRow</code>.</td></tr>
+      <tr><td><code>AddRowCells(c0.s, c1.s, c2.s, c3.s, c4.s, c5.s, c6.s, c7.s)</code></td><td>Appends a new row pre-filled with up to 8 cell values.</td></tr>
+      <tr><td><code>RemoveRow(index.i)</code></td><td>Removes the row at the specified index.</td></tr>
+      <tr><td><code>ClearRows()</code></td><td>Clears all rows from the table.</td></tr>
+      <tr><td><code>GetRowCount()</code></td><td>Returns the total count of rows in the table.</td></tr>
+      <tr><td><code>GetCellText(row.i, col.i)</code></td><td>Retrieves text content from a given cell.</td></tr>
+      <tr><td><code>SetCellText(row.i, col.i, text.s)</code></td><td>Updates text content of a given cell.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class='doc-section'>
+  <h2 class='section-title'>Styling, Theming & Event Callbacks</h2>
+  <table class='method-table'>
+    <thead>
+      <tr><th>Method</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>SetShowAlternatingColors(enable.b)</code></td><td>Enables or disables alternating row backgrounds.</td></tr>
+      <tr><td><code>SetEvenRowColors(bg.i, fg.i)</code></td><td>Sets background and foreground colors for even rows.</td></tr>
+      <tr><td><code>SetOddRowColors(bg.i, fg.i)</code></td><td>Sets background and foreground colors for odd rows.</td></tr>
+      <tr><td><code>SetDarkMode(enable.b)</code></td><td>Toggles the modern dark palette (Slate-900).</td></tr>
+      <tr><td><code>SetHeaderHeight(h.i)</code></td><td>Sets header bar height in pixels (default: 34 px).</td></tr>
+      <tr><td><code>SetLineHeight(h.i)</code></td><td>Sets row height in pixels (default: 30 px).</td></tr>
+      <tr><td><code>SetOnSelect(*cb)</code></td><td>Registers row selection callback: <code>Proc(*row.UI::TableRow)</code>.</td></tr>
+      <tr><td><code>SetOnCellEdit(*cb)</code></td><td>Registers cell edit completion callback: <code>Proc(*row, col.i, val.s)</code>.</td></tr>
+      <tr><td><code>SetOnCheck(*cb)</code></td><td>Registers checkbox toggled callback: <code>Proc(*row, isChecked.b)</code>.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class='doc-section'>
+  <h2 class='section-title'>Declarative XML Example</h2>
+  <div class='code-container'>
+    <pre><code><span class='kw'>&lt;CanvasTable</span> <span class='str'>Dock="Fill"</span> <span class='str'>LineHeight="32"</span> <span class='str'>HeaderHeight="36"</span> <span class='str'>ShowAlternatingColors="True"</span><span class='kw'>&gt;</span>
+  <span class='kw'>&lt;Column</span> <span class='str'>Title="Code"</span> <span class='str'>Width="90"</span> <span class='str'>Type="Text"</span> <span class='str'>Align="Center"</span><span class='kw'>/&gt;</span>
+  <span class='kw'>&lt;Column</span> <span class='str'>Title="Designation"</span> <span class='str'>Width="260"</span> <span class='str'>Type="Text"</span> <span class='str'>Align="Left"</span> <span class='str'>Editable="True"</span><span class='kw'>/&gt;</span>
+  <span class='kw'>&lt;Column</span> <span class='str'>Title="Stock"</span> <span class='str'>Width="90"</span> <span class='str'>Type="Number"</span> <span class='str'>Align="Right"</span><span class='kw'>/&gt;</span>
+  <span class='kw'>&lt;Column</span> <span class='str'>Title="Active"</span> <span class='str'>Width="80"</span> <span class='str'>Type="CheckBox"</span> <span class='str'>Align="Center"</span><span class='kw'>/&gt;</span>
+  <span class='kw'>&lt;Row</span> <span class='str'>Cells="ART-01;Mechanical RGB Keyboard;42;1"</span><span class='kw'>/&gt;</span>
+  <span class='kw'>&lt;Row</span> <span class='str'>Cells="ART-02;Wireless Optical Mouse;118;1"</span><span class='kw'>/&gt;</span>
+<span class='kw'>&lt;/CanvasTable&gt;</span></code></pre>
   </div>
 </div>
 

@@ -34,7 +34,8 @@ NAV_ITEMS_FR = [
         ("canvasbutton", "CanvasButton", "ui/canvasbutton.html", "CANVAS"),
         ("canvastextbox", "CanvasTextBox", "ui/canvastextbox.html", "CANVAS"),
         ("canvastext", "CanvasText", "ui/canvastext.html", "CANVAS"),
-        ("canvastree", "CanvasTree", "ui/canvastree.html", "CANVAS")
+        ("canvastree", "CanvasTree", "ui/canvastree.html", "CANVAS"),
+        ("canvastable", "CanvasTable", "ui/canvastable.html", "CANVAS")
     ]),
     ("Styles & Animations WPF", [
         ("styles", "Styles & Dictionnaires", "ui/styles.html", "WPF"),
@@ -98,7 +99,8 @@ NAV_ITEMS_EN = [
         ("canvasbutton", "CanvasButton", "ui/canvasbutton.html", "CANVAS"),
         ("canvastextbox", "CanvasTextBox", "ui/canvastextbox.html", "CANVAS"),
         ("canvastext", "CanvasText", "ui/canvastext.html", "CANVAS"),
-        ("canvastree", "CanvasTree", "ui/canvastree.html", "CANVAS")
+        ("canvastree", "CanvasTree", "ui/canvastree.html", "CANVAS"),
+        ("canvastable", "CanvasTable", "ui/canvastable.html", "CANVAS")
     ]),
     ("WPF Declarative Styles & Animations", [
         ("styles", "Styles & Dictionaries", "ui/styles.html", "WPF"),
@@ -146,7 +148,8 @@ HIERARCHY_DATA = {
             ("UI::CanvasButton", "canvasbutton.html"),
             ("UI::CanvasTextBox", "canvastextbox.html"),
             ("UI::CanvasText", "canvastext.html"),
-            ("UI::CanvasTree", "canvastree.html")
+            ("UI::CanvasTree", "canvastree.html"),
+            ("UI::CanvasTable", "canvastable.html")
         ],
         "inherited": [
             ("UI::Gadget", "gadget.html", ["GetID()", "GetHandle()", "FreeGadget()", "SetToolTip()", "SetFocus()"]),
@@ -185,6 +188,15 @@ HIERARCHY_DATA = {
         "derived": [],
         "inherited": [
             ("UI::CanvasControl", "canvascontrol.html", ["ApplyStyle(*style)", "SetCornerRadius(r)"]),
+            ("UI::Gadget", "gadget.html", ["GetID()", "GetHandle()", "FreeGadget()"]),
+            ("UI::Component", "component.html", ["SetPosition()", "SetSize()", "SetMargin()", "Arrange()"])
+        ]
+    },
+    "canvastable": {
+        "ancestors": [("Core::Object", "../keywords/class.html"), ("UI::Component", "component.html"), ("UI::Gadget", "gadget.html"), ("UI::CanvasControl", "canvascontrol.html"), ("UI::CanvasTable", "canvastable.html")],
+        "derived": [],
+        "inherited": [
+            ("UI::CanvasControl", "canvascontrol.html", ["ApplyStyle(*style)", "SetCornerRadius(r)", "SetBorderColor(c)"]),
             ("UI::Gadget", "gadget.html", ["GetID()", "GetHandle()", "FreeGadget()"]),
             ("UI::Component", "component.html", ["SetPosition()", "SetSize()", "SetMargin()", "Arrange()"])
         ]
@@ -2735,6 +2747,153 @@ save_page("en", "ui/canvastree.html", "CanvasTree Class", "Modern vector treevie
   <p><code>UI::CanvasTree</code> delivers an interactive hierarchical tree view. Each node supports expandable animated chevrons, checkboxes, custom icons, and right-aligned interactive action buttons.</p>
 </div>
 """, "canvastree")
+
+# ----------------------------------------------------------------------------
+# CanvasTable
+# ----------------------------------------------------------------------------
+save_page("fr", "ui/canvastable.html", "Classe CanvasTable", "Tableau de données vectoriel haute performance (DataGrid) avec virtual scrolling, tri de colonnes et cellules interactives.", "badge-ui", "CANVAS", """
+<div class='doc-section'>
+  <h2 class='section-title'>Présentation</h2>
+  <p><code>UI::CanvasTable</code> hérite de <code>UI::CanvasControl</code> et offre un composant de grille de données vectorielle ultra-performant. Conçu pour afficher et manipuler des volumes importants de données avec fluidité grâce au scrolling virtuel, il gère nativement le redimensionnement et le tri par colonne, l'alternance esthétique des lignes (thèmes clair et sombre), l'édition en ligne ainsi que des types de cellules variés (texte, nombres, décimaux, cases à cocher, boutons d'action et icônes).</p>
+</div>
+
+<div class='doc-section'>
+  <h2 class='section-title'>Constructeurs</h2>
+  <div class='table-wrapper'>
+    <table>
+      <tr><th>Constructeur</th><th>Description</th></tr>
+      <tr><td><code>Init()</code></td><td>Initialise une table vectorielle aux dimensions par défaut (400x300).</td></tr>
+      <tr><td><code>Init(w.i, h.i)</code></td><td>Initialise une table avec largeur et hauteur spécifiées.</td></tr>
+      <tr><td><code>Init(x.i, y.i, w.i, h.i)</code></td><td>Initialise une table avec coordonnées et dimensions absolues.</td></tr>
+    </table>
+  </div>
+</div>
+
+<div class='doc-section'>
+  <h2 class='section-title'>Gestion des Colonnes et Données</h2>
+  <table class='method-table'>
+    <thead>
+      <tr><th>Méthode</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>AddColumn(title.s, width.i, type.i, align.i, editable.b = #False)</code></td><td>Ajoute une colonne avec type (#UI_TableCol_Text, Number, Float, CheckBox, Button, Image) et alignement.</td></tr>
+      <tr><td><code>AddRow()</code></td><td>Ajoute une ligne vide et retourne son pointeur <code>*row.UI::TableRow</code>.</td></tr>
+      <tr><td><code>AddRowCells(c0.s, c1.s, c2.s, c3.s, c4.s, c5.s, c6.s, c7.s)</code></td><td>Ajoute une nouvelle ligne pré-remplie avec jusqu'à 8 valeurs de cellules.</td></tr>
+      <tr><td><code>RemoveRow(index.i)</code></td><td>Supprime la ligne à l'index donné.</td></tr>
+      <tr><td><code>ClearRows()</code></td><td>Supprime l'ensemble des lignes de la table.</td></tr>
+      <tr><td><code>GetRowCount()</code></td><td>Retourne le nombre total de lignes présentes dans la table.</td></tr>
+      <tr><td><code>GetCellText(row.i, col.i)</code></td><td>Récupère la valeur textuelle d'une cellule donnée.</td></tr>
+      <tr><td><code>SetCellText(row.i, col.i, text.s)</code></td><td>Modifie la valeur textuelle d'une cellule donnée.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class='doc-section'>
+  <h2 class='section-title'>Apparence, Thème & Callbacks</h2>
+  <table class='method-table'>
+    <thead>
+      <tr><th>Méthode</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>SetShowAlternatingColors(enable.b)</code></td><td>Active ou désactive l'alternance de fond entre lignes paires et impaires.</td></tr>
+      <tr><td><code>SetEvenRowColors(bg.i, fg.i)</code></td><td>Définit les couleurs de fond et de texte pour les lignes paires.</td></tr>
+      <tr><td><code>SetOddRowColors(bg.i, fg.i)</code></td><td>Définit les couleurs de fond et de texte pour les lignes impaires.</td></tr>
+      <tr><td><code>SetDarkMode(enable.b)</code></td><td>Bascule automatiquement la table en palette sombre moderne (Slate-900).</td></tr>
+      <tr><td><code>SetHeaderHeight(h.i)</code></td><td>Modifie la hauteur de la barre d'en-tête (défaut : 34 px).</td></tr>
+      <tr><td><code>SetLineHeight(h.i)</code></td><td>Modifie la hauteur de chaque ligne de données (défaut : 30 px).</td></tr>
+      <tr><td><code>SetOnSelect(*cb)</code></td><td>Enregistre un callback de sélection de ligne : <code>Proc(*row.UI::TableRow)</code>.</td></tr>
+      <tr><td><code>SetOnCellEdit(*cb)</code></td><td>Enregistre un callback de fin d'édition d'une cellule : <code>Proc(*row, col.i, val.s)</code>.</td></tr>
+      <tr><td><code>SetOnCheck(*cb)</code></td><td>Enregistre un callback lors du basculement d'une case à cocher : <code>Proc(*row, isChecked.b)</code>.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class='doc-section'>
+  <h2 class='section-title'>Exemple Déclaratif XML</h2>
+  <div class='code-container'>
+    <pre><code><span class='kw'>&lt;CanvasTable</span> <span class='str'>Dock="Fill"</span> <span class='str'>LineHeight="32"</span> <span class='str'>HeaderHeight="36"</span> <span class='str'>ShowAlternatingColors="True"</span><span class='kw'>&gt;</span>
+  <span class='kw'>&lt;Column</span> <span class='str'>Title="Code"</span> <span class='str'>Width="90"</span> <span class='str'>Type="Text"</span> <span class='str'>Align="Center"</span><span class='kw'>/&gt;</span>
+  <span class='kw'>&lt;Column</span> <span class='str'>Title="Désignation"</span> <span class='str'>Width="260"</span> <span class='str'>Type="Text"</span> <span class='str'>Align="Left"</span> <span class='str'>Editable="True"</span><span class='kw'>/&gt;</span>
+  <span class='kw'>&lt;Column</span> <span class='str'>Title="Stock"</span> <span class='str'>Width="90"</span> <span class='str'>Type="Number"</span> <span class='str'>Align="Right"</span><span class='kw'>/&gt;</span>
+  <span class='kw'>&lt;Column</span> <span class='str'>Title="Actif"</span> <span class='str'>Width="80"</span> <span class='str'>Type="CheckBox"</span> <span class='str'>Align="Center"</span><span class='kw'>/&gt;</span>
+  <span class='kw'>&lt;Row</span> <span class='str'>Cells="ART-01;Clavier Mécanique RGB;42;1"</span><span class='kw'>/&gt;</span>
+  <span class='kw'>&lt;Row</span> <span class='str'>Cells="ART-02;Souris Optique Sans-Fil;118;1"</span><span class='kw'>/&gt;</span>
+<span class='kw'>&lt;/CanvasTable&gt;</span></code></pre>
+  </div>
+</div>
+""", "canvastable")
+
+save_page("en", "ui/canvastable.html", "CanvasTable Class", "High-performance vector data table (DataGrid) featuring virtual scrolling, resizable sorted columns, and interactive cells.", "badge-ui", "CANVAS", """
+<div class='doc-section'>
+  <h2 class='section-title'>Overview</h2>
+  <p><code>UI::CanvasTable</code> inherits from <code>UI::CanvasControl</code> and provides an ultra-responsive 2D vector data grid. Built for rendering and interacting with large datasets smoothly using virtual scrolling, it natively provides column sorting and resizing, alternating row colors (light and dark palettes), inline cell editing, and multiple column types (text, numbers, floats, checkboxes, action buttons, and icons).</p>
+</div>
+
+<div class='doc-section'>
+  <h2 class='section-title'>Constructors</h2>
+  <div class='table-wrapper'>
+    <table>
+      <tr><th>Constructor</th><th>Description</th></tr>
+      <tr><td><code>Init()</code></td><td>Initializes a vector table with default dimensions (400x300).</td></tr>
+      <tr><td><code>Init(w.i, h.i)</code></td><td>Initializes a table with explicit width and height.</td></tr>
+      <tr><td><code>Init(x.i, y.i, w.i, h.i)</code></td><td>Initializes a table with absolute position and bounds.</td></tr>
+    </table>
+  </div>
+</div>
+
+<div class='doc-section'>
+  <h2 class='section-title'>Columns and Rows Management</h2>
+  <table class='method-table'>
+    <thead>
+      <tr><th>Method</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>AddColumn(title.s, width.i, type.i, align.i, editable.b = #False)</code></td><td>Adds a column with type (#UI_TableCol_Text, Number, Float, CheckBox, Button, Image) and alignment.</td></tr>
+      <tr><td><code>AddRow()</code></td><td>Appends an empty row and returns its pointer <code>*row.UI::TableRow</code>.</td></tr>
+      <tr><td><code>AddRowCells(c0.s, c1.s, c2.s, c3.s, c4.s, c5.s, c6.s, c7.s)</code></td><td>Appends a new row pre-filled with up to 8 cell values.</td></tr>
+      <tr><td><code>RemoveRow(index.i)</code></td><td>Removes the row at the specified index.</td></tr>
+      <tr><td><code>ClearRows()</code></td><td>Clears all rows from the table.</td></tr>
+      <tr><td><code>GetRowCount()</code></td><td>Returns the total count of rows in the table.</td></tr>
+      <tr><td><code>GetCellText(row.i, col.i)</code></td><td>Retrieves text content from a given cell.</td></tr>
+      <tr><td><code>SetCellText(row.i, col.i, text.s)</code></td><td>Updates text content of a given cell.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class='doc-section'>
+  <h2 class='section-title'>Styling, Theming & Event Callbacks</h2>
+  <table class='method-table'>
+    <thead>
+      <tr><th>Method</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>SetShowAlternatingColors(enable.b)</code></td><td>Enables or disables alternating row backgrounds.</td></tr>
+      <tr><td><code>SetEvenRowColors(bg.i, fg.i)</code></td><td>Sets background and foreground colors for even rows.</td></tr>
+      <tr><td><code>SetOddRowColors(bg.i, fg.i)</code></td><td>Sets background and foreground colors for odd rows.</td></tr>
+      <tr><td><code>SetDarkMode(enable.b)</code></td><td>Toggles the modern dark palette (Slate-900).</td></tr>
+      <tr><td><code>SetHeaderHeight(h.i)</code></td><td>Sets header bar height in pixels (default: 34 px).</td></tr>
+      <tr><td><code>SetLineHeight(h.i)</code></td><td>Sets row height in pixels (default: 30 px).</td></tr>
+      <tr><td><code>SetOnSelect(*cb)</code></td><td>Registers row selection callback: <code>Proc(*row.UI::TableRow)</code>.</td></tr>
+      <tr><td><code>SetOnCellEdit(*cb)</code></td><td>Registers cell edit completion callback: <code>Proc(*row, col.i, val.s)</code>.</td></tr>
+      <tr><td><code>SetOnCheck(*cb)</code></td><td>Registers checkbox toggled callback: <code>Proc(*row, isChecked.b)</code>.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class='doc-section'>
+  <h2 class='section-title'>Declarative XML Example</h2>
+  <div class='code-container'>
+    <pre><code><span class='kw'>&lt;CanvasTable</span> <span class='str'>Dock="Fill"</span> <span class='str'>LineHeight="32"</span> <span class='str'>HeaderHeight="36"</span> <span class='str'>ShowAlternatingColors="True"</span><span class='kw'>&gt;</span>
+  <span class='kw'>&lt;Column</span> <span class='str'>Title="Code"</span> <span class='str'>Width="90"</span> <span class='str'>Type="Text"</span> <span class='str'>Align="Center"</span><span class='kw'>/&gt;</span>
+  <span class='kw'>&lt;Column</span> <span class='str'>Title="Designation"</span> <span class='str'>Width="260"</span> <span class='str'>Type="Text"</span> <span class='str'>Align="Left"</span> <span class='str'>Editable="True"</span><span class='kw'>/&gt;</span>
+  <span class='kw'>&lt;Column</span> <span class='str'>Title="Stock"</span> <span class='str'>Width="90"</span> <span class='str'>Type="Number"</span> <span class='str'>Align="Right"</span><span class='kw'>/&gt;</span>
+  <span class='kw'>&lt;Column</span> <span class='str'>Title="Active"</span> <span class='str'>Width="80"</span> <span class='str'>Type="CheckBox"</span> <span class='str'>Align="Center"</span><span class='kw'>/&gt;</span>
+  <span class='kw'>&lt;Row</span> <span class='str'>Cells="ART-01;Mechanical RGB Keyboard;42;1"</span><span class='kw'>/&gt;</span>
+  <span class='kw'>&lt;Row</span> <span class='str'>Cells="ART-02;Wireless Optical Mouse;118;1"</span><span class='kw'>/&gt;</span>
+<span class='kw'>&lt;/CanvasTable&gt;</span></code></pre>
+  </div>
+</div>
+""", "canvastable")
 
 # ----------------------------------------------------------------------------
 # Styles & Resource Dictionaries

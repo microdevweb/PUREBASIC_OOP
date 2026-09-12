@@ -4,7 +4,7 @@
   <meta charset='UTF-8'>
   <meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>
   <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-  <title>Classe TextBox - PureBasic OOP Documentation</title>
+  <title>Classe CanvasTable - PureBasic OOP Documentation</title>
   <link rel='stylesheet' href='../../css/doc_theme.css'>
 </head>
 <body>
@@ -21,7 +21,7 @@
       </div>
       <div class='lang-switch'>
         <a href='#' class='lang-btn active'>FR</a>
-        <a href='../../en/ui/textbox.html' class='lang-btn'>EN</a>
+        <a href='../../en/ui/canvastable.html' class='lang-btn'>EN</a>
       </div>
     </div>
   </header>
@@ -63,7 +63,7 @@
       <li class='nav-item'><a href='../ui/canvastextbox.html'><span>CanvasTextBox</span><span class='badge badge-canvas'>CANVAS</span></a></li>
       <li class='nav-item'><a href='../ui/canvastext.html'><span>CanvasText</span><span class='badge badge-canvas'>CANVAS</span></a></li>
       <li class='nav-item'><a href='../ui/canvastree.html'><span>CanvasTree</span><span class='badge badge-canvas'>CANVAS</span></a></li>
-      <li class='nav-item'><a href='../ui/canvastable.html'><span>CanvasTable</span><span class='badge badge-canvas'>CANVAS</span></a></li>
+      <li class='nav-item active'><a href='../ui/canvastable.html'><span>CanvasTable</span><span class='badge badge-canvas'>CANVAS</span></a></li>
     </ul>
   </div>
   <div class='nav-section'>
@@ -91,7 +91,7 @@
       <li class='nav-item'><a href='../ui/slider.html'><span>Slider</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/spinbox.html'><span>SpinBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/tabcontrol.html'><span>TabControl</span><span class='badge badge-ui'>UI</span></a></li>
-      <li class='nav-item active'><a href='../ui/textbox.html'><span>TextBox</span><span class='badge badge-ui'>UI</span></a></li>
+      <li class='nav-item'><a href='../ui/textbox.html'><span>TextBox</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/toggleswitch.html'><span>ToggleSwitch</span><span class='badge badge-ui'>UI</span></a></li>
       <li class='nav-item'><a href='../ui/treeview.html'><span>TreeView</span><span class='badge badge-ui'>UI</span></a></li>
     </ul>
@@ -122,15 +122,15 @@
       <div class='breadcrumb'>
         <a href='../index.html'>Accueil</a>
         <span class='breadcrumb-separator'>/</span><span>Composants UI</span>
-        <span class='breadcrumb-separator'>/</span><span style='color: var(--accent-blue);'>Classe TextBox</span>
+        <span class='breadcrumb-separator'>/</span><span style='color: var(--accent-blue);'>Classe CanvasTable</span>
       </div>
       
       <div class='page-header'>
         <div class='title-row'>
-          <h1 class='page-title'>Classe TextBox</h1>
-          <span class='badge badge-ui'>UI Class</span>
+          <h1 class='page-title'>Classe CanvasTable</h1>
+          <span class='badge badge-ui'>CANVAS</span>
         </div>
-        <p class='page-lead'>Champ de saisie textuelle monoligne avec placeholder et mode mot de passe.</p>
+        <p class='page-lead'>Tableau de données vectoriel haute performance (DataGrid) avec virtual scrolling, tri de colonnes et cellules interactives.</p>
       </div>
       
       <div class='inheritance-box'>
@@ -142,30 +142,32 @@
     <span class='inheritance-arrow'>&rarr;</span>
     <a href='gadget.html' class='inheritance-node'>UI::Gadget</a>
     <span class='inheritance-arrow'>&rarr;</span>
-    <span class='inheritance-node current'>UI::TextBox</span>
+    <a href='canvascontrol.html' class='inheritance-node'>UI::CanvasControl</a>
+    <span class='inheritance-arrow'>&rarr;</span>
+    <span class='inheritance-node current'>UI::CanvasTable</span>
   </div>
   <div class='inherited-members-summary'>
-    <div class='inherited-members-title'><span>Méthodes héritées de <a href='gadget.html' style='color: var(--accent-blue); text-decoration: underline;'>UI::Gadget</a></span> <span style='font-size: 0.78rem; font-weight: normal; color: var(--text-muted);'>(7 méthodes)</span></div>
+    <div class='inherited-members-title'><span>Méthodes héritées de <a href='canvascontrol.html' style='color: var(--accent-blue); text-decoration: underline;'>UI::CanvasControl</a></span> <span style='font-size: 0.78rem; font-weight: normal; color: var(--text-muted);'>(3 méthodes)</span></div>
     <div class='inherited-members-tags'>
-      <a href='gadget.html' class='inherited-tag'>GetID()</a>
-      <a href='gadget.html' class='inherited-tag'>GetHandle()</a>
-      <a href='gadget.html' class='inherited-tag'>SetFont()</a>
-      <a href='gadget.html' class='inherited-tag'>SetColor()</a>
-      <a href='gadget.html' class='inherited-tag'>FreeGadget()</a>
-      <a href='gadget.html' class='inherited-tag'>SetToolTip()</a>
-      <a href='gadget.html' class='inherited-tag'>SetFocus()</a>
+      <a href='canvascontrol.html' class='inherited-tag'>ApplyStyle(*style)</a>
+      <a href='canvascontrol.html' class='inherited-tag'>SetCornerRadius(r)</a>
+      <a href='canvascontrol.html' class='inherited-tag'>SetBorderColor(c)</a>
     </div>
   </div>
   <div class='inherited-members-summary'>
-    <div class='inherited-members-title'><span>Méthodes héritées de <a href='component.html' style='color: var(--accent-blue); text-decoration: underline;'>UI::Component</a></span> <span style='font-size: 0.78rem; font-weight: normal; color: var(--text-muted);'>(8 méthodes)</span></div>
+    <div class='inherited-members-title'><span>Méthodes héritées de <a href='gadget.html' style='color: var(--accent-blue); text-decoration: underline;'>UI::Gadget</a></span> <span style='font-size: 0.78rem; font-weight: normal; color: var(--text-muted);'>(3 méthodes)</span></div>
+    <div class='inherited-members-tags'>
+      <a href='gadget.html' class='inherited-tag'>GetID()</a>
+      <a href='gadget.html' class='inherited-tag'>GetHandle()</a>
+      <a href='gadget.html' class='inherited-tag'>FreeGadget()</a>
+    </div>
+  </div>
+  <div class='inherited-members-summary'>
+    <div class='inherited-members-title'><span>Méthodes héritées de <a href='component.html' style='color: var(--accent-blue); text-decoration: underline;'>UI::Component</a></span> <span style='font-size: 0.78rem; font-weight: normal; color: var(--text-muted);'>(4 méthodes)</span></div>
     <div class='inherited-members-tags'>
       <a href='component.html' class='inherited-tag'>SetPosition()</a>
       <a href='component.html' class='inherited-tag'>SetSize()</a>
       <a href='component.html' class='inherited-tag'>SetMargin()</a>
-      <a href='component.html' class='inherited-tag'>SetHorizontalAlignment()</a>
-      <a href='component.html' class='inherited-tag'>SetVerticalAlignment()</a>
-      <a href='component.html' class='inherited-tag'>SetVisible()</a>
-      <a href='component.html' class='inherited-tag'>SetEnabled()</a>
       <a href='component.html' class='inherited-tag'>Arrange()</a>
     </div>
   </div>
@@ -173,21 +175,72 @@
       
 
 <div class='doc-section'>
-  <h2 class='section-title'>Description</h2>
-  <p>La classe <code>UI::TextBox</code> encapsule le <code>StringGadget</code> de PureBasic. Elle prend en charge le DataBinding bidirectionnel MVVM (mise à jour automatique du ViewModel lors de la saisie).</p>
+  <h2 class='section-title'>Présentation</h2>
+  <p><code>UI::CanvasTable</code> hérite de <code>UI::CanvasControl</code> et offre un composant de grille de données vectorielle ultra-performant. Conçu pour afficher et manipuler des volumes importants de données avec fluidité grâce au scrolling virtuel, il gère nativement le redimensionnement et le tri par colonne, l'alternance esthétique des lignes (thèmes clair et sombre), l'édition en ligne ainsi que des types de cellules variés (texte, nombres, décimaux, cases à cocher, boutons d'action et icônes).</p>
 </div>
 
 <div class='doc-section'>
-  <h2 class='section-title'>Constructeurs & Méthodes</h2>
+  <h2 class='section-title'>Constructeurs</h2>
   <div class='table-wrapper'>
     <table>
-      <tr><th>Signature</th><th>Description</th></tr>
-      <tr><td><code>Init(text.s = "")</code></td><td>Initialise le champ texte avec contenu initial optionnel.</td></tr>
-      <tr><td><code>Init(x.i, y.i, w.i, h.i, text.s = "")</code></td><td>Initialise avec position et taille absolues.</td></tr>
-      <tr><td><code>GetText() / SetText(text.s)</code></td><td>Lit ou met à jour le texte saisi.</td></tr>
-      <tr><td><code>SetReadOnly(ro.b) / IsReadOnly()</code></td><td>Active ou désactive la protection en écriture.</td></tr>
-      <tr><td><code>OnChange()</code></td><td>Méthode virtuelle appelée à chaque frappe de touche.</td></tr>
+      <tr><th>Constructeur</th><th>Description</th></tr>
+      <tr><td><code>Init()</code></td><td>Initialise une table vectorielle aux dimensions par défaut (400x300).</td></tr>
+      <tr><td><code>Init(w.i, h.i)</code></td><td>Initialise une table avec largeur et hauteur spécifiées.</td></tr>
+      <tr><td><code>Init(x.i, y.i, w.i, h.i)</code></td><td>Initialise une table avec coordonnées et dimensions absolues.</td></tr>
     </table>
+  </div>
+</div>
+
+<div class='doc-section'>
+  <h2 class='section-title'>Gestion des Colonnes et Données</h2>
+  <table class='method-table'>
+    <thead>
+      <tr><th>Méthode</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>AddColumn(title.s, width.i, type.i, align.i, editable.b = #False)</code></td><td>Ajoute une colonne avec type (#UI_TableCol_Text, Number, Float, CheckBox, Button, Image) et alignement.</td></tr>
+      <tr><td><code>AddRow()</code></td><td>Ajoute une ligne vide et retourne son pointeur <code>*row.UI::TableRow</code>.</td></tr>
+      <tr><td><code>AddRowCells(c0.s, c1.s, c2.s, c3.s, c4.s, c5.s, c6.s, c7.s)</code></td><td>Ajoute une nouvelle ligne pré-remplie avec jusqu'à 8 valeurs de cellules.</td></tr>
+      <tr><td><code>RemoveRow(index.i)</code></td><td>Supprime la ligne à l'index donné.</td></tr>
+      <tr><td><code>ClearRows()</code></td><td>Supprime l'ensemble des lignes de la table.</td></tr>
+      <tr><td><code>GetRowCount()</code></td><td>Retourne le nombre total de lignes présentes dans la table.</td></tr>
+      <tr><td><code>GetCellText(row.i, col.i)</code></td><td>Récupère la valeur textuelle d'une cellule donnée.</td></tr>
+      <tr><td><code>SetCellText(row.i, col.i, text.s)</code></td><td>Modifie la valeur textuelle d'une cellule donnée.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class='doc-section'>
+  <h2 class='section-title'>Apparence, Thème & Callbacks</h2>
+  <table class='method-table'>
+    <thead>
+      <tr><th>Méthode</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>SetShowAlternatingColors(enable.b)</code></td><td>Active ou désactive l'alternance de fond entre lignes paires et impaires.</td></tr>
+      <tr><td><code>SetEvenRowColors(bg.i, fg.i)</code></td><td>Définit les couleurs de fond et de texte pour les lignes paires.</td></tr>
+      <tr><td><code>SetOddRowColors(bg.i, fg.i)</code></td><td>Définit les couleurs de fond et de texte pour les lignes impaires.</td></tr>
+      <tr><td><code>SetDarkMode(enable.b)</code></td><td>Bascule automatiquement la table en palette sombre moderne (Slate-900).</td></tr>
+      <tr><td><code>SetHeaderHeight(h.i)</code></td><td>Modifie la hauteur de la barre d'en-tête (défaut : 34 px).</td></tr>
+      <tr><td><code>SetLineHeight(h.i)</code></td><td>Modifie la hauteur de chaque ligne de données (défaut : 30 px).</td></tr>
+      <tr><td><code>SetOnSelect(*cb)</code></td><td>Enregistre un callback de sélection de ligne : <code>Proc(*row.UI::TableRow)</code>.</td></tr>
+      <tr><td><code>SetOnCellEdit(*cb)</code></td><td>Enregistre un callback de fin d'édition d'une cellule : <code>Proc(*row, col.i, val.s)</code>.</td></tr>
+      <tr><td><code>SetOnCheck(*cb)</code></td><td>Enregistre un callback lors du basculement d'une case à cocher : <code>Proc(*row, isChecked.b)</code>.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class='doc-section'>
+  <h2 class='section-title'>Exemple Déclaratif XML</h2>
+  <div class='code-container'>
+    <pre><code><span class='kw'>&lt;CanvasTable</span> <span class='str'>Dock="Fill"</span> <span class='str'>LineHeight="32"</span> <span class='str'>HeaderHeight="36"</span> <span class='str'>ShowAlternatingColors="True"</span><span class='kw'>&gt;</span>
+  <span class='kw'>&lt;Column</span> <span class='str'>Title="Code"</span> <span class='str'>Width="90"</span> <span class='str'>Type="Text"</span> <span class='str'>Align="Center"</span><span class='kw'>/&gt;</span>
+  <span class='kw'>&lt;Column</span> <span class='str'>Title="Désignation"</span> <span class='str'>Width="260"</span> <span class='str'>Type="Text"</span> <span class='str'>Align="Left"</span> <span class='str'>Editable="True"</span><span class='kw'>/&gt;</span>
+  <span class='kw'>&lt;Column</span> <span class='str'>Title="Stock"</span> <span class='str'>Width="90"</span> <span class='str'>Type="Number"</span> <span class='str'>Align="Right"</span><span class='kw'>/&gt;</span>
+  <span class='kw'>&lt;Column</span> <span class='str'>Title="Actif"</span> <span class='str'>Width="80"</span> <span class='str'>Type="CheckBox"</span> <span class='str'>Align="Center"</span><span class='kw'>/&gt;</span>
+  <span class='kw'>&lt;Row</span> <span class='str'>Cells="ART-01;Clavier Mécanique RGB;42;1"</span><span class='kw'>/&gt;</span>
+  <span class='kw'>&lt;Row</span> <span class='str'>Cells="ART-02;Souris Optique Sans-Fil;118;1"</span><span class='kw'>/&gt;</span>
+<span class='kw'>&lt;/CanvasTable&gt;</span></code></pre>
   </div>
 </div>
 
