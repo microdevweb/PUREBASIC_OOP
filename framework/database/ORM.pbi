@@ -20,15 +20,19 @@
 ; =============================================================================
 
 XIncludeFile "ORM_Entity.pbi"
-XIncludeFile "ORM_Dialect_SQLite.pbi"
 XIncludeFile "ORM_Transaction.pbi"
 XIncludeFile "ORM_Schema.pbi"
+XIncludeFile "ORM_Dialect_SQLite.pbi"
 XIncludeFile "ORM_LockManager.pbi"
 XIncludeFile "ORM_CRUD.pbi"
 XIncludeFile "ORM_Relations.pbi"
 XIncludeFile "ORM_AsyncWorker.pbi"
+XIncludeFile "Database.pbi"
 
 DeclareModule ORM
+
+  Structure ORM_EntityBase Extends ORM_CRUD::ORM_EntityBase
+  EndStructure
 
   ; ---------------------------------------------------------------------------
   ; Global state (one database connection per application for the UI thread)
@@ -108,6 +112,11 @@ Module ORM
   Procedure ConfigureSQLite(filePath.s)
     orm_dbPath = filePath
     UseSQLiteDatabase()
+
+    If FileSize(filePath) = -1
+      Protected f.i = CreateFile(#PB_Any, filePath)
+      If f : CloseFile(f) : EndIf
+    EndIf
 
     orm_mainDb = OpenDatabase(#PB_Any, filePath, "", "", #PB_Database_SQLite)
     If Not IsDatabase(orm_mainDb)

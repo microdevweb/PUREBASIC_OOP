@@ -7,6 +7,9 @@
 ; The ORM engine then manages id, dirty tracking, locking and async I/O.
 ; =============================================================================
 
+XIncludeFile "IDatabaseEntity.pbi"
+XIncludeFile "EntitySet.pbi"
+
 DeclareModule ORM_Entity
 
   ; ---------------------------------------------------------------------------
@@ -29,7 +32,6 @@ DeclareModule ORM_Entity
 
   ; ---------------------------------------------------------------------------
   ; Cascade / Referential integrity policy constants
-  ; Used internally by ORM_Relations to decide behaviour on save/delete
   ; ---------------------------------------------------------------------------
   #ORM_Cascade_Save    = 1   ; Save parent -> save all modified children (default)
   #ORM_Cascade_Delete  = 2   ; Delete parent -> delete all children first
@@ -37,11 +39,31 @@ DeclareModule ORM_Entity
   #ORM_SetNull_Delete  = 4   ; On parent delete: set children FK column to NULL
   #ORM_AllowOrphan     = 5   ; No FK enforcement at ORM level
 
+  #Cascade_None        = 0
+  #Cascade_Save        = 1
+  #Cascade_Delete      = 2
+  #Cascade_All         = 3
+
+  ; ---------------------------------------------------------------------------
+  ; Relation type constants
+  ; ---------------------------------------------------------------------------
+  #ORM_Rel_OneToMany   = 1
+  #ORM_Rel_ManyToOne   = 2
+  #ORM_Rel_ManyToMany  = 3
+  #ORM_Rel_OneToOne    = 4
+  ; ---------------------------------------------------------------------------
+  ; Field type codes (used in metadata)
+  ; ---------------------------------------------------------------------------
+  #ORM_Type_Integer = 1   ; .i or .l
+  #ORM_Type_String  = 2   ; .s
+  #ORM_Type_Double  = 3   ; .d
+  #ORM_Type_Float   = 4   ; .f
+  #ORM_Type_Bool    = 5   ; .b  (stored as INTEGER 0/1)
+  #ORM_Type_FK      = 6   ; foreign key column (auto-generated for child tables)
+
 EndDeclareModule
 
 Module ORM_Entity
-  ; Constants are declared above, no implementation code needed here.
-  ; The Entity class itself is defined in the OOP transpiler syntax below.
 EndModule
 
 ; =============================================================================

@@ -15,7 +15,11 @@
 ; If a station crashes, the lock expires in max 60 seconds (no permanent deadlock).
 ; =============================================================================
 
+XIncludeFile "ORM_Entity.pbi"
+
 DeclareModule ORM_LockManager
+
+  UseModule ORM_Entity
 
   #ORM_Lock_TTL_Seconds       = 60   ; Lock expires after 60s without heartbeat
   #ORM_Heartbeat_Interval_ms  = 30000 ; Heartbeat every 30 seconds
@@ -24,12 +28,13 @@ DeclareModule ORM_LockManager
   ; entityType.s : "Client"
   ; recordId.i   : the id value of the record to lock
   ; db.i         : open database handle
-  ; Returns #ORM_Lock_Granted, #ORM_Lock_AlreadyLocked, or #ORM_Lock_Error
-  Declare.i Lock(db.i, entityType.s, recordId.i)
+  ; Returns #True if lock acquired, #False if already locked or error
+  Declare.b Lock(db.i, entityType.s, recordId.i, stationId.s = "", userName.s = "")
 
   ; --- Release a lock ---
   ; Returns #True if lock was released, #False if it was not held by this station.
-  Declare.b Unlock(db.i, entityType.s, recordId.i)
+  Declare.b Unlock(db.i, entityType.s, recordId.i, stationId.s = "")
+  Declare.b Release(db.i, entityType.s, recordId.i, stationId.s = "")
 
   ; --- Check if a record is currently locked (does NOT acquire) ---
   ; Returns #True if locked, #False if free or expired.
@@ -56,6 +61,8 @@ EndDeclareModule
 
 Module ORM_LockManager
 
+  UseModule ORM_Entity
+
   ; --- Global station identifier (built once at module load time) ---
   Global orm_stationId.s = ComputerName() + "@" + GetEnvironmentVariable("USERNAME")
 
@@ -80,7 +87,10 @@ Module ORM_LockManager
   ; ---------------------------------------------------------------------------
   ; Acquire a lock
   ; ---------------------------------------------------------------------------
-  Procedure.i Lock(db.i, entityType.s, recordId.i)
+  Procedure.b Lock(db.i, entityType.s, recordId.i, stationId.s = "", userName.s = "")
+    If stationId = "" : stationId = orm_stationId : EndIf
+    If userName = ""  : userName = GetEnvironmentVariable("USERNAME") : EndIf
+
     ; First clean up any stale/expired locks
     CleanExpiredLocks(db)
 
@@ -88,47 +98,53 @@ Module ORM_LockManager
     Protected expires.i = now + #ORM_Lock_TTL_Seconds
 
     ; Try to INSERT the lock record (will fail if another station holds it)
-    ; SQLite INSERT OR IGNORE does nothing if the PK already exists.
-    ; We check how many rows were affected to determine if we got the lock.
     Protected insertSQL.s = "INSERT OR IGNORE INTO _orm_locks " +
                             "(entity_type, record_id, station_id, user_name, locked_at, expires_at) " +
                             "VALUES ('" + entityType + "', " + Str(recordId) + ", " +
-                            "'" + orm_stationId + "', " +
-                            "'" + GetEnvironmentVariable("USERNAME") + "', " +
+                            "'" + stationId + "', " +
+                            "'" + userName + "', " +
                             Str(now) + ", " + Str(expires) + ");"
 
     If Not DatabaseUpdate(db, insertSQL)
       Debug "ORM_LockManager::Lock() DB ERROR: " + DatabaseError()
-      ProcedureReturn #ORM_Lock_Error
+      ProcedureReturn #False
     EndIf
 
     ; Check if our INSERT actually succeeded (RowsAffected = 1 means we got the lock)
     If AffectedDatabaseRows(db) > 0
-      Debug "ORM_LockManager: Lock GRANTED for " + entityType + "#" + Str(recordId) + " by " + orm_stationId
-      ProcedureReturn #ORM_Lock_Granted
+      Debug "ORM_LockManager: Lock GRANTED for " + entityType + "#" + Str(recordId) + " by " + stationId
+      ProcedureReturn #True
     Else
       ; A lock already exists for this record (held by another station)
       Debug "ORM_LockManager: Lock DENIED for " + entityType + "#" + Str(recordId) + " (already locked)"
-      ProcedureReturn #ORM_Lock_AlreadyLocked
+      ProcedureReturn #False
     EndIf
   EndProcedure
 
   ; ---------------------------------------------------------------------------
   ; Release a lock (only if held by this station)
   ; ---------------------------------------------------------------------------
-  Procedure.b Unlock(db.i, entityType.s, recordId.i)
+  Procedure.b Unlock(db.i, entityType.s, recordId.i, stationId.s = "")
+    If stationId = "" : stationId = orm_stationId : EndIf
     Protected sql.s = "DELETE FROM _orm_locks WHERE " +
                       "entity_type='" + entityType + "' AND " +
                       "record_id=" + Str(recordId) + " AND " +
-                      "station_id='" + orm_stationId + "';"
+                      "station_id='" + stationId + "';"
     DatabaseUpdate(db, sql)
-    Protected released.b = (AffectedDatabaseRows(db) > 0)
+    Protected released.b = Bool(AffectedDatabaseRows(db) > 0)
     If released
       Debug "ORM_LockManager: Lock RELEASED for " + entityType + "#" + Str(recordId)
     Else
       Debug "ORM_LockManager::Unlock() WARNING: lock not held by this station"
     EndIf
     ProcedureReturn released
+  EndProcedure
+
+  ; ---------------------------------------------------------------------------
+  ; Alias Release -> Unlock
+  ; ---------------------------------------------------------------------------
+  Procedure.b Release(db.i, entityType.s, recordId.i, stationId.s = "")
+    ProcedureReturn Unlock(db, entityType, recordId, stationId)
   EndProcedure
 
   ; ---------------------------------------------------------------------------
@@ -143,7 +159,7 @@ Module ORM_LockManager
     Protected locked.b = #False
     If DatabaseQuery(db, sql)
       If NextDatabaseRow(db)
-        locked = (GetDatabaseLong(db, 0) > 0)
+        locked = Bool(GetDatabaseLong(db, 0) > 0)
       EndIf
       FinishDatabaseQuery(db)
     EndIf

@@ -1,0 +1,141 @@
+; =============================================================================
+; 06_database_crm / main.pbo
+; PureBasic OOP Framework - Alpha 1.4 - Modern ORM Entity Demo
+; =============================================================================
+; Demonstrates PureBasic OOP Phase 2 modern entity architecture:
+;   - Native entity classes implementing IDatabaseEntity
+;   - Declaring 1-N relation: HasMany contacts.Contact
+;   - Zero manual boilerplate: Auto-generated serialization, schemas, methods
+;   - Active Record saving: *client\Save() or *client\Save(*db)
+;   - Cascade save: saving client automatically cascades and saves contacts
+;   - AutoMigrate creates all SQLite tables and relations
+; =============================================================================
+
+; -----------------------------------------------------------------------------
+; 1. ENTITY DEFINITIONS
+; -----------------------------------------------------------------------------
+
+Class Contact Implement IDatabaseEntity
+  firstName.s
+  lastName.s
+  email.s
+  isPrimary.b
+EndClass
+
+Class Client Implement IDatabaseEntity
+  companyName.s
+  email.s
+  phone.s
+  city.s
+  isActive.b
+  
+  HasMany contacts.Contact
+EndClass
+
+; -----------------------------------------------------------------------------
+; 2. APPLICATION EXECUTION
+; -----------------------------------------------------------------------------
+
+OpenConsole()
+PrintN("=================================================================")
+PrintN("   PureBasic OOP - 06 Database CRM Demo (Modern ORM Engine)")
+PrintN("=================================================================")
+
+; Database initialization
+#DB_FILE = "crm_demo.db"
+DeleteFile(#DB_FILE)
+
+Define *db.DatabaseEngine::IDatabase = Database::NewSQLite(#DB_FILE)
+If Not *db
+  PrintN("[ERROR] Failed to open database: " + #DB_FILE)
+  End 1
+EndIf
+
+; Set default database connection for Active Record style operations
+Database::SetDefault(*db)
+
+; Auto-migration generates schema directly from class declarations
+If Not *db\AutoMigrate()
+  PrintN("[ERROR] Schema AutoMigrate failed!")
+  End 1
+EndIf
+PrintN("[SUCCESS] Database tables (clients, contacts) created automatically.")
+
+; -----------------------------------------------------------------------------
+; 3. CREATING AND PERSISTING ENTITY WITH RELATIONS
+; -----------------------------------------------------------------------------
+
+PrintN("")
+PrintN("Creating Client 'Acme Corp' with 2 contacts...")
+
+Define *client.Client = New Client()
+*client\Set_companyName("Acme Corporation")
+*client\Set_email("contact@acme.corp")
+*client\Set_phone("+33 1 23 45 67 89")
+*client\Set_city("Paris")
+*client\Set_isActive(#True)
+
+; Contact 1
+Define *c1.Contact = New Contact()
+*c1\Set_firstName("Jean")
+*c1\Set_lastName("Dupont")
+*c1\Set_email("j.dupont@acme.corp")
+*c1\Set_isPrimary(#True)
+*client\Add_contacts(*c1)
+
+; Contact 2
+Define *c2.Contact = New Contact()
+*c2\Set_firstName("Sophie")
+*c2\Set_lastName("Martin")
+*c2\Set_email("s.martin@acme.corp")
+*c2\Set_isPrimary(#False)
+*client\Add_contacts(*c2)
+
+; Active Record style save: *client\Save()
+; Automatically inserts Client into 'clients', generates ID,
+; and cascades to save *c1 and *c2 into 'contacts' with foreign key client_id.
+If *client\Save()
+  PrintN("[SUCCESS] Client saved with ID: " + Str(*client\GetId()))
+  PrintN("[SUCCESS] Contact 1 saved with ID: " + Str(*c1\GetId()))
+  PrintN("[SUCCESS] Contact 2 saved with ID: " + Str(*c2\GetId()))
+Else
+  PrintN("[ERROR] Failed to save Client!")
+EndIf
+
+; -----------------------------------------------------------------------------
+; 4. DIRECT DATABASE VERIFICATION
+; -----------------------------------------------------------------------------
+
+PrintN("")
+PrintN("Verifying data directly in SQLite...")
+
+Define query.i = *db\Query("SELECT id, companyName, city FROM clients WHERE id = " + Str(*client\GetId()) + ";")
+If query
+  If NextDatabaseRow(*db\GetHandle())
+    PrintN("  Client row found: ID=" + Str(GetDatabaseLong(*db\GetHandle(), 0)) + ", Name=" + GetDatabaseString(*db\GetHandle(), 1) + ", City=" + GetDatabaseString(*db\GetHandle(), 2))
+  EndIf
+  FinishDatabaseQuery(*db\GetHandle())
+EndIf
+
+query = *db\Query("SELECT id, firstName, lastName, client_id FROM contacts WHERE client_id = " + Str(*client\GetId()) + ";")
+If query
+  While NextDatabaseRow(*db\GetHandle())
+    PrintN("  Contact row found: ID=" + Str(GetDatabaseLong(*db\GetHandle(), 0)) + " -> " + GetDatabaseString(*db\GetHandle(), 1) + " " + GetDatabaseString(*db\GetHandle(), 2) + " (client_id=" + Str(GetDatabaseLong(*db\GetHandle(), 3)) + ")")
+  Wend
+  FinishDatabaseQuery(*db\GetHandle())
+EndIf
+
+; -----------------------------------------------------------------------------
+; 5. CLEANUP
+; -----------------------------------------------------------------------------
+
+Free(*client)
+Free(*c1)
+Free(*c2)
+*db\Disconnect()
+
+PrintN("")
+PrintN("=================================================================")
+PrintN("   Demo completed successfully! Press Enter to exit.")
+PrintN("=================================================================")
+CloseConsole()

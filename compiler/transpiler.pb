@@ -71,6 +71,29 @@ Structure OOP_InitConstructor
   srcFile.s
 EndStructure
 
+#ORM_Rel_OneToMany   = 1
+#ORM_Rel_ManyToOne   = 2
+#ORM_Rel_ManyToMany  = 3
+#ORM_Rel_OneToOne    = 4
+
+#Cascade_None        = 0
+#Cascade_Save        = 1
+#Cascade_Delete      = 2
+#Cascade_All         = 3
+
+Structure OOP_Relation
+  relationType.i
+  propertyName.s
+  targetClass.s
+  foreignKey.s
+  joinTable.s
+  parentFk.s
+  childFk.s
+  cascade.i
+  srcLineNumber.i
+  srcFile.s
+EndStructure
+
 Structure OOP_Class
   name.s                ; Short name e.g. "Renderer"
   namespace.s           ; e.g. "Game::Graphics"
@@ -80,8 +103,11 @@ Structure OOP_Class
   fullParentName.s      ; Resolved full parent name
   mangledParentName.s   ; Mangled parent name
   isAbstract.b
+  isDatabaseEntity.b
   srcLineNumber.i
   srcFile.s
+  List ImplementedInterfaces.s()
+  List Relations.OOP_Relation()
   List Fields.OOP_Field()
   List Methods.OOP_Method()
   List VTableSlots.OOP_VTableSlot()
@@ -1072,6 +1098,144 @@ Procedure.b PreprocessCurlyBraces()
   ProcedureReturn #True
 EndProcedure
 
+Procedure.b ParseRelationDirective(workLine.s, *currentClass.OOP_Class, currentLineNum.i, currentFile.s)
+  Protected up.s = UCase(workLine)
+  Protected relType.i = 0
+  Protected rest.s = ""
+  
+  If Left(up, 8) = "HASMANY "
+    relType = #ORM_Rel_OneToMany
+    rest = Trim(Mid(workLine, 9))
+  ElseIf Left(up, 10) = "BELONGSTO "
+    relType = #ORM_Rel_ManyToOne
+    rest = Trim(Mid(workLine, 11))
+  ElseIf Left(up, 11) = "MANYTOMANY "
+    relType = #ORM_Rel_ManyToMany
+    rest = Trim(Mid(workLine, 12))
+  ElseIf Left(up, 7) = "HASONE "
+    relType = #ORM_Rel_OneToOne
+    rest = Trim(Mid(workLine, 8))
+  Else
+    ProcedureReturn #False
+  EndIf
+  
+  Protected parenOpen.i = FindString(rest, "(")
+  Protected parenClose.i = FindString(rest, ")", parenOpen + 1)
+  Protected targetPart.s = ""
+  Protected paramsPart.s = ""
+  
+  If parenOpen > 0 And parenClose > parenOpen
+    targetPart = Trim(Left(rest, parenOpen - 1))
+    paramsPart = Mid(rest, parenOpen + 1, parenClose - parenOpen - 1)
+  Else
+    targetPart = Trim(rest)
+  EndIf
+  
+  Protected dotPos.i = FindString(targetPart, ".")
+  If dotPos = 0
+    SetOOPError(currentLineNum, "Relation declaration must specify property and target type (e.g. HasMany telephones.Telephone)", currentFile)
+    ProcedureReturn #False
+  EndIf
+  
+  Protected propName.s   = Trim(Left(targetPart, dotPos - 1))
+  Protected targetClass.s = Trim(Mid(targetPart, dotPos + 1))
+  
+  ; Default parameters
+  Protected fk.s        = LCase(*currentClass\name) + "_id"
+  Protected joinTbl.s   = ""
+  Protected parentFk.s  = LCase(*currentClass\name) + "_id"
+  Protected childFk.s   = LCase(targetClass) + "_id"
+  Protected cascade.i   = #Cascade_All
+  
+  If relType = #ORM_Rel_ManyToOne
+    fk = LCase(propName) + "_id"
+  ElseIf relType = #ORM_Rel_ManyToMany
+    joinTbl = LCase(*currentClass\name) + "_" + LCase(targetClass) + "s"
+  EndIf
+  
+  If paramsPart <> ""
+    Protected numPairs.i = CountString(paramsPart, ",") + 1
+    Protected pIdx.i
+    For pIdx = 1 To numPairs
+      Protected pair.s = Trim(StringField(paramsPart, pIdx, ","))
+      Protected eqPos.i = FindString(pair, "=")
+      If eqPos > 0
+        Protected k.s = Trim(UCase(Left(pair, eqPos - 1)))
+        Protected v.s = Trim(Mid(pair, eqPos + 1))
+        If Left(v, 1) = Chr(34) And Right(v, 1) = Chr(34)
+          v = Mid(v, 2, Len(v) - 2)
+        EndIf
+        
+        Select k
+          Case "FOREIGNKEY", "FK"
+            fk = v
+          Case "JOINTABLE"
+            joinTbl = v
+          Case "PARENTFOREIGNKEY", "PARENTFK"
+            parentFk = v
+          Case "CHILDFOREIGNKEY", "CHILDFK"
+            childFk = v
+          Case "CASCADE"
+            Protected upV.s = UCase(v)
+            If FindString(upV, "ALL") > 0 Or upV = "3"
+              cascade = #Cascade_All
+            ElseIf FindString(upV, "DELETE") > 0 Or upV = "2"
+              cascade = #Cascade_Delete
+            ElseIf FindString(upV, "SAVE") > 0 Or upV = "1"
+              cascade = #Cascade_Save
+            Else
+              cascade = #Cascade_None
+            EndIf
+        EndSelect
+      EndIf
+    Next
+  EndIf
+  
+  AddElement(*currentClass\Relations())
+  *currentClass\Relations()\relationType = relType
+  *currentClass\Relations()\propertyName = propName
+  *currentClass\Relations()\targetClass = targetClass
+  *currentClass\Relations()\foreignKey = fk
+  *currentClass\Relations()\joinTable = joinTbl
+  *currentClass\Relations()\parentFk = parentFk
+  *currentClass\Relations()\childFk = childFk
+  *currentClass\Relations()\cascade = cascade
+  *currentClass\Relations()\srcLineNumber = currentLineNum
+  *currentClass\Relations()\srcFile = currentFile
+  
+  *currentClass\isDatabaseEntity = #True
+  
+  AddElement(*currentClass\Fields())
+  If relType = #ORM_Rel_OneToMany Or relType = #ORM_Rel_ManyToMany
+    *currentClass\Fields()\name = propName + ".EntitySet::IEntitySet"
+  ElseIf relType = #ORM_Rel_ManyToOne
+    *currentClass\Fields()\name = propName + "." + targetClass
+    Protected hasFkField.b = #False
+    PushListPosition(*currentClass\Fields())
+    ForEach *currentClass\Fields()
+      If LCase(StringField(*currentClass\Fields()\name, 1, ".")) = LCase(fk)
+        hasFkField = #True
+        Break
+      EndIf
+    Next
+    PopListPosition(*currentClass\Fields())
+    If Not hasFkField
+      AddElement(*currentClass\Fields())
+      *currentClass\Fields()\name = fk + ".i"
+      *currentClass\Fields()\visibility = "Public"
+      *currentClass\Fields()\srcLineNumber = currentLineNum
+      *currentClass\Fields()\srcFile = currentFile
+    EndIf
+  Else ; OneToOne
+    *currentClass\Fields()\name = propName + "." + targetClass
+  EndIf
+  *currentClass\Fields()\visibility = "Public"
+  *currentClass\Fields()\srcLineNumber = currentLineNum
+  *currentClass\Fields()\srcFile = currentFile
+  
+  ProcedureReturn #True
+EndProcedure
+
 ; ----------------------------------------------------------------------------
 ; Parser Phase (.pbo -> AST / OOP Meta-Model)
 ; ----------------------------------------------------------------------------
@@ -1222,6 +1386,39 @@ Procedure.b ParsePBO(inputFile.s)
     ; 2. Parsing inside a Class Definition
     ElseIf inClass
       If Left(upper, 8) = "ENDCLASS"
+        If *currentClass\isDatabaseEntity
+          Protected hasId.b = #False
+          Protected hasDirty.b = #False
+          Protected hasNew.b = #False
+          ForEach *currentClass\Fields()
+            Protected fBase.s = LCase(Trim(StringField(*currentClass\Fields()\name, 1, ".")))
+            If fBase = "id" : hasId = #True : EndIf
+            If fBase = "orm_isdirty" : hasDirty = #True : EndIf
+            If fBase = "orm_isnew" : hasNew = #True : EndIf
+          Next
+          If Not hasId
+            ResetList(*currentClass\Fields())
+            InsertElement(*currentClass\Fields())
+            *currentClass\Fields()\name = "id.i"
+            *currentClass\Fields()\visibility = "Public"
+            *currentClass\Fields()\srcLineNumber = currentLineNum
+            *currentClass\Fields()\srcFile = currentFile
+          EndIf
+          If Not hasDirty
+            AddElement(*currentClass\Fields())
+            *currentClass\Fields()\name = "orm_isDirty.b"
+            *currentClass\Fields()\visibility = "Protected"
+            *currentClass\Fields()\srcLineNumber = currentLineNum
+            *currentClass\Fields()\srcFile = currentFile
+          EndIf
+          If Not hasNew
+            AddElement(*currentClass\Fields())
+            *currentClass\Fields()\name = "orm_isNew.b"
+            *currentClass\Fields()\visibility = "Protected"
+            *currentClass\Fields()\srcLineNumber = currentLineNum
+            *currentClass\Fields()\srcFile = currentFile
+          EndIf
+        EndIf
         inClass = #False
         *currentClass = #Null
         Continue
@@ -1375,6 +1572,15 @@ Procedure.b ParsePBO(inputFile.s)
           Continue
 
         ElseIf matchedPrefix Or (line <> "" And Left(line, 1) <> ";")
+          Protected upWorkLine.s = UCase(workLine)
+          If Left(upWorkLine, 8) = "HASMANY " Or Left(upWorkLine, 10) = "BELONGSTO " Or Left(upWorkLine, 11) = "MANYTOMANY " Or Left(upWorkLine, 7) = "HASONE "
+            If ParseRelationDirective(workLine, *currentClass, currentLineNum, currentFile)
+              Continue
+            Else
+              ProcedureReturn #False
+            EndIf
+          EndIf
+
           If Not IsValidFieldDeclaration(workLine)
             SetOOPError(currentLineNum, "Syntax error or invalid declaration '" + workLine + "' in Class '" + *currentClass\fullName + "'")
             ProcedureReturn #False
@@ -1414,6 +1620,22 @@ Procedure.b ParsePBO(inputFile.s)
 
         Protected cName.s = ""
         Protected pName.s = ""
+        Protected ifacesPart.s = ""
+        
+        Protected pImp.i = FindString(UCase(classDecl), " IMPLEMENTS ")
+        If pImp = 0
+          pImp = FindString(UCase(classDecl), " IMPLEMENT ")
+        EndIf
+        
+        If pImp > 0
+          Protected impKeywordLen.i = 11
+          If Mid(UCase(classDecl), pImp, 12) = " IMPLEMENTS "
+            impKeywordLen = 12
+          EndIf
+          ifacesPart = Trim(Mid(classDecl, pImp + impKeywordLen))
+          classDecl = Trim(Left(classDecl, pImp - 1))
+        EndIf
+
         p1 = FindString(UCase(classDecl), " EXTENDS ")
         If p1 > 0
           cName = Trim(Left(classDecl, p1 - 1))
@@ -1449,6 +1671,25 @@ Procedure.b ParsePBO(inputFile.s)
         *currentClass\isAbstract = isAbsClass
         *currentClass\srcLineNumber = currentLineNum
         *currentClass\srcFile = currentFile
+        
+        If ifacesPart <> ""
+          Protected numIfaces.i = CountString(ifacesPart, ",") + 1
+          Protected ifIdx.i
+          For ifIdx = 1 To numIfaces
+            Protected ifaceName.s = Trim(StringField(ifacesPart, ifIdx, ","))
+            If ifaceName <> ""
+              AddElement(*currentClass\ImplementedInterfaces())
+              *currentClass\ImplementedInterfaces() = ifaceName
+              Protected upperIface.s = UCase(ifaceName)
+              If upperIface = "IDATABASEENTITY" Or upperIface = "DATABASEENTITIES::IDATABASEENTITY" Or upperIface = "ENTITY"
+                *currentClass\isDatabaseEntity = #True
+              EndIf
+            EndIf
+          Next
+        EndIf
+        If UCase(pName) = "ENTITY" Or UCase(pName) = "ORM::ENTITY"
+          *currentClass\isDatabaseEntity = #True
+        EndIf
         
         ClassMap(UCase(fullCName)) = ListIndex(Classes())
         ClassMap(UCase(mangledCName)) = ListIndex(Classes())
@@ -1630,7 +1871,362 @@ EndProcedure
 ; Semantic Analysis & Overloading Resolution & VTable Construction
 ; ----------------------------------------------------------------------------
 
+Procedure ProcessEntityClassMetadata(*c.OOP_Class)
+  If Not *c\isDatabaseEntity : ProcedureReturn : EndIf
+
+  Protected hasMethod.b, hasGetter.b, hasSetter.b, hasAdd.b, hasCount.b
+
+  ; 1. Auto-inject foreign key fields into target classes for HasMany relations
+  ForEach *c\Relations()
+    If *c\Relations()\relationType = #ORM_Rel_OneToMany
+      Protected tgtClass.s = *c\Relations()\targetClass
+      If FindMapElement(ClassMap(), UCase(tgtClass))
+        PushListPosition(Classes())
+        SelectElement(Classes(), ClassMap(UCase(tgtClass)))
+        Protected hasTargetFk.b = #False
+        ForEach Classes()\Fields()
+          If LCase(StringField(Classes()\Fields()\name, 1, ".")) = LCase(*c\Relations()\foreignKey)
+            hasTargetFk = #True
+            Break
+          EndIf
+        Next
+        If Not hasTargetFk
+          AddElement(Classes()\Fields())
+          Classes()\Fields()\name = *c\Relations()\foreignKey + ".i"
+          Classes()\Fields()\visibility = "Public"
+          Classes()\Fields()\srcLineNumber = *c\srcLineNumber
+          Classes()\Fields()\srcFile = *c\srcFile
+        EndIf
+        PopListPosition(Classes())
+      EndIf
+    EndIf
+  Next
+
+  ; 2. Auto-generate getters and setters for all public fields
+  Protected NewList fieldsCopy.OOP_Field()
+  CopyList(*c\Fields(), fieldsCopy())
+  
+  ForEach fieldsCopy()
+    Protected fFull.s = fieldsCopy()\name
+    Protected fName.s = Trim(StringField(fFull, 1, "."))
+    Protected fType.s = Trim(StringField(fFull, 2, "."))
+    Protected fNameLow.s = LCase(fName)
+    
+    If fNameLow = "id" Or Left(fNameLow, 4) = "orm_" Or fNameLow = "*vtable" Or Left(fName, 1) = "*"
+      Continue
+    EndIf
+    
+    If FindString(UCase(fType), "IENTITYSET") > 0
+      ; Relation collection field (IEntitySet)
+      ; Get_<fName>() / <fName>()
+      hasGetter = #False
+      ForEach *c\Methods()
+        If UCase(*c\Methods()\name) = UCase(fName) Or UCase(*c\Methods()\name) = UCase("Get_" + fName)
+          hasGetter = #True : Break
+        EndIf
+      Next
+      If Not hasGetter
+        AddElement(*c\Methods())
+        *c\Methods()\name = fName
+        *c\Methods()\rawDecl = "Public Method.i " + fName + "()"
+        *c\Methods()\params = ""
+        *c\Methods()\cleanParams = ""
+        *c\Methods()\returnType = ".i"
+        *c\Methods()\visibility = "Public"
+        *c\Methods()\signature = "void"
+        *c\Methods()\paramCount = 0
+        *c\Methods()\minParamCount = 0
+        *c\Methods()\mangledMethodName = fName
+        *c\Methods()\srcLineNumber = *c\srcLineNumber
+        *c\Methods()\srcFile = *c\srcFile
+
+        AddElement(MethodBodies())
+        MethodBodies()\className = *c\fullName
+        MethodBodies()\mangledClassName = *c\mangledName
+        MethodBodies()\methodName = fName
+        MethodBodies()\signature = "void"
+        MethodBodies()\mangledMethodName = fName
+        MethodBodies()\params = ""
+        MethodBodies()\cleanParams = ""
+        MethodBodies()\returnType = ".i"
+        MethodBodies()\srcLineNumber = *c\srcLineNumber
+        MethodBodies()\srcFile = *c\srcFile
+        AddElement(MethodBodies()\BodyLines())
+        MethodBodies()\BodyLines()\content = "ProcedureReturn *This\" + fName
+      EndIf
+
+      ; Add_<fName>(*child)
+      hasAdd = #False
+      ForEach *c\Methods()
+        If UCase(*c\Methods()\name) = UCase("Add_" + fName)
+          hasAdd = #True : Break
+        EndIf
+      Next
+      If Not hasAdd
+        AddElement(*c\Methods())
+        *c\Methods()\name = "Add_" + fName
+        *c\Methods()\rawDecl = "Public Method Add_" + fName + "(*item)"
+        *c\Methods()\params = "*item"
+        *c\Methods()\cleanParams = "*item"
+        *c\Methods()\returnType = ""
+        *c\Methods()\visibility = "Public"
+        *c\Methods()\signature = "p"
+        *c\Methods()\paramCount = 1
+        *c\Methods()\minParamCount = 1
+        *c\Methods()\mangledMethodName = "Add_" + fName
+        *c\Methods()\srcLineNumber = *c\srcLineNumber
+        *c\Methods()\srcFile = *c\srcFile
+
+        AddElement(MethodBodies())
+        MethodBodies()\className = *c\fullName
+        MethodBodies()\mangledClassName = *c\mangledName
+        MethodBodies()\methodName = "Add_" + fName
+        MethodBodies()\signature = "p"
+        MethodBodies()\mangledMethodName = "Add_" + fName
+        MethodBodies()\params = "*item"
+        MethodBodies()\cleanParams = "*item"
+        MethodBodies()\returnType = ""
+        MethodBodies()\srcLineNumber = *c\srcLineNumber
+        MethodBodies()\srcFile = *c\srcFile
+        AddElement(MethodBodies()\BodyLines())
+        MethodBodies()\BodyLines()\content = "If *This\" + fName + " : *This\" + fName + "\Add(*item) : EndIf"
+      EndIf
+
+      ; Count_<fName>()
+      hasCount = #False
+      ForEach *c\Methods()
+        If UCase(*c\Methods()\name) = UCase("Count_" + fName)
+          hasCount = #True : Break
+        EndIf
+      Next
+      If Not hasCount
+        AddElement(*c\Methods())
+        *c\Methods()\name = "Count_" + fName
+        *c\Methods()\rawDecl = "Public Method.i Count_" + fName + "()"
+        *c\Methods()\params = ""
+        *c\Methods()\cleanParams = ""
+        *c\Methods()\returnType = ".i"
+        *c\Methods()\visibility = "Public"
+        *c\Methods()\signature = "void"
+        *c\Methods()\paramCount = 0
+        *c\Methods()\minParamCount = 0
+        *c\Methods()\mangledMethodName = "Count_" + fName
+        *c\Methods()\srcLineNumber = *c\srcLineNumber
+        *c\Methods()\srcFile = *c\srcFile
+
+        AddElement(MethodBodies())
+        MethodBodies()\className = *c\fullName
+        MethodBodies()\mangledClassName = *c\mangledName
+        MethodBodies()\methodName = "Count_" + fName
+        MethodBodies()\signature = "void"
+        MethodBodies()\mangledMethodName = "Count_" + fName
+        MethodBodies()\params = ""
+        MethodBodies()\cleanParams = ""
+        MethodBodies()\returnType = ".i"
+        MethodBodies()\srcLineNumber = *c\srcLineNumber
+        MethodBodies()\srcFile = *c\srcFile
+        AddElement(MethodBodies()\BodyLines())
+        MethodBodies()\BodyLines()\content = "If *This\" + fName + " : ProcedureReturn *This\" + fName + "\Count() : EndIf : ProcedureReturn 0"
+      EndIf
+
+    Else
+      ; Standard scalar field: generate Get_<fName>() and Set_<fName>(val)
+      Protected retT.s = "." + fType
+      If fType = "" : retT = ".i" : fType = "i" : EndIf
+      
+      hasGetter = #False
+      ForEach *c\Methods()
+        If UCase(*c\Methods()\name) = UCase("Get_" + fName)
+          hasGetter = #True : Break
+        EndIf
+      Next
+      If Not hasGetter
+        AddElement(*c\Methods())
+        *c\Methods()\name = "Get_" + fName
+        *c\Methods()\rawDecl = "Public Method" + retT + " Get_" + fName + "()"
+        *c\Methods()\params = ""
+        *c\Methods()\cleanParams = ""
+        *c\Methods()\returnType = retT
+        *c\Methods()\visibility = "Public"
+        *c\Methods()\signature = "void"
+        *c\Methods()\paramCount = 0
+        *c\Methods()\minParamCount = 0
+        *c\Methods()\mangledMethodName = "Get_" + fName
+        *c\Methods()\srcLineNumber = *c\srcLineNumber
+        *c\Methods()\srcFile = *c\srcFile
+
+        AddElement(MethodBodies())
+        MethodBodies()\className = *c\fullName
+        MethodBodies()\mangledClassName = *c\mangledName
+        MethodBodies()\methodName = "Get_" + fName
+        MethodBodies()\signature = "void"
+        MethodBodies()\mangledMethodName = "Get_" + fName
+        MethodBodies()\params = ""
+        MethodBodies()\cleanParams = ""
+        MethodBodies()\returnType = retT
+        MethodBodies()\srcLineNumber = *c\srcLineNumber
+        MethodBodies()\srcFile = *c\srcFile
+        AddElement(MethodBodies()\BodyLines())
+        MethodBodies()\BodyLines()\content = "ProcedureReturn *This\" + fName
+      EndIf
+
+      hasSetter = #False
+      ForEach *c\Methods()
+        If UCase(*c\Methods()\name) = UCase("Set_" + fName)
+          hasSetter = #True : Break
+        EndIf
+      Next
+      If Not hasSetter
+        AddElement(*c\Methods())
+        *c\Methods()\name = "Set_" + fName
+        *c\Methods()\rawDecl = "Public Method Set_" + fName + "(val" + retT + ")"
+        *c\Methods()\params = "val" + retT
+        *c\Methods()\cleanParams = "val" + retT
+        *c\Methods()\returnType = ""
+        *c\Methods()\visibility = "Public"
+        *c\Methods()\signature = fType
+        *c\Methods()\paramCount = 1
+        *c\Methods()\minParamCount = 1
+        *c\Methods()\mangledMethodName = "Set_" + fName
+        *c\Methods()\srcLineNumber = *c\srcLineNumber
+        *c\Methods()\srcFile = *c\srcFile
+
+        AddElement(MethodBodies())
+        MethodBodies()\className = *c\fullName
+        MethodBodies()\mangledClassName = *c\mangledName
+        MethodBodies()\methodName = "Set_" + fName
+        MethodBodies()\signature = fType
+        MethodBodies()\mangledMethodName = "Set_" + fName
+        MethodBodies()\params = "val" + retT
+        MethodBodies()\cleanParams = "val" + retT
+        MethodBodies()\returnType = ""
+        MethodBodies()\srcLineNumber = *c\srcLineNumber
+        MethodBodies()\srcFile = *c\srcFile
+        AddElement(MethodBodies()\BodyLines())
+        MethodBodies()\BodyLines()\content = "*This\" + fName + " = val"
+        AddElement(MethodBodies()\BodyLines())
+        MethodBodies()\BodyLines()\content = "*This\orm_isDirty = #True"
+      EndIf
+    EndIf
+  Next
+  ClearList(fieldsCopy())
+
+  ; 3. Auto-inject the 11 IDatabaseEntity methods into *c\Methods() & MethodBodies()
+  Protected Dim eNames.s(10)
+  Protected Dim eRets.s(10)
+  Protected Dim eParams.s(10)
+  Protected Dim eClean.s(10)
+  Protected Dim eSigs.s(10)
+  Protected Dim eParamCounts.i(10)
+  Protected Dim eMinParams.i(10)
+
+  eNames(0) = "GetId"        : eRets(0) = ".i" : eParams(0) = "" : eClean(0) = "" : eSigs(0) = "void" : eParamCounts(0) = 0 : eMinParams(0) = 0
+  eNames(1) = "SetId"        : eRets(1) = ""   : eParams(1) = "id.i" : eClean(1) = "id.i" : eSigs(1) = "i" : eParamCounts(1) = 1 : eMinParams(1) = 1
+  eNames(2) = "IsDirty"      : eRets(2) = ".b" : eParams(2) = "" : eClean(2) = "" : eSigs(2) = "void" : eParamCounts(2) = 0 : eMinParams(2) = 0
+  eNames(3) = "SetDirty"     : eRets(3) = ""   : eParams(3) = "dirty.b" : eClean(3) = "dirty.b" : eSigs(3) = "b" : eParamCounts(3) = 1 : eMinParams(3) = 1
+  eNames(4) = "IsNew"        : eRets(4) = ".b" : eParams(4) = "" : eClean(4) = "" : eSigs(4) = "void" : eParamCounts(4) = 0 : eMinParams(4) = 0
+  eNames(5) = "SetNew"       : eRets(5) = ""   : eParams(5) = "isNew.b" : eClean(5) = "isNew.b" : eSigs(5) = "b" : eParamCounts(5) = 1 : eMinParams(5) = 1
+  eNames(6) = "Save"         : eRets(6) = ".b" : eParams(6) = "db.DatabaseEngine::IDatabase = 0" : eClean(6) = "db.DatabaseEngine::IDatabase = 0" : eSigs(6) = "IDatabase" : eParamCounts(6) = 1 : eMinParams(6) = 0
+  eNames(7) = "Delete"       : eRets(7) = ".b" : eParams(7) = "db.DatabaseEngine::IDatabase = 0" : eClean(7) = "db.DatabaseEngine::IDatabase = 0" : eSigs(7) = "IDatabase" : eParamCounts(7) = 1 : eMinParams(7) = 0
+  eNames(8) = "Reload"       : eRets(8) = ".b" : eParams(8) = "db.DatabaseEngine::IDatabase = 0" : eClean(8) = "db.DatabaseEngine::IDatabase = 0" : eSigs(8) = "IDatabase" : eParamCounts(8) = 1 : eMinParams(8) = 0
+  eNames(9) = "GetTableName" : eRets(9) = ".s" : eParams(9) = "" : eClean(9) = "" : eSigs(9) = "void" : eParamCounts(9) = 0 : eMinParams(9) = 0
+  eNames(10) = "GetEntityName": eRets(10) = ".s": eParams(10) = "" : eClean(10) = "" : eSigs(10) = "void": eParamCounts(10) = 0 : eMinParams(10) = 0
+
+  Protected i.i
+  For i = 0 To 10
+    hasMethod = #False
+    ForEach *c\Methods()
+      If UCase(*c\Methods()\name) = UCase(eNames(i))
+        hasMethod = #True : Break
+      EndIf
+    Next
+    If Not hasMethod
+      AddElement(*c\Methods())
+      *c\Methods()\name = eNames(i)
+      *c\Methods()\rawDecl = "Public Method" + eRets(i) + " " + eNames(i) + "(" + eParams(i) + ")"
+      *c\Methods()\params = eParams(i)
+      *c\Methods()\cleanParams = eClean(i)
+      *c\Methods()\returnType = eRets(i)
+      *c\Methods()\visibility = "Public"
+      *c\Methods()\signature = eSigs(i)
+      *c\Methods()\paramCount = eParamCounts(i)
+      *c\Methods()\minParamCount = eMinParams(i)
+      *c\Methods()\mangledMethodName = eNames(i)
+      *c\Methods()\srcLineNumber = *c\srcLineNumber
+      *c\Methods()\srcFile = *c\srcFile
+    EndIf
+
+    Protected hasBody.b = #False
+    ForEach MethodBodies()
+      If MethodBodies()\className = *c\fullName And UCase(MethodBodies()\methodName) = UCase(eNames(i))
+        hasBody = #True : Break
+      EndIf
+    Next
+    If Not hasBody
+      AddElement(MethodBodies())
+      MethodBodies()\className = *c\fullName
+      MethodBodies()\mangledClassName = *c\mangledName
+      MethodBodies()\methodName = eNames(i)
+      MethodBodies()\signature = eSigs(i)
+      MethodBodies()\mangledMethodName = eNames(i)
+      MethodBodies()\params = eParams(i)
+      MethodBodies()\cleanParams = eClean(i)
+      MethodBodies()\returnType = eRets(i)
+      MethodBodies()\srcLineNumber = *c\srcLineNumber
+      MethodBodies()\srcFile = *c\srcFile
+
+      Select i
+        Case 0 ; GetId
+          AddElement(MethodBodies()\BodyLines()) : MethodBodies()\BodyLines()\content = "ProcedureReturn *This\id"
+        Case 1 ; SetId
+          AddElement(MethodBodies()\BodyLines()) : MethodBodies()\BodyLines()\content = "*This\id = id"
+        Case 2 ; IsDirty
+          AddElement(MethodBodies()\BodyLines()) : MethodBodies()\BodyLines()\content = "ProcedureReturn *This\orm_isDirty"
+        Case 3 ; SetDirty
+          AddElement(MethodBodies()\BodyLines()) : MethodBodies()\BodyLines()\content = "*This\orm_isDirty = dirty"
+        Case 4 ; IsNew
+          AddElement(MethodBodies()\BodyLines()) : MethodBodies()\BodyLines()\content = "ProcedureReturn *This\orm_isNew"
+        Case 5 ; SetNew
+          AddElement(MethodBodies()\BodyLines()) : MethodBodies()\BodyLines()\content = "*This\orm_isNew = isNew"
+        Case 6 ; Save
+          AddElement(MethodBodies()\BodyLines()) : MethodBodies()\BodyLines()\content = "Protected targetDb.DatabaseEngine::IDatabase = db"
+          AddElement(MethodBodies()\BodyLines()) : MethodBodies()\BodyLines()\content = "If targetDb = 0 : targetDb = Database::GetDefault() : EndIf"
+          AddElement(MethodBodies()\BodyLines()) : MethodBodies()\BodyLines()\content = "If targetDb = 0 : ProcedureReturn #False : EndIf"
+          AddElement(MethodBodies()\BodyLines()) : MethodBodies()\BodyLines()\content = "ProcedureReturn targetDb\Save(*This)"
+        Case 7 ; Delete
+          AddElement(MethodBodies()\BodyLines()) : MethodBodies()\BodyLines()\content = "Protected targetDb.DatabaseEngine::IDatabase = db"
+          AddElement(MethodBodies()\BodyLines()) : MethodBodies()\BodyLines()\content = "If targetDb = 0 : targetDb = Database::GetDefault() : EndIf"
+          AddElement(MethodBodies()\BodyLines()) : MethodBodies()\BodyLines()\content = "If targetDb = 0 : ProcedureReturn #False : EndIf"
+          AddElement(MethodBodies()\BodyLines()) : MethodBodies()\BodyLines()\content = "ProcedureReturn targetDb\Delete(*This)"
+        Case 8 ; Reload
+          AddElement(MethodBodies()\BodyLines()) : MethodBodies()\BodyLines()\content = "Protected targetDb.DatabaseEngine::IDatabase = db"
+          AddElement(MethodBodies()\BodyLines()) : MethodBodies()\BodyLines()\content = "If targetDb = 0 : targetDb = Database::GetDefault() : EndIf"
+          AddElement(MethodBodies()\BodyLines()) : MethodBodies()\BodyLines()\content = "If targetDb = 0 Or *This\id = 0 : ProcedureReturn #False : EndIf"
+          AddElement(MethodBodies()\BodyLines()) : MethodBodies()\BodyLines()\content = "NewMap vals.s()"
+          AddElement(MethodBodies()\BodyLines()) : MethodBodies()\BodyLines()\content = "If ORM_CRUD::SelectById(targetDb\GetHandle(), " + Chr(34) + *c\name + Chr(34) + ", *This\id, vals())"
+          AddElement(MethodBodies()\BodyLines()) : MethodBodies()\BodyLines()\content = "  " + *c\mangledName + "_Deserialize(*This, vals())"
+          AddElement(MethodBodies()\BodyLines()) : MethodBodies()\BodyLines()\content = "  *This\orm_isDirty = #False"
+          AddElement(MethodBodies()\BodyLines()) : MethodBodies()\BodyLines()\content = "  *This\orm_isNew = #False"
+          AddElement(MethodBodies()\BodyLines()) : MethodBodies()\BodyLines()\content = "  ProcedureReturn #True"
+          AddElement(MethodBodies()\BodyLines()) : MethodBodies()\BodyLines()\content = "EndIf"
+          AddElement(MethodBodies()\BodyLines()) : MethodBodies()\BodyLines()\content = "ProcedureReturn #False"
+        Case 9 ; GetTableName
+          AddElement(MethodBodies()\BodyLines()) : MethodBodies()\BodyLines()\content = "ProcedureReturn " + Chr(34) + LCase(*c\name) + "s" + Chr(34)
+        Case 10 ; GetEntityName
+          AddElement(MethodBodies()\BodyLines()) : MethodBodies()\BodyLines()\content = "ProcedureReturn " + Chr(34) + *c\name + Chr(34)
+      EndSelect
+    EndIf
+  Next
+EndProcedure
+
 Procedure.b BuildVTables()
+  ; Step 0: Process database entity classes (inject methods, fields, relations)
+  ForEach Classes()
+    If Classes()\isDatabaseEntity
+      ProcessEntityClassMetadata(@Classes())
+    EndIf
+  Next
+
   ; Step 1: Detect method overloading within each class and across hierarchy
   ForEach Classes()
     Protected *c.OOP_Class = @Classes()
@@ -1702,6 +2298,45 @@ Procedure.b BuildVTables()
         *c\VTableSlots()\srcFile = *parent\VTableSlots()\srcFile
       Next
       PopListPosition(Classes())
+    ElseIf *c\isDatabaseEntity
+      ; Root entity class: populate the 11 IDatabaseEntity slots first
+      Protected Dim eSlotNames.s(10)
+      Protected Dim eSlotRets.s(10)
+      Protected Dim eSlotParams.s(10)
+      Protected Dim eSlotClean.s(10)
+      Protected Dim eSlotSigs.s(10)
+      Protected Dim eSlotCounts.i(10)
+      Protected Dim eSlotMin.i(10)
+
+      eSlotNames(0) = "GetId"        : eSlotRets(0) = ".i" : eSlotParams(0) = "" : eSlotClean(0) = "" : eSlotSigs(0) = "void" : eSlotCounts(0) = 0 : eSlotMin(0) = 0
+      eSlotNames(1) = "SetId"        : eSlotRets(1) = ""   : eSlotParams(1) = "id.i" : eSlotClean(1) = "id.i" : eSlotSigs(1) = "i" : eSlotCounts(1) = 1 : eSlotMin(1) = 1
+      eSlotNames(2) = "IsDirty"      : eSlotRets(2) = ".b" : eSlotParams(2) = "" : eSlotClean(2) = "" : eSlotSigs(2) = "void" : eSlotCounts(2) = 0 : eSlotMin(2) = 0
+      eSlotNames(3) = "SetDirty"     : eSlotRets(3) = ""   : eSlotParams(3) = "dirty.b" : eSlotClean(3) = "dirty.b" : eSlotSigs(3) = "b" : eSlotCounts(3) = 1 : eSlotMin(3) = 1
+      eSlotNames(4) = "IsNew"        : eSlotRets(4) = ".b" : eSlotParams(4) = "" : eSlotClean(4) = "" : eSlotSigs(4) = "void" : eSlotCounts(4) = 0 : eSlotMin(4) = 0
+      eSlotNames(5) = "SetNew"       : eSlotRets(5) = ""   : eSlotParams(5) = "isNew.b" : eSlotClean(5) = "isNew.b" : eSlotSigs(5) = "b" : eSlotCounts(5) = 1 : eSlotMin(5) = 1
+      eSlotNames(6) = "Save"         : eSlotRets(6) = ".b" : eSlotParams(6) = "db.DatabaseEngine::IDatabase = 0" : eSlotClean(6) = "db.DatabaseEngine::IDatabase = 0" : eSlotSigs(6) = "IDatabase" : eSlotCounts(6) = 1 : eSlotMin(6) = 0
+      eSlotNames(7) = "Delete"       : eSlotRets(7) = ".b" : eSlotParams(7) = "db.DatabaseEngine::IDatabase = 0" : eSlotClean(7) = "db.DatabaseEngine::IDatabase = 0" : eSlotSigs(7) = "IDatabase" : eSlotCounts(7) = 1 : eSlotMin(7) = 0
+      eSlotNames(8) = "Reload"       : eSlotRets(8) = ".b" : eSlotParams(8) = "db.DatabaseEngine::IDatabase = 0" : eSlotClean(8) = "db.DatabaseEngine::IDatabase = 0" : eSlotSigs(8) = "IDatabase" : eSlotCounts(8) = 1 : eSlotMin(8) = 0
+      eSlotNames(9) = "GetTableName" : eSlotRets(9) = ".s" : eSlotParams(9) = "" : eSlotClean(9) = "" : eSlotSigs(9) = "void" : eSlotCounts(9) = 0 : eSlotMin(9) = 0
+      eSlotNames(10) = "GetEntityName": eSlotRets(10) = ".s": eSlotParams(10) = "" : eSlotClean(10) = "" : eSlotSigs(10) = "void": eSlotCounts(10) = 0 : eSlotMin(10) = 0
+
+      Protected iSlot.i
+      For iSlot = 0 To 10
+        AddElement(*c\VTableSlots())
+        *c\VTableSlots()\methodName = eSlotNames(iSlot)
+        *c\VTableSlots()\baseMethodName = eSlotNames(iSlot)
+        *c\VTableSlots()\signature = eSlotSigs(iSlot)
+        *c\VTableSlots()\implementingClass = *c\fullName
+        *c\VTableSlots()\declaringClass = *c\fullName
+        *c\VTableSlots()\params = eSlotParams(iSlot)
+        *c\VTableSlots()\cleanParams = eSlotClean(iSlot)
+        *c\VTableSlots()\returnType = eSlotRets(iSlot)
+        *c\VTableSlots()\isAbstract = #False
+        *c\VTableSlots()\paramCount = eSlotCounts(iSlot)
+        *c\VTableSlots()\minParamCount = eSlotMin(iSlot)
+        *c\VTableSlots()\srcLineNumber = *c\srcLineNumber
+        *c\VTableSlots()\srcFile = *c\srcFile
+      Next
     EndIf
 
     ; Process methods declared in current class
@@ -2505,7 +3140,36 @@ Procedure.s TranspileMainLine(line.s)
   Next
   PopListPosition(Classes())
   
+  ; Protect PureBasic Modules with :: so they are not broken by :: -> _
+  res = ReplaceString(res, "DatabaseEngine::", "@@MOD_DBENGINE@@")
+  res = ReplaceString(res, "DatabaseEntities::", "@@MOD_DBENTITIES@@")
+  res = ReplaceString(res, "Database::", "@@MOD_DB@@")
+  res = ReplaceString(res, "EntitySet::", "@@MOD_ENTITYSET@@")
+  res = ReplaceString(res, "ORM::", "@@MOD_ORM@@")
+  res = ReplaceString(res, "ORM_Schema::", "@@MOD_ORMSCHEMA@@")
+  res = ReplaceString(res, "ORM_CRUD::", "@@MOD_ORMCRUD@@")
+  res = ReplaceString(res, "ORM_Relations::", "@@MOD_ORMREL@@")
+  res = ReplaceString(res, "ORM_Entity::", "@@MOD_ORMENTITY@@")
+  res = ReplaceString(res, "ORM_Transaction::", "@@MOD_ORMTRANS@@")
+  res = ReplaceString(res, "ORM_Lock::", "@@MOD_ORMLOCK@@")
+  res = ReplaceString(res, "UI::", "@@MOD_UI@@")
+  res = ReplaceString(res, "MVVM::", "@@MOD_MVVM@@")
+
   res = ReplaceString(res, "::", "_")
+
+  res = ReplaceString(res, "@@MOD_DBENGINE@@", "DatabaseEngine::")
+  res = ReplaceString(res, "@@MOD_DBENTITIES@@", "DatabaseEntities::")
+  res = ReplaceString(res, "@@MOD_DB@@", "Database::")
+  res = ReplaceString(res, "@@MOD_ENTITYSET@@", "EntitySet::")
+  res = ReplaceString(res, "@@MOD_ORM@@", "ORM::")
+  res = ReplaceString(res, "@@MOD_ORMSCHEMA@@", "ORM_Schema::")
+  res = ReplaceString(res, "@@MOD_ORMCRUD@@", "ORM_CRUD::")
+  res = ReplaceString(res, "@@MOD_ORMREL@@", "ORM_Relations::")
+  res = ReplaceString(res, "@@MOD_ORMENTITY@@", "ORM_Entity::")
+  res = ReplaceString(res, "@@MOD_ORMTRANS@@", "ORM_Transaction::")
+  res = ReplaceString(res, "@@MOD_ORMLOCK@@", "ORM_Lock::")
+  res = ReplaceString(res, "@@MOD_UI@@", "UI::")
+  res = ReplaceString(res, "@@MOD_MVVM@@", "MVVM::")
   
   ProcedureReturn res
 EndProcedure
@@ -2515,6 +3179,227 @@ Procedure EmitLine(content.s, srcLine.i = 0, srcFile.s = "")
   GeneratedLines()\content = content
   GeneratedLines()\srcLineNumber = srcLine
   GeneratedLines()\srcFile = srcFile
+EndProcedure
+
+Procedure EmitEntityRegistration()
+  Protected hasEntity.b = #False
+  ForEach Classes()
+    If Classes()\isDatabaseEntity : hasEntity = #True : Break : EndIf
+  Next
+  If Not hasEntity : ProcedureReturn : EndIf
+
+  EmitLine("; " + RSet("", 76, "-"))
+  EmitLine("; 5.5 ORM ENTITY SERIALIZATION, DESERIALIZATION & REGISTRATION")
+  EmitLine("; " + RSet("", 76, "-"))
+  EmitLine("")
+
+  ; Emit Serialization, Deserialization, and CascadeSave helpers for each entity
+  ForEach Classes()
+    Protected *c.OOP_Class = @Classes()
+    If *c\isDatabaseEntity
+      Protected cMangled.s = *c\mangledName
+      Protected tblName.s = LCase(*c\name) + "s"
+
+      ; 1. Serialization
+      EmitLine("Procedure " + cMangled + "_Serialize(*This." + cMangled + "_Inst, Map values.s())")
+      EmitLine("  ClearMap(values())")
+      ForEach *c\Fields()
+        Protected fDecl.s = *c\Fields()\name
+        Protected numItems.i = CountString(fDecl, ",") + 1
+        Protected fIdx.i
+        For fIdx = 1 To numItems
+          Protected item.s = Trim(StringField(fDecl, fIdx, ","))
+          If item = "" : Continue : EndIf
+          Protected pDot.i = FindString(item, ".")
+          Protected baseName.s = item
+          Protected typeCode.s = "s"
+          If pDot > 0
+            baseName = Trim(Left(item, pDot - 1))
+            typeCode = LCase(Trim(Mid(item, pDot + 1)))
+          EndIf
+          If baseName = "id" Or baseName = "orm_isDirty" Or baseName = "orm_isNew" : Continue : EndIf
+          
+          Protected isRel.b = #False
+          ForEach *c\Relations()
+            If *c\Relations()\propertyName = baseName : isRel = #True : Break : EndIf
+          Next
+          If isRel : Continue : EndIf
+
+          Select typeCode
+            Case "s"
+              EmitLine("  values(" + Chr(34) + baseName + Chr(34) + ") = *This\" + baseName)
+            Case "f", "d"
+              EmitLine("  values(" + Chr(34) + baseName + Chr(34) + ") = StrF(*This\" + baseName + ")")
+            Default
+              EmitLine("  values(" + Chr(34) + baseName + Chr(34) + ") = Str(*This\" + baseName + ")")
+          EndSelect
+        Next
+      Next
+      EmitLine("EndProcedure")
+      EmitLine("")
+
+      ; 2. Deserialization
+      EmitLine("Procedure " + cMangled + "_Deserialize(*This." + cMangled + "_Inst, Map values.s())")
+      EmitLine("  If FindMapElement(values(), " + Chr(34) + "id" + Chr(34) + ") : *This\id = Val(values()) : EndIf")
+      ForEach *c\Fields()
+        fDecl = *c\Fields()\name
+        numItems = CountString(fDecl, ",") + 1
+        For fIdx = 1 To numItems
+          item = Trim(StringField(fDecl, fIdx, ","))
+          If item = "" : Continue : EndIf
+          pDot = FindString(item, ".")
+          baseName = item
+          typeCode = "s"
+          If pDot > 0
+            baseName = Trim(Left(item, pDot - 1))
+            typeCode = LCase(Trim(Mid(item, pDot + 1)))
+          EndIf
+          If baseName = "id" Or baseName = "orm_isDirty" Or baseName = "orm_isNew" : Continue : EndIf
+          
+          isRel = #False
+          ForEach *c\Relations()
+            If *c\Relations()\propertyName = baseName : isRel = #True : Break : EndIf
+          Next
+          If isRel : Continue : EndIf
+
+          Select typeCode
+            Case "s"
+              EmitLine("  If FindMapElement(values(), " + Chr(34) + baseName + Chr(34) + ") : *This\" + baseName + " = values() : EndIf")
+            Case "f", "d"
+              EmitLine("  If FindMapElement(values(), " + Chr(34) + baseName + Chr(34) + ") : *This\" + baseName + " = ValF(values()) : EndIf")
+            Default
+              EmitLine("  If FindMapElement(values(), " + Chr(34) + baseName + Chr(34) + ") : *This\" + baseName + " = Val(values()) : EndIf")
+          EndSelect
+        Next
+      Next
+      EmitLine("EndProcedure")
+      EmitLine("")
+
+      ; 3. SaveChildren procs for each relation
+      ForEach *c\Relations()
+        Protected *r.OOP_Relation = @*c\Relations()
+        Protected relProcName.s = cMangled + "_SaveChildren_" + *r\propertyName
+        EmitLine("Procedure " + relProcName + "(*This." + cMangled + "_Inst, db.i)")
+        EmitLine("  Protected targetDb.DatabaseEngine::IDatabase = Database::WrapHandle(db)")
+        EmitLine("  If Not targetDb : targetDb = Database::GetDefault() : EndIf")
+        EmitLine("  If Not targetDb : ProcedureReturn : EndIf")
+
+        If *r\relationType = #ORM_Rel_OneToMany
+          ; HasMany
+          EmitLine("  If *This\" + *r\propertyName)
+          EmitLine("    Protected count.i = *This\" + *r\propertyName + "\Count()")
+          EmitLine("    Protected i.i")
+          EmitLine("    For i = 0 To count - 1")
+          EmitLine("      Protected item.DatabaseEntities::IDatabaseEntity = *This\" + *r\propertyName + "\Get(i)")
+          EmitLine("      If item")
+          Protected targetClsMangled.s = MangleIdentifier(*r\targetClass)
+          EmitLine("        Protected *itemInst." + targetClsMangled + "_Inst = item")
+          EmitLine("        *itemInst\" + *r\foreignKey + " = *This\id")
+          EmitLine("        item\Save(targetDb)")
+          EmitLine("      EndIf")
+          EmitLine("    Next")
+          If *r\cascade = #Cascade_Delete Or *r\cascade = #Cascade_All
+            EmitLine("    count = *This\" + *r\propertyName + "\GetRemovedCount()")
+            EmitLine("    For i = 0 To count - 1")
+            EmitLine("      Protected remItem.DatabaseEntities::IDatabaseEntity = *This\" + *r\propertyName + "\GetRemovedItem(i)")
+            EmitLine("      If remItem : remItem\Delete(targetDb) : EndIf")
+            EmitLine("    Next")
+          EndIf
+          EmitLine("    *This\" + *r\propertyName + "\ResetTracking()")
+          EmitLine("  EndIf")
+
+        ElseIf *r\relationType = #ORM_Rel_ManyToMany
+          ; ManyToMany
+          EmitLine("  If *This\" + *r\propertyName + " And *This\id > 0")
+          EmitLine("    ORM_Relations::SyncManyToManyLinks(db, " + Chr(34) + *r\joinTable + Chr(34) + ", " + Chr(34) + *r\parentFk + Chr(34) + ", *This\id, " + Chr(34) + *r\childFk + Chr(34) + ", *This\" + *r\propertyName + ")")
+          EmitLine("  EndIf")
+        EndIf
+
+        EmitLine("EndProcedure")
+        EmitLine("")
+      Next
+
+    EndIf
+  Next
+
+  ; 4. Register_All_Entities procedure
+  EmitLine("Procedure Register_All_Entities()")
+  EmitLine("  NewList currentFields.ORM_Schema::ORM_FieldDef()")
+  EmitLine("  NewList currentRelations.ORM_Schema::ORM_RelationDef()")
+  EmitLine("")
+  ForEach Classes()
+    *c = @Classes()
+    If *c\isDatabaseEntity
+      cMangled = *c\mangledName
+      tblName = LCase(*c\name) + "s"
+
+      EmitLine("  ; Register entity " + *c\name)
+      EmitLine("  ClearList(currentFields())")
+      EmitLine("  ClearList(currentRelations())")
+
+      ForEach *c\Fields()
+        fDecl = *c\Fields()\name
+        numItems = CountString(fDecl, ",") + 1
+        For fIdx = 1 To numItems
+          item = Trim(StringField(fDecl, fIdx, ","))
+          If item = "" : Continue : EndIf
+          pDot = FindString(item, ".")
+          baseName = item
+          typeCode = "s"
+          If pDot > 0
+            baseName = Trim(Left(item, pDot - 1))
+            typeCode = LCase(Trim(Mid(item, pDot + 1)))
+          EndIf
+          If baseName = "id" Or baseName = "orm_isDirty" Or baseName = "orm_isNew" : Continue : EndIf
+          
+          isRel = #False
+          ForEach *c\Relations()
+            If *c\Relations()\propertyName = baseName : isRel = #True : Break : EndIf
+          Next
+          If isRel : Continue : EndIf
+
+          Protected ormTypeConst.s = "ORM_Entity::#ORM_Type_String"
+          Select typeCode
+            Case "s" : ormTypeConst = "ORM_Entity::#ORM_Type_String"
+            Case "i", "l", "q" : ormTypeConst = "ORM_Entity::#ORM_Type_Integer"
+            Case "b" : ormTypeConst = "ORM_Entity::#ORM_Type_Bool"
+            Case "f", "d" : ormTypeConst = "ORM_Entity::#ORM_Type_Double"
+          EndSelect
+
+          EmitLine("  AddElement(currentFields()) : currentFields()\name = " + Chr(34) + baseName + Chr(34) + " : currentFields()\typeCode = " + ormTypeConst)
+        Next
+      Next
+
+      ForEach *c\Relations()
+        *r = @*c\Relations()
+        Protected relTypeConst.s = "ORM_Entity::#ORM_Rel_OneToMany"
+        If *r\relationType = #ORM_Rel_ManyToMany
+          relTypeConst = "ORM_Entity::#ORM_Rel_ManyToMany"
+        ElseIf *r\relationType = #ORM_Rel_ManyToOne
+          relTypeConst = "ORM_Entity::#ORM_Rel_ManyToOne"
+        ElseIf *r\relationType = #ORM_Rel_OneToOne
+          relTypeConst = "ORM_Entity::#ORM_Rel_OneToOne"
+        EndIf
+
+        EmitLine("  AddElement(currentRelations())")
+        EmitLine("  currentRelations()\relationType = " + relTypeConst)
+        EmitLine("  currentRelations()\propertyName = " + Chr(34) + *r\propertyName + Chr(34))
+        EmitLine("  currentRelations()\childEntityType = " + Chr(34) + *r\targetClass + Chr(34))
+        EmitLine("  currentRelations()\childTable = " + Chr(34) + LCase(*r\targetClass) + "s" + Chr(34))
+        EmitLine("  currentRelations()\fkColumn = " + Chr(34) + *r\foreignKey + Chr(34))
+        EmitLine("  currentRelations()\joinTable = " + Chr(34) + *r\joinTable + Chr(34))
+        EmitLine("  currentRelations()\parentFkColumn = " + Chr(34) + *r\parentFk + Chr(34))
+        EmitLine("  currentRelations()\childFkColumn = " + Chr(34) + *r\childFk + Chr(34))
+        EmitLine("  currentRelations()\cascadeSave = #True")
+        EmitLine("  currentRelations()\saveChildrenProc = @" + cMangled + "_SaveChildren_" + *r\propertyName + "()")
+      Next
+
+      EmitLine("  ORM_Schema::RegisterEntity(" + Chr(34) + *c\name + Chr(34) + ", " + Chr(34) + tblName + Chr(34) + ", currentFields(), currentRelations(), @" + cMangled + "_Serialize(), @" + cMangled + "_Deserialize(), @New_" + cMangled + "(), #True)")
+      EmitLine("")
+    EndIf
+  Next
+  EmitLine("EndProcedure")
+  EmitLine("")
 EndProcedure
 
 Procedure.b GenerateTargetPB(outputFile.s, inputPBO.s)
@@ -2536,6 +3421,21 @@ Procedure.b GenerateTargetPB(outputFile.s, inputPBO.s)
   EmitLine("#OOP_WORKSPACE_DIR = " + Chr(34) + GetCurrentDirectory() + Chr(34))
   EmitLine("")
 
+  Protected hasEntity.b = #False
+  ForEach Classes()
+    If Classes()\isDatabaseEntity : hasEntity = #True : Break : EndIf
+  Next
+  If hasEntity
+    EmitLine("; PureBasic OOP Framework - Database & ORM Engine Integration")
+    EmitLine("XIncludeFile #OOP_WORKSPACE_DIR + " + Chr(34) + "framework/database/ORM.pbi" + Chr(34))
+    EmitLine("UseModule Database")
+    EmitLine("UseModule DatabaseEngine")
+    EmitLine("UseModule DatabaseEntities")
+    EmitLine("UseModule EntitySet")
+    EmitLine("UseModule ORM_Schema")
+    EmitLine("")
+  EndIf
+
   ; 0.5 Generate Top-Level Type Declarations (Structures, Enums, Constants, Macros)
   EmitLine("; " + RSet("", 76, "-"))
   EmitLine("; 0.5 GLOBAL TYPE DECLARATIONS, STRUCTURES & CONSTANTS")
@@ -2556,6 +3456,8 @@ Procedure.b GenerateTargetPB(outputFile.s, inputPBO.s)
     Protected *c.OOP_Class = @Classes()
     If *c\mangledParentName <> ""
       EmitLine("Interface " + *c\mangledName + "_vt Extends " + *c\mangledParentName + "_vt", *c\srcLineNumber, *c\srcFile)
+    ElseIf *c\isDatabaseEntity
+      EmitLine("Interface " + *c\mangledName + "_vt Extends DatabaseEntities::IDatabaseEntity", *c\srcLineNumber, *c\srcFile)
     Else
       EmitLine("Interface " + *c\mangledName + "_vt", *c\srcLineNumber, *c\srcFile)
     EndIf
@@ -2563,6 +3465,12 @@ Procedure.b GenerateTargetPB(outputFile.s, inputPBO.s)
     ForEach *c\Methods()
       Protected *m.OOP_Method = @*c\Methods()
       If *m\visibility <> "Private" And UCase(*m\name) <> "INIT"
+        If *c\isDatabaseEntity And *c\mangledParentName = ""
+          Protected uMN.s = UCase(*m\name)
+          If uMN = "GETID" Or uMN = "SETID" Or uMN = "ISDIRTY" Or uMN = "SETDIRTY" Or uMN = "ISNEW" Or uMN = "SETNEW" Or uMN = "SAVE" Or uMN = "DELETE" Or uMN = "RELOAD" Or uMN = "GETTABLENAME" Or uMN = "GETENTITYNAME"
+            Continue
+          EndIf
+        EndIf
         If *c\mangledParentName = "" Or Not *m\isOverride
           EmitLine("  " + *m\mangledMethodName + *m\returnType + "(" + TranspileMainLine(*m\cleanParams) + ")", *m\srcLineNumber, *m\srcFile)
         EndIf
@@ -2613,6 +3521,21 @@ Procedure.b GenerateTargetPB(outputFile.s, inputPBO.s)
     EmitLine(TranspileMainLine(HeaderDeclarations()\content), HeaderDeclarations()\srcLineNumber, HeaderDeclarations()\srcFile)
   Next
   EmitLine("")
+
+  If hasEntity
+    ForEach Classes()
+      If Classes()\isDatabaseEntity
+        Protected clsMang.s = Classes()\mangledName
+        EmitLine("Declare " + clsMang + "_Serialize(*This." + clsMang + "_Inst, Map values.s())")
+        EmitLine("Declare " + clsMang + "_Deserialize(*This." + clsMang + "_Inst, Map values.s())")
+        ForEach Classes()\Relations()
+          EmitLine("Declare " + clsMang + "_SaveChildren_" + Classes()\Relations()\propertyName + "(*This." + clsMang + "_Inst, db.i)")
+        Next
+      EndIf
+    Next
+    EmitLine("Declare Register_All_Entities()")
+    EmitLine("")
+  EndIf
 
   ; 3. Generate Method Procedures (Forward Declares & Implementations)
   EmitLine("; " + RSet("", 76, "-"))
@@ -2749,6 +3672,15 @@ Procedure.b GenerateTargetPB(outputFile.s, inputPBO.s)
           EmitLine("  Protected *obj." + *c\mangledName + "_Inst = AllocateStructure(" + *c\mangledName + "_Inst)", *c\srcLineNumber, *c\srcFile)
           EmitLine("  If *obj", *c\srcLineNumber, *c\srcFile)
           EmitLine("    *obj\VTable = ?" + *c\mangledName + "_VTable_Data", *c\srcLineNumber, *c\srcFile)
+          If *c\isDatabaseEntity
+            EmitLine("    *obj\orm_isNew = #True", *c\srcLineNumber, *c\srcFile)
+            EmitLine("    *obj\orm_isDirty = #False", *c\srcLineNumber, *c\srcFile)
+            ForEach *c\Relations()
+              If *c\Relations()\relationType = #ORM_Rel_OneToMany Or *c\Relations()\relationType = #ORM_Rel_ManyToMany
+                EmitLine("    *obj\" + *c\Relations()\propertyName + " = EntitySet::New()", *c\srcLineNumber, *c\srcFile)
+              EndIf
+            Next
+          EndIf
           If initArgPass <> ""
             EmitLine("    " + *c\InitConstructors()\initProcMangled + "(*obj, " + initArgPass + ")", *c\srcLineNumber, *c\srcFile)
           Else
@@ -2765,6 +3697,15 @@ Procedure.b GenerateTargetPB(outputFile.s, inputPBO.s)
         EmitLine("  Protected *obj." + *c\mangledName + "_Inst = AllocateStructure(" + *c\mangledName + "_Inst)", *c\srcLineNumber, *c\srcFile)
         EmitLine("  If *obj", *c\srcLineNumber, *c\srcFile)
         EmitLine("    *obj\VTable = ?" + *c\mangledName + "_VTable_Data", *c\srcLineNumber, *c\srcFile)
+        If *c\isDatabaseEntity
+          EmitLine("    *obj\orm_isNew = #True", *c\srcLineNumber, *c\srcFile)
+          EmitLine("    *obj\orm_isDirty = #False", *c\srcLineNumber, *c\srcFile)
+          ForEach *c\Relations()
+            If *c\Relations()\relationType = #ORM_Rel_OneToMany Or *c\Relations()\relationType = #ORM_Rel_ManyToMany
+              EmitLine("    *obj\" + *c\Relations()\propertyName + " = EntitySet::New()", *c\srcLineNumber, *c\srcFile)
+            EndIf
+          Next
+        EndIf
         EmitLine("  EndIf", *c\srcLineNumber, *c\srcFile)
         EmitLine("  ProcedureReturn *obj", *c\srcLineNumber, *c\srcFile)
         EmitLine("EndProcedure")
@@ -2774,6 +3715,13 @@ Procedure.b GenerateTargetPB(outputFile.s, inputPBO.s)
       ; Free wrapper
       EmitLine("Procedure Free_" + *c\mangledName + "(*obj." + *c\mangledName + "_Inst)", *c\srcLineNumber, *c\srcFile)
       EmitLine("  If *obj", *c\srcLineNumber, *c\srcFile)
+      If *c\isDatabaseEntity
+        ForEach *c\Relations()
+          If *c\Relations()\relationType = #ORM_Rel_OneToMany Or *c\Relations()\relationType = #ORM_Rel_ManyToMany
+            EmitLine("    If *obj\" + *c\Relations()\propertyName + " : *obj\" + *c\Relations()\propertyName + "\Free() : EndIf", *c\srcLineNumber, *c\srcFile)
+          EndIf
+        Next
+      EndIf
       If *c\hasFree
         Protected callFreeMangled.s = *c\mangledName
         If *c\freeClassMangled <> ""
@@ -2788,11 +3736,19 @@ Procedure.b GenerateTargetPB(outputFile.s, inputPBO.s)
     EndIf
   Next
 
+  ; Emit Entity Registration & Helpers (Serialize, Deserialize, SaveChildren)
+  EmitEntityRegistration()
+
   ; 6. Generate Main Program Execution
   EmitLine("; " + RSet("", 76, "-"))
   EmitLine("; 6. MAIN PROGRAM EXECUTION")
   EmitLine("; " + RSet("", 76, "-"))
   EmitLine("")
+
+  If hasEntity
+    EmitLine("Register_All_Entities()")
+    EmitLine("")
+  EndIf
 
   ForEach MainLines()
     Protected transpiledMain.s = TranspileMainLine(MainLines()\content)

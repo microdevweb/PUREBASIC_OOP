@@ -24,7 +24,10 @@ DeclareModule ORM_Dialect_SQLite
   ; tableName.s        : "clients"
   ; fields()           : list of ORM field descriptors
   ; Returns a complete "CREATE TABLE IF NOT EXISTS ..." SQL string.
-  Declare.s BuildCreateTable(tableName.s, List fields.ORM_FieldDef())
+  Declare.s BuildCreateTable(tableName.s, List fields.ORM_Schema::ORM_FieldDef())
+
+  ; --- Build CREATE TABLE for Many-to-Many junction table ---
+  Declare.s BuildCreateJunctionTable(joinTableName.s, parentTable.s, parentFk.s, childTable.s, childFk.s)
 
   ; --- Build ALTER TABLE ADD COLUMN statement (for schema migration) ---
   Declare.s BuildAddColumn(tableName.s, fieldName.s, ormTypeCode.i)
@@ -76,7 +79,7 @@ Module ORM_Dialect_SQLite
   ; ---------------------------------------------------------------------------
   ; Build full CREATE TABLE IF NOT EXISTS statement
   ; ---------------------------------------------------------------------------
-  Procedure.s BuildCreateTable(tableName.s, List fields.ORM_FieldDef())
+  Procedure.s BuildCreateTable(tableName.s, List fields.ORM_Schema::ORM_FieldDef())
     Protected sql.s = "CREATE TABLE IF NOT EXISTS " + tableName + " (" + #CRLF$
     sql + "  id INTEGER PRIMARY KEY AUTOINCREMENT"
 
@@ -172,20 +175,20 @@ Module ORM_Dialect_SQLite
     ProcedureReturn "SELECT COUNT(*) FROM " + childTableName + " WHERE " + fkColumn + "=?;"
   EndProcedure
 
+  ; ---------------------------------------------------------------------------
+  ; Build CREATE TABLE for Many-to-Many junction table
+  ; ---------------------------------------------------------------------------
+  Procedure.s BuildCreateJunctionTable(joinTableName.s, parentTable.s, parentFk.s, childTable.s, childFk.s)
+    Protected sql.s = "CREATE TABLE IF NOT EXISTS " + joinTableName + " (" +
+                      parentFk + " INTEGER NOT NULL, " +
+                      childFk + " INTEGER NOT NULL, " +
+                      "PRIMARY KEY (" + parentFk + ", " + childFk + "), " +
+                      "FOREIGN KEY (" + parentFk + ") REFERENCES " + parentTable + "(id) ON DELETE CASCADE, " +
+                      "FOREIGN KEY (" + childFk + ") REFERENCES " + childTable + "(id) ON DELETE CASCADE);"
+    ProcedureReturn sql
+  EndProcedure
+
 EndModule
-
-; =============================================================================
-; ORM_FieldDef Structure - used across all ORM modules to describe class fields
-; =============================================================================
-; Place here so all modules that XIncludeFile this dialect can share the structure.
-
-Structure ORM_FieldDef
-  name.s        ; Field name as string (e.g. "companyName")
-  typeCode.i    ; One of the #ORM_Type_* constants
-  isFK.b        ; True if this is a foreign key column
-  fkTable.s     ; Name of parent table (if isFK=True)
-  nullable.b    ; True if column allows NULL
-EndStructure
 
 ; =============================================================================
 ; EOF ORM_Dialect_SQLite.pbi

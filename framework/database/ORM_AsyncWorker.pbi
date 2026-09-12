@@ -21,6 +21,10 @@ XIncludeFile "ORM_Relations.pbi"
 
 DeclareModule ORM_AsyncWorker
 
+  CompilerIf Not Defined(PB_Event_Custom, #PB_Constant)
+    #PB_Event_Custom = 65536
+  CompilerEndIf
+
   ; --- Work item operation codes ---
   #ORM_Op_Save     = 1
   #ORM_Op_FindById = 2
@@ -64,7 +68,7 @@ DeclareModule ORM_AsyncWorker
   Declare Shutdown()
 
   ; --- Push a work item onto the queue ---
-  Declare.b Enqueue(workItem.ORM_WorkItem)
+  Declare.b Enqueue(*workItem.ORM_WorkItem)
 
   ; --- Convenience wrappers: call these from the UI thread ---
 
@@ -138,34 +142,34 @@ Module ORM_AsyncWorker
       UnlockMutex(orm_queueMutex)
 
       ; --- Execute the operation ---
-      Protected eventCode.i = #ORM_AsyncWorker::#ORM_Event_Error
-      Protected result.i    = #ORM_Entity::#ORM_Error_DbConnection
+      Protected eventCode.i = #ORM_Event_Error
+      Protected result.i    = ORM_Entity::#ORM_Error_DbConnection
 
       Select workItem\operation
 
         ; ----- SAVE (with cascade children) -----
-        Case #ORM_AsyncWorker::#ORM_Op_Save
+        Case #ORM_Op_Save
           result = ORM_Relations::SaveWithChildren(workerDb,
                                                    workItem\entityType,
                                                    workItem\entityPtr,
                                                    workItem\serializeProc)
-          eventCode = #ORM_AsyncWorker::#ORM_Event_SaveDone
+          eventCode = #ORM_Event_SaveDone
           Debug "ORM_AsyncWorker: SaveAsync DONE for " + workItem\entityType +
                 " -> result=" + Str(result)
 
         ; ----- FIND BY ID -----
-        Case #ORM_AsyncWorker::#ORM_Op_FindById
+        Case #ORM_Op_FindById
           result = ORM_CRUD::FindById(workerDb,
                                       workItem\entityType,
                                       workItem\recordId,
                                       workItem\entityPtr,
                                       workItem\deserializeProc)
-          eventCode = #ORM_AsyncWorker::#ORM_Event_LoadDone
+          eventCode = #ORM_Event_LoadDone
           Debug "ORM_AsyncWorker: FindByIdAsync DONE id=" + Str(workItem\recordId) +
                 " -> result=" + Str(result)
 
         ; ----- QUERY (list) -----
-        Case #ORM_AsyncWorker::#ORM_Op_Query
+        Case #ORM_Op_Query
           ; Lock the shared result list while filling it
           LockMutex(orm_queryResultMutex)
             ClearList(orm_queryResultList())
@@ -177,16 +181,16 @@ Module ORM_AsyncWorker
                                      workItem\deserializeProc)
             orm_queryResultCode = result
           UnlockMutex(orm_queryResultMutex)
-          eventCode = #ORM_AsyncWorker::#ORM_Event_QueryDone
+          eventCode = #ORM_Event_QueryDone
           Debug "ORM_AsyncWorker: QueryAsync DONE for " + workItem\entityType +
                 " -> " + Str(ListSize(orm_queryResultList())) + " row(s)"
 
         ; ----- DELETE (with FK enforcement) -----
-        Case #ORM_AsyncWorker::#ORM_Op_Delete
+        Case #ORM_Op_Delete
           result = ORM_Relations::DeleteWithFKCheck(workerDb,
                                                     workItem\entityType,
                                                     workItem\entityPtr)
-          eventCode = #ORM_AsyncWorker::#ORM_Event_DeleteDone
+          eventCode = #ORM_Event_DeleteDone
           Debug "ORM_AsyncWorker: DeleteAsync DONE for " + workItem\entityType +
                 " -> result=" + Str(result)
 
@@ -226,7 +230,8 @@ Module ORM_AsyncWorker
   Procedure Init(dbPath.s, numWorkers.i = 2, windowId.i = 0)
     orm_dbPath      = dbPath
     orm_windowId    = windowId
-    orm_numWorkers  = Clamp(numWorkers, 1, 4)
+    If numWorkers < 1 : numWorkers = 1 : ElseIf numWorkers > 4 : numWorkers = 4 : EndIf
+    orm_numWorkers  = numWorkers
     orm_shutdown    = 0
     orm_queueMutex     = CreateMutex()
     orm_queueSemaphore = CreateSemaphore()
@@ -258,10 +263,10 @@ Module ORM_AsyncWorker
   ; ---------------------------------------------------------------------------
   ; Enqueue: push a work item onto the queue
   ; ---------------------------------------------------------------------------
-  Procedure.b Enqueue(workItem.ORM_AsyncWorker::ORM_WorkItem)
+  Procedure.b Enqueue(*workItem.ORM_AsyncWorker::ORM_WorkItem)
     LockMutex(orm_queueMutex)
       AddElement(orm_workQueue())
-      CopyStructure(@workItem, @orm_workQueue(), ORM_AsyncWorker::ORM_WorkItem)
+      CopyStructure(*workItem, @orm_workQueue(), ORM_AsyncWorker::ORM_WorkItem)
     UnlockMutex(orm_queueMutex)
     SignalSemaphore(orm_queueSemaphore)
     ProcedureReturn #True
@@ -272,13 +277,13 @@ Module ORM_AsyncWorker
   ; ---------------------------------------------------------------------------
   Procedure SaveAsync(*entity, entityType.s, serializeProc.i, callbackPtr.i, windowId.i)
     Protected item.ORM_AsyncWorker::ORM_WorkItem
-    item\operation     = #ORM_AsyncWorker::#ORM_Op_Save
+    item\operation     = #ORM_Op_Save
     item\entityPtr     = *entity
     item\entityType    = entityType
     item\serializeProc = serializeProc
     item\callbackPtr   = callbackPtr
     item\windowId      = windowId
-    Enqueue(item)
+    Enqueue(@item)
   EndProcedure
 
   ; ---------------------------------------------------------------------------
@@ -286,14 +291,14 @@ Module ORM_AsyncWorker
   ; ---------------------------------------------------------------------------
   Procedure FindByIdAsync(*entity, entityType.s, recordId.i, deserializeProc.i, callbackPtr.i, windowId.i)
     Protected item.ORM_AsyncWorker::ORM_WorkItem
-    item\operation       = #ORM_AsyncWorker::#ORM_Op_FindById
+    item\operation       = #ORM_Op_FindById
     item\entityPtr       = *entity
     item\entityType      = entityType
     item\recordId        = recordId
     item\deserializeProc = deserializeProc
     item\callbackPtr     = callbackPtr
     item\windowId        = windowId
-    Enqueue(item)
+    Enqueue(@item)
   EndProcedure
 
   ; ---------------------------------------------------------------------------
@@ -301,14 +306,14 @@ Module ORM_AsyncWorker
   ; ---------------------------------------------------------------------------
   Procedure QueryAsync(entityType.s, whereClause.s, newEntityProc.i, deserializeProc.i, callbackPtr.i, windowId.i)
     Protected item.ORM_AsyncWorker::ORM_WorkItem
-    item\operation       = #ORM_AsyncWorker::#ORM_Op_Query
+    item\operation       = #ORM_Op_Query
     item\entityType      = entityType
     item\whereClause     = whereClause
     item\newEntityProc   = newEntityProc
     item\deserializeProc = deserializeProc
     item\callbackPtr     = callbackPtr
     item\windowId        = windowId
-    Enqueue(item)
+    Enqueue(@item)
   EndProcedure
 
   ; ---------------------------------------------------------------------------
@@ -316,12 +321,12 @@ Module ORM_AsyncWorker
   ; ---------------------------------------------------------------------------
   Procedure DeleteAsync(*entity, entityType.s, callbackPtr.i, windowId.i)
     Protected item.ORM_AsyncWorker::ORM_WorkItem
-    item\operation   = #ORM_AsyncWorker::#ORM_Op_Delete
+    item\operation   = #ORM_Op_Delete
     item\entityPtr   = *entity
     item\entityType  = entityType
     item\callbackPtr = callbackPtr
     item\windowId    = windowId
-    Enqueue(item)
+    Enqueue(@item)
   EndProcedure
 
 EndModule
@@ -329,3 +334,5 @@ EndModule
 ; =============================================================================
 ; EOF ORM_AsyncWorker.pbi
 ; =============================================================================
+
+

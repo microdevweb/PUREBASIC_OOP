@@ -16,16 +16,23 @@
 ; =============================================================================
 
 XIncludeFile "ORM_Schema.pbi"
+XIncludeFile "IDatabaseEntity.pbi"
 
 DeclareModule ORM_CRUD
 
-  ; Base accessor: id is always the first integer field in every entity.
-  ; Cast any *entity pointer to *ORM_EntityBase to read or write id/flags.
+  UseModule DatabaseEntities
+
+  ; Base accessor: id is always the first integer field in non-OOP entities.
+  ; For OOP entities with VTable, access via IDatabaseEntity.
   Structure ORM_EntityBase
     id.i          ; offset 0 - primary key
     orm_isNew.b   ; offset 4 (or 8 on 64-bit) - True before first save
     orm_isDirty.b ; True if any field changed since last save/load
   EndStructure
+
+  Declare.i GetEntityId(*entity, *meta.ORM_Schema::ORM_EntityMeta)
+  Declare SetEntityId(*entity, *meta.ORM_Schema::ORM_EntityMeta, id.i)
+  Declare SetEntityStatus(*entity, *meta.ORM_Schema::ORM_EntityMeta, isNew.b, isDirty.b)
 
   ; --- SQL escaping: double single-quotes to prevent SQL injection ---
   Declare.s EscapeStr(s.s)
@@ -53,6 +60,9 @@ DeclareModule ORM_CRUD
   ; --- DELETE record by id, without FK enforcement (handled by ORM_Relations) ---
   Declare.b DeleteById(db.i, entityType.s, recordId.i)
 
+  ; --- SELECT one row into a map (used by Reload and FindById) ---
+  Declare.b SelectById(db.i, entityType.s, recordId.i, Map outValues.s())
+
   ; --- Load one entity from DB by id, fills *entity via deserializeProc ---
   ; Returns #ORM_Success or #ORM_Error_NotFound / #ORM_Error_DbConnection.
   Declare.i FindById(db.i, entityType.s, recordId.i, *entity, deserializeProc.i)
@@ -62,12 +72,14 @@ DeclareModule ORM_CRUD
   ; The caller owns the returned entity pointers and must free them.
   ; Returns #ORM_Success or error code.
   Declare.i Query(db.i, entityType.s, whereClause.s,
-                  List *results.i(),
+                  List results.i(),
                   newEntityProc.i, deserializeProc.i)
 
 EndDeclareModule
 
 Module ORM_CRUD
+
+  UseModule ORM_Dialect_SQLite
 
   ; ---------------------------------------------------------------------------
   ; SQL string escaping: double single-quotes
@@ -94,6 +106,55 @@ Module ORM_CRUD
       Default                                    ; INTEGER / FK -> bare number
         ProcedureReturn Str(Val(value))
     EndSelect
+  EndProcedure
+
+  Procedure.i GetEntityId(*entity, *meta.ORM_Schema::ORM_EntityMeta)
+    If Not *entity : ProcedureReturn 0 : EndIf
+    If *meta And *meta\isOOP
+      Protected ent.DatabaseEntities::IDatabaseEntity = *entity
+      ProcedureReturn ent\GetId()
+    Else
+      Protected *base.ORM_CRUD::ORM_EntityBase = *entity
+      ProcedureReturn *base\id
+    EndIf
+  EndProcedure
+
+  Procedure SetEntityId(*entity, *meta.ORM_Schema::ORM_EntityMeta, id.i)
+    If Not *entity : ProcedureReturn : EndIf
+    If *meta And *meta\isOOP
+      Protected ent.DatabaseEntities::IDatabaseEntity = *entity
+      ent\SetId(id)
+    Else
+      Protected *base.ORM_CRUD::ORM_EntityBase = *entity
+      *base\id = id
+    EndIf
+  EndProcedure
+
+  Procedure SetEntityStatus(*entity, *meta.ORM_Schema::ORM_EntityMeta, isNew.b, isDirty.b)
+    If Not *entity : ProcedureReturn : EndIf
+    If *meta And *meta\isOOP
+      Protected ent.DatabaseEntities::IDatabaseEntity = *entity
+      ent\SetNew(isNew)
+      ent\SetDirty(isDirty)
+    Else
+      Protected *base.ORM_CRUD::ORM_EntityBase = *entity
+      *base\orm_isNew = isNew
+      *base\orm_isDirty = isDirty
+    EndIf
+  EndProcedure
+
+  ; ---------------------------------------------------------------------------
+  ; Internal helper: get SQLite last insert row id
+  ; ---------------------------------------------------------------------------
+  Procedure.i LastInsertedID(db.i)
+    Protected id.i = 0
+    If DatabaseQuery(db, "SELECT last_insert_rowid();")
+      If NextDatabaseRow(db)
+        id = GetDatabaseLong(db, 0)
+      EndIf
+      FinishDatabaseQuery(db)
+    EndIf
+    ProcedureReturn id
   EndProcedure
 
   ; ---------------------------------------------------------------------------
@@ -154,11 +215,10 @@ Module ORM_CRUD
     Debug "ORM_CRUD::Insert -> " + sql
 
     If ORM_Transaction::Execute(db, sql)
-      Protected *base.ORM_CRUD::ORM_EntityBase = *entity
-      *base\id          = LastInsertedID(db)
-      *base\orm_isNew   = #False
-      *base\orm_isDirty = #False
-      Debug "ORM_CRUD::Insert OK - new id=" + Str(*base\id)
+      Protected newId.i = LastInsertedID(db)
+      SetEntityId(*entity, *meta, newId)
+      SetEntityStatus(*entity, *meta, #False, #False)
+      Debug "ORM_CRUD::Insert OK - new id=" + Str(newId)
       ProcedureReturn #True
     Else
       Debug "ORM_CRUD::Insert FAILED: " + DatabaseError()
@@ -173,8 +233,8 @@ Module ORM_CRUD
     Protected *meta.ORM_Schema::ORM_EntityMeta = ORM_Schema::FindEntityMeta(entityType)
     If Not *meta : ProcedureReturn #False : EndIf
 
-    Protected *base.ORM_CRUD::ORM_EntityBase = *entity
-    If *base\id = 0
+    Protected entId.i = GetEntityId(*entity, *meta)
+    If entId = 0
       Debug "ORM_CRUD::Update ERROR: id=0 - use Insert() for new entities"
       ProcedureReturn #False
     EndIf
@@ -196,12 +256,12 @@ Module ORM_CRUD
 
     Protected sql.s = "UPDATE " + *meta\tableName +
                       " SET " + sets +
-                      " WHERE id=" + Str(*base\id) + ";"
+                      " WHERE id=" + Str(entId) + ";"
     Debug "ORM_CRUD::Update -> " + sql
 
     If ORM_Transaction::Execute(db, sql)
-      *base\orm_isDirty = #False
-      Debug "ORM_CRUD::Update OK id=" + Str(*base\id)
+      SetEntityStatus(*entity, *meta, #False, #False)
+      Debug "ORM_CRUD::Update OK id=" + Str(entId)
       ProcedureReturn #True
     Else
       Debug "ORM_CRUD::Update FAILED: " + DatabaseError()
@@ -213,8 +273,19 @@ Module ORM_CRUD
   ; InsertOrUpdate: branch on id value
   ; ---------------------------------------------------------------------------
   Procedure.b InsertOrUpdate(db.i, entityType.s, *entity, serializeProc.i)
-    Protected *base.ORM_CRUD::ORM_EntityBase = *entity
-    If *base\id = 0 Or *base\orm_isNew
+    Protected *meta.ORM_Schema::ORM_EntityMeta = ORM_Schema::FindEntityMeta(entityType)
+    If Not *meta : ProcedureReturn #False : EndIf
+
+    Protected isNew.b = #False
+    If *meta\isOOP
+      Protected ent.DatabaseEntities::IDatabaseEntity = *entity
+      isNew = Bool(ent\GetId() = 0 Or ent\IsNew())
+    Else
+      Protected *base.ORM_CRUD::ORM_EntityBase = *entity
+      isNew = Bool(*base\id = 0 Or *base\orm_isNew)
+    EndIf
+
+    If isNew
       ProcedureReturn Insert(db, entityType, *entity, serializeProc)
     Else
       ProcedureReturn Update(db, entityType, *entity, serializeProc)
@@ -236,11 +307,19 @@ Module ORM_CRUD
     ; Force the FK column to the parent id (overrides whatever the developer set)
     values(fkColumn) = Str(parentId)
 
-    Protected *base.ORM_CRUD::ORM_EntityBase = *child
+    Protected isNewChild.b = #False
+    If *meta\isOOP
+      Protected entChild.DatabaseEntities::IDatabaseEntity = *child
+      isNewChild = Bool(entChild\GetId() = 0 Or entChild\IsNew())
+    Else
+      Protected *base.ORM_CRUD::ORM_EntityBase = *child
+      isNewChild = Bool(*base\id = 0 Or *base\orm_isNew)
+    EndIf
+
     Protected sql.s
     Protected ok.b
 
-    If *base\id = 0 Or *base\orm_isNew
+    If isNewChild
       ; INSERT new child
       Protected cols.s  = ""
       Protected vals.s  = ""
@@ -258,9 +337,8 @@ Module ORM_CRUD
       Debug "ORM_CRUD::SaveOne INSERT -> " + sql
       ok = ORM_Transaction::Execute(db, sql)
       If ok
-        *base\id          = LastInsertedID(db)
-        *base\orm_isNew   = #False
-        *base\orm_isDirty = #False
+        SetEntityId(*child, *meta, LastInsertedID(db))
+        SetEntityStatus(*child, *meta, #False, #False)
       EndIf
     Else
       ; UPDATE existing child
@@ -275,22 +353,28 @@ Module ORM_CRUD
       Next
       sql = "UPDATE " + *meta\tableName +
             " SET " + sets +
-            " WHERE id=" + Str(*base\id) + ";"
+            " WHERE id=" + Str(GetEntityId(*child, *meta)) + ";"
       Debug "ORM_CRUD::SaveOne UPDATE -> " + sql
       ok = ORM_Transaction::Execute(db, sql)
       If ok
-        *base\orm_isDirty = #False
+        SetEntityStatus(*child, *meta, #False, #False)
       EndIf
     EndIf
 
-    If Not ok
-      Debug "ORM_CRUD::SaveOne FAILED: " + DatabaseError()
+    If ok
+      ForEach *meta\relations()
+        If *meta\relations()\saveChildrenProc <> 0
+          Protected saveChildProc.ORM_Schema::ORM_SaveChildrenProto = *meta\relations()\saveChildrenProc
+          saveChildProc(*child, db)
+        EndIf
+      Next
     EndIf
+
     ProcedureReturn ok
   EndProcedure
 
   ; ---------------------------------------------------------------------------
-  ; DeleteById: remove record (FK rules checked by ORM_Relations before this)
+  ; DeleteById: straight DELETE without relation checks
   ; ---------------------------------------------------------------------------
   Procedure.b DeleteById(db.i, entityType.s, recordId.i)
     Protected *meta.ORM_Schema::ORM_EntityMeta = ORM_Schema::FindEntityMeta(entityType)
@@ -298,39 +382,57 @@ Module ORM_CRUD
 
     Protected sql.s = "DELETE FROM " + *meta\tableName + " WHERE id=" + Str(recordId) + ";"
     Debug "ORM_CRUD::DeleteById -> " + sql
-    If ORM_Transaction::Execute(db, sql)
-      Debug "ORM_CRUD::DeleteById OK id=" + Str(recordId)
-      ProcedureReturn #True
-    Else
-      Debug "ORM_CRUD::DeleteById FAILED: " + DatabaseError()
-      ProcedureReturn #False
-    EndIf
+    ProcedureReturn ORM_Transaction::Execute(db, sql)
   EndProcedure
 
   ; ---------------------------------------------------------------------------
-  ; FindById: SELECT * WHERE id=N, fill entity via deserializeProc
-  ; Uses DatabaseColumnName() to safely map column positions to field names.
+  ; SelectById: load one record into a map (used by Reload and FindById)
   ; ---------------------------------------------------------------------------
-  Procedure.i FindById(db.i, entityType.s, recordId.i, *entity, deserializeProc.i)
+  Procedure.b SelectById(db.i, entityType.s, recordId.i, Map outValues.s())
     Protected *meta.ORM_Schema::ORM_EntityMeta = ORM_Schema::FindEntityMeta(entityType)
-    If Not *meta : ProcedureReturn #ORM_Entity::#ORM_Error_NotFound : EndIf
+    If Not *meta : ProcedureReturn #False : EndIf
 
-    Protected sql.s = "SELECT * FROM " + *meta\tableName +
-                      " WHERE id=" + Str(recordId) + " LIMIT 1;"
-    Debug "ORM_CRUD::FindById -> " + sql
-
+    Protected sql.s = "SELECT * FROM " + *meta\tableName + " WHERE id=" + Str(recordId) + " LIMIT 1;"
     If Not DatabaseQuery(db, sql)
-      Debug "ORM_CRUD::FindById QUERY ERROR: " + DatabaseError()
-      ProcedureReturn #ORM_Entity::#ORM_Error_DbConnection
+      ProcedureReturn #False
     EndIf
 
     If Not NextDatabaseRow(db)
       FinishDatabaseQuery(db)
-      Debug "ORM_CRUD::FindById: id=" + Str(recordId) + " NOT FOUND in " + *meta\tableName
-      ProcedureReturn #ORM_Entity::#ORM_Error_NotFound
+      ProcedureReturn #False
     EndIf
 
-    ; Build value map using actual column names from result set (safe against schema drift)
+    ClearMap(outValues())
+    Protected numCols.i = DatabaseColumns(db)
+    Protected i.i
+    For i = 0 To numCols - 1
+      outValues(DatabaseColumnName(db, i)) = GetDatabaseString(db, i)
+    Next
+    FinishDatabaseQuery(db)
+    ProcedureReturn #True
+  EndProcedure
+
+  ; ---------------------------------------------------------------------------
+  ; FindById: SELECT one row and fill *entity via deserializeProc
+  ; ---------------------------------------------------------------------------
+  Procedure.i FindById(db.i, entityType.s, recordId.i, *entity, deserializeProc.i)
+    Protected *meta.ORM_Schema::ORM_EntityMeta = ORM_Schema::FindEntityMeta(entityType)
+    If Not *meta : ProcedureReturn ORM_Entity::#ORM_Error_NotFound : EndIf
+
+    Protected sql.s = "SELECT * FROM " + *meta\tableName + " WHERE id=" + Str(recordId) + " LIMIT 1;"
+    Debug "ORM_CRUD::FindById -> " + sql
+
+    If Not DatabaseQuery(db, sql)
+      Debug "ORM_CRUD::FindById ERROR: " + DatabaseError()
+      ProcedureReturn ORM_Entity::#ORM_Error_DbConnection
+    EndIf
+
+    If Not NextDatabaseRow(db)
+      FinishDatabaseQuery(db)
+      Debug "ORM_CRUD::FindById: record " + Str(recordId) + " not found"
+      ProcedureReturn ORM_Entity::#ORM_Error_NotFound
+    EndIf
+
     NewMap values.s()
     Protected numCols.i = DatabaseColumns(db)
     Protected i.i
@@ -340,17 +442,15 @@ Module ORM_CRUD
     FinishDatabaseQuery(db)
 
     ; Write id and state flags back
-    Protected *base.ORM_CRUD::ORM_EntityBase = *entity
-    *base\id          = Val(values("id"))
-    *base\orm_isNew   = #False
-    *base\orm_isDirty = #False
+    SetEntityId(*entity, *meta, Val(values("id")))
+    SetEntityStatus(*entity, *meta, #False, #False)
 
     ; Call developer-supplied deserialize proc to fill the remaining fields
     Protected deserialize.ORM_Schema::ORM_DeserializeProto = deserializeProc
     deserialize(*entity, values())
 
-    Debug "ORM_CRUD::FindById OK - id=" + Str(*base\id)
-    ProcedureReturn #ORM_Entity::#ORM_Success
+    Debug "ORM_CRUD::FindById OK - id=" + Str(GetEntityId(*entity, *meta))
+    ProcedureReturn ORM_Entity::#ORM_Success
   EndProcedure
 
   ; ---------------------------------------------------------------------------
@@ -359,10 +459,10 @@ Module ORM_CRUD
   ; Caller is responsible for freeing the returned entity pointers.
   ; ---------------------------------------------------------------------------
   Procedure.i Query(db.i, entityType.s, whereClause.s,
-                    List *results.i(),
+                    List results.i(),
                     newEntityProc.i, deserializeProc.i)
     Protected *meta.ORM_Schema::ORM_EntityMeta = ORM_Schema::FindEntityMeta(entityType)
-    If Not *meta : ProcedureReturn #ORM_Entity::#ORM_Error_NotFound : EndIf
+    If Not *meta : ProcedureReturn ORM_Entity::#ORM_Error_NotFound : EndIf
 
     Protected sql.s = "SELECT * FROM " + *meta\tableName
     If Trim(whereClause) <> "" : sql + " " + whereClause : EndIf
@@ -371,7 +471,7 @@ Module ORM_CRUD
 
     If Not DatabaseQuery(db, sql)
       Debug "ORM_CRUD::Query ERROR: " + DatabaseError()
-      ProcedureReturn #ORM_Entity::#ORM_Error_DbConnection
+      ProcedureReturn ORM_Entity::#ORM_Error_DbConnection
     EndIf
 
     Protected numCols.i = DatabaseColumns(db)
@@ -380,7 +480,7 @@ Module ORM_CRUD
     Protected newEntity.ORM_Schema::ORM_NewEntityProto  = newEntityProc
     Protected deserialize.ORM_Schema::ORM_DeserializeProto = deserializeProc
 
-    ClearList(*results())
+    ClearList(results())
 
     While NextDatabaseRow(db)
       ; Create a fresh entity instance
@@ -398,23 +498,21 @@ Module ORM_CRUD
       Next
 
       ; Set id and flags
-      Protected *base.ORM_CRUD::ORM_EntityBase = *entity
-      *base\id          = Val(values("id"))
-      *base\orm_isNew   = #False
-      *base\orm_isDirty = #False
+      SetEntityId(*entity, *meta, Val(values("id")))
+      SetEntityStatus(*entity, *meta, #False, #False)
 
       ; Fill entity fields
       deserialize(*entity, values())
 
       ; Append to result list
-      AddElement(*results())
-      *results() = *entity
+      AddElement(results())
+      results() = *entity
       count + 1
     Wend
 
     FinishDatabaseQuery(db)
-    Debug "ORM_CRUD::Query: returned " + Str(count) + " row(s)"
-    ProcedureReturn #ORM_Entity::#ORM_Success
+    Debug "ORM_CRUD::Query OK - loaded " + Str(count) + " record(s)"
+    ProcedureReturn ORM_Entity::#ORM_Success
   EndProcedure
 
 EndModule
@@ -422,3 +520,4 @@ EndModule
 ; =============================================================================
 ; EOF ORM_CRUD.pbi
 ; =============================================================================
+

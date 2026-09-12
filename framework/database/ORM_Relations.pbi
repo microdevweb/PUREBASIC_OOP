@@ -15,8 +15,12 @@
 ; =============================================================================
 
 XIncludeFile "ORM_CRUD.pbi"
+XIncludeFile "EntitySet.pbi"
 
 DeclareModule ORM_Relations
+
+  UseModule EntitySet
+  UseModule DatabaseEntities
 
   ; --- Check if any child records exist for a given parent id ---
   ; childTable.s : "contacts"
@@ -40,14 +44,16 @@ DeclareModule ORM_Relations
   Declare.i SaveWithChildren(db.i, entityType.s, *entity, serializeProc.i)
 
   ; --- Delete with FK enforcement ---
-  ; Checks each relation's deletePolicy before performing the DELETE.
-  ; Policies applied in order:
-  ;   RestrictDelete -> return #ORM_Error_HasChildren if children exist
-  ;   CascadeDelete  -> delete children first, then parent
-  ;   SetNullDelete  -> nullify children FK, then delete parent
-  ;   AllowOrphan    -> delete parent without touching children
-  ; Returns #ORM_Success, #ORM_Error_HasChildren, or other error code.
   Declare.i DeleteWithFKCheck(db.i, entityType.s, *entity)
+
+  ; --- High-level atomic save with all 1-N and N-N relations ---
+  Declare.b SaveEntityComplete(db.i, entityType.s, *entity)
+
+  ; --- High-level atomic delete with all 1-N and N-N relations ---
+  Declare.b DeleteEntityComplete(db.i, entityType.s, *entity)
+
+  ; --- Synchronize Many-to-Many junction table links from an EntitySet ---
+  Declare.b SyncManyToManyLinks(db.i, joinTable.s, parentFk.s, parentId.i, childFk.s, entitySet.IEntitySet)
 
 EndDeclareModule
 
@@ -62,7 +68,7 @@ Module ORM_Relations
     Protected found.b = #False
     If DatabaseQuery(db, sql)
       If NextDatabaseRow(db)
-        found = (GetDatabaseLong(db, 0) > 0)
+        found = Bool(GetDatabaseLong(db, 0) > 0)
       EndIf
       FinishDatabaseQuery(db)
     Else
@@ -98,11 +104,11 @@ Module ORM_Relations
   ; ---------------------------------------------------------------------------
   Procedure.i SaveWithChildren(db.i, entityType.s, *entity, serializeProc.i)
     Protected *meta.ORM_Schema::ORM_EntityMeta = ORM_Schema::FindEntityMeta(entityType)
-    If Not *meta : ProcedureReturn #ORM_Entity::#ORM_Error_NotFound : EndIf
+    If Not *meta : ProcedureReturn ORM_Entity::#ORM_Error_NotFound : EndIf
 
     ; --- BEGIN transaction ---
     If Not ORM_Transaction::Begin(db)
-      ProcedureReturn #ORM_Entity::#ORM_Error_DbConnection
+      ProcedureReturn ORM_Entity::#ORM_Error_DbConnection
     EndIf
 
     ; --- Step 1: save parent (INSERT or UPDATE) ---
@@ -111,12 +117,11 @@ Module ORM_Relations
     If Not ok
       ORM_Transaction::Rollback(db)
       Debug "ORM_Relations::SaveWithChildren: parent save FAILED - rolled back"
-      ProcedureReturn #ORM_Entity::#ORM_Error_DbConnection
+      ProcedureReturn ORM_Entity::#ORM_Error_DbConnection
     EndIf
 
     ; Get the parent id (set by INSERT or already > 0 for UPDATE)
-    Protected *base.ORM_CRUD::ORM_EntityBase = *entity
-    Protected parentId.i = *base\id
+    Protected parentId.i = ORM_CRUD::GetEntityId(*entity, *meta)
 
     ; --- Step 2: for each cascade relation, call saveChildrenProc ---
     ForEach *meta\relations()
@@ -133,11 +138,11 @@ Module ORM_Relations
     ; --- COMMIT ---
     If ORM_Transaction::Commit(db)
       Debug "ORM_Relations::SaveWithChildren: COMMITTED (" + entityType + "#" + Str(parentId) + ")"
-      ProcedureReturn #ORM_Entity::#ORM_Success
+      ProcedureReturn ORM_Entity::#ORM_Success
     Else
       ORM_Transaction::Rollback(db)
       Debug "ORM_Relations::SaveWithChildren: COMMIT failed - rolled back"
-      ProcedureReturn #ORM_Entity::#ORM_Error_DbConnection
+      ProcedureReturn ORM_Entity::#ORM_Error_DbConnection
     EndIf
   EndProcedure
 
@@ -146,19 +151,18 @@ Module ORM_Relations
   ; ---------------------------------------------------------------------------
   Procedure.i DeleteWithFKCheck(db.i, entityType.s, *entity)
     Protected *meta.ORM_Schema::ORM_EntityMeta = ORM_Schema::FindEntityMeta(entityType)
-    If Not *meta : ProcedureReturn #ORM_Entity::#ORM_Error_NotFound : EndIf
+    If Not *meta : ProcedureReturn ORM_Entity::#ORM_Error_NotFound : EndIf
 
-    Protected *base.ORM_CRUD::ORM_EntityBase = *entity
-    Protected parentId.i = *base\id
+    Protected parentId.i = ORM_CRUD::GetEntityId(*entity, *meta)
 
     If parentId = 0
       Debug "ORM_Relations::DeleteWithFKCheck: id=0, nothing to delete"
-      ProcedureReturn #ORM_Entity::#ORM_Success
+      ProcedureReturn ORM_Entity::#ORM_Success
     EndIf
 
     ; --- BEGIN transaction ---
     If Not ORM_Transaction::Begin(db)
-      ProcedureReturn #ORM_Entity::#ORM_Error_DbConnection
+      ProcedureReturn ORM_Entity::#ORM_Error_DbConnection
     EndIf
 
     ; --- Check each 1-N relation and apply the configured delete policy ---
@@ -168,32 +172,32 @@ Module ORM_Relations
       Protected policy.i   = *meta\relations()\deletePolicy
 
       Select policy
-        Case #ORM_Entity::#ORM_Restrict_Delete
+        Case ORM_Entity::#ORM_Restrict_Delete
           ; BLOCK the delete if children exist
           If HasChildren(db, childTbl, fkCol, parentId)
             ORM_Transaction::Rollback(db)
             Debug "ORM_Relations::Delete BLOCKED: " + entityType + "#" + Str(parentId) +
                   " has children in '" + childTbl + "' (RestrictDelete policy)"
-            ProcedureReturn #ORM_Entity::#ORM_Error_HasChildren
+            ProcedureReturn ORM_Entity::#ORM_Error_HasChildren
           EndIf
 
-        Case #ORM_Entity::#ORM_Cascade_Delete
+        Case ORM_Entity::#ORM_Cascade_Delete
           ; Delete all children first, then continue to parent delete
           If Not DeleteChildren(db, childTbl, fkCol, parentId)
             ORM_Transaction::Rollback(db)
             Debug "ORM_Relations::Delete: cascade child delete FAILED"
-            ProcedureReturn #ORM_Entity::#ORM_Error_DbConnection
+            ProcedureReturn ORM_Entity::#ORM_Error_DbConnection
           EndIf
 
-        Case #ORM_Entity::#ORM_SetNull_Delete
+        Case ORM_Entity::#ORM_SetNull_Delete
           ; Nullify FK on children, then continue to parent delete
           If Not NullifyChildren(db, childTbl, fkCol, parentId)
             ORM_Transaction::Rollback(db)
             Debug "ORM_Relations::Delete: set-null on children FAILED"
-            ProcedureReturn #ORM_Entity::#ORM_Error_DbConnection
+            ProcedureReturn ORM_Entity::#ORM_Error_DbConnection
           EndIf
 
-        Case #ORM_Entity::#ORM_AllowOrphan
+        Case ORM_Entity::#ORM_AllowOrphan
           ; No action - children keep their FK value (may become orphans)
           Debug "ORM_Relations::Delete: AllowOrphan - skipping FK check for " + childTbl
 
@@ -201,7 +205,7 @@ Module ORM_Relations
           ; Default safety: treat unknown policy as RestrictDelete
           If HasChildren(db, childTbl, fkCol, parentId)
             ORM_Transaction::Rollback(db)
-            ProcedureReturn #ORM_Entity::#ORM_Error_HasChildren
+            ProcedureReturn ORM_Entity::#ORM_Error_HasChildren
           EndIf
       EndSelect
     Next
@@ -209,17 +213,126 @@ Module ORM_Relations
     ; --- All FK rules passed: delete the parent record ---
     If Not ORM_CRUD::DeleteById(db, entityType, parentId)
       ORM_Transaction::Rollback(db)
-      ProcedureReturn #ORM_Entity::#ORM_Error_DbConnection
+      ProcedureReturn ORM_Entity::#ORM_Error_DbConnection
     EndIf
 
     ; --- COMMIT ---
     If ORM_Transaction::Commit(db)
       Debug "ORM_Relations::DeleteWithFKCheck: DELETED " + entityType + "#" + Str(parentId)
-      ProcedureReturn #ORM_Entity::#ORM_Success
+      ProcedureReturn ORM_Entity::#ORM_Success
     Else
       ORM_Transaction::Rollback(db)
-      ProcedureReturn #ORM_Entity::#ORM_Error_DbConnection
+      ProcedureReturn ORM_Entity::#ORM_Error_DbConnection
     EndIf
+  EndProcedure
+
+  ; ---------------------------------------------------------------------------
+  ; Synchronize Many-to-Many junction table from an EntitySet
+  ; ---------------------------------------------------------------------------
+  Procedure.b SyncManyToManyLinks(db.i, joinTable.s, parentFk.s, parentId.i, childFk.s, entitySet.IEntitySet)
+    If Not entitySet : ProcedureReturn #True : EndIf
+
+    Protected i.i, count.i = entitySet\GetAddedCount()
+    For i = 0 To count - 1
+      Protected item.IDatabaseEntity = entitySet\GetAddedItem(i)
+      If item
+        Protected childId.i = item\GetId()
+        If childId = 0
+          item\Save()
+          childId = item\GetId()
+        EndIf
+        If childId > 0
+          Protected sqlInsert.s = "INSERT OR IGNORE INTO " + joinTable + " (" + parentFk + ", " + childFk + ") VALUES (" + Str(parentId) + ", " + Str(childId) + ");"
+          ORM_Transaction::Execute(db, sqlInsert)
+        EndIf
+      EndIf
+    Next
+
+    count = entitySet\GetRemovedCount()
+    For i = 0 To count - 1
+      Protected remItem.IDatabaseEntity = entitySet\GetRemovedItem(i)
+      If remItem
+        Protected remChildId.i = remItem\GetId()
+        If remChildId > 0
+          Protected sqlDel.s = "DELETE FROM " + joinTable + " WHERE " + parentFk + "=" + Str(parentId) + " AND " + childFk + "=" + Str(remChildId) + ";"
+          ORM_Transaction::Execute(db, sqlDel)
+        EndIf
+      EndIf
+    Next
+
+    entitySet\ResetTracking()
+    ProcedureReturn #True
+  EndProcedure
+
+  ; ---------------------------------------------------------------------------
+  ; High-level Save with 1-N & N-N relations
+  ; ---------------------------------------------------------------------------
+  Procedure.b SaveEntityComplete(db.i, entityType.s, *entity)
+    Protected *meta.ORM_Schema::ORM_EntityMeta = ORM_Schema::FindEntityMeta(entityType)
+    If Not *meta : ProcedureReturn #False : EndIf
+
+    Protected inTx.b = #False
+    If ORM_Transaction::Begin(db)
+      inTx = #True
+    EndIf
+
+    Protected ok.b = ORM_CRUD::InsertOrUpdate(db, entityType, *entity, *meta\serializeProc)
+    If Not ok
+      If inTx : ORM_Transaction::Rollback(db) : EndIf
+      ProcedureReturn #False
+    EndIf
+
+    Protected parentId.i = ORM_CRUD::GetEntityId(*entity, *meta)
+
+    ForEach *meta\relations()
+      If *meta\relations()\saveChildrenProc <> 0
+        Protected saveProc.ORM_Schema::ORM_SaveChildrenProto = *meta\relations()\saveChildrenProc
+        saveProc(*entity, db)
+      EndIf
+    Next
+
+    If inTx
+      ORM_Transaction::Commit(db)
+    EndIf
+
+    ProcedureReturn #True
+  EndProcedure
+
+  ; ---------------------------------------------------------------------------
+  ; High-level Delete with 1-N & N-N relations
+  ; ---------------------------------------------------------------------------
+  Procedure.b DeleteEntityComplete(db.i, entityType.s, *entity)
+    Protected *meta.ORM_Schema::ORM_EntityMeta = ORM_Schema::FindEntityMeta(entityType)
+    If Not *meta : ProcedureReturn #False : EndIf
+
+    Protected inTx.b = #False
+    If ORM_Transaction::Begin(db)
+      inTx = #True
+    EndIf
+
+    Protected parentId.i = ORM_CRUD::GetEntityId(*entity, *meta)
+
+    ; Delete N-N junction records
+    ForEach *meta\relations()
+      If *meta\relations()\relationType = ORM_Entity::#ORM_Rel_ManyToMany Or *meta\relations()\joinTable <> ""
+        Protected jTable.s = *meta\relations()\joinTable
+        Protected pFk.s    = *meta\relations()\parentFkColumn
+        If jTable <> "" And pFk <> "" And parentId > 0
+          ORM_Transaction::Execute(db, "DELETE FROM " + jTable + " WHERE " + pFk + "=" + Str(parentId) + ";")
+        EndIf
+      EndIf
+    Next
+
+    Protected res.i = DeleteWithFKCheck(db, entityType, *entity)
+    If res <> ORM_Entity::#ORM_Success
+      If inTx : ORM_Transaction::Rollback(db) : EndIf
+      ProcedureReturn #False
+    EndIf
+
+    If inTx
+      ORM_Transaction::Commit(db)
+    EndIf
+    ProcedureReturn #True
   EndProcedure
 
 EndModule
@@ -227,3 +340,4 @@ EndModule
 ; =============================================================================
 ; EOF ORM_Relations.pbi
 ; =============================================================================
+

@@ -8,10 +8,19 @@
 ;   - Public FindEntityMeta() for use by ORM_CRUD and ORM_Relations
 ; =============================================================================
 
-XIncludeFile "ORM_Dialect_SQLite.pbi"
+XIncludeFile "ORM_Entity.pbi"
 XIncludeFile "ORM_Transaction.pbi"
 
 DeclareModule ORM_Schema
+
+  ; --- Field descriptor ---
+  Structure ORM_FieldDef
+    name.s        ; Field name as string (e.g. "companyName")
+    typeCode.i    ; One of the #ORM_Type_* constants
+    isFK.b        ; True if this is a foreign key column
+    fkTable.s     ; Name of parent table (if isFK=True)
+    nullable.b    ; True if column allows NULL
+  EndStructure
 
   ; --- Serialize / Deserialize procedure prototypes ---
   ; SerializeProc   : fills a Map with field values (strings) from an entity pointer
@@ -26,13 +35,20 @@ DeclareModule ORM_Schema
   ; The developer implements this once per relation.
   Prototype ORM_SaveChildrenProto(*parent, db.i)
 
-  ; --- Relation descriptor (1-N link between parent and child table) ---
+  ; --- Relation descriptor (1-N, N-N, 1-1 link between parent and child table) ---
   Structure ORM_RelationDef
-    childTable.s          ; e.g. "contacts"
-    fkColumn.s            ; e.g. "clientId" (FK column in child table)
+    relationType.i        ; #ORM_Rel_OneToMany, #ORM_Rel_ManyToMany, #ORM_Rel_OneToOne, #ORM_Rel_ManyToOne
+    propertyName.s        ; e.g. "telephones" or "groupes"
+    childEntityType.s     ; e.g. "Telephone" or "Groupe"
+    childTable.s          ; e.g. "contacts" or "telephones"
+    fkColumn.s            ; e.g. "contact_id" (FK column in child table for 1-N)
+    joinTable.s           ; e.g. "contact_groupes" for ManyToMany
+    parentFkColumn.s      ; e.g. "contact_id" in joinTable
+    childFkColumn.s       ; e.g. "groupe_id" in joinTable
     cascadeSave.b         ; #True  = save parent -> also save all children
     deletePolicy.i        ; #ORM_Restrict_Delete / #ORM_Cascade_Delete / etc.
     saveChildrenProc.i    ; @MyProc(*parent, db.i) - saves all children of parent
+    loadChildrenProc.i    ; @MyProc(*parent, db.i) - loads children of parent
   EndStructure
 
   ; --- Full entity descriptor stored in the internal registry ---
@@ -42,6 +58,7 @@ DeclareModule ORM_Schema
     serializeProc.i       ; @MySerialize(*entity, Map values.s())
     deserializeProc.i     ; @MyDeserialize(*entity, Map values.s())
     newEntityProc.i       ; @MyNewEntity() -> *entity
+    isOOP.b               ; True if entity is an OOP class with VTable
     List fields.ORM_FieldDef()
     List relations.ORM_RelationDef()
   EndStructure
@@ -58,7 +75,8 @@ DeclareModule ORM_Schema
                          List relations.ORM_RelationDef(),
                          serializeProc.i   = 0,
                          deserializeProc.i = 0,
-                         newEntityProc.i   = 0)
+                         newEntityProc.i   = 0,
+                         isOOP.b           = #False)
 
   ; --- Find entity metadata by name (public, used by CRUD and Relations) ---
   ; Returns pointer to ORM_EntityMeta or 0 if not found.
@@ -75,7 +93,11 @@ DeclareModule ORM_Schema
 
 EndDeclareModule
 
+XIncludeFile "ORM_Dialect_SQLite.pbi"
+
 Module ORM_Schema
+
+  UseModule ORM_Dialect_SQLite
 
   ; ---------------------------------------------------------------------------
   ; Derive table name from entity class name
@@ -92,7 +114,8 @@ Module ORM_Schema
                            List relations.ORM_RelationDef(),
                            serializeProc.i   = 0,
                            deserializeProc.i = 0,
-                           newEntityProc.i   = 0)
+                           newEntityProc.i   = 0,
+                           isOOP.b           = #False)
     ; Check for duplicate
     ForEach orm_registry()
       If orm_registry()\entityName = entityName
@@ -107,6 +130,7 @@ Module ORM_Schema
     orm_registry()\serializeProc   = serializeProc
     orm_registry()\deserializeProc = deserializeProc
     orm_registry()\newEntityProc   = newEntityProc
+    orm_registry()\isOOP           = isOOP
 
     ForEach fields()
       AddElement(orm_registry()\fields())
@@ -119,11 +143,18 @@ Module ORM_Schema
 
     ForEach relations()
       AddElement(orm_registry()\relations())
-      orm_registry()\relations()\childTable        = relations()\childTable
-      orm_registry()\relations()\fkColumn          = relations()\fkColumn
-      orm_registry()\relations()\cascadeSave       = relations()\cascadeSave
-      orm_registry()\relations()\deletePolicy      = relations()\deletePolicy
-      orm_registry()\relations()\saveChildrenProc  = relations()\saveChildrenProc
+      orm_registry()\relations()\relationType     = relations()\relationType
+      orm_registry()\relations()\propertyName     = relations()\propertyName
+      orm_registry()\relations()\childEntityType  = relations()\childEntityType
+      orm_registry()\relations()\childTable       = relations()\childTable
+      orm_registry()\relations()\fkColumn         = relations()\fkColumn
+      orm_registry()\relations()\joinTable        = relations()\joinTable
+      orm_registry()\relations()\parentFkColumn   = relations()\parentFkColumn
+      orm_registry()\relations()\childFkColumn    = relations()\childFkColumn
+      orm_registry()\relations()\cascadeSave      = relations()\cascadeSave
+      orm_registry()\relations()\deletePolicy     = relations()\deletePolicy
+      orm_registry()\relations()\saveChildrenProc = relations()\saveChildrenProc
+      orm_registry()\relations()\loadChildrenProc = relations()\loadChildrenProc
     Next
 
     Debug "ORM_Schema: Registered entity '" + entityName + "' -> table '" + tableName + "'"
@@ -204,10 +235,7 @@ Module ORM_Schema
         ForEach orm_registry()\fields()
           If orm_registry()\fields()\name <> "id"
             If Not ColumnExists(db, tbl, orm_registry()\fields()\name)
-              Protected alterSQL.s = ORM_Dialect_SQLite::BuildAddColumn(
-                tbl,
-                orm_registry()\fields()\name,
-                orm_registry()\fields()\typeCode)
+              Protected alterSQL.s = ORM_Dialect_SQLite::BuildAddColumn(tbl, orm_registry()\fields()\name, orm_registry()\fields()\typeCode)
               If ORM_Transaction::Execute(db, alterSQL)
                 Debug "ORM_Schema:   Added column '" + orm_registry()\fields()\name + "' to '" + tbl + "'"
               Else
@@ -227,6 +255,29 @@ Module ORM_Schema
           ok = #False
         EndIf
       EndIf
+    Next
+
+    ; Process Many-to-Many junction tables
+    ForEach orm_registry()
+      Protected parentTable.s = orm_registry()\tableName
+      ForEach orm_registry()\relations()
+        If orm_registry()\relations()\relationType = ORM_Entity::#ORM_Rel_ManyToMany Or orm_registry()\relations()\joinTable <> ""
+          Protected jTable.s = orm_registry()\relations()\joinTable
+          Protected pFk.s    = orm_registry()\relations()\parentFkColumn
+          Protected cFk.s    = orm_registry()\relations()\childFkColumn
+          Protected cTable.s = orm_registry()\relations()\childTable
+
+          If jTable <> "" And Not TableExists(db, jTable)
+            Protected jSql.s = ORM_Dialect_SQLite::BuildCreateJunctionTable(jTable, parentTable, pFk, cTable, cFk)
+            If ORM_Transaction::Execute(db, jSql)
+              Debug "ORM_Schema: Created junction table '" + jTable + "'"
+            Else
+              Debug "ORM_Schema: ERROR creating junction table '" + jTable + "'"
+              ok = #False
+            EndIf
+          EndIf
+        EndIf
+      Next
     Next
 
     ProcedureReturn ok
