@@ -19,7 +19,7 @@ Namespace UI {
       This\isVisible = #True : This\isEnabled = #True
       This\id = ListIconGadget(#PB_Any, 0, 0, 300, 200, title_p, colWidth_p, #PB_ListIcon_FullRowSelect | #PB_ListIcon_AlwaysShowSelection)
       If (This\id) {
-        UI::RegisterGadget(This\id, This)
+        UI_RegisterGadget(This\id, This)
       }
     }
 
@@ -31,7 +31,7 @@ Namespace UI {
       This\isVisible = #True : This\isEnabled = #True
       This\id = ListIconGadget(#PB_Any, 0, 0, 300, 200, title_p, colWidth_p, flags_p)
       If (This\id) {
-        UI::RegisterGadget(This\id, This)
+        UI_RegisterGadget(This\id, This)
       }
     }
 
@@ -43,7 +43,7 @@ Namespace UI {
       This\isVisible = #True : This\isEnabled = #True
       This\id = ListIconGadget(#PB_Any, x_p, y_p, w_p, h_p, title_p, colWidth_p, #PB_ListIcon_FullRowSelect | #PB_ListIcon_AlwaysShowSelection)
       If (This\id) {
-        UI::RegisterGadget(This\id, This)
+        UI_RegisterGadget(This\id, This)
       }
     }
 
@@ -55,7 +55,7 @@ Namespace UI {
       This\isVisible = #True : This\isEnabled = #True
       This\id = ListIconGadget(#PB_Any, x_p, y_p, w_p, h_p, title_p, colWidth_p, flags_p)
       If (This\id) {
-        UI::RegisterGadget(This\id, This)
+        UI_RegisterGadget(This\id, This)
       }
     }
 
@@ -131,7 +131,7 @@ Namespace UI {
 
     Public Method Free() {
       If (This\id) {
-        UI::UnregisterGadget(This\id)
+        UI_UnregisterGadget(This\id)
         Super\Free()
       }
     }

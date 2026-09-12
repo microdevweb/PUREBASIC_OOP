@@ -1,4 +1,4 @@
-; ============================================================================
+﻿; ============================================================================
 ; PureBasic OOP GUI Framework - Editor.pbi
 ; Multiline Text Editor / EditorGadget wrapper
 ; Author:      MicrodevWeb
@@ -19,7 +19,7 @@ Namespace UI {
       This\isVisible = #True : This\isEnabled = #True
       This\id = EditorGadget(#PB_Any, 0, 0, 200, 120, 0)
       If (This\id) {
-        UI::RegisterGadget(This\id, This)
+        UI_RegisterGadget(This\id, This)
       }
     }
 
@@ -31,7 +31,7 @@ Namespace UI {
       This\isVisible = #True : This\isEnabled = #True
       This\id = EditorGadget(#PB_Any, 0, 0, w_p, h_p, 0)
       If (This\id) {
-        UI::RegisterGadget(This\id, This)
+        UI_RegisterGadget(This\id, This)
       }
     }
 
@@ -44,7 +44,7 @@ Namespace UI {
       This\id = EditorGadget(#PB_Any, 0, 0, w_p, h_p, 0)
       If (This\id) {
         SetGadgetText(This\id, text_p)
-        UI::RegisterGadget(This\id, This)
+        UI_RegisterGadget(This\id, This)
       }
     }
 
@@ -57,7 +57,7 @@ Namespace UI {
       This\id = EditorGadget(#PB_Any, x_p, y_p, w_p, h_p, flags_p)
       If (This\id) {
         If text_p <> "" : SetGadgetText(This\id, text_p) : EndIf
-        UI::RegisterGadget(This\id, This)
+        UI_RegisterGadget(This\id, This)
       }
     }
 
@@ -101,7 +101,7 @@ Namespace UI {
 
     Public Method Free() {
       If (This\id) {
-        UI::UnregisterGadget(This\id)
+        UI_UnregisterGadget(This\id)
         Super\Free()
       }
     }

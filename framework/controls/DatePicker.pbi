@@ -1,4 +1,4 @@
-; ============================================================================
+﻿; ============================================================================
 ; PureBasic OOP GUI Framework - DatePicker.pbi
 ; Date Selection (DateGadget) wrapper
 ; Author:      MicrodevWeb
@@ -21,7 +21,7 @@ Namespace UI {
       This\mask = "%dd/%mm/%yyyy"
       This\id = DateGadget(#PB_Any, 0, 0, 140, 25, This\mask, Date(), 0)
       If (This\id) {
-        UI::RegisterGadget(This\id, This)
+        UI_RegisterGadget(This\id, This)
       }
     }
 
@@ -34,7 +34,7 @@ Namespace UI {
       This\mask = mask_p
       This\id = DateGadget(#PB_Any, 0, 0, 140, 25, mask_p, Date(), 0)
       If (This\id) {
-        UI::RegisterGadget(This\id, This)
+        UI_RegisterGadget(This\id, This)
       }
     }
 
@@ -47,7 +47,7 @@ Namespace UI {
       This\mask = mask_p
       This\id = DateGadget(#PB_Any, 0, 0, 140, 25, mask_p, dateVal_p, 0)
       If (This\id) {
-        UI::RegisterGadget(This\id, This)
+        UI_RegisterGadget(This\id, This)
       }
     }
 
@@ -60,7 +60,7 @@ Namespace UI {
       This\mask = mask_p
       This\id = DateGadget(#PB_Any, 0, 0, w_p, h_p, mask_p, dateVal_p, 0)
       If (This\id) {
-        UI::RegisterGadget(This\id, This)
+        UI_RegisterGadget(This\id, This)
       }
     }
 
@@ -87,7 +87,7 @@ Namespace UI {
 
     Public Method Free() {
       If (This\id) {
-        UI::UnregisterGadget(This\id)
+        UI_UnregisterGadget(This\id)
         Super\Free()
       }
     }

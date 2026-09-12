@@ -1,4 +1,4 @@
-; ============================================================================
+﻿; ============================================================================
 ; PureBasic OOP GUI Framework - TabControl.pbi
 ; Tabbed Panel (PanelGadget) wrapper
 ; Author:      MicrodevWeb
@@ -20,7 +20,7 @@ Namespace UI {
       This\id = PanelGadget(#PB_Any, 0, 0, 300, 200)
       If (This\id) {
         CloseGadgetList()
-        UI::RegisterGadget(This\id, This)
+        UI_RegisterGadget(This\id, This)
       }
     }
 
@@ -33,7 +33,7 @@ Namespace UI {
       This\id = PanelGadget(#PB_Any, 0, 0, w_p, h_p)
       If (This\id) {
         CloseGadgetList()
-        UI::RegisterGadget(This\id, This)
+        UI_RegisterGadget(This\id, This)
       }
     }
 
@@ -98,7 +98,7 @@ Namespace UI {
 
     Public Method Free() {
       If (This\id) {
-        UI::UnregisterGadget(This\id)
+        UI_UnregisterGadget(This\id)
         Super\Free()
       }
     }

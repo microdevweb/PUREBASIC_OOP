@@ -1,4 +1,4 @@
-; ============================================================================
+﻿; ============================================================================
 ; PureBasic OOP GUI Framework - RadioButton.pbi
 ; Radio / Option Button (OptionGadget) wrapper
 ; Author:      MicrodevWeb
@@ -21,7 +21,7 @@ Namespace UI {
       This\groupID = 0
       This\id = OptionGadget(#PB_Any, 0, 0, 120, 24, text_p)
       If (This\id) {
-        UI::RegisterGadget(This\id, This)
+        UI_RegisterGadget(This\id, This)
       }
     }
 
@@ -35,7 +35,7 @@ Namespace UI {
       This\id = OptionGadget(#PB_Any, 0, 0, 120, 24, text_p)
       If (This\id) {
         SetGadgetState(This\id, checked_p)
-        UI::RegisterGadget(This\id, This)
+        UI_RegisterGadget(This\id, This)
       }
     }
 
@@ -49,7 +49,7 @@ Namespace UI {
       This\id = OptionGadget(#PB_Any, 0, 0, w_p, h_p, text_p)
       If (This\id) {
         SetGadgetState(This\id, checked_p)
-        UI::RegisterGadget(This\id, This)
+        UI_RegisterGadget(This\id, This)
       }
     }
 
@@ -63,7 +63,7 @@ Namespace UI {
       This\id = OptionGadget(#PB_Any, x_p, y_p, w_p, h_p, text_p)
       If (This\id) {
         SetGadgetState(This\id, checked_p)
-        UI::RegisterGadget(This\id, This)
+        UI_RegisterGadget(This\id, This)
       }
     }
 
@@ -90,7 +90,7 @@ Namespace UI {
 
     Public Method Free() {
       If (This\id) {
-        UI::UnregisterGadget(This\id)
+        UI_UnregisterGadget(This\id)
         Super\Free()
       }
     }

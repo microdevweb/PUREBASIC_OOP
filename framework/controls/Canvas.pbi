@@ -1,4 +1,4 @@
-; ============================================================================
+﻿; ============================================================================
 ; PureBasic OOP GUI Framework - Canvas.pbi
 ; Standard Canvas / CanvasGadget wrapper with Multi-Constructors
 ; ============================================================================
@@ -18,7 +18,7 @@ Namespace UI {
       This\isVisible = #True : This\isEnabled = #True
       This\id = CanvasGadget(#PB_Any, 0, 0, 200, 200, #PB_Canvas_Keyboard)
       If (This\id) {
-        UI::RegisterGadget(This\id, This)
+        UI_RegisterGadget(This\id, This)
       }
     }
 
@@ -30,7 +30,7 @@ Namespace UI {
       This\isVisible = #True : This\isEnabled = #True
       This\id = CanvasGadget(#PB_Any, 0, 0, w_p, h_p, #PB_Canvas_Keyboard)
       If (This\id) {
-        UI::RegisterGadget(This\id, This)
+        UI_RegisterGadget(This\id, This)
       }
     }
 
@@ -42,7 +42,7 @@ Namespace UI {
       This\isVisible = #True : This\isEnabled = #True
       This\id = CanvasGadget(#PB_Any, x_p, y_p, w_p, h_p, #PB_Canvas_Keyboard)
       If (This\id) {
-        UI::RegisterGadget(This\id, This)
+        UI_RegisterGadget(This\id, This)
       }
     }
 
@@ -54,13 +54,13 @@ Namespace UI {
       This\isVisible = #True : This\isEnabled = #True
       This\id = CanvasGadget(#PB_Any, x_p, y_p, w_p, h_p, flags_p)
       If (This\id) {
-        UI::RegisterGadget(This\id, This)
+        UI_RegisterGadget(This\id, This)
       }
     }
 
     Public Method Free() {
       If (This\id) {
-        UI::UnregisterGadget(This\id)
+        UI_UnregisterGadget(This\id)
         Super\Free()
       }
     }

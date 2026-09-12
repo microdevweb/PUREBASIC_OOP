@@ -22,7 +22,7 @@ Namespace UI {
       This\isVisible = #True : This\isEnabled = #True
       This\id = ProgressBarGadget(#PB_Any, 0, 0, 200, 25, 0, 100, 0)
       If (This\id) {
-        UI::RegisterGadget(This\id, This)
+        UI_RegisterGadget(This\id, This)
       }
     }
 
@@ -35,7 +35,7 @@ Namespace UI {
       This\isVisible = #True : This\isEnabled = #True
       This\id = ProgressBarGadget(#PB_Any, 0, 0, 200, 25, min_p, max_p, 0)
       If (This\id) {
-        UI::RegisterGadget(This\id, This)
+        UI_RegisterGadget(This\id, This)
       }
     }
 
@@ -48,7 +48,7 @@ Namespace UI {
       This\isVisible = #True : This\isEnabled = #True
       This\id = ProgressBarGadget(#PB_Any, 0, 0, w_p, h_p, min_p, max_p, 0)
       If (This\id) {
-        UI::RegisterGadget(This\id, This)
+        UI_RegisterGadget(This\id, This)
       }
     }
 
@@ -61,7 +61,7 @@ Namespace UI {
       This\isVisible = #True : This\isEnabled = #True
       This\id = ProgressBarGadget(#PB_Any, x_p, y_p, w_p, h_p, min_p, max_p, flags_p)
       If (This\id) {
-        UI::RegisterGadget(This\id, This)
+        UI_RegisterGadget(This\id, This)
       }
     }
 
@@ -80,7 +80,7 @@ Namespace UI {
 
     Public Method Free() {
       If (This\id) {
-        UI::UnregisterGadget(This\id)
+        UI_UnregisterGadget(This\id)
         Super\Free()
       }
     }

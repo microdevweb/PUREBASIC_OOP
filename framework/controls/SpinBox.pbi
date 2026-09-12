@@ -1,4 +1,4 @@
-; ============================================================================
+﻿; ============================================================================
 ; PureBasic OOP GUI Framework - SpinBox.pbi
 ; Numeric Up/Down Spinner (SpinGadget) wrapper
 ; Author:      MicrodevWeb
@@ -24,7 +24,7 @@ Namespace UI {
       If (This\id) {
         SetGadgetState(This\id, 0)
         SetGadgetText(This\id, "0")
-        UI::RegisterGadget(This\id, This)
+        UI_RegisterGadget(This\id, This)
       }
     }
 
@@ -39,7 +39,7 @@ Namespace UI {
       If (This\id) {
         SetGadgetState(This\id, min_p)
         SetGadgetText(This\id, Str(min_p))
-        UI::RegisterGadget(This\id, This)
+        UI_RegisterGadget(This\id, This)
       }
     }
 
@@ -54,7 +54,7 @@ Namespace UI {
       If (This\id) {
         SetGadgetState(This\id, current_p)
         SetGadgetText(This\id, Str(current_p))
-        UI::RegisterGadget(This\id, This)
+        UI_RegisterGadget(This\id, This)
       }
     }
 
@@ -69,7 +69,7 @@ Namespace UI {
       If (This\id) {
         SetGadgetState(This\id, current_p)
         SetGadgetText(This\id, Str(current_p))
-        UI::RegisterGadget(This\id, This)
+        UI_RegisterGadget(This\id, This)
       }
     }
 
@@ -105,7 +105,7 @@ Namespace UI {
 
     Public Method Free() {
       If (This\id) {
-        UI::UnregisterGadget(This\id)
+        UI_UnregisterGadget(This\id)
         Super\Free()
       }
     }

@@ -19,7 +19,7 @@ Namespace UI {
       This\isVisible = #True : This\isEnabled = #True
       This\id = TextGadget(#PB_Any, 0, 0, 150, 20, text_p, 0)
       If (This\id) {
-        UI::RegisterGadget(This\id, This)
+        UI_RegisterGadget(This\id, This)
       }
     }
 
@@ -31,7 +31,7 @@ Namespace UI {
       This\isVisible = #True : This\isEnabled = #True
       This\id = TextGadget(#PB_Any, 0, 0, w_p, h_p, text_p, 0)
       If (This\id) {
-        UI::RegisterGadget(This\id, This)
+        UI_RegisterGadget(This\id, This)
       }
     }
 
@@ -43,7 +43,7 @@ Namespace UI {
       This\isVisible = #True : This\isEnabled = #True
       This\id = TextGadget(#PB_Any, x_p, y_p, w_p, h_p, text_p, 0)
       If (This\id) {
-        UI::RegisterGadget(This\id, This)
+        UI_RegisterGadget(This\id, This)
       }
     }
 
@@ -55,13 +55,13 @@ Namespace UI {
       This\isVisible = #True : This\isEnabled = #True
       This\id = TextGadget(#PB_Any, x_p, y_p, w_p, h_p, text_p, flags_p)
       If (This\id) {
-        UI::RegisterGadget(This\id, This)
+        UI_RegisterGadget(This\id, This)
       }
     }
 
     Public Method Free() {
       If (This\id) {
-        UI::UnregisterGadget(This\id)
+        UI_UnregisterGadget(This\id)
         Super\Free()
       }
     }
